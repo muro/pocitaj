@@ -26,7 +26,7 @@ import com.google.mlkit.vision.digitalink.Ink;
  * StrokeManager. The view is also able to draw content from the StrokeManager.
  */
 public class SolveView extends View implements ContentChangedListener {
-    private static final String TAG = "MLKD.DrawingView";
+    private static final String TAG = "SolveView";
     private static final int STROKE_WIDTH_DP = 3;
     private static final int MIN_BB_WIDTH = 10;
     private static final int MIN_BB_HEIGHT = 10;
