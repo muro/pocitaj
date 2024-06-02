@@ -22,8 +22,8 @@ public class SolveActivity extends AppCompatActivity
     @VisibleForTesting
     final StrokeManager strokeManager = new StrokeManager();
 
-    private String modelLanguageTag = "en-US";
-    private ExerciseBook exerciseBook = new ExerciseBook();
+    private final String modelLanguageTag = "en-US";
+    private final ExerciseBook exerciseBook = new ExerciseBook();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +39,8 @@ public class SolveActivity extends AppCompatActivity
         SolveView solveView = findViewById(R.id.solve_view);
         solveView.setStrokeManager(strokeManager);
         solveView.setExerciseBook(exerciseBook);
+
+        // strokeManager.deleteActiveModel();
 
         strokeManager.setContentChangedListener(solveView);
         strokeManager.setDownloadedModelsChangedListener(this);

@@ -1,5 +1,7 @@
 package com.codinglikeapirate.pocitaj;
 
+// Based on code from MlKit examples.
+
 import android.util.Log;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -17,7 +19,7 @@ import java.util.Set;
 /** Class to manage model downloading, deletion, and selection. */
 public class ModelManager {
 
-    private static final String TAG = "MLKD.ModelManager";
+    private static final String TAG = "ModelManager";
     private DigitalInkRecognitionModel model;
     private DigitalInkRecognizer recognizer;
     final RemoteModelManager remoteModelManager = RemoteModelManager.getInstance();

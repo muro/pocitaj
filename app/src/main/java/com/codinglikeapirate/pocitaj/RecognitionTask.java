@@ -1,5 +1,7 @@
 package com.codinglikeapirate.pocitaj;
 
+// Based on code from MlKit examples.
+
 import android.util.Log;
 import androidx.annotation.Nullable;
 import com.google.android.gms.tasks.Task;
@@ -14,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /** Task to run asynchronously to obtain recognition results. */
 public class RecognitionTask {
 
-    private static final String TAG = "MLKD.RecognitionTask";
+    private static final String TAG = "RecognitionTask";
     private final DigitalInkRecognizer recognizer;
     private final Ink ink;
     @Nullable private RecognizedInk currentResult;
@@ -54,7 +56,7 @@ public class RecognitionTask {
     }
 
     public Task<String> run() {
-        Log.i(TAG, "RecoTask.run");
+        Log.i(TAG, "RecognitionTask.run");
         return recognizer
                 .recognize(this.ink, RecognitionContext.builder().setPreContext("1234").build())
                 .onSuccessTask(

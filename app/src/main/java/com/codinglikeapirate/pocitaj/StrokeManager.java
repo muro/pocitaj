@@ -1,5 +1,7 @@
 package com.codinglikeapirate.pocitaj;
 
+// Based on code from MlKit examples.
+
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -38,7 +40,7 @@ public class StrokeManager {
     }
 
     @VisibleForTesting static final long CONVERSION_TIMEOUT_MS = 1000;
-    private static final String TAG = "MLKD.StrokeManager";
+    private static final String TAG = "StrokeManager";
     // This is a constant that is used as a message identifier to trigger the timeout.
     private static final int TIMEOUT_TRIGGER = 1;
     // For handling recognition and model downloading.
@@ -166,16 +168,16 @@ public class StrokeManager {
     }
 
     // Listeners to update the drawing and status.
-    public void setContentChangedListener(ContentChangedListener contentChangedListener) {
+    public void setContentChangedListener(@Nullable ContentChangedListener contentChangedListener) {
         this.contentChangedListener = contentChangedListener;
     }
 
-    public void setStatusChangedListener(StatusChangedListener statusChangedListener) {
+    public void setStatusChangedListener(@Nullable StatusChangedListener statusChangedListener) {
         this.statusChangedListener = statusChangedListener;
     }
 
     public void setDownloadedModelsChangedListener(
-            DownloadedModelsChangedListener downloadedModelsChangedListener) {
+        @Nullable DownloadedModelsChangedListener downloadedModelsChangedListener) {
         this.downloadedModelsChangedListener = downloadedModelsChangedListener;
     }
 

@@ -2,16 +2,17 @@ package com.codinglikeapirate.pocitaj;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 public class ExerciseBook {
 
-    public static final int NOTRECOGNIZED = -1000;
-    private Random random = new Random(); //1234);
+    public static final int NOT_RECOGNIZED = -1000;
+    private final Random random = new Random(); //1234);
     private static final int BOUND = 10;
 
     public interface Exercise {
-        public String question();
+        String question();
     }
 
     public class Addition implements Exercise {
@@ -25,16 +26,16 @@ public class ExerciseBook {
         }
 
         public String question() {
-            return String.format("%d + %d", a, b);
+            return String.format(Locale.ENGLISH, "%d + %d", a, b);
         }
 
         public boolean solve(int solution) {
             this.solution = solution;
-            if (solution == NOTRECOGNIZED) {
+            if (solution == NOT_RECOGNIZED) {
                 return false;
             }
             // only set solved, if it's not the default:
-            this.solved = solution != NOTRECOGNIZED;
+            this.solved = solution != NOT_RECOGNIZED;
             return correct();
         }
 
@@ -48,12 +49,12 @@ public class ExerciseBook {
 
         public String equation() {
             if (correct()) {
-                return String.format("%d + %d = %d", a, b, solution);
+                return String.format(Locale.ENGLISH,"%d + %d = %d", a, b, solution);
             } else {
-                if (solution == NOTRECOGNIZED) {
-                    return String.format("%d + %d ≠ %s", a, b, "?");
+                if (solution == NOT_RECOGNIZED) {
+                    return String.format(Locale.ENGLISH, "%d + %d ≠ %s", a, b, "?");
                 }
-                return String.format("%d + %d ≠ %d", a, b, solution);
+                return String.format(Locale.ENGLISH,"%d + %d ≠ %d", a, b, solution);
             }
 
         }
@@ -66,7 +67,7 @@ public class ExerciseBook {
         return new Addition(random.nextInt(bound), random.nextInt(bound));
     }
 
-    private List<Addition> history = new ArrayList<>();
+    private final List<Addition> history = new ArrayList<>();
 
     public void generate() {
         history.add(generate(BOUND));
@@ -84,7 +85,7 @@ public class ExerciseBook {
                 correct++;
             }
         }
-        float percent = total != 0 ? (float) 100f * correct / (float) total : 0f;
-        return String.format("%d / %d (%.0f%%)", correct, total, percent);
+        float percent = total != 0 ? 100f * correct / (float) total : 0f;
+        return String.format(Locale.ENGLISH, "%d / %d (%.0f%%)", correct, total, percent);
     }
 }

@@ -1,5 +1,6 @@
 package com.codinglikeapirate.pocitaj;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -193,7 +194,6 @@ public class SolveView extends View implements ContentChangedListener {
     }
 
     private void drawStroke(@NonNull Ink.Stroke s, Paint paint) {
-        Log.i(TAG, "drawstroke");
         Path path = null;
         for (Ink.Point p : s.getPoints()) {
             if (path == null) {
@@ -227,6 +227,7 @@ public class SolveView extends View implements ContentChangedListener {
         canvas.drawPath(currentStroke, currentStrokePaint);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getActionMasked();
@@ -259,7 +260,7 @@ public class SolveView extends View implements ContentChangedListener {
             Log.e(TAG, "last was solved");
         }
         String text = strokeManager.getContent().get(strokeManager.getContent().size() - 1).text;
-        int result = ExerciseBook.NOTRECOGNIZED;
+        int result = ExerciseBook.NOT_RECOGNIZED;
         try {
             result = Integer.parseInt(text);
         } catch (NumberFormatException e) {}
@@ -270,7 +271,7 @@ public class SolveView extends View implements ContentChangedListener {
         stats = exerciseBook.getStats();
 
         // do animation
-        if (result != ExerciseBook.NOTRECOGNIZED) {
+        if (result != ExerciseBook.NOT_RECOGNIZED) {
             exerciseBook.generate();
         }
         redrawContent();
