@@ -263,7 +263,7 @@ public class SolveView extends View implements ContentChangedListener {
         int result = ExerciseBook.NOT_RECOGNIZED;
         try {
             result = Integer.parseInt(text);
-        } catch (NumberFormatException e) {}
+        } catch (NumberFormatException ignored) {}
 
         boolean correct = exerciseBook.getLast().solve(result);
         lastResult = exerciseBook.getLast().equation();
