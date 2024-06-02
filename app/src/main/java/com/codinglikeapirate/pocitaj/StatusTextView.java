@@ -2,7 +2,6 @@ package com.codinglikeapirate.pocitaj;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.TextView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.annotation.NonNull;
 import com.codinglikeapirate.pocitaj.StrokeManager.StatusChangedListener;

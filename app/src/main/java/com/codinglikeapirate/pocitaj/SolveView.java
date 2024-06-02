@@ -38,7 +38,7 @@ public class SolveView extends View implements ContentChangedListener {
     private final Paint currentStrokePaint;
     private final Paint canvasPaint;
 
-    private TextPaint lastResultPaint;
+    private final TextPaint lastResultPaint;
     private String lastResult = "";
     private String stats = "";
 
@@ -259,7 +259,7 @@ public class SolveView extends View implements ContentChangedListener {
             Log.e(TAG, "last was solved");
         }
         String text = strokeManager.getContent().get(strokeManager.getContent().size() - 1).text;
-        int result = exerciseBook.NOTRECOGNIZED;
+        int result = ExerciseBook.NOTRECOGNIZED;
         try {
             result = Integer.parseInt(text);
         } catch (NumberFormatException e) {}
@@ -270,7 +270,7 @@ public class SolveView extends View implements ContentChangedListener {
         stats = exerciseBook.getStats();
 
         // do animation
-        if (result != exerciseBook.NOTRECOGNIZED) {
+        if (result != ExerciseBook.NOTRECOGNIZED) {
             exerciseBook.generate();
         }
         redrawContent();
