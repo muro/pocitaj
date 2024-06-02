@@ -45,7 +45,8 @@ public class StrokeManager {
     private static final int TIMEOUT_TRIGGER = 1;
     // For handling recognition and model downloading.
     private RecognitionTask recognitionTask = null;
-    @VisibleForTesting ModelManager modelManager = new ModelManager();
+    @VisibleForTesting
+    final ModelManager modelManager = new ModelManager();
     // Managing the recognition queue.
     private final List<RecognitionTask.RecognizedInk> content = new ArrayList<>();
     // Managing ink currently drawn.
@@ -97,6 +98,7 @@ public class StrokeManager {
     private void commitResult() {
         if (recognitionTask.done() && recognitionTask.result() != null) {
             content.add(recognitionTask.result());
+            //noinspection DataFlowIssue
             setStatus("Successful recognition: " + recognitionTask.result().text);
             if (clearCurrentInkAfterRecognition) {
                 resetCurrentInk();
