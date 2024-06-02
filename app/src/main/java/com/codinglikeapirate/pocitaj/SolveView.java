@@ -194,10 +194,9 @@ public class SolveView extends View implements ContentChangedListener {
     }
 
     private void drawStroke(@NonNull Ink.Stroke s, Paint paint) {
-        Path path = null;
+        Path path = new Path();
         for (Ink.Point p : s.getPoints()) {
-            if (path == null) {
-                path = new Path();
+            if (path.isEmpty()) {
                 path.moveTo(p.getX(), p.getY());
             } else {
                 path.lineTo(p.getX(), p.getY());
