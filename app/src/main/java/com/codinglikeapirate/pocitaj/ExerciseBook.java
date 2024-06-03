@@ -15,7 +15,7 @@ public class ExerciseBook {
         String question();
     }
 
-    public class Addition implements Exercise {
+    public static class Addition implements Exercise {
         private final int a, b;
         private int solution;
         private boolean solved = false;
