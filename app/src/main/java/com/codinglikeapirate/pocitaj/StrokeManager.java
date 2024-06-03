@@ -3,6 +3,7 @@ package com.codinglikeapirate.pocitaj;
 // Based on code from MlKit examples.
 
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.MotionEvent;
 import androidx.annotation.Nullable;
@@ -75,6 +76,7 @@ public class StrokeManager {
     // addNewTouchEvent).
     private final Handler uiHandler =
             new Handler(
+                    Looper.getMainLooper(),
                     msg -> {
                         if (msg.what == TIMEOUT_TRIGGER) {
                             Log.i(TAG, "Handling timeout trigger.");
