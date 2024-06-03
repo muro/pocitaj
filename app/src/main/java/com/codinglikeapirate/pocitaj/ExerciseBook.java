@@ -12,7 +12,18 @@ public class ExerciseBook {
     private static final int BOUND = 10;
 
     public interface Exercise {
+        // Returns the Exercise question as a string
         String question();
+
+        // Marks the Exercise as solved and returns true if the solution is correct.
+        // If the proposed solution is NOT_RECOGNIZED, doesn't set it as solved.
+        boolean solve(int solution);
+
+        // Returns true, if the Exercise has been solved.
+        boolean solved();
+
+        // Returns true if the Exercise has been correctly solved.
+        boolean correct();
     }
 
     public static class Addition implements Exercise {
@@ -39,7 +50,7 @@ public class ExerciseBook {
             return correct();
         }
 
-        public boolean isSolved() {
+        public boolean solved() {
             return solved;
         }
 
