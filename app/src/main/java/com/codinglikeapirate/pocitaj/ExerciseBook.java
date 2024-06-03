@@ -46,7 +46,7 @@ public class ExerciseBook {
                 return false;
             }
             // only set solved, if it's not the default:
-            this.solved = solution != NOT_RECOGNIZED;
+            this.solved = true;
             return correct();
         }
 
