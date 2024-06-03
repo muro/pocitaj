@@ -21,6 +21,7 @@ public class SolveActivity extends AppCompatActivity implements DownloadedModels
   @VisibleForTesting
   final StrokeManager strokeManager = new StrokeManager();
 
+  /** @noinspection FieldCanBeLocal*/
   private final String modelLanguageTag = "en-US";
   private final ExerciseBook exerciseBook = new ExerciseBook();
 
