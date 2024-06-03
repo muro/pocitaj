@@ -34,4 +34,35 @@ public class ExerciseBookTest {
     assertTrue(exercise.solved());
     assertTrue(exercise.correct());
   }
+
+  @Test
+  public void exerciseBook_generatesQuestionAtStart() {
+    ExerciseBook exerciseBook = new ExerciseBook();
+    assertNotNull(exerciseBook.getLast());
+  }
+
+  @Test
+  public void exerciseBook_emptyStats() {
+    ExerciseBook exerciseBook = new ExerciseBook();
+    assertEquals("0 / 0 (0%)", exerciseBook.getStats());
+  }
+
+  @Test
+  public void exerciseBook_allWrongStats() {
+    ExerciseBook exerciseBook = new ExerciseBook();
+    int incorrect = 100;
+    exerciseBook.getLast().solve(incorrect);
+    exerciseBook.generate();
+    exerciseBook.getLast().solve(incorrect);
+    assertEquals("0 / 2 (0%)", exerciseBook.getStats());
+  }
+
+  @Test
+  public void exerciseBook_oneSolvedOneUnsolvedWrongStats() {
+    ExerciseBook exerciseBook = new ExerciseBook();
+    int incorrect = 100;
+    exerciseBook.getLast().solve(incorrect);
+    exerciseBook.generate();
+    assertEquals("0 / 1 (0%)", exerciseBook.getStats());
+  }
 }

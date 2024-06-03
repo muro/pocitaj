@@ -89,14 +89,17 @@ public class ExerciseBook {
     }
 
     public String getStats() {
-        int total = history.size();
+        int solved = 0;
         int correct = 0;
         for (Addition a : history) {
+            if (a.solved()) {
+                solved++;
+            }
             if (a.correct()) {
                 correct++;
             }
         }
-        float percent = total != 0 ? 100f * correct / (float) total : 0f;
-        return String.format(Locale.ENGLISH, "%d / %d (%.0f%%)", correct, total, percent);
+        float percent = solved != 0 ? 100f * correct / (float) solved : 0f;
+        return String.format(Locale.ENGLISH, "%d / %d (%.0f%%)", correct, solved, percent);
     }
 }
