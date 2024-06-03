@@ -24,6 +24,9 @@ public class ExerciseBook {
 
         // Returns true if the Exercise has been correctly solved.
         boolean correct();
+
+        // Returns the full equation as a string.
+        String equation();
     }
 
     public static class Addition implements Exercise {
@@ -63,7 +66,7 @@ public class ExerciseBook {
                 return String.format(Locale.ENGLISH,"%d + %d = %d", a, b, solution);
             } else {
                 if (solution == NOT_RECOGNIZED) {
-                    return String.format(Locale.ENGLISH, "%d + %d ≠ %s", a, b, "?");
+                    return String.format(Locale.ENGLISH, "%d + %d ≠ ?", a, b);
                 }
                 return String.format(Locale.ENGLISH,"%d + %d ≠ %d", a, b, solution);
             }

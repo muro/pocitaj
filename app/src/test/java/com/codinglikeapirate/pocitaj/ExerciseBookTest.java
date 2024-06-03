@@ -14,17 +14,21 @@ public class ExerciseBookTest {
   @Test
   public void addition_SolveNotRecognized() {
     ExerciseBook.Exercise exercise = new ExerciseBook.Addition(2, 3);
+    assertEquals("2 + 3", exercise.question());
     assertFalse(exercise.solve(ExerciseBook.NOT_RECOGNIZED));
     assertFalse(exercise.solved());
     assertFalse(exercise.correct());
+    assertEquals("2 + 3 ≠ ?", exercise.equation());
   }
 
   @Test
   public void addition_SolveIncorrectly() {
-    ExerciseBook.Exercise exercise = new ExerciseBook.Addition(2, 3);
+    ExerciseBook.Exercise exercise = new ExerciseBook.Addition(4, 2);
+    assertEquals("4 + 2", exercise.question());
     assertFalse(exercise.solve(7));
     assertTrue(exercise.solved());
     assertFalse(exercise.correct());
+    assertEquals("4 + 2 ≠ 7", exercise.equation());
   }
 
   @Test
@@ -33,6 +37,7 @@ public class ExerciseBookTest {
     assertTrue(exercise.solve(5));
     assertTrue(exercise.solved());
     assertTrue(exercise.correct());
+    assertEquals("2 + 3 = 5", exercise.equation());
   }
 
   @Test
