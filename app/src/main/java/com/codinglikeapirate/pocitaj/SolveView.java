@@ -78,6 +78,7 @@ public class SolveView extends View implements ContentChangedListener {
     void setStrokeManager(@NonNull StrokeManager strokeManager) {
         this.strokeManager = strokeManager;
     }
+
     public void setExerciseBook(@NonNull ExerciseBook exerciseBook) {
         this.exerciseBook = exerciseBook;
     }
@@ -163,7 +164,9 @@ public class SolveView extends View implements ContentChangedListener {
             default:
                 break;
         }
-        strokeManager.addNewTouchEvent(event);
+        if (!strokeManager.addNewTouchEvent(event)) {
+            Log.w(TAG, "onTouchEvent: stroke manager didn't process event");
+        }
         invalidate();
         return true;
     }
