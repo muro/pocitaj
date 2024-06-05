@@ -20,12 +20,12 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
 
-    @Rule
-    public ActivityScenarioRule<SolveActivity> activityScenarioRule =
-        new ActivityScenarioRule<>(SolveActivity.class);
+  @Rule
+  public ActivityScenarioRule<SolveActivity> activityScenarioRule =
+      new ActivityScenarioRule<>(SolveActivity.class);
 
-    @Test
-    public void showsSolveView() {
-        onView(withId(R.id.solve_view)).check(matches(isDisplayed()));
-    }
+  @Test
+  public void showsSolveView() {
+    onView(withId(R.id.solve_view)).check(matches(isDisplayed()));
+  }
 }

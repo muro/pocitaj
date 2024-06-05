@@ -7,102 +7,102 @@ import java.util.Random;
 
 public class ExerciseBook {
 
-    public static final int NOT_RECOGNIZED = -1000;
-    private final Random random = new Random(); //1234);
-    private static final int BOUND = 10;
+  public static final int NOT_RECOGNIZED = -1000;
+  private static final int BOUND = 10;
+  private final Random random = new Random(); //1234);
+  private final List<Addition> history = new ArrayList<>();
 
-    public interface Exercise {
-        // Returns the Exercise question as a string
-        String question();
+  public ExerciseBook() {
+    generate();
+  }
 
-        // Marks the Exercise as solved and returns true if the solution is correct.
-        // If the proposed solution is NOT_RECOGNIZED, doesn't set it as solved.
-        boolean solve(int solution);
+  private Addition generate(int bound) {
+    return new Addition(random.nextInt(bound), random.nextInt(bound));
+  }
 
-        // Returns true, if the Exercise has been solved.
-        boolean solved();
+  public void generate() {
+    history.add(generate(BOUND));
+  }
 
-        // Returns true if the Exercise has been correctly solved.
-        boolean correct();
+  public Addition getLast() {
+    return history.get(history.size() - 1);
+  }
 
-        // Returns the full equation as a string.
-        String equation();
+  public String getStats() {
+    int solved = 0;
+    int correct = 0;
+    for (Addition a : history) {
+      if (a.solved()) {
+        solved++;
+      }
+      if (a.correct()) {
+        correct++;
+      }
+    }
+    float percent = solved != 0 ? 100f * correct / (float) solved : 0f;
+    return String.format(Locale.ENGLISH, "%d / %d (%.0f%%)", correct, solved, percent);
+  }
+
+  public interface Exercise {
+    // Returns the Exercise question as a string
+    String question();
+
+    // Marks the Exercise as solved and returns true if the solution is correct.
+    // If the proposed solution is NOT_RECOGNIZED, doesn't set it as solved.
+    boolean solve(int solution);
+
+    // Returns true, if the Exercise has been solved.
+    boolean solved();
+
+    // Returns true if the Exercise has been correctly solved.
+    boolean correct();
+
+    // Returns the full equation as a string.
+    String equation();
+  }
+
+  public static class Addition implements Exercise {
+    private final int a, b;
+    private int solution;
+    private boolean solved = false;
+
+    Addition(int a, int b) {
+      this.a = a;
+      this.b = b;
     }
 
-    public static class Addition implements Exercise {
-        private final int a, b;
-        private int solution;
-        private boolean solved = false;
-
-        Addition(int a, int b) {
-            this.a = a;
-            this.b = b;
-        }
-
-        public String question() {
-            return String.format(Locale.ENGLISH, "%d + %d", a, b);
-        }
-
-        public boolean solve(int solution) {
-            this.solution = solution;
-            if (solution == NOT_RECOGNIZED) {
-                return false;
-            }
-            // only set solved, if it's not the default:
-            this.solved = true;
-            return correct();
-        }
-
-        public boolean solved() {
-            return solved;
-        }
-
-        public boolean correct() {
-            return solved && a + b == solution;
-        }
-
-        public String equation() {
-            if (correct()) {
-                return String.format(Locale.ENGLISH,"%d + %d = %d", a, b, solution);
-            } else {
-                if (solution == NOT_RECOGNIZED) {
-                    return String.format(Locale.ENGLISH, "%d + %d ≠ ?", a, b);
-                }
-                return String.format(Locale.ENGLISH,"%d + %d ≠ %d", a, b, solution);
-            }
-
-        }
+    public String question() {
+      return String.format(Locale.ENGLISH, "%d + %d", a, b);
     }
 
-    public ExerciseBook() {
-        generate();
-    }
-    private Addition generate(int bound) {
-        return new Addition(random.nextInt(bound), random.nextInt(bound));
-    }
-
-    private final List<Addition> history = new ArrayList<>();
-
-    public void generate() {
-        history.add(generate(BOUND));
+    public boolean solve(int solution) {
+      this.solution = solution;
+      if (solution == NOT_RECOGNIZED) {
+        return false;
+      }
+      // only set solved, if it's not the default:
+      this.solved = true;
+      return correct();
     }
 
-    public Addition getLast() {
-        return history.get(history.size() - 1);
+    public boolean solved() {
+      return solved;
     }
 
-    public String getStats() {
-        int solved = 0;
-        int correct = 0;
-        for (Addition a : history) {
-            if (a.solved()) {
-                solved++;
-            }
-            if (a.correct()) {
-                correct++;
-            }
+    public boolean correct() {
+      return solved && a + b == solution;
+    }
+
+    public String equation() {
+      if (correct()) {
+        return String.format(Locale.ENGLISH, "%d + %d = %d", a, b, solution);
+      } else {
+        if (solution == NOT_RECOGNIZED) {
+          return String.format(Locale.ENGLISH, "%d + %d ≠ ?", a, b);
         }
-        float percent = solved != 0 ? 100f * correct / (float) solved : 0f;
-        return String.format(Locale.ENGLISH, "%d / %d (%.0f%%)", correct, solved, percent);
+        return String.format(Locale.ENGLISH, "%d + %d ≠ %d", a, b, solution);
+      }
+
     }
+  }
 }
