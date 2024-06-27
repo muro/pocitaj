@@ -7,13 +7,41 @@
     android:layout_height="match_parent"
     tools:context=".SolveActivity">
 
-    <com.codinglikeapirate.pocitaj.SolveView
-        android:id="@+id/solve_view"
-        android:layout_width="wrap_content"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_margin="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.codinglikeapirate.pocitaj.QuestionView
+                android:id="@+id/question_view"
+                android:layout_width="match_parent"
+                android:layout_height="312dp"
+                android:background="#E6CFF4"
+                android:gravity="center"
+                android:scaleType="centerCrop"
+                android:text="question text"
+                android:textColor="#9C27B0"
+                android:textSize="96sp"
+                app:fontFamily="casual" />
+
+
+            <com.codinglikeapirate.pocitaj.SolveView
+                android:id="@+id/solve_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

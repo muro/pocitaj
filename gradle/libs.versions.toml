@@ -17,7 +17,7 @@ appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "a
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 tasks = { group = "com.google.android.gms", name = "play-services-tasks", version.ref = "tasks"}
-digiink = { group = "com.google.mlkit", name = "digital-ink-recognition", version.ref="digiinkVersion" }
+digiink = { group = "com.google.mlkit", name = "digital-ink-recognition", version.ref = "digiinkVersion" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

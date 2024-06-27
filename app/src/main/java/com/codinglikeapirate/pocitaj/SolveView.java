@@ -41,6 +41,7 @@ public class SolveView extends View implements ContentChangedListener {
   private Bitmap canvasBitmap;
   private StrokeManager strokeManager;
   private ExerciseBook exerciseBook;
+  private QuestionView questionView;
 
   public SolveView(Context context) {
     this(context, null);
@@ -97,6 +98,7 @@ public class SolveView extends View implements ContentChangedListener {
     drawInk(currentInk, currentStrokePaint);
 
     drawQuestion();
+    questionView.setText(exerciseBook.getLast().question());
     invalidate();
   }
 
@@ -186,5 +188,9 @@ public class SolveView extends View implements ContentChangedListener {
       exerciseBook.generate();
     }
     redrawContent();
+  }
+
+  public void setQuestionView(QuestionView questionView) {
+    this.questionView = questionView;
   }
 }

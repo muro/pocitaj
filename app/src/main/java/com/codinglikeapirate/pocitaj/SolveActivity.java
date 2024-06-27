@@ -40,6 +40,10 @@ public class SolveActivity extends AppCompatActivity implements DownloadedModels
     solveView.setStrokeManager(strokeManager);
     solveView.setExerciseBook(exerciseBook);
 
+    QuestionView questionView = findViewById(R.id.question_view);
+    questionView.setExerciseBook(exerciseBook);
+    solveView.setQuestionView(questionView);
+
     // strokeManager.deleteActiveModel();
 
     strokeManager.setContentChangedListener(solveView);
