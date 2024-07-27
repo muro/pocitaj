@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Typeface;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -34,7 +33,6 @@ public class SolveView extends View implements ContentChangedListener {
 
   private final TextPaint lastResultPaint;
   private final Path currentStroke;
-  private final TextPaint largeTextPaint;
   private String lastResult = "";
   private String stats = "";
   private Canvas drawCanvas;
@@ -50,7 +48,7 @@ public class SolveView extends View implements ContentChangedListener {
   public SolveView(Context context, AttributeSet attributeSet) {
     super(context, attributeSet);
     currentStrokePaint = new Paint();
-    currentStrokePaint.setColor(0xFFFF00FF); // pink.
+    currentStrokePaint.setColor(0xFF0277BD); // dark blue.
     currentStrokePaint.setAntiAlias(true);
     // Set stroke width based on display density.
     currentStrokePaint.setStrokeWidth(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, STROKE_WIDTH_DP, getResources().getDisplayMetrics()));
@@ -65,12 +63,6 @@ public class SolveView extends View implements ContentChangedListener {
     // green
     lastResultPaint.setColor(0xFF116611);
     lastResultPaint.setTextSize(80);
-
-    largeTextPaint = new TextPaint();
-    largeTextPaint.setColor(0xAAAAAAFF);
-    largeTextPaint.setAntiAlias(true);
-    largeTextPaint.setTypeface(Typeface.SERIF);
-    largeTextPaint.setTextSize(250);
   }
 
   void setStrokeManager(@NonNull StrokeManager strokeManager) {
@@ -121,7 +113,6 @@ public class SolveView extends View implements ContentChangedListener {
   }
 
   private void drawQuestion() {
-    drawCanvas.drawText(exerciseBook.getLast().question(), 100, 400, largeTextPaint);
   }
 
   public void clear() {

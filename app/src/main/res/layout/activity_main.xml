@@ -9,25 +9,32 @@
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp">
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
             <com.codinglikeapirate.pocitaj.QuestionView
                 android:id="@+id/question_view"
                 android:layout_width="match_parent"
                 android:layout_height="312dp"
-                android:background="#E6CFF4"
+                android:background="#FFD54F"
                 android:gravity="center"
                 android:scaleType="centerCrop"
                 android:text="question text"
-                android:textColor="#9C27B0"
+                android:textColor="#0277BD"
                 android:textSize="96sp"
+                android:textStyle="bold"
                 app:fontFamily="casual" />
 
 
