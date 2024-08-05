@@ -26,7 +26,7 @@ import com.google.mlkit.vision.digitalink.Ink;
  */
 public class SolveView extends View implements ContentChangedListener {
   private static final String TAG = "SolveView";
-  private static final int STROKE_WIDTH_DP = 3;
+  private static final int STROKE_WIDTH_DP = 6;
 
   private final Paint currentStrokePaint;
   private final Paint canvasPaint;

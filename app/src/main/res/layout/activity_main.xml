@@ -7,48 +7,104 @@
     android:layout_height="match_parent"
     tools:context=".SolveActivity">
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_margin="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="0px"
+            android:layout_margin="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <com.codinglikeapirate.pocitaj.QuestionView
-                android:id="@+id/question_view"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="312dp"
-                android:background="#FFD54F"
-                android:gravity="center"
-                android:scaleType="centerCrop"
-                android:text="question text"
-                android:textColor="#0277BD"
-                android:textSize="96sp"
-                android:textStyle="bold"
-                app:fontFamily="casual" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <com.codinglikeapirate.pocitaj.QuestionView
+                    android:id="@+id/question_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="312dp"
+                    android:background="#FFD54F"
+                    android:gravity="center"
+                    android:scaleType="centerCrop"
+                    android:text="question text"
+                    android:textColor="#0277BD"
+                    android:textSize="96sp"
+                    android:textStyle="bold"
+                    app:fontFamily="casual" />
 
 
-            <com.codinglikeapirate.pocitaj.SolveView
-                android:id="@+id/solve_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                <com.codinglikeapirate.pocitaj.SolveView
+                    android:id="@+id/solve_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="0px"
+                    android:layout_weight="1"
+                    android:background="#39FFECB3"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-        </LinearLayout>
+            </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+        </com.google.android.material.card.MaterialCardView>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="bottom"
+        android:orientation="horizontal"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="696dp">
+
+        <ImageView
+            android:id="@+id/progress_1"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            app:srcCompat="@android:drawable/star_off" />
+
+        <ImageView
+            android:id="@+id/progress_2"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:scaleType="fitCenter"
+            app:srcCompat="@android:drawable/star_on" />
+
+        <ImageView
+            android:id="@+id/progress_3"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:scaleType="fitCenter"
+            app:srcCompat="@android:drawable/star_off" />
+
+        <ImageView
+            android:id="@+id/progress_4"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:scaleType="fitCenter"
+            app:srcCompat="@android:drawable/star_on" />
+
+        <ImageView
+            android:id="@+id/progress_5"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:scaleType="fitCenter"
+            app:srcCompat="@android:drawable/star_off" />
+    </LinearLayout>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
