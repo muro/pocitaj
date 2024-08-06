@@ -2,6 +2,7 @@ package com.codinglikeapirate.pocitaj;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.VisibleForTesting;
@@ -12,6 +13,8 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.codinglikeapirate.pocitaj.StrokeManager.DownloadedModelsChangedListener;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class SolveActivity extends AppCompatActivity implements DownloadedModelsChangedListener {
@@ -21,8 +24,7 @@ public class SolveActivity extends AppCompatActivity implements DownloadedModels
   @VisibleForTesting
   final StrokeManager strokeManager = new StrokeManager();
 
-  /** @noinspection FieldCanBeLocal*/
-  private final String modelLanguageTag = "en-US";
+  private static final String modelLanguageTag = "en-US";
   private final ExerciseBook exerciseBook = new ExerciseBook();
 
   @Override
@@ -43,6 +45,19 @@ public class SolveActivity extends AppCompatActivity implements DownloadedModels
     QuestionView questionView = findViewById(R.id.question_view);
     questionView.setExerciseBook(exerciseBook);
     solveView.setQuestionView(questionView);
+
+    List<ImageView> progressIcons = new ArrayList<>();
+    progressIcons.add(findViewById(R.id.progress_1));
+    progressIcons.add(findViewById(R.id.progress_2));
+    progressIcons.add(findViewById(R.id.progress_3));
+    progressIcons.add(findViewById(R.id.progress_4));
+    progressIcons.add(findViewById(R.id.progress_5));
+    progressIcons.add(findViewById(R.id.progress_6));
+    progressIcons.add(findViewById(R.id.progress_7));
+    progressIcons.add(findViewById(R.id.progress_8));
+    progressIcons.add(findViewById(R.id.progress_9));
+    progressIcons.add(findViewById(R.id.progress_10));
+    solveView.setProgressIcons(progressIcons);
 
     // strokeManager.deleteActiveModel();
 

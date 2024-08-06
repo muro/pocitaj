@@ -12,11 +12,14 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 
 import com.codinglikeapirate.pocitaj.StrokeManager.ContentChangedListener;
 import com.google.mlkit.vision.digitalink.Ink;
+
+import java.util.List;
 
 /**
  * Main view for rendering content.
@@ -40,6 +43,7 @@ public class SolveView extends View implements ContentChangedListener {
   private StrokeManager strokeManager;
   private ExerciseBook exerciseBook;
   private QuestionView questionView;
+  private List<ImageView> progressIcons;
 
   public SolveView(Context context) {
     this(context, null);
@@ -82,6 +86,7 @@ public class SolveView extends View implements ContentChangedListener {
       redrawContent();
     }
     invalidate();
+    updateProgressIcons();
   }
 
   public void redrawContent() {
@@ -124,7 +129,8 @@ public class SolveView extends View implements ContentChangedListener {
   protected void onDraw(Canvas canvas) {
     canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
     canvas.drawText(lastResult, 30, canvasBitmap.getHeight() - 100, lastResultPaint);
-    canvas.drawText(stats, canvasBitmap.getWidth() - 450, canvasBitmap.getHeight() - 100, lastResultPaint);
+    //canvas.drawText(stats, canvasBitmap.getWidth() - 450, canvasBitmap.getHeight() - 100, lastResultPaint);
+    updateProgressIcons();
     canvas.drawPath(currentStroke, currentStrokePaint);
   }
 
@@ -138,6 +144,7 @@ public class SolveView extends View implements ContentChangedListener {
     switch (action) {
       case MotionEvent.ACTION_DOWN:
         currentStroke.moveTo(x, y);
+        updateProgressIcons();
         break;
       case MotionEvent.ACTION_MOVE:
         currentStroke.lineTo(x, y);
@@ -173,6 +180,7 @@ public class SolveView extends View implements ContentChangedListener {
     lastResult = exerciseBook.getLast().equation();
     lastResultPaint.setColor(correct ? 0xFF33AA33 : 0xFFFF8888);
     stats = exerciseBook.getStats();
+    updateProgressIcons();
 
     // do animation
     if (result != ExerciseBook.NOT_RECOGNIZED) {
@@ -183,5 +191,27 @@ public class SolveView extends View implements ContentChangedListener {
 
   public void setQuestionView(QuestionView questionView) {
     this.questionView = questionView;
+  }
+
+  private void updateProgressIcons() {
+    List<ExerciseBook.Exercise> history = exerciseBook.getHistory();
+    for (int i = 0; i < progressIcons.size(); i++) {
+      if (history.size() <= i) {
+        progressIcons.get(i).setImageResource(R.drawable.cat_sleep);
+        continue;
+      }
+      if (!history.get(i).solved()) {
+        progressIcons.get(i).setImageResource(R.drawable.cat_big_eyes);
+      } else if (!history.get(i).correct()) {
+        progressIcons.get(i).setImageResource(R.drawable.cat_cry);
+      } else {
+        progressIcons.get(i).setImageResource(R.drawable.cat_heart);
+      }
+      //progressIcons.get(i).invalidate();
+    }
+  }
+
+  public void setProgressIcons(List<ImageView> progressIcons) {
+    this.progressIcons = progressIcons;
   }
 }

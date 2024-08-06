@@ -60,8 +60,9 @@
         </com.google.android.material.card.MaterialCardView>
 
     <LinearLayout
+        android:id="@+id/progress"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="36dp"
         android:gravity="bottom"
         android:orientation="horizontal"
         tools:layout_editor_absoluteX="8dp"
@@ -69,42 +70,64 @@
 
         <ImageView
             android:id="@+id/progress_1"
-            android:layout_width="wrap_content"
+            android:layout_width="36dp"
             android:layout_height="match_parent"
-            android:scaleType="fitCenter"
-            app:srcCompat="@android:drawable/star_off" />
+            android:scaleType="fitCenter" />
 
         <ImageView
             android:id="@+id/progress_2"
-            android:layout_width="wrap_content"
+            android:layout_width="36dp"
             android:layout_height="match_parent"
-            android:layout_weight="0"
-            android:scaleType="fitCenter"
-            app:srcCompat="@android:drawable/star_on" />
+            android:scaleType="fitCenter" />
 
         <ImageView
             android:id="@+id/progress_3"
-            android:layout_width="wrap_content"
+            android:layout_width="36dp"
             android:layout_height="match_parent"
-            android:layout_weight="0"
-            android:scaleType="fitCenter"
-            app:srcCompat="@android:drawable/star_off" />
+            android:scaleType="fitCenter" />
 
         <ImageView
             android:id="@+id/progress_4"
-            android:layout_width="wrap_content"
+            android:layout_width="36dp"
             android:layout_height="match_parent"
-            android:layout_weight="0"
-            android:scaleType="fitCenter"
-            app:srcCompat="@android:drawable/star_on" />
+            android:scaleType="fitCenter" />
 
         <ImageView
             android:id="@+id/progress_5"
-            android:layout_width="wrap_content"
+            android:layout_width="36dp"
             android:layout_height="match_parent"
-            android:layout_weight="0"
-            android:scaleType="fitCenter"
-            app:srcCompat="@android:drawable/star_off" />
+            android:scaleType="fitCenter" />
+
+        <ImageView
+            android:id="@+id/progress_6"
+            android:layout_width="36dp"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter" />
+
+        <ImageView
+            android:id="@+id/progress_7"
+            android:layout_width="36dp"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter" />
+
+        <ImageView
+            android:id="@+id/progress_8"
+            android:layout_width="36dp"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter" />
+
+        <ImageView
+            android:id="@+id/progress_9"
+            android:layout_width="36dp"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter" />
+
+        <ImageView
+            android:id="@+id/progress_10"
+            android:layout_width="36dp"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter" />
+
     </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

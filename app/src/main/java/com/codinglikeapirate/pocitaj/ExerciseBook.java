@@ -43,6 +43,12 @@ public class ExerciseBook {
     return String.format(Locale.ENGLISH, "%d / %d (%.0f%%)", correct, solved, percent);
   }
 
+  public List<Exercise> getHistory() {
+    List<Exercise> hist = new ArrayList<>();
+    hist.addAll(this.history);
+    return hist;
+  }
+
   public interface Exercise {
     // Returns the Exercise question as a string
     String question();
