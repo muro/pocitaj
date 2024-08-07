@@ -3,6 +3,7 @@ package com.codinglikeapirate.pocitaj;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.VisibleForTesting;
@@ -42,8 +43,7 @@ public class SolveActivity extends AppCompatActivity implements DownloadedModels
     solveView.setExerciseBook(exerciseBook);
     solveView.setStrokeManager(strokeManager);
 
-    QuestionView questionView = findViewById(R.id.question_view);
-    questionView.setExerciseBook(exerciseBook);
+    TextView questionView = findViewById(R.id.question_view);
     solveView.setQuestionView(questionView);
 
     List<ImageView> progressIcons = new ArrayList<>();

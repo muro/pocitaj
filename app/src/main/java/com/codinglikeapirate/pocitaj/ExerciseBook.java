@@ -44,9 +44,7 @@ public class ExerciseBook {
   }
 
   public List<Exercise> getHistory() {
-    List<Exercise> hist = new ArrayList<>();
-    hist.addAll(this.history);
-    return hist;
+    return new ArrayList<>(this.history);
   }
 
   public interface Exercise {

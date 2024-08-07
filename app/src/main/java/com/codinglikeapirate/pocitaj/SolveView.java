@@ -13,6 +13,7 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
@@ -37,12 +38,11 @@ public class SolveView extends View implements ContentChangedListener {
   private final TextPaint lastResultPaint;
   private final Path currentStroke;
   private String lastResult = "";
-  private String stats = "";
   private Canvas drawCanvas;
   private Bitmap canvasBitmap;
   private StrokeManager strokeManager;
   private ExerciseBook exerciseBook;
-  private QuestionView questionView;
+  private TextView questionView;
   private List<ImageView> progressIcons;
 
   public SolveView(Context context) {
@@ -92,6 +92,9 @@ public class SolveView extends View implements ContentChangedListener {
   }
 
   public void redrawContent() {
+    if (strokeManager == null) {
+      return;
+    }
     clear();
     Ink currentInk = strokeManager.getCurrentInk();
     drawInk(currentInk, currentStrokePaint);
@@ -119,6 +122,7 @@ public class SolveView extends View implements ContentChangedListener {
     drawCanvas.drawPath(path, paint);
   }
 
+  /** @noinspection EmptyMethod*/
   private void drawQuestion() {
   }
 
@@ -180,7 +184,7 @@ public class SolveView extends View implements ContentChangedListener {
     boolean correct = exerciseBook.getLast().solve(result);
     lastResult = exerciseBook.getLast().equation();
     lastResultPaint.setColor(correct ? 0xFF33AA33 : 0xFFFF8888);
-    stats = exerciseBook.getStats();
+    Log.i(TAG, "Stats: " + exerciseBook.getStats());
     updateProgressIcons();
     // do animation
     if (result != ExerciseBook.NOT_RECOGNIZED) {
@@ -190,7 +194,7 @@ public class SolveView extends View implements ContentChangedListener {
     redrawContent();
   }
 
-  public void setQuestionView(QuestionView questionView) {
+  public void setQuestionView(TextView questionView) {
     this.questionView = questionView;
   }
 
