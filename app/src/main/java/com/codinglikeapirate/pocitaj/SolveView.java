@@ -54,6 +54,7 @@ public class SolveView extends View implements ContentChangedListener {
     currentStrokePaint = new Paint();
     currentStrokePaint.setColor(0xFF0277BD); // dark blue.
     currentStrokePaint.setAntiAlias(true);
+
     // Set stroke width based on display density.
     currentStrokePaint.setStrokeWidth(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, STROKE_WIDTH_DP, getResources().getDisplayMetrics()));
     currentStrokePaint.setStyle(Paint.Style.STROKE);
@@ -71,6 +72,7 @@ public class SolveView extends View implements ContentChangedListener {
 
   void setStrokeManager(@NonNull StrokeManager strokeManager) {
     this.strokeManager = strokeManager;
+    strokeManager.setExpectedResult(exerciseBook.getLast().getExpectedResult());
   }
 
   public void setExerciseBook(@NonNull ExerciseBook exerciseBook) {
@@ -129,7 +131,6 @@ public class SolveView extends View implements ContentChangedListener {
   protected void onDraw(Canvas canvas) {
     canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
     canvas.drawText(lastResult, 30, canvasBitmap.getHeight() - 100, lastResultPaint);
-    //canvas.drawText(stats, canvasBitmap.getWidth() - 450, canvasBitmap.getHeight() - 100, lastResultPaint);
     updateProgressIcons();
     canvas.drawPath(currentStroke, currentStrokePaint);
   }
@@ -181,11 +182,11 @@ public class SolveView extends View implements ContentChangedListener {
     lastResultPaint.setColor(correct ? 0xFF33AA33 : 0xFFFF8888);
     stats = exerciseBook.getStats();
     updateProgressIcons();
-
     // do animation
     if (result != ExerciseBook.NOT_RECOGNIZED) {
       exerciseBook.generate();
     }
+    strokeManager.setExpectedResult(exerciseBook.getLast().getExpectedResult());
     redrawContent();
   }
 
@@ -207,7 +208,6 @@ public class SolveView extends View implements ContentChangedListener {
       } else {
         progressIcons.get(i).setImageResource(R.drawable.cat_heart);
       }
-      //progressIcons.get(i).invalidate();
     }
   }
 

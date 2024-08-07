@@ -48,6 +48,7 @@ public class StrokeManager {
   private boolean triggerRecognitionAfterInput = true;
   private boolean clearCurrentInkAfterRecognition = true;
   private String status = "";
+  private int expectedResult = -1;
   // Handler to handle the UI Timeout.
   // This handler is only used to trigger the UI timeout. Each time a UI interaction happens,
   // the timer is reset by clearing the queue on this handler and sending a new delayed message (in
@@ -206,6 +207,11 @@ public class StrokeManager {
             });
   }
 
+  public void setExpectedResult(int expectedResult) {
+    Log.i(TAG, "StrokeManager.setExpectedResult: " + expectedResult);
+    this.expectedResult = expectedResult;
+  }
+
   // Model downloading / deleting / setting.
 
   public Task<String> recognize() {
@@ -230,7 +236,8 @@ public class StrokeManager {
 
               stateChangedSinceLastRequest = false;
               recognitionTask =
-                  new RecognitionTask(modelManager.getRecognizer(), inkBuilder.build());
+                  new RecognitionTask(modelManager.getRecognizer(), inkBuilder.build(),
+                      expectedResult);
               uiHandler.sendMessageDelayed(
                   uiHandler.obtainMessage(TIMEOUT_TRIGGER), CONVERSION_TIMEOUT_MS);
               return recognitionTask.run();

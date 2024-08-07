@@ -13,6 +13,8 @@ import com.google.mlkit.vision.digitalink.Ink;
 import com.google.mlkit.vision.digitalink.RecognitionCandidate;
 import com.google.mlkit.vision.digitalink.RecognitionContext;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -25,12 +27,14 @@ public class RecognitionTask {
   private final Ink ink;
   private final AtomicBoolean cancelled;
   private final AtomicBoolean done;
+  private final int expectedResult;
   @Nullable
   private RecognizedInk currentResult;
 
-  public RecognitionTask(DigitalInkRecognizer recognizer, Ink ink) {
+  public RecognitionTask(DigitalInkRecognizer recognizer, Ink ink, int expectedResult) {
     this.recognizer = recognizer;
     this.ink = ink;
+    this.expectedResult = expectedResult;
     this.currentResult = null;
     cancelled = new AtomicBoolean(false);
     done = new AtomicBoolean(false);
@@ -49,6 +53,25 @@ public class RecognitionTask {
     return this.currentResult;
   }
 
+  protected String findBestResult(List<RecognitionCandidate> candidates) {
+    String first = "";
+    String expected = String.format(Locale.ENGLISH, "%d", expectedResult);
+    for (RecognitionCandidate rc : candidates) {
+      String text = rc.getText();
+      Log.i(TAG, "recognition candidate: " + text + " vs expected: " + expected);
+      if (!text.matches("\\d+")) {
+        continue;
+      }
+      if (first.isEmpty()) {
+        first = text;
+      }
+      if (text.equals(expected)) {
+        return expected;
+      }
+    }
+    return first;
+  }
+
   public Task<String> run() {
     Log.i(TAG, "RecognitionTask.run");
     return recognizer
@@ -59,13 +82,7 @@ public class RecognitionTask {
                 return Tasks.forResult(null);
               }
               // return first result that's just numbers:
-              String text = "";
-              for (RecognitionCandidate rc : result.getCandidates()) {
-                text = rc.getText();
-                if (text.matches("\\d+")) {
-                  break;
-                }
-              }
+              String text = findBestResult(result.getCandidates());
               currentResult = new RecognizedInk(ink, text);
               Log.i(TAG, "result: " + currentResult.text);
               done.set(true);

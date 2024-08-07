@@ -39,8 +39,8 @@ public class SolveActivity extends AppCompatActivity implements DownloadedModels
     });
 
     SolveView solveView = findViewById(R.id.solve_view);
-    solveView.setStrokeManager(strokeManager);
     solveView.setExerciseBook(exerciseBook);
+    solveView.setStrokeManager(strokeManager);
 
     QuestionView questionView = findViewById(R.id.question_view);
     questionView.setExerciseBook(exerciseBook);

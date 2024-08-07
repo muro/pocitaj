@@ -99,6 +99,8 @@ public class ExerciseBook {
       return solved && a + b == solution;
     }
 
+    public int getExpectedResult() { return a + b; }
+
     public String equation() {
       if (correct()) {
         return String.format(Locale.ENGLISH, "%d + %d = %d", a, b, solution);
