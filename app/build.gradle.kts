@@ -2,12 +2,6 @@ plugins {
     alias(libs.plugins.androidApplication)
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-}
-
 android {
     namespace = "com.codinglikeapirate.pocitaj"
     compileSdk = 34
