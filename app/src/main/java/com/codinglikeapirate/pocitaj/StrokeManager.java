@@ -79,14 +79,16 @@ public class StrokeManager {
 
   private void commitResult() {
     if (recognitionTask.done() && recognitionTask.result() != null) {
-      content.add(recognitionTask.result());
+      RecognitionTask.RecognizedInk result = recognitionTask.result();
+      content.add(result);
+
       //noinspection DataFlowIssue
-      setStatus("Successful recognition: " + recognitionTask.result().text);
+      setStatus("Successful recognition: " + result.text);
       if (clearCurrentInkAfterRecognition) {
         resetCurrentInk();
       }
       if (contentChangedListener != null) {
-        contentChangedListener.onContentChanged();
+        contentChangedListener.onContentChanged(result.text);
       }
     }
   }
@@ -263,7 +265,7 @@ public class StrokeManager {
     /**
      * This method is called when the recognized content changes.
      */
-    void onContentChanged();
+    void onContentChanged(String text);
   }
 
   // Recognition-related.
@@ -274,7 +276,7 @@ public class StrokeManager {
   public interface StatusChangedListener {
 
     /**
-     * This method is called when the recognized content changes.
+     * This method is called when the status changes.
      */
     void onStatusChanged();
   }

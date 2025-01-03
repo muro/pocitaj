@@ -170,11 +170,10 @@ public class SolveView extends View implements ContentChangedListener {
   }
 
   @Override
-  public void onContentChanged() {
+  public void onContentChanged(String text) {
     if (exerciseBook.getLast().solved()) {
       Log.e(TAG, "last was solved");
     }
-    String text = strokeManager.getContent().get(strokeManager.getContent().size() - 1).text;
     int result = ExerciseBook.NOT_RECOGNIZED;
     try {
       result = Integer.parseInt(text);
