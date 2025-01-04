@@ -1,6 +1,9 @@
 package com.codinglikeapirate.pocitaj;
 
+import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -13,12 +16,13 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.codinglikeapirate.pocitaj.StrokeManager.DownloadedModelsChangedListener;
+import com.codinglikeapirate.pocitaj.StrokeManager.ContentChangedListener;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class SolveActivity extends AppCompatActivity implements DownloadedModelsChangedListener {
+public class SolveActivity extends AppCompatActivity implements DownloadedModelsChangedListener, ContentChangedListener {
 
   private static final String TAG = "SolveActivity";
 
@@ -61,7 +65,8 @@ public class SolveActivity extends AppCompatActivity implements DownloadedModels
 
     // strokeManager.deleteActiveModel();
 
-    strokeManager.setContentChangedListener(solveView);
+    strokeManager.addContentChangedListener(solveView);
+    strokeManager.addContentChangedListener(this);
     strokeManager.setDownloadedModelsChangedListener(this);
     strokeManager.setClearCurrentInkAfterRecognition(true);
     strokeManager.setTriggerRecognitionAfterInput(false);
@@ -76,5 +81,14 @@ public class SolveActivity extends AppCompatActivity implements DownloadedModels
     for (String s : downloadedLanguageTags) {
       Log.i(TAG, "Downloaded models changed: " + s);
     }
+  }
+
+  @Override
+  public void onNewRecognizedText(String text) {
+    TextView questionView = findViewById(R.id.question_view);
+    ColorStateList cls = questionView.getTextColors();
+    questionView.setTextColor(0x00ffffff);
+
+    new Handler(Looper.getMainLooper()).postDelayed(() -> questionView.setTextColor(cls), 500);
   }
 }

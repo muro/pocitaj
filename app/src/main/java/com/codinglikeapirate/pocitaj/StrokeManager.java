@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
@@ -39,8 +40,8 @@ public class StrokeManager {
   private Ink.Stroke.Builder strokeBuilder = Ink.Stroke.builder();
   private Ink.Builder inkBuilder = Ink.builder();
   private boolean stateChangedSinceLastRequest = false;
-  @Nullable
-  private ContentChangedListener contentChangedListener = null;
+  @NonNull
+  private final List<ContentChangedListener> contentChangedListeners = new ArrayList<>();
   @Nullable
   private StatusChangedListener statusChangedListener = null;
   @Nullable
@@ -87,8 +88,8 @@ public class StrokeManager {
       if (clearCurrentInkAfterRecognition) {
         resetCurrentInk();
       }
-      if (contentChangedListener != null) {
-        contentChangedListener.onContentChanged(result.text);
+      for (ContentChangedListener contentChangedListener : contentChangedListeners) {
+        contentChangedListener.onNewRecognizedText(result.text);
       }
     }
   }
@@ -154,8 +155,12 @@ public class StrokeManager {
   }
 
   // Listeners to update the drawing and status.
-  public void setContentChangedListener(@Nullable ContentChangedListener contentChangedListener) {
-    this.contentChangedListener = contentChangedListener;
+  public void addContentChangedListener(@NonNull ContentChangedListener contentChangedListener) {
+    contentChangedListeners.add(contentChangedListener);
+  }
+
+  public void removeContentChangedListener(@NonNull ContentChangedListener contentChangedListener) {
+    contentChangedListeners.remove(contentChangedListener);
   }
 
   public void setStatusChangedListener(@Nullable StatusChangedListener statusChangedListener) {
@@ -165,10 +170,6 @@ public class StrokeManager {
   public void setDownloadedModelsChangedListener(
       @Nullable DownloadedModelsChangedListener downloadedModelsChangedListener) {
     this.downloadedModelsChangedListener = downloadedModelsChangedListener;
-  }
-
-  public List<RecognitionTask.RecognizedInk> getContent() {
-    return content;
   }
 
   public String getStatus() {
@@ -263,20 +264,20 @@ public class StrokeManager {
   public interface ContentChangedListener {
 
     /**
-     * This method is called when the recognized content changes.
+     * This method is called when the strokes are recognized, with the new content as parameter.
      */
-    void onContentChanged(String text);
+    void onNewRecognizedText(String text);
   }
 
   // Recognition-related.
 
   /**
-   * Interface to register to be notified of changes in the status.
+   * Interface to register to be notified of changes in the status - a description string.
    */
   public interface StatusChangedListener {
 
     /**
-     * This method is called when the status changes.
+     * This method is called when the status (= description string) changes.
      */
     void onStatusChanged();
   }

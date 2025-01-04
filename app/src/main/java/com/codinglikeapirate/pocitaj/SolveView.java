@@ -170,7 +170,7 @@ public class SolveView extends View implements ContentChangedListener {
   }
 
   @Override
-  public void onContentChanged(String text) {
+  public void onNewRecognizedText(String text) {
     if (exerciseBook.getLast().solved()) {
       Log.e(TAG, "last was solved");
     }
