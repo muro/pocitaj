@@ -1,0 +1,42 @@
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+  <aapt:attr name="android:drawable">
+    <vector
+        android:name="question"
+        android:width="83dp"
+        android:height="123dp"
+        android:viewportWidth="83"
+        android:viewportHeight="123">
+      <path
+          android:strokeWidth="1"
+          android:pathData="m41.06,25.95c-20.71,0 -37.5,16.34 -37.5,36.5c0,20.16 16.79,36.5 37.5,36.5c20.71,0 37.5,-16.34 37.5,-36.5c0,-20.16 -16.79,-36.5 -37.5,-36.5zM44.48,83.48l-6.98,0l0,-6.52l6.98,0l0,6.52zM44.48,70l0,2.15l-6.98,0l0,-2.65c0,-8.01 9.37,-9.28 9.37,-14.98c0,-2.6 -2.38,-4.58 -5.51,-4.58c-3.24,0 -6.07,2.32 -6.07,2.32l-3.98,-4.81c0,0 3.92,-3.98 10.67,-3.98c6.42,0 12.37,3.87 12.37,10.39c0,9.12 -9.87,10.17 -9.87,16.14l0,0z"
+          android:strokeColor="#000">
+        <aapt:attr name="android:fillColor">
+          <gradient
+              android:centerX="30.81"
+              android:centerY="51.96"
+              android:gradientRadius="78.16"
+              android:tileMode="clamp"
+              android:type="radial">
+            <item android:offset="0" android:color="#FDF5FFD1"/>
+            <item android:offset="0.97" android:color="#FE94FF00"/>
+            <item android:offset="1" android:color="#FF000000"/>
+          </gradient>
+        </aapt:attr>
+      </path>
+    </vector>
+  </aapt:attr>
+  <target android:name="question">
+    <aapt:attr name="android:animation">
+      <set>
+        <objectAnimator
+            android:duration="300"
+            android:interpolator="@android:interpolator/fast_out_slow_in"
+            android:propertyName="alpha"
+            android:valueFrom="1"
+            android:valueTo="0"
+            android:valueType="floatType" />
+      </set>
+    </aapt:attr>
+  </target>
+</animated-vector>

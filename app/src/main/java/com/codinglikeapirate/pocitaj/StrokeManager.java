@@ -89,8 +89,21 @@ public class StrokeManager {
       if (clearCurrentInkAfterRecognition) {
         resetCurrentInk();
       }
+
+      int parsedResult = 0;
+      try {
+        parsedResult = Integer.parseInt(result.text);
+      } catch (NumberFormatException ignored) {
+        for (ContentChangedListener contentChangedListener : contentChangedListeners) {
+          contentChangedListener.onMisparsedRecognizedText(result.text);
+        }
+        return;
+      }
+
+      // must be stored, as onNewRecognizedText could modify this.expectedResult
+      boolean correct = parsedResult == expectedResult;
       for (ContentChangedListener contentChangedListener : contentChangedListeners) {
-        contentChangedListener.onNewRecognizedText(result.text);
+        contentChangedListener.onNewRecognizedText(result.text, correct);
       }
     }
   }
@@ -267,7 +280,10 @@ public class StrokeManager {
     /**
      * This method is called when the strokes are recognized, with the new content as parameter.
      */
-    void onNewRecognizedText(String text);
+    void onNewRecognizedText(String text, boolean correct);
+
+    // Called when the text can't be parsed as a number
+    void onMisparsedRecognizedText(String text);
   }
 
   // Recognition-related.

@@ -2,33 +2,53 @@
     xmlns:aapt="http://schemas.android.com/aapt">
     <aapt:attr name="android:drawable">
         <vector
-            android:name="vector"
-            android:width="150dp"
-            android:height="90dp"
-            android:viewportWidth="150"
-            android:viewportHeight="90">
+            android:name="heart"
+            android:width="105dp"
+            android:height="125dp"
+            android:viewportWidth="105"
+            android:viewportHeight="125">
             <path
-                android:name="path"
-                android:fillColor="#ff0000"
-                android:pathData="M 75 15 C 32.5 -10 32.5 50 75 75 C 117.5 50 117.5 -10 75 15 Z"
-                android:strokeWidth="1" />
+                android:strokeWidth="1"
+                android:pathData="m53.58,24.76c3.71,-35.96 107.09,-12.16 0,89.78c-110.5,-99.47 -3.71,-126.61 0,-89.78z"
+                android:strokeColor="#000">
+                <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:centerX="54.36"
+                        android:centerY="67.21"
+                        android:gradientRadius="52.77"
+                        android:tileMode="clamp"
+                        android:type="radial">
+                        <item android:offset="0" android:color="#FFEF0909"/>
+                        <item android:offset="1" android:color="#FEFF4949"/>
+                    </gradient>
+                </aapt:attr>
+            </path>
+            <path
+                android:strokeWidth="1"
+                android:pathData="m94.09,37.5c0.66,0.63 -1.89,-5.76 -3.9,-10.61c-2,-4.85 -7.69,-6.79 -3.35,-6.96c4.34,-0.16 6.27,2.16 7.49,7.48c1.22,5.32 -0.9,9.45 -0.25,10.08z"
+                android:strokeColor="#000">
+                <aapt:attr name="android:fillColor">
+                    <gradient
+                        android:startX="85.25"
+                        android:startY="19.92"
+                        android:endX="94.72"
+                        android:endY="19.92"
+                        android:tileMode="clamp"
+                        android:type="linear">
+                        <item android:offset="0" android:color="#FEFFE2E2"/>
+                        <item android:offset="0.98" android:color="#FDFFD3D3"/>
+                    </gradient>
+                </aapt:attr>
+            </path>
         </vector>
     </aapt:attr>
-    <target android:name="path">
+    <target android:name="heart">
         <aapt:attr name="android:animation">
             <set>
                 <objectAnimator
-                    android:duration="70"
-                    android:interpolator="@android:interpolator/fast_out_slow_in"
-                    android:propertyName="fillColor"
-                    android:startOffset="230"
-                    android:valueFrom="#ff0000"
-                    android:valueTo="#ffffff"
-                    android:valueType="colorType" />
-                <objectAnimator
                     android:duration="300"
                     android:interpolator="@android:interpolator/fast_out_slow_in"
-                    android:propertyName="fillAlpha"
+                    android:propertyName="alpha"
                     android:valueFrom="1"
                     android:valueTo="0"
                     android:valueType="floatType" />

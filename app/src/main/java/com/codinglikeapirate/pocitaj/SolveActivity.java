@@ -86,9 +86,28 @@ public class SolveActivity extends AppCompatActivity implements DownloadedModels
   }
 
   @Override
-  public void onNewRecognizedText(String text) {
+  public void onNewRecognizedText(String text, boolean correct) {
     ImageView popupView = findViewById(R.id.popup_view);
-    popupView.setImageResource(R.drawable.teardrop);
+    if (correct) {
+      popupView.setImageResource(R.drawable.heart_animation);
+    } else {
+      popupView.setImageResource(R.drawable.teardrop);
+    }
+    popupView.setVisibility(View.VISIBLE);
+    Drawable d = popupView.getDrawable();
+    AnimatedVectorDrawable animation;
+    if (d instanceof AnimatedVectorDrawable) {
+      animation = (AnimatedVectorDrawable) d;
+      animation.start();
+    }
+
+    new Handler(Looper.getMainLooper()).postDelayed(() -> popupView.setVisibility(View.GONE), 500);
+  }
+
+  @Override
+  public void onMisparsedRecognizedText(String text) {
+    ImageView popupView = findViewById(R.id.popup_view);
+    popupView.setImageResource(R.drawable.question);
     popupView.setVisibility(View.VISIBLE);
     Drawable d = popupView.getDrawable();
     AnimatedVectorDrawable animation;

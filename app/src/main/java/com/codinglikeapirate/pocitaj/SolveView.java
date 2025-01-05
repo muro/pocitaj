@@ -170,7 +170,7 @@ public class SolveView extends View implements ContentChangedListener {
   }
 
   @Override
-  public void onNewRecognizedText(String text) {
+  public void onNewRecognizedText(String text, boolean correct) {
     if (exerciseBook.getLast().solved()) {
       Log.e(TAG, "last was solved");
     }
@@ -180,7 +180,10 @@ public class SolveView extends View implements ContentChangedListener {
     } catch (NumberFormatException ignored) {
     }
 
-    boolean correct = exerciseBook.getLast().solve(result);
+    boolean correctlySolved = exerciseBook.getLast().solve(result);
+    if (correctlySolved != correct) {
+      Log.e(TAG, "Passed-through solution didn't match expected result");
+    }
     lastResult = exerciseBook.getLast().equation();
     lastResultPaint.setColor(correct ? 0xFF33AA33 : 0xFFFF8888);
     Log.i(TAG, "Stats: " + exerciseBook.getStats());
@@ -190,6 +193,11 @@ public class SolveView extends View implements ContentChangedListener {
       exerciseBook.generate();
     }
     strokeManager.setExpectedResult(exerciseBook.getLast().getExpectedResult());
+    redrawContent();
+  }
+
+  @Override
+  public void onMisparsedRecognizedText(String text) {
     redrawContent();
   }
 

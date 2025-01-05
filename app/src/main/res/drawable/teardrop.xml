@@ -3,19 +3,19 @@
     <aapt:attr name="android:drawable">
         <vector
             android:name="teardrop"
-            android:width="80dp"
-            android:height="120dp"
-            android:viewportWidth="200"
-            android:viewportHeight="300">
+            android:width="105dp"
+            android:height="125dp"
+            android:viewportWidth="105"
+            android:viewportHeight="125">
             <path
                 android:strokeWidth="1"
-                android:pathData="m41.14,2.01c0.2,1.09 38.86,60.13 38.86,81c-0,20.87 -17.23,37.77 -38.5,37.77c-21.27,-0 -38.5,-16.9 -38.5,-37.77c-0,-20.87 37.93,-82.08 38.14,-81z"
+                android:pathData="m52.14,2.01c0.2,1.09 38.86,60.13 38.86,81c-0,20.87 -17.23,37.77 -38.5,37.77c-21.27,-0 -38.5,-16.9 -38.5,-37.77c-0,-20.87 37.93,-82.08 38.14,-81z"
                 android:strokeColor="#000">
                 <aapt:attr name="android:fillColor">
                     <gradient
-                        android:startX="3"
+                        android:startX="14"
                         android:startY="2"
-                        android:endX="80"
+                        android:endX="91"
                         android:endY="2"
                         android:type="linear">
                         <item android:offset="0" android:color="#FE6FB7E8"/>
@@ -25,11 +25,11 @@
             </path>
             <path
                 android:strokeWidth="1"
-                android:pathData="m64.84,66.21c-1.92,0.76 -4.05,-7.82 -5.49,-10.98c-1.43,-3.16 -4.42,-14.42 -3.89,-12.61c0.53,1.81 4.44,3.52 8.17,10.41c3.73,6.89 3.13,12.41 1.21,13.17z"
+                android:pathData="m69.84,66.21c-1.92,0.76 -4.05,-7.82 -5.49,-10.98c-1.43,-3.16 -4.42,-14.42 -3.89,-12.61c0.53,1.81 4.44,3.52 8.17,10.41c3.73,6.89 3.13,12.41 1.21,13.17z"
                 android:strokeColor="#000">
                 <aapt:attr name="android:fillColor">
                     <gradient
-                        android:centerX="59.29"
+                        android:centerX="64.29"
                         android:centerY="56.13"
                         android:gradientRadius="11.92"
                         android:tileMode="clamp"
@@ -40,7 +40,6 @@
                 </aapt:attr>
             </path>
         </vector>
-
     </aapt:attr>
     <target android:name="teardrop">
         <aapt:attr name="android:animation">
