@@ -1,10 +1,12 @@
 package com.codinglikeapirate.pocitaj;
 
-import android.content.res.ColorStateList;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -85,10 +87,16 @@ public class SolveActivity extends AppCompatActivity implements DownloadedModels
 
   @Override
   public void onNewRecognizedText(String text) {
-    TextView questionView = findViewById(R.id.question_view);
-    ColorStateList cls = questionView.getTextColors();
-    questionView.setTextColor(0x00ffffff);
+    ImageView popupView = findViewById(R.id.popup_view);
+    popupView.setImageResource(R.drawable.teardrop);
+    popupView.setVisibility(View.VISIBLE);
+    Drawable d = popupView.getDrawable();
+    AnimatedVectorDrawable animation;
+    if (d instanceof AnimatedVectorDrawable) {
+      animation = (AnimatedVectorDrawable) d;
+      animation.start();
+    }
 
-    new Handler(Looper.getMainLooper()).postDelayed(() -> questionView.setTextColor(cls), 500);
+    new Handler(Looper.getMainLooper()).postDelayed(() -> popupView.setVisibility(View.GONE), 500);
   }
 }

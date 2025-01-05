@@ -50,6 +50,7 @@ public class StrokeManager {
   private boolean clearCurrentInkAfterRecognition = true;
   private String status = "";
   private int expectedResult = -1;
+
   // Handler to handle the UI Timeout.
   // This handler is only used to trigger the UI timeout. Each time a UI interaction happens,
   // the timer is reset by clearing the queue on this handler and sending a new delayed message (in
