@@ -1,5 +1,6 @@
 package com.codinglikeapirate.pocitaj;
 
+import android.content.Intent;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -101,7 +102,11 @@ public class SolveActivity extends AppCompatActivity implements DownloadedModels
       animation.start();
     }
 
-    new Handler(Looper.getMainLooper()).postDelayed(() -> popupView.setVisibility(View.GONE), 500);
+    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+      popupView.setVisibility(View.GONE);
+      Intent intent = new Intent(this, ResultsActivity.class);
+      startActivity(intent);
+    }, 500);
   }
 
   @Override

@@ -26,6 +26,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 allprojects {
@@ -41,6 +44,8 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.tasks)
     implementation(libs.digiink)
+    implementation(libs.constraintlayout)
+    implementation(libs.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

@@ -64,6 +64,7 @@ public class SolveView extends View implements ContentChangedListener {
     currentStroke = new Path();
     canvasPaint = new Paint(Paint.DITHER_FLAG);
 
+    // TODO: remove last result from this view, move to a separate one.
     lastResultPaint = new TextPaint();
     // green
     lastResultPaint.setColor(0xFF116611);
