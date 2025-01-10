@@ -120,9 +120,10 @@ public class SolveActivity extends AppCompatActivity implements DownloadedModels
         corrects[i] = exerciseBook.getHistory().get(i).correct();
         recognized[i] = exerciseBook.getHistory().get(i).solved();
       }
-      bundle.putStringArray("exercises", exercises);
-      bundle.putBooleanArray("corrects", corrects);
-      bundle.putBooleanArray("recognized", recognized);
+      bundle.putStringArray(ResultsActivity.EXERCISES_KEY, exercises);
+      bundle.putBooleanArray(ResultsActivity.CORRECTS_KEY, corrects);
+      bundle.putBooleanArray(ResultsActivity.RECOGNIZED_KEY, recognized);
+
       intent.putExtras(bundle);
 
       startActivity(intent, bundle);
