@@ -26,14 +26,7 @@ public class ResultsActivity extends AppCompatActivity {
     }
   }
 
-  public class ResultDescription {
-    public final String equation;
-    public final ResultStatus status;
-
-    public ResultDescription(String equation, ResultStatus status) {
-      this.equation = equation;
-      this.status = status;
-    }
+  public record ResultDescription(String equation, ResultStatus status) {
   }
 
   private final ArrayList<ResultDescription> results = new ArrayList<>();
@@ -48,11 +41,15 @@ public class ResultsActivity extends AppCompatActivity {
     Intent intent = getIntent();
     Bundle extras = intent.getExtras();
 
+    //noinspection DataFlowIssue
     String[] exercises = extras.getStringArray(EXERCISES_KEY);
+    assert exercises != null;
+
     boolean[] recognized = extras.getBooleanArray(RECOGNIZED_KEY);
     boolean[] corrects = extras.getBooleanArray(CORRECTS_KEY);
     results.clear();
     for (int i = 0; i < exercises.length; i++) {
+      //noinspection DataFlowIssue
       results.add(new ResultDescription(exercises[i], ResultStatus.fromBooleanPair(recognized[i], corrects[i])));
     }
 

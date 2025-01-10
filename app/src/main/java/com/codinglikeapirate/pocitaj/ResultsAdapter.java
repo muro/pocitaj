@@ -40,7 +40,7 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
   @Override
   public void onBindViewHolder(@NonNull ResultsAdapter.ViewHolder holder, int position) {
     ResultsActivity.ResultDescription result = results.get(position);
-    switch (result.status) {
+    switch (result.status()) {
       case CORRECT:
         holder.getTextView().setTextColor(correctColor);
         holder.getStatusView().setImageResource(R.drawable.cat_heart);
@@ -54,12 +54,12 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
         holder.getStatusView().setImageResource(R.drawable.cat_big_eyes);
         break;
     }
-    holder.getTextView().setText(result.equation);
+    holder.getTextView().setText(result.equation());
   }
 
   public static class ViewHolder extends RecyclerView.ViewHolder {
-    TextView textView;
-    ImageView statusView;
+    final TextView textView;
+    final ImageView statusView;
 
     public ViewHolder(@NonNull View itemView) {
       super(itemView);

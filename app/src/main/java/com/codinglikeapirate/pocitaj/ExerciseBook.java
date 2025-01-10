@@ -16,6 +16,7 @@ public class ExerciseBook {
     generate();
   }
 
+  /** @noinspection SameParameterValue*/
   private Addition generate(int bound) {
     return new Addition(random.nextInt(bound), random.nextInt(bound));
   }

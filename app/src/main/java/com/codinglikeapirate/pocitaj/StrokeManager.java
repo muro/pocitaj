@@ -32,7 +32,7 @@ public class StrokeManager {
   private static final int TIMEOUT_TRIGGER = 1;
   @VisibleForTesting
   final ModelManager modelManager = new ModelManager();
-  // Managing the recognition queue.
+  /** @noinspection MismatchedQueryAndUpdateOfCollection*/ // Managing the recognition queue.
   private final List<RecognitionTask.RecognizedInk> content = new ArrayList<>();
   // For handling recognition and model downloading.
   private RecognitionTask recognitionTask = null;
@@ -90,7 +90,7 @@ public class StrokeManager {
         resetCurrentInk();
       }
 
-      int parsedResult = 0;
+      int parsedResult;
       try {
         parsedResult = Integer.parseInt(result.text);
       } catch (NumberFormatException ignored) {
@@ -173,6 +173,7 @@ public class StrokeManager {
     contentChangedListeners.add(contentChangedListener);
   }
 
+  /** @noinspection unused*/
   public void removeContentChangedListener(@NonNull ContentChangedListener contentChangedListener) {
     contentChangedListeners.remove(contentChangedListener);
   }
@@ -212,6 +213,7 @@ public class StrokeManager {
             });
   }
 
+  /** @noinspection UnusedReturnValue*/
   public Task<Void> download() {
     setStatus("Download started.");
     return modelManager
@@ -231,6 +233,7 @@ public class StrokeManager {
 
   // Model downloading / deleting / setting.
 
+  /** @noinspection UnusedReturnValue*/
   public Task<String> recognize() {
 
     if (!stateChangedSinceLastRequest || inkBuilder.isEmpty()) {
@@ -282,7 +285,7 @@ public class StrokeManager {
      */
     void onNewRecognizedText(String text, boolean correct);
 
-    // Called when the text can't be parsed as a number
+    /** @noinspection unused*/ // Called when the text can't be parsed as a number
     void onMisparsedRecognizedText(String text);
   }
 
