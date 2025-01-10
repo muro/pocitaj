@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="20sp"
-        android:text="Results"
+        android:text="@string/results_top_label"
         android:textAlignment="center"
         android:textColor="#0277BD"
         android:textSize="26sp"

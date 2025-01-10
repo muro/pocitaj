@@ -146,7 +146,7 @@
         android:id="@+id/popup_view"
         android:layout_width="160dp"
         android:layout_height="250dp"
-        android:contentDescription="Animation for the result"
+        android:contentDescription="@string/recognition_animation_desc"
         android:src="@drawable/heart_animation"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
