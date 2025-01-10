@@ -1,16 +1,11 @@
 package com.codinglikeapirate.pocitaj;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-public class ExerciseBook implements Parcelable {
+public class ExerciseBook {
 
   public static final int NOT_RECOGNIZED = -1000;
   private static final int BOUND = 10;
@@ -20,22 +15,6 @@ public class ExerciseBook implements Parcelable {
   public ExerciseBook() {
     generate();
   }
-
-  protected ExerciseBook(Parcel in) {
-
-  }
-
-  public static final Creator<ExerciseBook> CREATOR = new Creator<ExerciseBook>() {
-    @Override
-    public ExerciseBook createFromParcel(Parcel in) {
-      return new ExerciseBook(in);
-    }
-
-    @Override
-    public ExerciseBook[] newArray(int size) {
-      return new ExerciseBook[size];
-    }
-  };
 
   private Addition generate(int bound) {
     return new Addition(random.nextInt(bound), random.nextInt(bound));
@@ -66,17 +45,6 @@ public class ExerciseBook implements Parcelable {
 
   public List<Exercise> getHistory() {
     return new ArrayList<>(this.history);
-  }
-
-  @Override
-  public int describeContents() {
-    return 0;
-  }
-
-  @Override
-  public void writeToParcel(@NonNull Parcel dest, int flags) {
-    dest.writeInt(1);
-
   }
 
   public interface Exercise {

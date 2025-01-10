@@ -10,19 +10,21 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+
 public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHolder> {
 
-  private final ExerciseBook exerciseBook;
+  private final ArrayList<ResultsActivity.ResultDescription> results;
   private int correctColor;
   private int incorrectColor;
 
-  ResultsAdapter(ExerciseBook exerciseBook) {
-    this.exerciseBook = exerciseBook;
+  public ResultsAdapter(ArrayList<ResultsActivity.ResultDescription> results) {
+    this.results = results;
   }
 
   @Override
   public int getItemCount() {
-    return exerciseBook.getHistory().size();
+    return results.size();
   }
 
   @NonNull
@@ -37,21 +39,22 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
 
   @Override
   public void onBindViewHolder(@NonNull ResultsAdapter.ViewHolder holder, int position) {
-    ExerciseBook.Exercise exercise = exerciseBook.getHistory().get(position);
-    holder.getTextView().setText(exercise.equation());
-    if (exercise.correct()) {
-      holder.getTextView().setTextColor(correctColor);
-    } else {
-      holder.getTextView().setTextColor(incorrectColor);
+    ResultsActivity.ResultDescription result = results.get(position);
+    switch (result.status) {
+      case CORRECT:
+        holder.getTextView().setTextColor(correctColor);
+        holder.getStatusView().setImageResource(R.drawable.cat_heart);
+        break;
+      case INCORRECT:
+        holder.getTextView().setTextColor(incorrectColor);
+        holder.getStatusView().setImageResource(R.drawable.cat_cry);
+        break;
+      case NOT_RECOGNIZED:
+        holder.getTextView().setTextColor(incorrectColor);
+        holder.getStatusView().setImageResource(R.drawable.cat_big_eyes);
+        break;
     }
-
-    if (!exercise.solved()) {
-      holder.getStatusView().setImageResource(R.drawable.cat_big_eyes);
-    } else if (!exercise.correct()) {
-      holder.getStatusView().setImageResource(R.drawable.cat_cry);
-    } else {
-      holder.getStatusView().setImageResource(R.drawable.cat_heart);
-    }
+    holder.getTextView().setText(result.equation);
   }
 
   public static class ViewHolder extends RecyclerView.ViewHolder {
