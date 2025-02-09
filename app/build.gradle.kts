@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.androidApplication)
+    alias(libs.plugins.kotlinAndroid)
 }
 
 android {
@@ -32,6 +33,9 @@ android {
     lint {
         disable.add("IconMissingDensityFolder")
     }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 }
 
 allprojects {
@@ -49,6 +53,7 @@ dependencies {
     implementation(libs.digiink)
     implementation(libs.constraintlayout)
     implementation(libs.recyclerview)
+    implementation(libs.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
