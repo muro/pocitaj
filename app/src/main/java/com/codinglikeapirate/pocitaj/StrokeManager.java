@@ -85,17 +85,17 @@ public class StrokeManager {
       content.add(result);
 
       //noinspection DataFlowIssue
-      setStatus("Successful recognition: " + result.text);
+      setStatus("Successful recognition: " + result.getText());
       if (clearCurrentInkAfterRecognition) {
         resetCurrentInk();
       }
 
       int parsedResult;
       try {
-        parsedResult = Integer.parseInt(result.text);
+        parsedResult = Integer.parseInt(result.getText());
       } catch (NumberFormatException ignored) {
         for (ContentChangedListener contentChangedListener : contentChangedListeners) {
-          contentChangedListener.onMisparsedRecognizedText(result.text);
+          contentChangedListener.onMisparsedRecognizedText(result.getText());
         }
         return;
       }
@@ -103,7 +103,7 @@ public class StrokeManager {
       // must be stored, as onNewRecognizedText could modify this.expectedResult
       boolean correct = parsedResult == expectedResult;
       for (ContentChangedListener contentChangedListener : contentChangedListeners) {
-        contentChangedListener.onNewRecognizedText(result.text, correct);
+        contentChangedListener.onNewRecognizedText(result.getText(), correct);
       }
     }
   }
