@@ -1,118 +1,130 @@
-package com.codinglikeapirate.pocitaj;
+package com.codinglikeapirate.pocitaj
 
-// Based on code from MlKit examples.
+import android.util.Log
+import com.google.android.gms.tasks.SuccessContinuation
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import com.google.mlkit.common.MlKitException
+import com.google.mlkit.common.model.DownloadConditions
+import com.google.mlkit.common.model.RemoteModelManager
+import com.google.mlkit.vision.digitalink.DigitalInkRecognition
+import com.google.mlkit.vision.digitalink.DigitalInkRecognitionModel
+import com.google.mlkit.vision.digitalink.DigitalInkRecognitionModelIdentifier
+import com.google.mlkit.vision.digitalink.DigitalInkRecognizer
+import com.google.mlkit.vision.digitalink.DigitalInkRecognizerOptions
+import java.util.HashSet
 
-import android.util.Log;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
-import com.google.mlkit.common.MlKitException;
-import com.google.mlkit.common.model.DownloadConditions;
-import com.google.mlkit.common.model.RemoteModelManager;
-import com.google.mlkit.vision.digitalink.DigitalInkRecognition;
-import com.google.mlkit.vision.digitalink.DigitalInkRecognitionModel;
-import com.google.mlkit.vision.digitalink.DigitalInkRecognitionModelIdentifier;
-import com.google.mlkit.vision.digitalink.DigitalInkRecognizer;
-import com.google.mlkit.vision.digitalink.DigitalInkRecognizerOptions;
-import java.util.HashSet;
-import java.util.Set;
+/** Class to manage model downloading, deletion, and selection.  */
+class ModelManager {
+    private var model: DigitalInkRecognitionModel? = null
+    var recognizer: DigitalInkRecognizer? = null
+    val remoteModelManager = RemoteModelManager.getInstance()
 
-/** Class to manage model downloading, deletion, and selection. */
-public class ModelManager {
+    //     public DigitalInkRecognizer getRecognizer() {
+    //        return recognizer;
+    //    }
 
-    private static final String TAG = "ModelManager";
-    private DigitalInkRecognitionModel model;
-    private DigitalInkRecognizer recognizer;
-    final RemoteModelManager remoteModelManager = RemoteModelManager.getInstance();
-
-    public String setModel(String languageTag) {
+    fun setModel(languageTag: String): String {
         // Clear the old model and recognizer.
-        model = null;
-        if (recognizer != null) {
-            recognizer.close();
-        }
-        recognizer = null;
+        model = null
+        recognizer?.close()
+        recognizer = null
 
         // Try to parse the languageTag and get a model from it.
-        DigitalInkRecognitionModelIdentifier modelIdentifier;
-        try {
-            modelIdentifier = DigitalInkRecognitionModelIdentifier.fromLanguageTag(languageTag);
-        } catch (MlKitException e) {
-            Log.e(TAG, "Failed to parse language '" + languageTag + "'");
-            return "";
-        }
-        if (modelIdentifier == null) {
-            return "No model for language: " + languageTag;
-        }
+        val modelIdentifier: DigitalInkRecognitionModelIdentifier?
+        modelIdentifier = try {
+            DigitalInkRecognitionModelIdentifier.fromLanguageTag(languageTag)
+        } catch (e: MlKitException) {
+            Log.e(
+                TAG,
+                "Failed to parse language '$languageTag'"
+            )
+            return ""
+        } ?: return "No model for language: $languageTag"
 
         // Initialize the model and recognizer.
-        model = DigitalInkRecognitionModel.builder(modelIdentifier).build();
-        recognizer =
-                DigitalInkRecognition.getClient(DigitalInkRecognizerOptions.builder(model).setMaxResultCount(100).build());
+        model = DigitalInkRecognitionModel.builder(modelIdentifier).build()
+        recognizer = DigitalInkRecognition.getClient(
+            DigitalInkRecognizerOptions.builder(model!!).build()
+        )
         Log.i(
-                TAG,
-                "Model set for language '"
-                        + languageTag
-                        + "' ('"
-                        + modelIdentifier.getLanguageTag()
-                        + "').");
-        return "Model set for language: " + languageTag;
+            TAG, "Model set for language '$languageTag' ('$modelIdentifier.languageTag')."
+        )
+        return "Model set for language: $languageTag"
     }
 
-    public DigitalInkRecognizer getRecognizer() {
-        return recognizer;
+    fun checkIsModelDownloaded(): Task<Boolean?> {
+        return remoteModelManager.isModelDownloaded(model!!)
     }
 
-    public Task<Boolean> checkIsModelDownloaded() {
-        return remoteModelManager.isModelDownloaded(model);
-    }
-
-    public Task<String> deleteActiveModel() {
+    fun deleteActiveModel(): Task<String?> {
         if (model == null) {
-            Log.i(TAG, "Model not set");
-            return Tasks.forResult("Model not set");
+            Log.i(TAG, "Model not set")
+            return Tasks.forResult("Model not set")
         }
         return checkIsModelDownloaded()
-                .onSuccessTask(
-                        result -> {
-                            if (!result) {
-                                return Tasks.forResult("Model not downloaded yet");
-                            }
-                            return remoteModelManager
-                                    .deleteDownloadedModel(model)
-                                    .onSuccessTask(
-                                            aVoid -> {
-                                                Log.i(TAG, "Model successfully deleted");
-                                                return Tasks.forResult("Model successfully deleted");
-                                            });
-                        })
-                .addOnFailureListener(e -> Log.e(TAG, "Error while model deletion: " + e));
+            .onSuccessTask { result: Boolean? ->
+                if (!result!!) {
+                    return@onSuccessTask Tasks.forResult("Model not downloaded yet")
+                }
+                remoteModelManager
+                    .deleteDownloadedModel(model!!)
+                    .onSuccessTask { _: Void? ->
+                        Log.i(
+                            TAG,
+                            "Model successfully deleted"
+                        )
+                        Tasks.forResult(
+                            "Model successfully deleted"
+                        )
+                    }
+            }
+            .addOnFailureListener { e: Exception ->
+                Log.e(
+                    TAG,
+                    "Error while model deletion: $e"
+                )
+            }
     }
 
-    public Task<Set<String>> getDownloadedModelLanguages() {
-        return remoteModelManager
-                .getDownloadedModels(DigitalInkRecognitionModel.class)
-                .onSuccessTask(
-                        (remoteModels) -> {
-                            Set<String> result = new HashSet<>();
-                            for (DigitalInkRecognitionModel model : remoteModels) {
-                                result.add(model.getModelIdentifier().getLanguageTag());
-                            }
-                            Log.i(TAG, "Downloaded models for languages:" + result);
-                            return Tasks.forResult(result);
-                        });
+    val downloadedModelLanguages: Task<Set<String>>
+        get() = remoteModelManager
+            .getDownloadedModels(DigitalInkRecognitionModel::class.java)
+            .onSuccessTask(
+                SuccessContinuation { remoteModels: Set<DigitalInkRecognitionModel>? ->
+                    val result: MutableSet<String> = HashSet()
+                    for (model in remoteModels!!) {
+                        result.add(model.modelIdentifier.languageTag)
+                    }
+                    Log.i(
+                        TAG,
+                        "Downloaded models for languages:$result"
+                    )
+                    Tasks.forResult<Set<String>>(result.toSet())
+                }
+            )
+
+    fun download(): Task<String?> {
+        return if (model == null) {
+            Tasks.forResult("Model not selected.")
+        } else remoteModelManager
+            .download(model!!, DownloadConditions.Builder().build())
+            .onSuccessTask { _: Void? ->
+                Log.i(
+                    TAG,
+                    "Model download succeeded."
+                )
+                Tasks.forResult("Downloaded model successfully")
+            }
+            .addOnFailureListener { e: Exception ->
+                Log.e(
+                    TAG,
+                    "Error while downloading the model: $e"
+                )
+            }
     }
 
-    public Task<String> download() {
-        if (model == null) {
-            return Tasks.forResult("Model not selected.");
-        }
-        return remoteModelManager
-                .download(model, new DownloadConditions.Builder().build())
-                .onSuccessTask(
-                        aVoid -> {
-                            Log.i(TAG, "Model download succeeded.");
-                            return Tasks.forResult("Downloaded model successfully");
-                        })
-                .addOnFailureListener(e -> Log.e(TAG, "Error while downloading the model: " + e));
+    companion object {
+        private const val TAG = "ModelManager"
     }
 }
