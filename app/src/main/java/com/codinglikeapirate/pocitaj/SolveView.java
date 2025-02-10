@@ -207,7 +207,7 @@ public class SolveView extends View implements ContentChangedListener {
   }
 
   private void updateProgressIcons() {
-    List<ExerciseBook.Exercise> history = exerciseBook.getHistory();
+    List<ExerciseBook.Exercise> history = exerciseBook.getHistoryList();
     for (int i = 0; i < progressIcons.size(); i++) {
       if (history.size() <= i) {
         progressIcons.get(i).setImageResource(R.drawable.cat_sleep);

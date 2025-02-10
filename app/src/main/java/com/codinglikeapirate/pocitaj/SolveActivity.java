@@ -105,20 +105,20 @@ public class SolveActivity extends AppCompatActivity implements DownloadedModels
     new Handler(Looper.getMainLooper()).postDelayed(() -> {
       popupView.setVisibility(View.GONE);
 
-      if (exerciseBook.getHistory().size() < 5)
+      if (exerciseBook.getHistoryList().size() < 5)
         return;
 
       Intent intent = new Intent(this, ResultsActivity.class);
       Bundle bundle = new Bundle();
 
-      int exerciseCount = exerciseBook.getHistory().size();
+      int exerciseCount = exerciseBook.getHistoryList().size();
       String[] exercises = new String[exerciseCount];
       boolean[] corrects = new boolean[exerciseCount];
       boolean[] recognized = new boolean[exerciseCount];
       for (int i = 0; i < exerciseCount; i++) {
-        exercises[i] = exerciseBook.getHistory().get(i).equation();
-        corrects[i] = exerciseBook.getHistory().get(i).correct();
-        recognized[i] = exerciseBook.getHistory().get(i).solved();
+        exercises[i] = exerciseBook.getHistoryList().get(i).equation();
+        corrects[i] = exerciseBook.getHistoryList().get(i).correct();
+        recognized[i] = exerciseBook.getHistoryList().get(i).solved();
       }
       bundle.putStringArray(ResultsActivity.EXERCISES_KEY, exercises);
       bundle.putBooleanArray(ResultsActivity.CORRECTS_KEY, corrects);

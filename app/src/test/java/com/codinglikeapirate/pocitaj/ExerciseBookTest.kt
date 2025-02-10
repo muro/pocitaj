@@ -6,6 +6,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+
 class ExerciseBookTest {
 
     @Test
@@ -46,6 +47,7 @@ class ExerciseBookTest {
     @Test
     fun exerciseBook_generatesQuestionAtStart() {
         val exerciseBook = ExerciseBook()
+        //val exerciseBook = ExerciseBook()
         assertNotNull(exerciseBook.last)
     }
 

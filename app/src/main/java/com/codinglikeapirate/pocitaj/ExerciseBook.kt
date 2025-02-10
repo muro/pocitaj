@@ -1,115 +1,110 @@
-package com.codinglikeapirate.pocitaj;
+package com.codinglikeapirate.pocitaj
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
+import java.util.Locale
+import java.util.Random
 
-public class ExerciseBook {
+class ExerciseBook {
 
-  public static final int NOT_RECOGNIZED = -1000;
-  private static final int BOUND = 10;
-  private final Random random = new Random(); //1234);
-  private final List<Addition> history = new ArrayList<>();
-
-  public ExerciseBook() {
-    generate();
-  }
-
-  /** @noinspection SameParameterValue*/
-  private Addition generate(int bound) {
-    return new Addition(random.nextInt(bound), random.nextInt(bound));
-  }
-
-  public void generate() {
-    history.add(generate(BOUND));
-  }
-
-  public Addition getLast() {
-    return history.get(history.size() - 1);
-  }
-
-  public String getStats() {
-    int solved = 0;
-    int correct = 0;
-    for (Addition a : history) {
-      if (a.solved()) {
-        solved++;
-      }
-      if (a.correct()) {
-        correct++;
-      }
-    }
-    float percent = solved != 0 ? 100f * correct / (float) solved : 0f;
-    return String.format(Locale.ENGLISH, "%d / %d (%.0f%%)", correct, solved, percent);
-  }
-
-  public List<Exercise> getHistory() {
-    return new ArrayList<>(this.history);
-  }
-
-  public interface Exercise {
-    // Returns the Exercise question as a string
-    String question();
-
-    // Marks the Exercise as solved and returns true if the solution is correct.
-    // If the proposed solution is NOT_RECOGNIZED, doesn't set it as solved.
-    boolean solve(int solution);
-
-    // Returns true, if the Exercise has been solved.
-    boolean solved();
-
-    // Returns true if the Exercise has been correctly solved.
-    boolean correct();
-
-    // Returns the full equation as a string.
-    String equation();
-  }
-
-  public static class Addition implements Exercise {
-    private final int a, b;
-    private int solution;
-    private boolean solved = false;
-
-    Addition(int a, int b) {
-      this.a = a;
-      this.b = b;
+    companion object {
+        const val NOT_RECOGNIZED = -1000
+        private const val BOUND = 10
     }
 
-    public String question() {
-      return String.format(Locale.ENGLISH, "%d + %d", a, b);
+    private val random = Random() //1234)
+    private val history = mutableListOf<Addition>()
+
+    init {
+        generate()
     }
 
-    public boolean solve(int solution) {
-      this.solution = solution;
-      if (solution == NOT_RECOGNIZED) {
-        return false;
-      }
-      // only set solved, if it's not the default:
-      this.solved = true;
-      return correct();
+    private fun generate(bound: Int = BOUND): Addition {
+        return Addition(random.nextInt(bound), random.nextInt(bound))
     }
 
-    public boolean solved() {
-      return solved;
+    fun generate() {
+        history.add(generate(BOUND))
     }
 
-    public boolean correct() {
-      return solved && a + b == solution;
-    }
+    val last: Addition
+        get() = history.last()
 
-    public int getExpectedResult() { return a + b; }
-
-    public String equation() {
-      if (correct()) {
-        return String.format(Locale.ENGLISH, "%d + %d = %d", a, b, solution);
-      } else {
-        if (solution == NOT_RECOGNIZED) {
-          return String.format(Locale.ENGLISH, "%d + %d ≠ ?", a, b);
+    val stats: String
+        get() {
+            var solved = 0
+            var correct = 0
+            for (a in history) {
+                if (a.solved()) {
+                    solved++
+                }
+                if (a.correct()) {
+                    correct++
+                }
+            }
+            val percent = if (solved != 0) 100f * correct / solved.toFloat() else 0f
+            return String.format(Locale.ENGLISH, "%d / %d (%.0f%%)", correct, solved, percent)
         }
-        return String.format(Locale.ENGLISH, "%d + %d ≠ %d", a, b, solution);
-      }
 
+    val historyList: List<Exercise>
+        get() = history.toList()
+
+    interface Exercise {
+        // Returns the Exercise question as a string
+        fun question(): String
+
+        // Marks the Exercise as solved and returns true if the solution is correct.
+        // If the proposed solution is NOT_RECOGNIZED, doesn't set it as solved.
+        fun solve(solution: Int): Boolean
+
+        // Returns true, if the Exercise has been solved.
+        fun solved(): Boolean
+
+        // Returns true if the Exercise has been correctly solved.
+        fun correct(): Boolean
+
+        // Returns the full equation as a string.
+        fun equation(): String
     }
-  }
+
+    class Addition(private val a: Int, private val b: Int) : Exercise {
+        private var solution: Int = 0
+        private var solved: Boolean = false
+
+        override fun question(): String {
+            return String.format(Locale.ENGLISH, "%d + %d", a, b)
+        }
+
+        override fun solve(solution: Int): Boolean {
+            this.solution = solution
+            if (solution == NOT_RECOGNIZED) {
+                return false
+            }
+            // only set solved, if it's not the default:
+            this.solved = true
+            return correct()
+        }
+
+        override fun solved(): Boolean {
+            return solved
+        }
+
+        override fun correct(): Boolean {
+            return solved && a + b == solution
+        }
+
+        fun getExpectedResult(): Int {
+            return a + b
+        }
+
+        override fun equation(): String {
+            return if (correct()) {
+                String.format(Locale.ENGLISH, "%d + %d = %d", a, b, solution)
+            } else {
+                if (solution == NOT_RECOGNIZED) {
+                    String.format(Locale.ENGLISH, "%d + %d ≠ ?", a, b)
+                } else {
+                    String.format(Locale.ENGLISH, "%d + %d ≠ %d", a, b, solution)
+                }
+            }
+        }
+    }
 }
