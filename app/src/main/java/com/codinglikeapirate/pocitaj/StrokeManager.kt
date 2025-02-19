@@ -1,6 +1,7 @@
 package com.codinglikeapirate.pocitaj
 
 import android.os.Handler
+import android.os.Looper
 import android.os.Message
 import androidx.annotation.VisibleForTesting
 import android.util.Log
@@ -73,15 +74,16 @@ class StrokeManager {
     // This handler is only used to trigger the UI timeout. Each time a UI interaction happens,
     // the timer is reset by clearing the queue on this handler and sending a new delayed message (in
     // addNewTouchEvent).
-    private val uiHandler = Handler(Handler.Callback { msg: Message ->
-            if (msg.what == TIMEOUT_TRIGGER) {
+    private val uiHandler = Handler(Looper.getMainLooper()) { msg: Message ->
+        when (msg.what) {
+            TIMEOUT_TRIGGER -> {
                 Log.i(TAG, "Handling timeout trigger.")
                 commitResult()
-                return@Callback true
+                true
             }
-            false
+            else -> false
         }
-    )
+    }
 
     private fun commitResult() {
         recognitionTask!!.result()?.let { result: RecognizedInk ->
