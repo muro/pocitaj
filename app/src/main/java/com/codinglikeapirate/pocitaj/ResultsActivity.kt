@@ -1,62 +1,57 @@
-package com.codinglikeapirate.pocitaj;
+package com.codinglikeapirate.pocitaj
 
-import android.content.Intent;
-import android.os.Bundle;
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+class ResultsActivity : AppCompatActivity() {
 
-import java.util.ArrayList;
-
-public class ResultsActivity extends AppCompatActivity {
-
-  public final static String EXERCISES_KEY = "exercises";
-  public final static String RECOGNIZED_KEY = "recognized";
-  public final static String CORRECTS_KEY = "corrects";
-
-  public enum ResultStatus {
-    CORRECT, INCORRECT, NOT_RECOGNIZED;
-
-    static public ResultStatus fromBooleanPair(boolean recognized, boolean correct) {
-      if (!recognized) {
-        return NOT_RECOGNIZED;
-      }
-      return correct ? ResultStatus.CORRECT : ResultStatus.INCORRECT;
-    }
-  }
-
-  public record ResultDescription(String equation, ResultStatus status) {
-  }
-
-  private final ArrayList<ResultDescription> results = new ArrayList<>();
-
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    // EdgeToEdge.enable(this);
-    setContentView(R.layout.activity_results);
-
-    Intent intent = getIntent();
-    Bundle extras = intent.getExtras();
-
-    //noinspection DataFlowIssue
-    String[] exercises = extras.getStringArray(EXERCISES_KEY);
-    assert exercises != null;
-
-    boolean[] recognized = extras.getBooleanArray(RECOGNIZED_KEY);
-    boolean[] corrects = extras.getBooleanArray(CORRECTS_KEY);
-    results.clear();
-    for (int i = 0; i < exercises.length; i++) {
-      //noinspection DataFlowIssue
-      results.add(new ResultDescription(exercises[i], ResultStatus.fromBooleanPair(recognized[i], corrects[i])));
+    companion object {
+        const val EXERCISES_KEY = "exercises"
+        const val RECOGNIZED_KEY = "recognized"
+        const val CORRECTS_KEY = "corrects"
     }
 
-    ResultsAdapter adapter = new ResultsAdapter(results);
+    enum class ResultStatus {
+        CORRECT, INCORRECT, NOT_RECOGNIZED;
 
-    RecyclerView listView = findViewById(R.id.recycler_view);
-    listView.setAdapter(adapter);
-    listView.setLayoutManager(new LinearLayoutManager(this));
-  }
+        companion object {
+            fun fromBooleanPair(recognized: Boolean, correct: Boolean): ResultStatus {
+                return if (!recognized) {
+                    NOT_RECOGNIZED
+                } else {
+                    if (correct) CORRECT else INCORRECT
+                }
+            }
+        }
+    }
+
+    data class ResultDescription(val equation: String, val status: ResultStatus)
+
+    private val results = ArrayList<ResultDescription>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // EdgeToEdge.enable(this)
+        setContentView(R.layout.activity_results)
+
+        val intent = intent
+        val extras = intent.extras
+
+        val exercises = extras?.getStringArray(EXERCISES_KEY) ?: emptyArray()
+        val recognized = extras?.getBooleanArray(RECOGNIZED_KEY) ?: booleanArrayOf()
+        val corrects = extras?.getBooleanArray(CORRECTS_KEY) ?: booleanArrayOf()
+
+        results.clear()
+        for (i in exercises.indices) {
+            results.add(ResultDescription(exercises[i], ResultStatus.fromBooleanPair(recognized.getOrElse(i) { false }, corrects.getOrElse(i) { false })))
+        }
+
+        val adapter = ResultsAdapter(results)
+
+        val listView = findViewById<RecyclerView>(R.id.recycler_view)
+        listView.adapter = adapter
+        listView.layoutManager = LinearLayoutManager(this)
+    }
 }
