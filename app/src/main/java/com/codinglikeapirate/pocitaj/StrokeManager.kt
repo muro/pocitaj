@@ -1,315 +1,205 @@
-package com.codinglikeapirate.pocitaj;
+package com.codinglikeapirate.pocitaj
 
-// Based on code from MlKit examples.
-
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
-import android.view.MotionEvent;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
-import com.google.mlkit.vision.digitalink.Ink;
-import com.google.mlkit.vision.digitalink.Ink.Point;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
+import android.util.Log
+import android.view.MotionEvent
+import androidx.annotation.VisibleForTesting
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import com.google.mlkit.vision.digitalink.Ink
+import com.google.mlkit.vision.digitalink.Ink.Point
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Manages the recognition logic and the content that has been added to the current page.
  */
-public class StrokeManager {
+class StrokeManager {
 
-  @VisibleForTesting
-  static final long CONVERSION_TIMEOUT_MS = 1000;
-  private static final String TAG = "StrokeManager";
-  // This is a constant that is used as a message identifier to trigger the timeout.
-  private static final int TIMEOUT_TRIGGER = 1;
-  @VisibleForTesting
-  final ModelManager modelManager = new ModelManager();
-  /** @noinspection MismatchedQueryAndUpdateOfCollection*/ // Managing the recognition queue.
-  private final List<RecognitionTask.RecognizedInk> content = new ArrayList<>();
-  // For handling recognition and model downloading.
-  private RecognitionTask recognitionTask = null;
-  // Managing ink currently drawn.
-  private Ink.Stroke.Builder strokeBuilder = Ink.Stroke.builder();
-  private Ink.Builder inkBuilder = Ink.builder();
-  private boolean stateChangedSinceLastRequest = false;
-  @NonNull
-  private final List<ContentChangedListener> contentChangedListeners = new ArrayList<>();
-  @Nullable
-  private StatusChangedListener statusChangedListener = null;
-  @Nullable
-  private DownloadedModelsChangedListener downloadedModelsChangedListener = null;
-  private boolean triggerRecognitionAfterInput = true;
-  private boolean clearCurrentInkAfterRecognition = true;
-  private String status = "";
-  private int expectedResult = -1;
+    @VisibleForTesting
+    internal val modelManager = ModelManager()
 
-  // Handler to handle the UI Timeout.
-  // This handler is only used to trigger the UI timeout. Each time a UI interaction happens,
-  // the timer is reset by clearing the queue on this handler and sending a new delayed message (in
-  // addNewTouchEvent).
-  private final Handler uiHandler =
-      new Handler(
-          Looper.getMainLooper(),
-          msg -> {
-            if (msg.what == TIMEOUT_TRIGGER) {
-              Log.i(TAG, "Handling timeout trigger.");
-              commitResult();
-              return true;
+    private val content = ArrayList<RecognitionTask.RecognizedInk>()
+    private var recognitionTask: RecognitionTask? = null
+    private var strokeBuilder = Ink.Stroke.builder()
+    private var inkBuilder = Ink.builder()
+    private var stateChangedSinceLastRequest = false
+    private val contentChangedListeners: MutableList<ContentChangedListener> = CopyOnWriteArrayList()
+    private var statusChangedListener: StatusChangedListener? = null
+    private var downloadedModelsChangedListener: DownloadedModelsChangedListener? = null
+    var isTriggerRecognitionAfterInput = true
+    var isClearCurrentInkAfterRecognition = true
+    private var status = ""
+    var expectedResult = -1
+
+    private val uiHandler = Handler(Looper.getMainLooper()) { msg: Message ->
+        if (msg.what == TIMEOUT_TRIGGER) {
+            Log.i(TAG, "Handling timeout trigger.")
+            commitResult()
+            return@Handler true
+        }
+        false
+    }
+
+    private fun commitResult() {
+        if (recognitionTask?.done() == true && recognitionTask?.result() != null) {
+            val result = recognitionTask!!.result()!!
+            content.add(result)
+
+            setStatus("Successful recognition: ${result.text}")
+            if (isClearCurrentInkAfterRecognition) {
+                resetCurrentInk()
             }
-            // In the current use this statement is never reached because we only ever send
-            // TIMEOUT_TRIGGER messages to this handler.
-            // This line is necessary because otherwise Java's static analysis doesn't allow for
-            // compiling. Returning false indicates that a message wasn't handled.
-            return false;
-          });
 
-  public void setTriggerRecognitionAfterInput(boolean shouldTrigger) {
-    triggerRecognitionAfterInput = shouldTrigger;
-  }
+            val parsedResult = try {
+                result.text?.toInt()
+            } catch (ignored: NumberFormatException) {
+                contentChangedListeners.forEach { it.onMisparsedRecognizedText(result.text) }
+                return
+            }
 
-  public void setClearCurrentInkAfterRecognition(boolean shouldClear) {
-    clearCurrentInkAfterRecognition = shouldClear;
-  }
-
-  private void commitResult() {
-    if (recognitionTask.done() && recognitionTask.result() != null) {
-      RecognitionTask.RecognizedInk result = recognitionTask.result();
-      content.add(result);
-
-      //noinspection DataFlowIssue
-      setStatus("Successful recognition: " + result.getText());
-      if (clearCurrentInkAfterRecognition) {
-        resetCurrentInk();
-      }
-
-      int parsedResult;
-      try {
-        parsedResult = Integer.parseInt(result.getText());
-      } catch (NumberFormatException ignored) {
-        for (ContentChangedListener contentChangedListener : contentChangedListeners) {
-          contentChangedListener.onMisparsedRecognizedText(result.getText());
+            val correct = parsedResult == expectedResult
+            contentChangedListeners.forEach { it.onNewRecognizedText(result.text, correct) }
         }
-        return;
-      }
-
-      // must be stored, as onNewRecognizedText could modify this.expectedResult
-      boolean correct = parsedResult == expectedResult;
-      for (ContentChangedListener contentChangedListener : contentChangedListeners) {
-        contentChangedListener.onNewRecognizedText(result.getText(), correct);
-      }
     }
-  }
 
-  public void reset() {
-    Log.i(TAG, "reset");
-    resetCurrentInk();
-    content.clear();
-    if (recognitionTask != null && !recognitionTask.done()) {
-      recognitionTask.cancel();
-    }
-    setStatus("");
-  }
-
-  private void resetCurrentInk() {
-    inkBuilder = Ink.builder();
-    strokeBuilder = Ink.Stroke.builder();
-    stateChangedSinceLastRequest = false;
-  }
-
-  public Ink getCurrentInk() {
-    return inkBuilder.build();
-  }
-
-  /**
-   * This method is called when a new touch event happens on the drawing client and notifies the
-   * StrokeManager of new content being added.
-   *
-   * <p>This method takes care of triggering the UI timeout and scheduling recognitions on the
-   * background thread.
-   *
-   * @return whether the touch event was handled.
-   */
-  public boolean addNewTouchEvent(MotionEvent event) {
-    int action = event.getActionMasked();
-    float x = event.getX();
-    float y = event.getY();
-    long t = System.currentTimeMillis();
-
-    // A new event happened -> clear all pending timeout messages.
-    uiHandler.removeMessages(TIMEOUT_TRIGGER);
-
-    switch (action) {
-      case MotionEvent.ACTION_DOWN:
-      case MotionEvent.ACTION_MOVE:
-        strokeBuilder.addPoint(Point.create(x, y, t));
-        break;
-      case MotionEvent.ACTION_UP:
-        strokeBuilder.addPoint(Point.create(x, y, t));
-        inkBuilder.addStroke(strokeBuilder.build());
-        strokeBuilder = Ink.Stroke.builder();
-        stateChangedSinceLastRequest = true;
-        if (triggerRecognitionAfterInput) {
-          recognize();
+    fun reset() {
+        Log.i(TAG, "reset")
+        resetCurrentInk()
+        content.clear()
+        if (recognitionTask?.done() == false) {
+            recognitionTask?.cancel()
         }
-        break;
-      default:
-        // Indicate touch event wasn't handled.
-        return false;
+        setStatus("")
     }
 
-    return true;
-  }
-
-  // Listeners to update the drawing and status.
-  public void addContentChangedListener(@NonNull ContentChangedListener contentChangedListener) {
-    contentChangedListeners.add(contentChangedListener);
-  }
-
-  /** @noinspection unused*/
-  public void removeContentChangedListener(@NonNull ContentChangedListener contentChangedListener) {
-    contentChangedListeners.remove(contentChangedListener);
-  }
-
-  public void setStatusChangedListener(@Nullable StatusChangedListener statusChangedListener) {
-    this.statusChangedListener = statusChangedListener;
-  }
-
-  public void setDownloadedModelsChangedListener(
-      @Nullable DownloadedModelsChangedListener downloadedModelsChangedListener) {
-    this.downloadedModelsChangedListener = downloadedModelsChangedListener;
-  }
-
-  public String getStatus() {
-    return status;
-  }
-
-  private void setStatus(String newStatus) {
-    status = newStatus;
-    if (statusChangedListener != null) {
-      statusChangedListener.onStatusChanged();
-    }
-  }
-
-  public void setActiveModel(String languageTag) {
-    setStatus(modelManager.setModel(languageTag));
-  }
-
-  public Task<Void> deleteActiveModel() {
-    return modelManager
-        .deleteActiveModel()
-        .addOnSuccessListener(unused -> refreshDownloadedModelsStatus())
-        .onSuccessTask(
-            status -> {
-              setStatus(status);
-              return Tasks.forResult(null);
-            });
-  }
-
-  /** @noinspection UnusedReturnValue*/
-  public Task<Void> download() {
-    setStatus("Download started.");
-    return modelManager
-        .download()
-        .addOnSuccessListener(unused -> refreshDownloadedModelsStatus())
-        .onSuccessTask(
-            status -> {
-              setStatus(status);
-              return Tasks.forResult(null);
-            });
-  }
-
-  public void setExpectedResult(int expectedResult) {
-    Log.i(TAG, "StrokeManager.setExpectedResult: " + expectedResult);
-    this.expectedResult = expectedResult;
-  }
-
-  // Model downloading / deleting / setting.
-
-  /** @noinspection UnusedReturnValue*/
-  public Task<String> recognize() {
-
-    if (!stateChangedSinceLastRequest || inkBuilder.isEmpty()) {
-      setStatus("No recognition, ink unchanged or empty");
-      return Tasks.forResult(null);
-    }
-    if (modelManager.getRecognizer() == null) {
-      setStatus("Recognizer not set");
-      return Tasks.forResult(null);
+    private fun resetCurrentInk() {
+        inkBuilder = Ink.builder()
+        strokeBuilder = Ink.Stroke.builder()
+        stateChangedSinceLastRequest = false
     }
 
-    return modelManager
-        .checkIsModelDownloaded()
-        .onSuccessTask(
-            result -> {
-              if (!result) {
-                setStatus("Model not downloaded yet");
-                return Tasks.forResult(null);
-              }
+    fun getCurrentInk(): Ink = inkBuilder.build()
 
-              stateChangedSinceLastRequest = false;
-              recognitionTask =
-                  new RecognitionTask(modelManager.getRecognizer(), inkBuilder.build(),
-                      expectedResult);
-              uiHandler.sendMessageDelayed(
-                  uiHandler.obtainMessage(TIMEOUT_TRIGGER), CONVERSION_TIMEOUT_MS);
-              return recognitionTask.run();
-            });
-  }
+    fun addNewTouchEvent(event: MotionEvent): Boolean {
+        val action = event.actionMasked
+        val x = event.x
+        val y = event.y
+        val t = System.currentTimeMillis()
 
-  public void refreshDownloadedModelsStatus() {
-    modelManager
-        .getDownloadedModelLanguages()
-        .addOnSuccessListener(
-            downloadedLanguageTags -> {
-              if (downloadedModelsChangedListener != null) {
-                downloadedModelsChangedListener.onDownloadedModelsChanged(downloadedLanguageTags);
-              }
-            });
-  }
+        uiHandler.removeMessages(TIMEOUT_TRIGGER)
 
-  /**
-   * Interface to register to be notified of changes in the recognized content.
-   */
-  public interface ContentChangedListener {
+        when (action) {
+            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> strokeBuilder.addPoint(Point.create(x, y, t))
+            MotionEvent.ACTION_UP -> {
+                strokeBuilder.addPoint(Point.create(x, y, t))
+                inkBuilder.addStroke(strokeBuilder.build())
+                strokeBuilder = Ink.Stroke.builder()
+                stateChangedSinceLastRequest = true
+                if (isTriggerRecognitionAfterInput) {
+                    recognize()
+                }
+            }
+            else -> return false
+        }
+        return true
+    }
 
-    /**
-     * This method is called when the strokes are recognized, with the new content as parameter.
-     */
-    void onNewRecognizedText(String text, boolean correct);
+    fun addContentChangedListener(contentChangedListener: ContentChangedListener) {
+        contentChangedListeners.add(contentChangedListener)
+    }
 
-    /** @noinspection unused*/ // Called when the text can't be parsed as a number
-    void onMisparsedRecognizedText(String text);
-  }
+    fun removeContentChangedListener(contentChangedListener: ContentChangedListener) {
+        contentChangedListeners.remove(contentChangedListener)
+    }
 
-  // Recognition-related.
+    fun setStatusChangedListener(statusChangedListener: StatusChangedListener?) {
+        this.statusChangedListener = statusChangedListener
+    }
 
-  /**
-   * Interface to register to be notified of changes in the status - a description string.
-   */
-  public interface StatusChangedListener {
+    fun setDownloadedModelsChangedListener(downloadedModelsChangedListener: DownloadedModelsChangedListener?) {
+        this.downloadedModelsChangedListener = downloadedModelsChangedListener
+    }
 
-    /**
-     * This method is called when the status (= description string) changes.
-     */
-    void onStatusChanged();
-  }
+    fun getStatus(): String = status
 
-  /**
-   * Interface to register to be notified of changes in the downloaded model state.
-   */
-  public interface DownloadedModelsChangedListener {
+    private fun setStatus(newStatus: String) {
+        status = newStatus
+        statusChangedListener?.onStatusChanged()
+    }
 
-    /**
-     * This method is called when the downloaded models changes.
-     */
-    void onDownloadedModelsChanged(Set<String> downloadedLanguageTags);
-  }
+    fun setActiveModel(languageTag: String) {
+        setStatus(modelManager.setModel(languageTag))
+    }
+
+    fun deleteActiveModel(): Task<Void> {
+        return modelManager.deleteActiveModel()
+            .addOnSuccessListener { refreshDownloadedModelsStatus() }
+            .onSuccessTask {
+                setStatus(it!!)
+                Tasks.forResult(null)
+            }
+    }
+
+    fun download(): Task<Void> {
+        setStatus("Download started.")
+        return modelManager.download()
+            .addOnSuccessListener { refreshDownloadedModelsStatus() }
+            .onSuccessTask {
+                setStatus(it!!)
+                Tasks.forResult(null)
+            }
+    }
+
+    fun recognize(): Task<String?> {
+        if (!stateChangedSinceLastRequest || inkBuilder.isEmpty) {
+            setStatus("No recognition, ink unchanged or empty")
+            return Tasks.forResult(null)
+        }
+        if (modelManager.recognizer == null) {
+            setStatus("Recognizer not set")
+            return Tasks.forResult(null)
+        }
+
+        return modelManager.checkIsModelDownloaded()
+            .onSuccessTask { result ->
+                if (!result!!) {
+                    setStatus("Model not downloaded yet")
+                    return@onSuccessTask Tasks.forResult(null)
+                }
+
+                stateChangedSinceLastRequest = false
+                recognitionTask = RecognitionTask(modelManager.recognizer!!, inkBuilder.build(), expectedResult)
+                uiHandler.sendMessageDelayed(uiHandler.obtainMessage(TIMEOUT_TRIGGER), CONVERSION_TIMEOUT_MS)
+                recognitionTask!!.run()
+            }
+    }
+
+    fun refreshDownloadedModelsStatus() {
+        modelManager.downloadedModelLanguages
+            .addOnSuccessListener { downloadedLanguageTags ->
+                downloadedModelsChangedListener?.onDownloadedModelsChanged(downloadedLanguageTags)
+            }
+    }
+
+    interface ContentChangedListener {
+        fun onNewRecognizedText(text: String?, correct: Boolean)
+        fun onMisparsedRecognizedText(text: String?)
+    }
+
+    interface StatusChangedListener {
+        fun onStatusChanged()
+    }
+
+    interface DownloadedModelsChangedListener {
+        fun onDownloadedModelsChanged(downloadedLanguageTags: Set<String>)
+    }
+
+    companion object {
+        @VisibleForTesting
+        const val CONVERSION_TIMEOUT_MS: Long = 1000
+        private const val TAG = "StrokeManager"
+        private const val TIMEOUT_TRIGGER = 1
+    }
 }
