@@ -46,8 +46,8 @@ class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChanged
         strokeManager.addContentChangedListener(solveView)
         strokeManager.addContentChangedListener(this)
         strokeManager.setDownloadedModelsChangedListener(this)
-        strokeManager.isClearCurrentInkAfterRecognition = true
-        strokeManager.isTriggerRecognitionAfterInput = false
+        strokeManager.setClearCurrentInkAfterRecognition(true)
+        strokeManager.setTriggerRecognitionAfterInput(false)
         strokeManager.setActiveModel(modelLanguageTag)
 
         // add continuation here:
@@ -55,7 +55,7 @@ class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChanged
 
         strokeManager.refreshDownloadedModelsStatus()
         strokeManager.reset()
-        strokeManager.isTriggerRecognitionAfterInput = true
+        strokeManager.setTriggerRecognitionAfterInput(true)
     }
 //
 //    fun recognizeClick(v: View?) {
