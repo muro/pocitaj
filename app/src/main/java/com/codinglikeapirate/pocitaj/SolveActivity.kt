@@ -1,147 +1,133 @@
-package com.codinglikeapirate.pocitaj;
+package com.codinglikeapirate.pocitaj
 
-import android.content.Intent;
-import android.graphics.drawable.AnimatedVectorDrawable;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.content.Intent
+import android.graphics.drawable.AnimatedVectorDrawable
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.annotation.VisibleForTesting
+import androidx.appcompat.app.AppCompatActivity
+import com.codinglikeapirate.pocitaj.StrokeManager.ContentChangedListener
 
-import androidx.activity.EdgeToEdge;
-import androidx.annotation.VisibleForTesting;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+/** Main activity which creates a StrokeManager and connects it to the DrawingView. */
+class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChangedListener,
+    ContentChangedListener {
+    @JvmField @VisibleForTesting val strokeManager = StrokeManager()
+    private val modelLanguageTag = "en-US"
+    private var exerciseBook = ExerciseBook()
 
-import com.codinglikeapirate.pocitaj.StrokeManager.DownloadedModelsChangedListener;
-import com.codinglikeapirate.pocitaj.StrokeManager.ContentChangedListener;
+    public override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        val solveView = findViewById<SolveView>(R.id.solve_view)
+        solveView.setExerciseBook(exerciseBook)
+        solveView.setStrokeManager(strokeManager)
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+        val questionView = findViewById<TextView>(R.id.question_view)
+        solveView.setQuestionView(questionView)
 
-public class SolveActivity extends AppCompatActivity implements DownloadedModelsChangedListener, ContentChangedListener {
+        val progressIcons = ArrayList<ImageView>()
+        progressIcons.add(findViewById(R.id.progress_1))
+        progressIcons.add(findViewById(R.id.progress_2))
+        progressIcons.add(findViewById(R.id.progress_3))
+        progressIcons.add(findViewById(R.id.progress_4))
+        progressIcons.add(findViewById(R.id.progress_5))
+        progressIcons.add(findViewById(R.id.progress_6))
+        progressIcons.add(findViewById(R.id.progress_7))
+        progressIcons.add(findViewById(R.id.progress_8))
+        progressIcons.add(findViewById(R.id.progress_9))
+        progressIcons.add(findViewById(R.id.progress_10))
+        solveView.setProgressIcons(progressIcons)
 
-  private static final String TAG = "SolveActivity";
+        strokeManager.addContentChangedListener(solveView)
+        strokeManager.addContentChangedListener(this)
+        strokeManager.setDownloadedModelsChangedListener(this)
+        strokeManager.setClearCurrentInkAfterRecognition(true)
+        strokeManager.setTriggerRecognitionAfterInput(false)
+        strokeManager.setActiveModel(modelLanguageTag)
 
-  @VisibleForTesting
-  final StrokeManager strokeManager = new StrokeManager();
+        // add continuation here:
+        strokeManager.download()
 
-  private static final String modelLanguageTag = "en-US";
-  private final ExerciseBook exerciseBook = new ExerciseBook();
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    EdgeToEdge.enable(this);
-    setContentView(R.layout.activity_main);
-    ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-      Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-      v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-      return insets;
-    });
-
-    SolveView solveView = findViewById(R.id.solve_view);
-    solveView.setExerciseBook(exerciseBook);
-    solveView.setStrokeManager(strokeManager);
-
-    TextView questionView = findViewById(R.id.question_view);
-    solveView.setQuestionView(questionView);
-
-    List<ImageView> progressIcons = new ArrayList<>();
-    progressIcons.add(findViewById(R.id.progress_1));
-    progressIcons.add(findViewById(R.id.progress_2));
-    progressIcons.add(findViewById(R.id.progress_3));
-    progressIcons.add(findViewById(R.id.progress_4));
-    progressIcons.add(findViewById(R.id.progress_5));
-    progressIcons.add(findViewById(R.id.progress_6));
-    progressIcons.add(findViewById(R.id.progress_7));
-    progressIcons.add(findViewById(R.id.progress_8));
-    progressIcons.add(findViewById(R.id.progress_9));
-    progressIcons.add(findViewById(R.id.progress_10));
-    solveView.setProgressIcons(progressIcons);
-
-    // strokeManager.deleteActiveModel();
-
-    strokeManager.addContentChangedListener(solveView);
-    strokeManager.addContentChangedListener(this);
-    strokeManager.setDownloadedModelsChangedListener(this);
-    strokeManager.setClearCurrentInkAfterRecognition(true);
-    strokeManager.setTriggerRecognitionAfterInput(false);
-    strokeManager.reset();
-    strokeManager.setActiveModel(modelLanguageTag);
-    strokeManager.download();
-    strokeManager.refreshDownloadedModelsStatus();
-    strokeManager.setTriggerRecognitionAfterInput(true);
-  }
-
-  public void onDownloadedModelsChanged(Set<String> downloadedLanguageTags) {
-    for (String s : downloadedLanguageTags) {
-      Log.i(TAG, "Downloaded models changed: " + s);
+        strokeManager.refreshDownloadedModelsStatus()
+        strokeManager.reset()
+        strokeManager.setTriggerRecognitionAfterInput(true)
     }
-  }
+//
+//    fun recognizeClick(v: View?) {
+//        strokeManager.recognize()
+//    }
+//
+//    fun clearClick(v: View?) {
+//        strokeManager.reset()
+//        val drawingView = findViewById<SolveView>(R.id.solve_view)
+//        drawingView.clear()
+//    }
+//
+//    fun deleteClick(v: View?) {
+//        strokeManager.deleteActiveModel()
+//    }
 
-  @Override
-  public void onNewRecognizedText(String text, boolean correct) {
-    ImageView popupView = findViewById(R.id.popup_view);
-    if (correct) {
-      popupView.setImageResource(R.drawable.heart_animation);
-    } else {
-      popupView.setImageResource(R.drawable.teardrop);
-    }
-    popupView.setVisibility(View.VISIBLE);
-    Drawable d = popupView.getDrawable();
-    AnimatedVectorDrawable animation;
-    if (d instanceof AnimatedVectorDrawable) {
-      animation = (AnimatedVectorDrawable) d;
-      animation.start();
+    override fun onDownloadedModelsChanged(downloadedLanguageTags: Set<String>) {
+        for (s in downloadedLanguageTags) {
+            Log.i(TAG, "Downloaded models changed: $s")
+        }
     }
 
-    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-      popupView.setVisibility(View.GONE);
+    override fun onNewRecognizedText(text: String?, correct: Boolean) {    val popupView = findViewById<ImageView>(R.id.popup_view)
+        popupView.setImageResource(if (correct) R.drawable.heart_animation else R.drawable.teardrop)
+        popupView.visibility = View.VISIBLE
 
-      if (exerciseBook.getHistoryList().size() < 5)
-        return;
+        (popupView.drawable as? AnimatedVectorDrawable)?.start()
 
-      Intent intent = new Intent(this, ResultsActivity.class);
-      Bundle bundle = new Bundle();
+        Handler(Looper.getMainLooper()).postDelayed({
+            popupView.visibility = View.GONE
 
-      int exerciseCount = exerciseBook.getHistoryList().size();
-      String[] exercises = new String[exerciseCount];
-      boolean[] corrects = new boolean[exerciseCount];
-      boolean[] recognized = new boolean[exerciseCount];
-      for (int i = 0; i < exerciseCount; i++) {
-        exercises[i] = exerciseBook.getHistoryList().get(i).equation();
-        corrects[i] = exerciseBook.getHistoryList().get(i).correct();
-        recognized[i] = exerciseBook.getHistoryList().get(i).solved();
-      }
-      bundle.putStringArray(ResultsActivity.EXERCISES_KEY, exercises);
-      bundle.putBooleanArray(ResultsActivity.CORRECTS_KEY, corrects);
-      bundle.putBooleanArray(ResultsActivity.RECOGNIZED_KEY, recognized);
+            if (exerciseBook.historyList.size < 5) {
+                return@postDelayed
+            }
 
-      intent.putExtras(bundle);
+            val intent = Intent(this, ResultsActivity::class.java)
+            val bundle = Bundle()
 
-      startActivity(intent, bundle);
-    }, 500);
-  }
+            val exerciseCount = exerciseBook.historyList.size
+            val exercises = Array(exerciseCount) { "" }
+            val corrects = BooleanArray(exerciseCount)
+            val recognized = BooleanArray(exerciseCount)
 
-  @Override
-  public void onMisparsedRecognizedText(String text) {
-    ImageView popupView = findViewById(R.id.popup_view);
-    popupView.setImageResource(R.drawable.question);
-    popupView.setVisibility(View.VISIBLE);
-    Drawable d = popupView.getDrawable();
-    AnimatedVectorDrawable animation;
-    if (d instanceof AnimatedVectorDrawable) {
-      animation = (AnimatedVectorDrawable) d;
-      animation.start();
+            for (i in 0 until exerciseCount) {
+                val exercise = exerciseBook.historyList[i]
+                exercises[i] = exercise.equation()
+                corrects[i] = exercise.correct()
+                recognized[i] = exercise.solved()
+            }
+
+            bundle.putStringArray(ResultsActivity.EXERCISES_KEY, exercises)
+            bundle.putBooleanArray(ResultsActivity.CORRECTS_KEY, corrects)
+            bundle.putBooleanArray(ResultsActivity.RECOGNIZED_KEY, recognized)
+
+            intent.putExtras(bundle)
+            startActivity(intent, bundle)
+        }, 500)
     }
 
-    new Handler(Looper.getMainLooper()).postDelayed(() -> popupView.setVisibility(View.GONE), 500);
-  }
+    override fun onMisparsedRecognizedText(text: String?) {
+        val popupView = findViewById<ImageView>(R.id.popup_view)
+        popupView.setImageResource(R.drawable.question)
+        popupView.visibility = View.VISIBLE
+        val d = popupView.getDrawable()
+        if (d is AnimatedVectorDrawable) {
+            d.start()
+        }
+
+        Handler(Looper.getMainLooper()).postDelayed({ popupView.visibility = View.GONE }, 500)
+    }
+
+    companion object {
+        private const val TAG = "SolveActivity"
+    }
 }
