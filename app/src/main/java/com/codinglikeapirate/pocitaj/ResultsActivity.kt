@@ -9,23 +9,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -90,8 +92,8 @@ class ResultsActivity : ComponentActivity() {
     @Composable
     fun PreviewResultsScreen() {
         val results = ArrayList<ResultDescription>()
-        results.add(ResultDescription("2+2=4", ResultStatus.CORRECT))
-        results.add(ResultDescription("3+3!=5", ResultStatus.INCORRECT))
+        results.add(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT))
+        results.add(ResultDescription("3 + 3 ≠ 5", ResultStatus.INCORRECT))
 
         AppTheme {
             Surface(modifier=Modifier.background(MaterialTheme.colorScheme.onTertiaryContainer)) {
@@ -102,22 +104,25 @@ class ResultsActivity : ComponentActivity() {
 
     @Composable
     fun ResultCard(result: ResultDescription) {
-        Row(modifier = Modifier.padding(all = 8.dp)) {
+        Row(modifier = Modifier.padding(4.dp).fillMaxWidth().height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically
+            ) {
             Image(
                 painter = painterResource(R.drawable.cat_heart),
                 contentDescription = "Heart",
                 modifier = Modifier
-                    // Set image size to 40 dp
-                    .size(20.dp)
-                    // Clip image to be shaped as a circle
-                    .clip(CircleShape)
+                    .padding(horizontal = 8.dp, vertical = 0.dp)
+                    .fillMaxHeight()
+                    .aspectRatio(1f)
+                    .align(Alignment.CenterVertically)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
             Text(text = result.equation,
                 color = MaterialTheme.colorScheme.tertiary,
-                fontSize = 20.sp, fontWeight = FontWeight.Light, textAlign = TextAlign.Center,
+                fontSize = 32.sp, fontWeight = FontWeight.Light,// , textAlign = TextAlign.Center,
                 fontFamily = FontFamily.SansSerif,
+                modifier = Modifier.padding(16.dp).fillMaxWidth()
             )
         }
     }
@@ -136,7 +141,7 @@ class ResultsActivity : ComponentActivity() {
     fun PreviewResultCard() {
         AppTheme {
             Surface {
-                ResultCard(ResultDescription("2+2=4", ResultStatus.CORRECT))
+                ResultCard(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT))
             }
         }
     }
