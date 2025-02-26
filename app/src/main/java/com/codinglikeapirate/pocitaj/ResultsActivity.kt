@@ -8,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.res.painterResource
@@ -72,58 +71,73 @@ class ResultsActivity : ComponentActivity() {
 
         setContent {
             AppTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    ResultsScreen(results)
-                }
+                Results(results)
             }
         }
     }
 
     @Composable
-    fun ResultsScreen(results: List<ResultDescription>) {
+    fun Results(results: List<ResultDescription>, modifier: Modifier = Modifier) {
+        Surface(
+            modifier = modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            ResultsList(results)
+        }
+    }
+
+    @Composable
+    fun ResultsList(results: List<ResultDescription>, modifier: Modifier = Modifier) {
         LazyColumn {
             items(results) { result ->
-                ResultCard(result)
+                ResultCard(result, modifier)
             }
         }
     }
 
-    @Preview
+    @Preview(showBackground = true)
     @Composable
-    fun PreviewResultsScreen() {
+    fun PreviewResultsList() {
         val results = ArrayList<ResultDescription>()
         results.add(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT))
         results.add(ResultDescription("3 + 3 ≠ 5", ResultStatus.INCORRECT))
 
         AppTheme {
-            Surface(modifier=Modifier.background(MaterialTheme.colorScheme.onTertiaryContainer)) {
-                ResultsScreen(results)
+            Surface {
+                ResultsList(results)
             }
         }
     }
 
     @Composable
-    fun ResultCard(result: ResultDescription) {
-        Row(modifier = Modifier.padding(4.dp).fillMaxWidth().height(IntrinsicSize.Min),
-            verticalAlignment = Alignment.CenterVertically
+    fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
+        Surface(color = MaterialTheme.colorScheme.primary) {
+            Row(
+                modifier = modifier.padding(8.dp)
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-            Image(
-                painter = painterResource(R.drawable.cat_heart),
-                contentDescription = "Heart",
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 0.dp)
-                    .fillMaxHeight()
-                    .aspectRatio(1f)
-                    .align(Alignment.CenterVertically)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
+                Image(
+                    painter = painterResource(R.drawable.cat_heart),
+                    contentDescription = "Heart",
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp, vertical = 0.dp)
+                        .fillMaxHeight()
+                        .aspectRatio(1f)
+                        .align(Alignment.CenterVertically)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
 
-            Text(text = result.equation,
-                color = MaterialTheme.colorScheme.tertiary,
-                fontSize = 32.sp, fontWeight = FontWeight.Light,// , textAlign = TextAlign.Center,
-                fontFamily = FontFamily.SansSerif,
-                modifier = Modifier.padding(16.dp).fillMaxWidth()
-            )
+                Text(
+                    text = result.equation,
+                    //color = MaterialTheme.colorScheme.primary,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Light,// , textAlign = TextAlign.Center,
+                    fontFamily = FontFamily.SansSerif,
+                    modifier = Modifier.padding(16.dp).fillMaxWidth()
+                )
+            }
         }
     }
 
@@ -145,4 +159,28 @@ class ResultsActivity : ComponentActivity() {
             }
         }
     }
+
+    @Preview(
+        widthDp = 320,
+        heightDp = 480,
+        showSystemUi = true,
+        name = "Small phone"
+    )
+    @Preview(
+        widthDp = 320,
+        heightDp = 480,
+        showSystemUi = true,
+        uiMode = Configuration.UI_MODE_NIGHT_YES,
+        name = "Small phone horizontal"
+    )
+    @Composable
+    fun ResultsPreview() {
+        val results = ArrayList<ResultDescription>()
+        results.add(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT))
+        results.add(ResultDescription("3 + 3 ≠ 5", ResultStatus.INCORRECT))
+        AppTheme {
+            Results(results)
+        }
+    }
+
 }
