@@ -26,11 +26,12 @@ class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChanged
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        solveView = findViewById<SolveView>(R.id.solve_view)
+        solveView = findViewById(R.id.solve_view)
         solveView.setExerciseBook(exerciseBook)
         solveView.setStrokeManager(strokeManager)
+        updateExerciseBook(null, false)
 
-        questionView = findViewById<TextView>(R.id.question_view)
+        questionView = findViewById(R.id.question_view)
 
         progressIcons.add(findViewById(R.id.progress_1))
         progressIcons.add(findViewById(R.id.progress_2))
@@ -59,7 +60,7 @@ class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChanged
         strokeManager.setTriggerRecognitionAfterInput(true)
     }
 
-    fun updateViews() {
+    private fun updateViews() {
         val history = exerciseBook.historyList
         progressIcons.forEachIndexed { i, icon ->
             icon.setImageResource(
@@ -95,7 +96,7 @@ class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChanged
         }
     }
 
-    fun updateExerciseBook(text: String?, correct: Boolean) {
+    private fun updateExerciseBook(text: String?, correct: Boolean) {
         if (exerciseBook.last.solved()) {
             Log.e(TAG, "last was solved")
         }

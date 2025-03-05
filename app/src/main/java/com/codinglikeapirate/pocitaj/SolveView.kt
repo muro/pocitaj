@@ -56,7 +56,6 @@ class SolveView @JvmOverloads constructor(
 
     fun setStrokeManager(strokeManager: StrokeManager) {
         this.strokeManager = strokeManager
-        strokeManager.expectedResult = exerciseBook.last.getExpectedResult()
     }
 
     fun setExerciseBook(exerciseBook: ExerciseBook) {
