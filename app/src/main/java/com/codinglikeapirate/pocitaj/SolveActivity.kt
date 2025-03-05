@@ -19,6 +19,7 @@ class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChanged
     @JvmField @VisibleForTesting val strokeManager = StrokeManager()
     private val modelLanguageTag = "en-US"
     private var exerciseBook = ExerciseBook()
+    private var progressIcons = ArrayList<ImageView>()
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +31,6 @@ class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChanged
         val questionView = findViewById<TextView>(R.id.question_view)
         solveView.setQuestionView(questionView)
 
-        val progressIcons = ArrayList<ImageView>()
         progressIcons.add(findViewById(R.id.progress_1))
         progressIcons.add(findViewById(R.id.progress_2))
         progressIcons.add(findViewById(R.id.progress_3))
@@ -41,10 +41,10 @@ class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChanged
         progressIcons.add(findViewById(R.id.progress_8))
         progressIcons.add(findViewById(R.id.progress_9))
         progressIcons.add(findViewById(R.id.progress_10))
-        solveView.setProgressIcons(progressIcons)
+        updateProgressIcons()
 
-        strokeManager.addContentChangedListener(solveView)
         strokeManager.addContentChangedListener(this)
+        strokeManager.addContentChangedListener(solveView)
         strokeManager.setDownloadedModelsChangedListener(this)
         strokeManager.setClearCurrentInkAfterRecognition(true)
         strokeManager.setTriggerRecognitionAfterInput(false)
@@ -56,6 +56,20 @@ class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChanged
         strokeManager.refreshDownloadedModelsStatus()
         strokeManager.reset()
         strokeManager.setTriggerRecognitionAfterInput(true)
+    }
+
+    fun updateProgressIcons() {
+        val history = exerciseBook.historyList
+        progressIcons?.forEachIndexed { i, icon ->
+            icon.setImageResource(
+                when {
+                    history.size <= i -> R.drawable.cat_sleep
+                    !history[i].solved() -> R.drawable.cat_big_eyes
+                    !history[i].correct() -> R.drawable.cat_cry
+                    else -> R.drawable.cat_heart
+                }
+            )
+        }
     }
 //
 //    fun recognizeClick(v: View?) {
@@ -78,7 +92,26 @@ class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChanged
         }
     }
 
+    fun updateExerciseBook(text: String?, correct: Boolean) {
+        if (exerciseBook.last.solved()) {
+            Log.e(TAG, "last was solved")
+        }
+        val result = text?.toInt() ?: ExerciseBook.NOT_RECOGNIZED
+
+        val correctlySolved = exerciseBook.last.solve(result)
+        if (correctlySolved != correct) {
+            Log.e(TAG, "Passed-through solution didn't match expected result")
+        }
+        Log.i(TAG, "Stats: ${exerciseBook.stats}")
+        // do animation
+        if (result != ExerciseBook.NOT_RECOGNIZED) {
+            exerciseBook.generate()
+        }
+        strokeManager?.expectedResult = exerciseBook.last.getExpectedResult()
+    }
+
     override fun onNewRecognizedText(text: String?, correct: Boolean) {    val popupView = findViewById<ImageView>(R.id.popup_view)
+        updateExerciseBook(text, correct)
         popupView.setImageResource(if (correct) R.drawable.heart_animation else R.drawable.teardrop)
         popupView.visibility = View.VISIBLE
 
@@ -86,6 +119,7 @@ class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChanged
 
         Handler(Looper.getMainLooper()).postDelayed({
             popupView.visibility = View.GONE
+            updateProgressIcons()
 
             if (exerciseBook.historyList.size < 5) {
                 return@postDelayed

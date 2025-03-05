@@ -12,7 +12,6 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.codinglikeapirate.pocitaj.StrokeManager.ContentChangedListener
@@ -56,7 +55,6 @@ class SolveView @JvmOverloads constructor(
     private var strokeManager: StrokeManager? = null
     private lateinit var exerciseBook: ExerciseBook
     private var questionView: TextView? = null
-    private var progressIcons: List<ImageView>? = null
 
     fun setStrokeManager(strokeManager: StrokeManager) {
         this.strokeManager = strokeManager
@@ -75,10 +73,9 @@ class SolveView @JvmOverloads constructor(
             redrawContent()
         }
         invalidate()
-        updateProgressIcons()
     }
 
-    fun redrawContent() {
+    private fun redrawContent() {
         strokeManager ?: return
         clear()
         val currentInk = strokeManager!!.currentInk
@@ -110,7 +107,7 @@ class SolveView @JvmOverloads constructor(
         // Method is empty, no need to do anything here.
     }
 
-    fun clear() {
+    private fun clear() {
         currentStroke.reset()
         onSizeChanged(
             canvasBitmap.width,
@@ -123,7 +120,6 @@ class SolveView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         canvas.drawBitmap(canvasBitmap, 0f, 0f, canvasPaint)
         canvas.drawText(lastResult, 30f, canvasBitmap.height - 100f, lastResultPaint)
-        updateProgressIcons()
         canvas.drawPath(currentStroke, currentStrokePaint)
     }
 
@@ -135,7 +131,6 @@ class SolveView @JvmOverloads constructor(
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 currentStroke.moveTo(x, y)
-                updateProgressIcons()
             }
 
             MotionEvent.ACTION_MOVE -> currentStroke.lineTo(x, y)
@@ -153,27 +148,12 @@ class SolveView @JvmOverloads constructor(
     }
 
     override fun onNewRecognizedText(text: String?, correct: Boolean) {
-        if (exerciseBook.last.solved()) {
-            Log.e(TAG, "last was solved")
-        }
-        val result = text?.toInt() ?: ExerciseBook.NOT_RECOGNIZED
-
-        val correctlySolved = exerciseBook.last.solve(result)
-        if (correctlySolved != correct) {
-            Log.e(TAG, "Passed-through solution didn't match expected result")
-        }
-        lastResult = exerciseBook.last.equation()
+        // assume the exerciseBook was already updated - in the activity
+        lastResult = exerciseBook.historyList.elementAtOrNull(exerciseBook.historyList.size - 2)?.equation() ?: ""
         lastResultPaint.color = ContextCompat.getColor(
             context,
             if (correct) R.color.correct_text_color else R.color.incorrect_text_color
         )
-        Log.i(TAG, "Stats: ${exerciseBook.stats}")
-        updateProgressIcons()
-        // do animation
-        if (result != ExerciseBook.NOT_RECOGNIZED) {
-            exerciseBook.generate()
-        }
-        strokeManager?.expectedResult = exerciseBook.last.getExpectedResult()
         redrawContent()
     }
 
@@ -183,24 +163,6 @@ class SolveView @JvmOverloads constructor(
 
     fun setQuestionView(questionView: TextView) {
         this.questionView = questionView
-    }
-
-    private fun updateProgressIcons() {
-        val history = exerciseBook.historyList
-        progressIcons?.forEachIndexed { i, icon ->
-            icon.setImageResource(
-                when {
-                    history.size <= i -> R.drawable.cat_sleep
-                    !history[i].solved() -> R.drawable.cat_big_eyes
-                    !history[i].correct() -> R.drawable.cat_cry
-                    else -> R.drawable.cat_heart
-                }
-            )
-        }
-    }
-
-    fun setProgressIcons(progressIcons: List<ImageView>) {
-        this.progressIcons = progressIcons
     }
 
     companion object {
