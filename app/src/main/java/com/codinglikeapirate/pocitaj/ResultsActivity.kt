@@ -101,6 +101,7 @@ class ResultsActivity : ComponentActivity() {
         val results = ArrayList<ResultDescription>()
         results.add(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT))
         results.add(ResultDescription("3 + 3 ≠ 5", ResultStatus.INCORRECT))
+        results.add(ResultDescription("3 + 3 = ?", ResultStatus.NOT_RECOGNIZED))
 
         AppTheme {
             Surface {
@@ -119,7 +120,11 @@ class ResultsActivity : ComponentActivity() {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Image(
-                    painter = painterResource(R.drawable.cat_heart),
+                    painter = painterResource(when (result.status) {
+                        ResultStatus.CORRECT -> R.drawable.cat_heart
+                        ResultStatus.INCORRECT -> R.drawable.cat_cry
+                        ResultStatus.NOT_RECOGNIZED -> R.drawable.cat_big_eyes
+                    }),
                     contentDescription = "Heart",
                     modifier = Modifier
                         .padding(horizontal = 8.dp, vertical = 0.dp)
