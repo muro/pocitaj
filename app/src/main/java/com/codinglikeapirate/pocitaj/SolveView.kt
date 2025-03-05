@@ -12,7 +12,6 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.codinglikeapirate.pocitaj.StrokeManager.ContentChangedListener
 import com.google.mlkit.vision.digitalink.Ink
@@ -54,7 +53,6 @@ class SolveView @JvmOverloads constructor(
     private lateinit var canvasBitmap: Bitmap
     private var strokeManager: StrokeManager? = null
     private lateinit var exerciseBook: ExerciseBook
-    private var questionView: TextView? = null
 
     fun setStrokeManager(strokeManager: StrokeManager) {
         this.strokeManager = strokeManager
@@ -81,8 +79,16 @@ class SolveView @JvmOverloads constructor(
         val currentInk = strokeManager!!.currentInk
         drawInk(currentInk, currentStrokePaint)
 
-        drawQuestion()
-        questionView?.text = exerciseBook.last.question()
+        val lastResultCorrect =
+            exerciseBook.historyList.elementAtOrNull(exerciseBook.historyList.size - 2)
+                ?.correct() ?: false
+        lastResult = exerciseBook.historyList.elementAtOrNull(exerciseBook.historyList.size - 2)
+            ?.equation() ?: ""
+        lastResultPaint.color = ContextCompat.getColor(
+            context,
+            if (lastResultCorrect) R.color.correct_text_color else R.color.incorrect_text_color
+        )
+
         invalidate()
     }
 
@@ -100,11 +106,6 @@ class SolveView @JvmOverloads constructor(
             }
         }
         drawCanvas.drawPath(path, paint)
-    }
-
-    /** @noinspection EmptyMethod */
-    private fun drawQuestion() {
-        // Method is empty, no need to do anything here.
     }
 
     private fun clear() {
@@ -149,20 +150,11 @@ class SolveView @JvmOverloads constructor(
 
     override fun onNewRecognizedText(text: String?, correct: Boolean) {
         // assume the exerciseBook was already updated - in the activity
-        lastResult = exerciseBook.historyList.elementAtOrNull(exerciseBook.historyList.size - 2)?.equation() ?: ""
-        lastResultPaint.color = ContextCompat.getColor(
-            context,
-            if (correct) R.color.correct_text_color else R.color.incorrect_text_color
-        )
         redrawContent()
     }
 
     override fun onMisparsedRecognizedText(text: String?) {
         redrawContent()
-    }
-
-    fun setQuestionView(questionView: TextView) {
-        this.questionView = questionView
     }
 
     companion object {
