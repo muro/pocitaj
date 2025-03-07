@@ -16,7 +16,9 @@ import com.codinglikeapirate.pocitaj.StrokeManager.ContentChangedListener
 /** Main activity which creates a StrokeManager and connects it to the DrawingView. */
 class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChangedListener,
     ContentChangedListener {
-    @JvmField @VisibleForTesting val strokeManager = StrokeManager()
+    @JvmField
+    @VisibleForTesting
+    val strokeManager = StrokeManager()
     private val modelLanguageTag = "en-US"
     private var exerciseBook = ExerciseBook()
     private val progressIcons = ArrayList<ImageView>()
@@ -58,6 +60,12 @@ class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChanged
         strokeManager.refreshDownloadedModelsStatus()
         strokeManager.reset()
         strokeManager.setTriggerRecognitionAfterInput(true)
+
+        val inkActivityButton = findViewById<View>(R.id.compose_ink)
+        inkActivityButton.setOnClickListener {
+            val intent = Intent(this, InkRecognitionActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun updateViews() {

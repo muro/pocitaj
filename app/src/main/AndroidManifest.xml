@@ -20,6 +20,10 @@
             android:exported="false"
             android:theme="@style/Theme.Pocitaj" />
         <activity
+            android:name=".InkRecognitionActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Pocitaj" />
+        <activity
             android:name=".SolveActivity"
             android:exported="true">
             <intent-filter>
