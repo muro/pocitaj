@@ -70,7 +70,7 @@ fun InkRecognitionScreen(modelManager: ModelManager?) {
     val currentPath = remember { mutableStateOf(Path()) }
     val paths = remember { mutableStateListOf<Pair<Path, Color>>() }
     var currentStrokeBuilder = remember { Stroke.builder() }
-    var inkBuilder = remember { Ink.builder() }
+    var inkBuilder by remember { mutableStateOf(Ink.builder()) }
     var currentPathPoints by remember { mutableStateOf(listOf<Offset>()) }
     var isDrawing by remember { mutableStateOf(false) }
 
