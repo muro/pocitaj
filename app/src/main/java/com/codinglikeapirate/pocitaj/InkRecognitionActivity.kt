@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -72,11 +71,15 @@ fun InkRecognitionScreen(modelManager: ModelManager?) {
     var currentPathPoints by remember { mutableStateOf(listOf<Offset>()) }
     var isDrawing by remember { mutableStateOf(false) }
 
-    LaunchedEffect(isDrawing) {
+    LaunchedEffect(key1 = isDrawing) {
         if (!isDrawing && inkBuilder.build().strokes.isNotEmpty()) {
             delay(recognitionDelayMillis)
             recognizeInk(modelManager!!, inkBuilder.build()) { result ->
                 recognizedText = result
+                // Reset the ink so the next recognized value doesn't include already
+                // recognized characters.
+                paths.clear()
+                inkBuilder = Ink.builder()
             }
         }
     }
@@ -105,7 +108,7 @@ fun InkRecognitionScreen(modelManager: ModelManager?) {
                             currentStrokeBuilder.addPoint(Point.create(offset.x, offset.y))
                             currentPathPoints = listOf(offset)
                         },
-                        onDrag = { change, dragAmount ->
+                        onDrag = { change, _ ->
                             val newOffset = change.position
                             currentPath.value.lineTo(newOffset.x, newOffset.y)
                             currentStrokeBuilder.addPoint(
@@ -148,32 +151,6 @@ fun InkRecognitionScreen(modelManager: ModelManager?) {
                     )
                 }
             }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                recognizeInk(modelManager!!, inkBuilder.build()) { result ->
-                    recognizedText = result
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Recognize")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                paths.clear()
-                inkBuilder = Ink.builder()
-                recognizedText = ""
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Clear")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
