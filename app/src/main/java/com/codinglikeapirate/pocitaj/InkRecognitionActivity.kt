@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,14 +26,19 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke as GraphicsStroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.mlkit.vision.digitalink.Ink
@@ -39,6 +46,7 @@ import com.google.mlkit.vision.digitalink.Ink.Point
 import com.google.mlkit.vision.digitalink.Ink.Stroke
 import com.google.mlkit.vision.digitalink.RecognitionContext
 import kotlinx.coroutines.delay
+import androidx.compose.ui.graphics.drawscope.Stroke as GraphicsStroke
 
 class InkRecognitionActivity : ComponentActivity() {
 
@@ -54,7 +62,9 @@ class InkRecognitionActivity : ComponentActivity() {
         modelManager.setModel("en-US")
 
         setContent {
-            InkRecognitionScreen(modelManager)
+            AppTheme {
+                InkRecognitionScreen(modelManager)
+            }
         }
     }
 }
@@ -70,6 +80,9 @@ fun InkRecognitionScreen(modelManager: ModelManager?) {
     var inkBuilder by remember { mutableStateOf(Ink.builder()) }
     var currentPathPoints by remember { mutableStateOf(listOf<Offset>()) }
     var isDrawing by remember { mutableStateOf(false) }
+
+    val backgroundAll = ImageBitmap.imageResource(id = R.drawable.paper_top)
+    val backgroundAnswer = ImageBitmap.imageResource(id = R.drawable.paper_answer)
 
     LaunchedEffect(key1 = isDrawing) {
         if (!isDrawing && inkBuilder.build().strokes.isNotEmpty()) {
@@ -88,18 +101,36 @@ fun InkRecognitionScreen(modelManager: ModelManager?) {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            .drawBehind {
+                drawImage(
+                    image = backgroundAll,
+                    dstOffset = IntOffset(0, 0),
+                    dstSize = IntSize(size.width.toInt(), size.height.toInt())
+                )
+            }
     ) {
         Text(
-            text = "Draw below here:",
-            modifier = Modifier.fillMaxWidth(),
+            text = "12 + 14",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(312.dp)
+                .wrapContentHeight(align = Alignment.CenterVertically),
             textAlign = TextAlign.Center,
-            fontSize = 24.sp
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 96.sp,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.LightGray)
+                .drawBehind {
+                    drawImage(
+                        image = backgroundAnswer,
+                        dstOffset = IntOffset(0, 0),
+                        dstSize = IntSize(size.width.toInt(), size.height.toInt())
+                    )
+                }
                 .pointerInput(Unit) {
                     detectDragGestures(
                         onDragStart = { offset ->
@@ -192,7 +223,10 @@ private fun recognizeInk(
         return
     }
 
-    modelManager.recognizer!!.recognize(ink, RecognitionContext.builder().setPreContext("1234").build())
+    modelManager.recognizer!!.recognize(
+        ink,
+        RecognitionContext.builder().setPreContext("1234").build()
+    )
         .addOnSuccessListener { result ->
             val recognizedText = result.candidates.firstOrNull()?.text ?: ""
             onResult(recognizedText)

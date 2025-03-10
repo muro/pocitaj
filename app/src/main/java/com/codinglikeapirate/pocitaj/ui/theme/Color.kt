@@ -1,7 +1,7 @@
 package com.codinglikeapirate.pocitaj
 import androidx.compose.ui.graphics.Color
 
-val primaryLight = Color(0xFF6D5E0F)
+val primaryLight = Color(0xFF0277BD)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFFF8E287)
 val onPrimaryContainerLight = Color(0xFF534600)
