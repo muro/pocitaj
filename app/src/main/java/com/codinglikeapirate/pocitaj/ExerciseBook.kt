@@ -3,6 +3,9 @@ package com.codinglikeapirate.pocitaj
 import java.util.Locale
 import java.util.Random
 
+
+// Holds a set of exercises to do in a session.
+// Each Exercise can be checked for correct solution
 class ExerciseBook {
 
     companion object {
@@ -48,21 +51,26 @@ class ExerciseBook {
         get() = history.toList()
 
     interface Exercise {
-        // Returns the Exercise question as a string
+        // Returns the Exercise question only, without a solution, as a string
         fun question(): String
+
+        // Returns the Exercise question with the submitted solution as a string.
+        // When the solution was solved incorrectly, it uses the not equal sign.
+        // If the solution is not solved yet, returns the question without a solution.
+        fun equation(): String
 
         // Marks the Exercise as solved and returns true if the solution is correct.
         // If the proposed solution is NOT_RECOGNIZED, doesn't set it as solved.
         fun solve(solution: Int): Boolean
 
-        // Returns true, if the Exercise has been solved.
+        // Returns true, if the proposed solution is correct
+        fun check(solution: Int): Boolean
+
+        // Returns true, if the Exercise has been correctly or incorrectly solved.
         fun solved(): Boolean
 
-        // Returns true if the Exercise has been correctly solved.
+        // Returns true if the Exercise is solved and correct.
         fun correct(): Boolean
-
-        // Returns the full equation as a string.
-        fun equation(): String
     }
 
     class Addition(private val a: Int, private val b: Int) : Exercise {
@@ -83,12 +91,16 @@ class ExerciseBook {
             return correct()
         }
 
+        override fun check(solution: Int): Boolean {
+            return solution == getExpectedResult()
+        }
+
         override fun solved(): Boolean {
             return solved
         }
 
         override fun correct(): Boolean {
-            return solved && a + b == solution
+            return solved && check(solution)
         }
 
         fun getExpectedResult(): Int {
@@ -102,7 +114,11 @@ class ExerciseBook {
                 if (solution == NOT_RECOGNIZED) {
                     String.format(Locale.ENGLISH, "%d + %d ≠ ?", a, b)
                 } else {
-                    String.format(Locale.ENGLISH, "%d + %d ≠ %d", a, b, solution)
+                    if (solved) {
+                        String.format(Locale.ENGLISH, "%d + %d ≠ %d", a, b, solution)
+                    } else {
+                        question()
+                    }
                 }
             }
         }

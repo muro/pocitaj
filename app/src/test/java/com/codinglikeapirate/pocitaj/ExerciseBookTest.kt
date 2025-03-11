@@ -16,6 +16,12 @@ class ExerciseBookTest {
     }
 
     @Test
+    fun addition_EquationBeforeSolving() {
+        val exercise = ExerciseBook.Addition(2, 3)
+        assertEquals("2 + 3", exercise.equation())
+    }
+
+    @Test
     fun addition_SolveNotRecognized() {
         val exercise = ExerciseBook.Addition(2, 3)
         assertEquals("2 + 3", exercise.question())
@@ -47,7 +53,6 @@ class ExerciseBookTest {
     @Test
     fun exerciseBook_generatesQuestionAtStart() {
         val exerciseBook = ExerciseBook()
-        //val exerciseBook = ExerciseBook()
         assertNotNull(exerciseBook.last)
     }
 
