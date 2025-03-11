@@ -57,9 +57,16 @@ class ExerciseBookViewModel : ViewModel() {
     private val _exerciseBook: MutableState<ExerciseBook> = mutableStateOf(ExerciseBook())
     private var _exerciseIndex = 0
 
-    fun nextExercise() { ++_exerciseIndex }
+    private fun nextExercise() { ++_exerciseIndex }
     fun currentExercise(): ExerciseBook.Exercise {
         return _exerciseBook.value.historyList[_exerciseIndex]
+    }
+
+    fun onResult(recognized: String) {
+        recognized.toIntOrNull()?.let {
+            currentExercise().solve(it)
+            nextExercise()
+        }
     }
 
     init {
@@ -110,11 +117,14 @@ fun InkRecognitionScreen(
     val backgroundAll = ImageBitmap.imageResource(id = R.drawable.paper_top)
     val backgroundAnswer = ImageBitmap.imageResource(id = R.drawable.paper_answer)
 
+    val exercise = exerciseBookViewModel.currentExercise().question()
+
     LaunchedEffect(key1 = isDrawing) {
         if (!isDrawing && inkBuilder.build().strokes.isNotEmpty()) {
             delay(recognitionDelayMillis)
             recognizeInk(modelManager!!, inkBuilder.build()) { result ->
                 recognizedText = result
+                exerciseBookViewModel.onResult(result)
                 // Reset the ink so the next recognized value doesn't include already
                 // recognized characters.
                 paths.clear()
@@ -136,7 +146,7 @@ fun InkRecognitionScreen(
             }
     ) {
         Text(
-            text = "12 + 14",
+            text = exercise,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(312.dp)
