@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -21,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -41,12 +43,31 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
 import com.google.mlkit.vision.digitalink.Ink.Stroke
 import com.google.mlkit.vision.digitalink.RecognitionContext
 import kotlinx.coroutines.delay
 import androidx.compose.ui.graphics.drawscope.Stroke as GraphicsStroke
+
+
+class ExerciseBookViewModel : ViewModel() {
+    private val _exerciseBook: MutableState<ExerciseBook> = mutableStateOf(ExerciseBook())
+    private var _exerciseIndex = 0
+
+    fun nextExercise() { ++_exerciseIndex }
+    fun currentExercise(): ExerciseBook.Exercise {
+        return _exerciseBook.value.historyList[_exerciseIndex]
+    }
+
+    init {
+        _exerciseBook.value.generate()
+        _exerciseBook.value.generate()
+        _exerciseBook.value.generate()
+    }
+}
 
 class InkRecognitionActivity : ComponentActivity() {
 
@@ -59,18 +80,23 @@ class InkRecognitionActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val viewModel: ExerciseBookViewModel by viewModels()
         modelManager.setModel("en-US")
 
         setContent {
             AppTheme {
-                InkRecognitionScreen(modelManager)
+                InkRecognitionScreen(Modifier, modelManager, viewModel)
             }
         }
     }
 }
 
 @Composable
-fun InkRecognitionScreen(modelManager: ModelManager?) {
+fun InkRecognitionScreen(
+    modifier: Modifier = Modifier,
+    modelManager: ModelManager? = null,
+    exerciseBookViewModel: ExerciseBookViewModel
+) {
     val recognitionDelayMillis = 1000L
 
     var recognizedText by remember { mutableStateOf("") }
@@ -98,7 +124,7 @@ fun InkRecognitionScreen(modelManager: ModelManager?) {
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
             .drawBehind {
@@ -209,7 +235,7 @@ fun InkRecognitionScreen(modelManager: ModelManager?) {
 fun InkRecognitionScreenPreview() {
     // val modelManager = ModelManager()
     AppTheme {
-        InkRecognitionScreen(null)
+        InkRecognitionScreen(Modifier, null, viewModel())
     }
 }
 
