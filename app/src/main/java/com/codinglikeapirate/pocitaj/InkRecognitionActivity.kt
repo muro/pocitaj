@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -57,7 +58,10 @@ class ExerciseBookViewModel : ViewModel() {
     private val _exerciseBook: MutableState<ExerciseBook> = mutableStateOf(ExerciseBook())
     private var _exerciseIndex = 0
 
-    private fun nextExercise() { ++_exerciseIndex }
+    private fun nextExercise() {
+        ++_exerciseIndex
+    }
+
     fun currentExercise(): ExerciseBook.Exercise {
         return _exerciseBook.value.historyList[_exerciseIndex]
     }
@@ -159,7 +163,6 @@ fun InkRecognitionScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.LightGray)
                 .drawBehind {
                     drawImage(
                         image = backgroundAnswer,
@@ -196,8 +199,12 @@ fun InkRecognitionScreen(
                         }
                     )
                 }
+                .clipToBounds()
         ) {
-            Canvas(modifier = Modifier.height(300.dp)) {
+            Canvas(modifier = Modifier
+                .height(300.dp)
+                .background(Color.Red)) {
+                drawRect(color = Color.Blue)
                 paths.forEach { (path, color) ->
                     drawPath(
                         path = path,
