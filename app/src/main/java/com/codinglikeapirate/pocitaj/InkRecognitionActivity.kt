@@ -112,7 +112,7 @@ fun InkRecognitionScreen(
 
     var recognizedText by remember { mutableStateOf("") }
     val currentPath = remember { mutableStateOf(Path()) }
-    val paths = remember { mutableStateListOf<Pair<Path, Color>>() }
+    val paths = remember { mutableStateListOf<Path>() }
     var currentStrokeBuilder = remember { Stroke.builder() }
     var inkBuilder by remember { mutableStateOf(Ink.builder()) }
     var currentPathPoints by remember { mutableStateOf(listOf<Offset>()) }
@@ -191,7 +191,7 @@ fun InkRecognitionScreen(
                         },
                         onDragEnd = {
                             isDrawing = false
-                            paths.add(Pair(currentPath.value, Color.Black))
+                            paths.add(currentPath.value)
                             currentPath.value = Path()
                             inkBuilder.addStroke(currentStrokeBuilder.build())
                             currentStrokeBuilder = Stroke.builder()
@@ -205,10 +205,10 @@ fun InkRecognitionScreen(
                 .height(300.dp)
                 .background(Color.Red)) {
                 drawRect(color = Color.Blue)
-                paths.forEach { (path, color) ->
+                paths.forEach { path ->
                     drawPath(
                         path = path,
-                        color = color,
+                        color = Color.Black,
                         style = GraphicsStroke(width = 5f)
                     )
                 }
