@@ -36,6 +36,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
@@ -48,10 +51,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
-import com.google.mlkit.vision.digitalink.Ink.Stroke
 import com.google.mlkit.vision.digitalink.RecognitionContext
 import kotlinx.coroutines.delay
-import androidx.compose.ui.graphics.drawscope.Stroke as GraphicsStroke
+import com.google.mlkit.vision.digitalink.Ink.Stroke as InkStroke
 
 
 class ExerciseBookViewModel : ViewModel() {
@@ -113,13 +115,15 @@ fun InkRecognitionScreen(
     var recognizedText by remember { mutableStateOf("") }
     val currentPath = remember { mutableStateOf(Path()) }
     val paths = remember { mutableStateListOf<Path>() }
-    var currentStrokeBuilder = remember { Stroke.builder() }
+    var currentStrokeBuilder = remember { InkStroke.builder() }
     var inkBuilder by remember { mutableStateOf(Ink.builder()) }
     var currentPathPoints by remember { mutableStateOf(listOf<Offset>()) }
     var isDrawing by remember { mutableStateOf(false) }
 
     val backgroundAll = ImageBitmap.imageResource(id = R.drawable.paper_top)
     val backgroundAnswer = ImageBitmap.imageResource(id = R.drawable.paper_answer)
+    val strokeColor = MaterialTheme.colorScheme.primary
+    val strokeWidth = 5.dp
 
     val exercise = exerciseBookViewModel.currentExercise().question()
 
@@ -194,22 +198,28 @@ fun InkRecognitionScreen(
                             paths.add(currentPath.value)
                             currentPath.value = Path()
                             inkBuilder.addStroke(currentStrokeBuilder.build())
-                            currentStrokeBuilder = Stroke.builder()
+                            currentStrokeBuilder = InkStroke.builder()
                             currentPathPoints = emptyList()
                         }
                     )
                 }
                 .clipToBounds()
         ) {
-            Canvas(modifier = Modifier
-                .height(300.dp)
-                .background(Color.Red)) {
+            Canvas(
+                modifier = Modifier
+                    .height(300.dp)
+                    .background(Color.Red)
+            ) {
                 drawRect(color = Color.Blue)
                 paths.forEach { path ->
                     drawPath(
                         path = path,
-                        color = Color.Black,
-                        style = GraphicsStroke(width = 5f)
+                        color = strokeColor,
+                        style = Stroke(
+                            width = strokeWidth.toPx(),
+                            cap = StrokeCap.Round,
+                            join = StrokeJoin.Round
+                        )
                     )
                 }
                 if (currentPathPoints.isNotEmpty()) {
@@ -220,8 +230,12 @@ fun InkRecognitionScreen(
                     }
                     drawPath(
                         path = path,
-                        color = Color.Black,
-                        style = GraphicsStroke(width = 5f)
+                        color = strokeColor,
+                        style = Stroke(
+                            width = strokeWidth.toPx(),
+                            cap = StrokeCap.Round,
+                            join = StrokeJoin.Round
+                        )
                     )
                 }
             }
