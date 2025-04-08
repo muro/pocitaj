@@ -24,8 +24,9 @@ class ExerciseBook {
         return Addition(random.nextInt(bound), random.nextInt(bound))
     }
 
-    fun generate() {
+    fun generate() : Exercise {
         history.add(generate(BOUND))
+        return history.last()
     }
 
     val last: Addition
