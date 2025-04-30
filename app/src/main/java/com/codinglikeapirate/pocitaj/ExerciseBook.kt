@@ -17,7 +17,6 @@ class ExerciseBook {
     private val history = mutableListOf<Addition>()
 
     init {
-        generate()
     }
 
     private fun generate(bound: Int = BOUND): Addition {
@@ -27,6 +26,10 @@ class ExerciseBook {
     fun generate() : Exercise {
         history.add(generate(BOUND))
         return history.last()
+    }
+
+    fun clear() {
+        history.clear()
     }
 
     val last: Addition

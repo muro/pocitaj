@@ -17,6 +17,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +27,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,6 +60,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
@@ -65,11 +69,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import com.google.mlkit.vision.digitalink.Ink.Stroke as InkStroke
 
 
 // Which screen are we currently on:
 sealed class UiState {
+    object LoadingModel : UiState()
+    object ExerciseSetup : UiState()
     data class ExerciseScreen(val currentExercise: ExerciseBook.Exercise) : UiState()
     data class SummaryScreen(val results: String) : UiState()
 }
@@ -82,16 +89,42 @@ sealed class AnswerResult {
     data object None : AnswerResult() // Initial state
 }
 
+data class ExerciseConfig(val type: String, val level: Int)
+
 class ExerciseBookViewModel : ViewModel() {
     private val _exerciseBook: MutableState<ExerciseBook> = mutableStateOf(ExerciseBook())
     private var _exerciseIndex = 0
-    private val _uiState = MutableStateFlow<UiState>(
-        UiState.ExerciseScreen(_exerciseBook.value.historyList[_exerciseIndex])
-    )
+
+    private val _uiState = MutableStateFlow<UiState>(UiState.LoadingModel)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private val _answerResult = MutableStateFlow<AnswerResult>(AnswerResult.None)
     val answerResult: StateFlow<AnswerResult> = _answerResult.asStateFlow()
+
+    fun downloadModel(modelManager: ModelManager, languageCode: String) {
+        viewModelScope.launch {
+            _uiState.value = UiState.LoadingModel // Ensure we are in loading state
+            delay(2000) // Simulate download time
+            modelManager.setModel(languageCode) // Set the model after simulated download
+            _uiState.value = UiState.ExerciseSetup // Move to setup after download
+        }
+    }
+
+    // Function to handle exercise setup completion
+    fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
+        if (exerciseConfig.type == "addition") {
+            _exerciseBook.value.clear()
+            _exerciseBook.value.generate()
+            _exerciseBook.value.generate()
+            _exerciseBook.value.generate()
+        } else if (exerciseConfig.type == "subtraction") {
+            _exerciseBook.value.clear()
+            _exerciseBook.value.generate()
+
+        }
+        _exerciseIndex = 0
+        _uiState.value = UiState.ExerciseScreen(currentExercise())
+    }
 
     private fun currentExercise(): ExerciseBook.Exercise {
         return _exerciseBook.value.historyList[_exerciseIndex]
@@ -157,7 +190,26 @@ fun ExerciseScreen(
 ) {
     val uiState by exerciseBookViewModel.uiState.collectAsState()
 
+    // Trigger model download when the composable is first composed
+    LaunchedEffect(Unit) {
+        // You might want to check if the model is already downloaded here
+        // before starting the download process.
+        modelManager?.let {
+            exerciseBookViewModel.downloadModel(it, "en-US") // Start download
+        }
+    }
+
     when (uiState) {
+        is UiState.LoadingModel -> {
+            LoadingScreen() // Display loading screen
+        }
+        is UiState.ExerciseSetup -> {
+            ExerciseSetupScreen(
+                onStartExercises = { config ->
+                    exerciseBookViewModel.startExercises(config)
+                }
+            ) // Display exercise setup screen
+        }
         is UiState.ExerciseScreen -> {
             val currentExercise = (uiState as UiState.ExerciseScreen).currentExercise
             // Display the current exercise UI
@@ -192,6 +244,41 @@ fun ExerciseScreenPreview() {
     // val modelManager = ModelManager()
     AppTheme {
         ExerciseScreen(null, viewModel())
+    }
+}
+
+@Composable
+fun LoadingScreen() {
+    // UI for the loading screen (e.g., progress indicator, text)
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        CircularProgressIndicator()
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("Downloading model...")
+    }
+}
+
+@Composable
+fun ExerciseSetupScreen(onStartExercises: (ExerciseConfig) -> Unit) {
+    // UI for choosing exercise type and starting exercises
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("Choose Exercise Type")
+        Spacer(modifier = Modifier.height(16.dp))
+        // Add UI elements (e.g., Radio buttons, dropdowns) for selecting exercise type and level
+        Button(onClick = {
+            // Get selected exercise configuration
+            val config = ExerciseConfig("Math", 1) // Replace with actual selection
+            onStartExercises(config) // Call ViewModel to start exercises
+        }) {
+            Text("Start Exercises")
+        }
     }
 }
 
