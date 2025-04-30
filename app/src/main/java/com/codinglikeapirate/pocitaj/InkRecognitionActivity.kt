@@ -8,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -53,30 +52,47 @@ import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
 import com.google.mlkit.vision.digitalink.RecognitionContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import com.google.mlkit.vision.digitalink.Ink.Stroke as InkStroke
 
+
+sealed class UiState {
+    data class ExerciseScreen(val currentExercise: ExerciseBook.Exercise) : UiState()
+    data class SummaryScreen(val results: String) : UiState()
+}
 
 class ExerciseBookViewModel : ViewModel() {
     private val _exerciseBook: MutableState<ExerciseBook> = mutableStateOf(ExerciseBook())
     private var _exerciseIndex = 0
+    private val _uiState = MutableStateFlow<UiState>(
+        UiState.ExerciseScreen(_exerciseBook.value.historyList[_exerciseIndex])
+    )
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    private fun nextExercise() {
-        ++_exerciseIndex
-    }
-
-    fun currentExercise(): ExerciseBook.Exercise {
+    private fun currentExercise(): ExerciseBook.Exercise {
         return _exerciseBook.value.historyList[_exerciseIndex]
     }
 
-    fun onResult(recognized: String) {
-        recognized.toIntOrNull()?.let {
-            currentExercise().solve(it)
-            nextExercise()
+    fun checkAnswer(answer: String) {
+        answer.toIntOrNull()?.let {
+            if (currentExercise().solve(it)) {
+                // animate the happy state
+            } else {
+                // animate the sad state
+            }
+            ++_exerciseIndex
+            if (_exerciseIndex < _exerciseBook.value.historyList.size) {
+                _uiState.value = UiState.ExerciseScreen(currentExercise())
+            } else {
+                _uiState.value = UiState.SummaryScreen("summary") // _exerciseBook.value.stats)
+            }
         }
     }
 
     init {
-        _exerciseBook.value.generate()
+        // initialize with 2 exercises:
         _exerciseBook.value.generate()
         _exerciseBook.value.generate()
     }
@@ -86,9 +102,7 @@ class InkRecognitionActivity : ComponentActivity() {
 
     @JvmField
     @VisibleForTesting
-    var modelManager =
-        ModelManager()
-
+    var modelManager = ModelManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,7 +112,7 @@ class InkRecognitionActivity : ComponentActivity() {
 
         setContent {
             AppTheme {
-                InkRecognitionScreen(Modifier, modelManager, viewModel)
+                InkRecognitionScreen(modelManager, viewModel)
             }
         }
     }
@@ -106,149 +120,27 @@ class InkRecognitionActivity : ComponentActivity() {
 
 @Composable
 fun InkRecognitionScreen(
-    modifier: Modifier = Modifier,
     modelManager: ModelManager? = null,
     exerciseBookViewModel: ExerciseBookViewModel
 ) {
-    val recognitionDelayMillis = 1000L
+    val uiState by exerciseBookViewModel.uiState.collectAsState()
 
-    var recognizedText by remember { mutableStateOf("") }
-    val currentPath = remember { mutableStateOf(Path()) }
-    val paths = remember { mutableStateListOf<Path>() }
-    var currentStrokeBuilder = remember { InkStroke.builder() }
-    var inkBuilder by remember { mutableStateOf(Ink.builder()) }
-    var currentPathPoints by remember { mutableStateOf(listOf<Offset>()) }
-    var isDrawing by remember { mutableStateOf(false) }
-
-    val backgroundAll = ImageBitmap.imageResource(id = R.drawable.paper_top)
-    val backgroundAnswer = ImageBitmap.imageResource(id = R.drawable.paper_answer)
-    val strokeColor = MaterialTheme.colorScheme.primary
-    val strokeWidth = 5.dp
-
-    val exercise = exerciseBookViewModel.currentExercise().question()
-
-    LaunchedEffect(key1 = isDrawing) {
-        if (!isDrawing && inkBuilder.build().strokes.isNotEmpty()) {
-            delay(recognitionDelayMillis)
-            recognizeInk(modelManager!!, inkBuilder.build()) { result ->
-                recognizedText = result
-                exerciseBookViewModel.onResult(result)
-                // Reset the ink so the next recognized value doesn't include already
-                // recognized characters.
-                paths.clear()
-                inkBuilder = Ink.builder()
-            }
+    when (uiState) {
+        is UiState.ExerciseScreen -> {
+            val currentExercise = (uiState as UiState.ExerciseScreen).currentExercise
+            // Display the current exercise UI
+            ExerciseComposable(
+                exercise = currentExercise,
+                modelManager = modelManager,
+                onAnswerSubmit = { answer ->
+                    exerciseBookViewModel.checkAnswer(answer)
+            })
         }
-    }
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .drawBehind {
-                drawImage(
-                    image = backgroundAll,
-                    dstOffset = IntOffset(0, 0),
-                    dstSize = IntSize(size.width.toInt(), size.height.toInt())
-                )
-            }
-    ) {
-        Text(
-            text = exercise,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(312.dp)
-                .wrapContentHeight(align = Alignment.CenterVertically),
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = 96.sp,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .drawBehind {
-                    drawImage(
-                        image = backgroundAnswer,
-                        dstOffset = IntOffset(0, 0),
-                        dstSize = IntSize(size.width.toInt(), size.height.toInt())
-                    )
-                }
-                .pointerInput(Unit) {
-                    detectDragGestures(
-                        onDragStart = { offset ->
-                            isDrawing = true
-                            currentPath.value.moveTo(offset.x, offset.y)
-                            currentStrokeBuilder.addPoint(Point.create(offset.x, offset.y))
-                            currentPathPoints = listOf(offset)
-                        },
-                        onDrag = { change, _ ->
-                            val newOffset = change.position
-                            currentPath.value.lineTo(newOffset.x, newOffset.y)
-                            currentStrokeBuilder.addPoint(
-                                Point.create(
-                                    newOffset.x,
-                                    newOffset.y
-                                )
-                            )
-                            currentPathPoints = currentPathPoints + newOffset
-                        },
-                        onDragEnd = {
-                            isDrawing = false
-                            paths.add(currentPath.value)
-                            currentPath.value = Path()
-                            inkBuilder.addStroke(currentStrokeBuilder.build())
-                            currentStrokeBuilder = InkStroke.builder()
-                            currentPathPoints = emptyList()
-                        }
-                    )
-                }
-                .clipToBounds()
-        ) {
-            Canvas(
-                modifier = Modifier
-                    .height(300.dp)
-                    .background(Color.Red)
-            ) {
-                drawRect(color = Color.Blue)
-                paths.forEach { path ->
-                    drawPath(
-                        path = path,
-                        color = strokeColor,
-                        style = Stroke(
-                            width = strokeWidth.toPx(),
-                            cap = StrokeCap.Round,
-                            join = StrokeJoin.Round
-                        )
-                    )
-                }
-                if (currentPathPoints.isNotEmpty()) {
-                    val path = Path()
-                    path.moveTo(currentPathPoints.first().x, currentPathPoints.first().y)
-                    for (i in 1 until currentPathPoints.size) {
-                        path.lineTo(currentPathPoints[i].x, currentPathPoints[i].y)
-                    }
-                    drawPath(
-                        path = path,
-                        color = strokeColor,
-                        style = Stroke(
-                            width = strokeWidth.toPx(),
-                            cap = StrokeCap.Round,
-                            join = StrokeJoin.Round
-                        )
-                    )
-                }
-            }
+        is UiState.SummaryScreen -> {
+            val results = (uiState as UiState.SummaryScreen).results
+            // Display the summary UI
+            SummaryComposable(results = results)
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Recognized Text: $recognizedText",
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            fontSize = 18.sp
-        )
     }
 }
 
@@ -266,9 +158,204 @@ fun InkRecognitionScreen(
 fun InkRecognitionScreenPreview() {
     // val modelManager = ModelManager()
     AppTheme {
-        InkRecognitionScreen(Modifier, null, viewModel())
+        InkRecognitionScreen(null, viewModel())
     }
 }
+
+
+@Composable
+fun InkRecognitionBox(
+    modifier: Modifier = Modifier,
+    modelManager: ModelManager? = null,
+    onAnswerSubmit: (String) -> Unit
+) {
+    val recognitionDelayMillis = 1000L
+
+    var recognizedText by remember { mutableStateOf("") }
+    val currentPath = remember { mutableStateOf(Path()) }
+    val paths = remember { mutableStateListOf<Path>() }
+    var currentStrokeBuilder = remember { InkStroke.builder() }
+    var inkBuilder by remember { mutableStateOf(Ink.builder()) }
+    var currentPathPoints by remember { mutableStateOf(listOf<Offset>()) }
+    var isDrawing by remember { mutableStateOf(false) }
+
+    val backgroundAnswer: ImageBitmap = ImageBitmap.imageResource(id = R.drawable.paper_answer)
+
+    val strokeColor = MaterialTheme.colorScheme.primary
+    val strokeWidth = 5.dp
+
+    LaunchedEffect(key1 = isDrawing) {
+        if (!isDrawing && inkBuilder.build().strokes.isNotEmpty()) {
+            delay(recognitionDelayMillis)
+            modelManager?.let { manager ->
+                recognizeInk(manager, inkBuilder.build()) { result ->
+                    recognizedText = result
+                    onAnswerSubmit(result)
+                    // Reset the ink so the next recognized value doesn't include already
+                    // recognized characters.
+                    paths.clear()
+                    inkBuilder = Ink.builder()
+                }
+            }
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .drawBehind {
+                drawImage(
+                    image = backgroundAnswer,
+                    dstOffset = IntOffset(0, 0),
+                    dstSize = IntSize(size.width.toInt(), size.height.toInt())
+                )
+            }
+            .pointerInput(Unit) {
+                detectDragGestures(
+                    onDragStart = { offset ->
+                        isDrawing = true
+                        currentPath.value.moveTo(offset.x, offset.y)
+                        currentStrokeBuilder.addPoint(Point.create(offset.x, offset.y))
+                        currentPathPoints = listOf(offset)
+                    },
+                    onDrag = { change, _ ->
+                        val newOffset = change.position
+                        currentPath.value.lineTo(newOffset.x, newOffset.y)
+                        currentStrokeBuilder.addPoint(
+                            Point.create(
+                                newOffset.x,
+                                newOffset.y
+                            )
+                        )
+                        currentPathPoints = currentPathPoints + newOffset
+                    },
+                    onDragEnd = {
+                        isDrawing = false
+                        paths.add(currentPath.value)
+                        currentPath.value = Path()
+                        inkBuilder.addStroke(currentStrokeBuilder.build())
+                        currentStrokeBuilder = InkStroke.builder()
+                        currentPathPoints = emptyList()
+                    }
+                )
+            }
+            .clipToBounds()
+    ) {
+        Canvas(
+            modifier = Modifier
+                .height(300.dp)
+                .fillMaxWidth()
+        ) {
+            paths.forEach { path ->
+                drawPath(
+                    path = path,
+                    color = strokeColor,
+                    style = Stroke(
+                        width = strokeWidth.toPx(),
+                        cap = StrokeCap.Round,
+                        join = StrokeJoin.Round
+                    )
+                )
+            }
+            if (currentPathPoints.isNotEmpty()) {
+                val path = Path()
+                path.moveTo(currentPathPoints.first().x, currentPathPoints.first().y)
+                for (i in 1 until currentPathPoints.size) {
+                    path.lineTo(currentPathPoints[i].x, currentPathPoints[i].y)
+                }
+                drawPath(
+                    path = path,
+                    color = strokeColor,
+                    style = Stroke(
+                        width = strokeWidth.toPx(),
+                        cap = StrokeCap.Round,
+                        join = StrokeJoin.Round
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ExerciseComposable(exercise: ExerciseBook.Exercise,
+                       modelManager: ModelManager? = null,
+                       onAnswerSubmit: (String) -> Unit) {
+
+    val backgroundAll: ImageBitmap = ImageBitmap.imageResource(id = R.drawable.paper_top)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .drawBehind {
+                drawImage(
+                    image = backgroundAll,
+                    dstOffset = IntOffset(0, 0),
+                    dstSize = IntSize(size.width.toInt(), size.height.toInt())
+                )
+            }
+    ) {
+        Text(
+            text = exercise.question(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(312.dp)
+                .wrapContentHeight(align = Alignment.CenterVertically),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 96.sp,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // box for input here
+        InkRecognitionBox(Modifier, modelManager, onAnswerSubmit)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Recognized Text: ???", // $recognizedText",
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            fontSize = 18.sp
+        )
+    }
+}
+
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Composable
+fun ExerciseComposablePreview() {
+    AppTheme {
+        ExerciseComposable(ExerciseBook.Addition(1, 2), null) {}
+    }
+}
+
+@Composable
+fun SummaryComposable(results: String) {
+    // UI to display the summary of results
+    Column {
+        Text(text = "Summary:")
+        Text(text = results)
+        // Optionally, add a button to restart exercises or navigate elsewhere
+    }
+}
+
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Composable
+fun SummaryComposablePreview() {
+    AppTheme {
+        SummaryComposable("results")
+    }
+}
+
 
 private fun recognizeInk(
     modelManager: ModelManager,
