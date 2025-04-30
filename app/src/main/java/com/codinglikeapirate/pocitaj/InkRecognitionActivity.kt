@@ -7,10 +7,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -333,7 +336,7 @@ fun ExerciseComposable(exercise: ExerciseBook.Exercise,
             is AnswerResult.Correct -> {
                 resultImageRes = R.drawable.cat_heart // Replace with your correct image resource
                 showResultImage = true
-                delay(500) // Display for 500 milliseconds
+                delay(timeMillis = AppMotion.longDuration.toLong()) // Display for 500 milliseconds
                 showResultImage = false
                 // Call ViewModel function to signal animation is finished
                 exerciseBookViewModel.onResultAnimationFinished()
@@ -341,7 +344,7 @@ fun ExerciseComposable(exercise: ExerciseBook.Exercise,
             is AnswerResult.Incorrect -> {
                 resultImageRes = R.drawable.cat_cry // Replace with your incorrect image resource
                 showResultImage = true
-                delay(500) // Display for 500 milliseconds
+                delay(AppMotion.longDuration.toLong()) // Display for 500 milliseconds
                 showResultImage = false
                 // Call ViewModel function to signal animation is finished
                 exerciseBookViewModel.onResultAnimationFinished()
@@ -349,7 +352,7 @@ fun ExerciseComposable(exercise: ExerciseBook.Exercise,
             is AnswerResult.Unrecognized -> {
                 resultImageRes = R.drawable.cat_big_eyes // Replace with your incorrect image resource
                 showResultImage = true
-                delay(500) // Display for 500 milliseconds
+                delay(AppMotion.mediumDuration.toLong()) // Display for 500 milliseconds
                 showResultImage = false
                 // Call ViewModel function to signal animation is finished
                 exerciseBookViewModel.onResultAnimationFinished()
@@ -373,16 +376,26 @@ fun ExerciseComposable(exercise: ExerciseBook.Exercise,
                 )
             }
     ) {
-        Text(
-            text = exercise.question(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(312.dp)
-                .wrapContentHeight(align = Alignment.CenterVertically),
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = 96.sp,
-        )
+        // Animated content for the exercise question text
+        AnimatedContent(
+            targetState = exercise.question(), // Animate when the exercise question changes
+            transitionSpec = {
+                // Fade in the new text and fade out the old text
+                fadeIn(animationSpec = tween(AppMotion.mediumDuration)) togetherWith fadeOut(animationSpec = tween(AppMotion.mediumDuration))
+            }
+        ) { targetText -> // The target state (new exercise question)
+            Text(
+                text = targetText,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(312.dp)
+                    .wrapContentHeight(align = Alignment.CenterVertically),
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 96.sp,
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         // box for input here
