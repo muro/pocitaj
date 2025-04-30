@@ -20,7 +20,7 @@
             android:exported="false"
             android:theme="@style/Theme.Pocitaj" />
         <activity
-            android:name=".InkRecognitionActivity"
+            android:name=".ExerciseBookActivity"
             android:exported="true"
             android:theme="@style/Theme.Pocitaj">
             <intent-filter>

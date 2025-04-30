@@ -63,7 +63,7 @@ class SolveActivity : AppCompatActivity(), StrokeManager.DownloadedModelsChanged
 
         val inkActivityButton = findViewById<View>(R.id.compose_ink)
         inkActivityButton.setOnClickListener {
-            val intent = Intent(this, InkRecognitionActivity::class.java)
+            val intent = Intent(this, ExerciseBookActivity::class.java)
             startActivity(intent)
         }
     }

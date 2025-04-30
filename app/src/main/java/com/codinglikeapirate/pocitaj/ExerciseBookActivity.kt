@@ -130,7 +130,7 @@ class ExerciseBookViewModel : ViewModel() {
     }
 }
 
-class InkRecognitionActivity : ComponentActivity() {
+class ExerciseBookActivity : ComponentActivity() {
 
     @JvmField
     @VisibleForTesting
