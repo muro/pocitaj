@@ -12,13 +12,16 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +32,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 
 class ResultsActivity : ComponentActivity() {
 
@@ -58,6 +62,7 @@ class ResultsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         val extras = intent.extras
         val exercises = extras?.getStringArray(EXERCISES_KEY) ?: emptyArray()
@@ -79,7 +84,10 @@ class ResultsActivity : ComponentActivity() {
     @Composable
     fun Results(results: List<ResultDescription>, modifier: Modifier = Modifier) {
         Surface(
-            modifier = modifier.fillMaxSize(),
+            modifier = modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(vertical = 16.dp),
             color = MaterialTheme.colorScheme.background
         ) {
             ResultsList(results)
@@ -166,17 +174,15 @@ class ResultsActivity : ComponentActivity() {
     }
 
     @Preview(
-        widthDp = 320,
-        heightDp = 480,
+        device = "id:pixel_4",
         showSystemUi = true,
-        name = "Small phone"
+        name = "Pixel 4"
     )
     @Preview(
-        widthDp = 320,
-        heightDp = 480,
+        device = "id:pixel_9_pro_xl",
         showSystemUi = true,
         uiMode = Configuration.UI_MODE_NIGHT_YES,
-        name = "Small phone horizontal"
+        name = "Pixel 9 Pro XL"
     )
     @Composable
     fun ResultsPreview() {
