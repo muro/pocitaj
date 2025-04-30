@@ -76,7 +76,7 @@ sealed class UiState {
     data class LoadingModel(val errorMessage: String? = null) : UiState()
     data object ExerciseSetup : UiState()
     data class ExerciseScreen(val currentExercise: ExerciseBook.Exercise) : UiState()
-    data class SummaryScreen(val results: String) : UiState()
+    data class SummaryScreen(val results: List<ResultDescription>) : UiState()
 }
 
 // Are we animating a result ack
@@ -98,6 +98,8 @@ class ExerciseBookViewModel : ViewModel() {
 
     private val _answerResult = MutableStateFlow<AnswerResult>(AnswerResult.None)
     val answerResult: StateFlow<AnswerResult> = _answerResult.asStateFlow()
+
+    private val results = ArrayList<ResultDescription>()
 
     fun downloadModel(modelManager: ModelManager, languageCode: String) {
         modelManager.setModel(languageCode)
@@ -149,10 +151,25 @@ class ExerciseBookViewModel : ViewModel() {
             _uiState.value = UiState.ExerciseScreen(currentExercise())
         } else {
             // All exercises completed, calculate results and transition
-            val results = "You finished all exercises!" // Calculate actual results
+            resultsList()
             _uiState.value = UiState.SummaryScreen(results)
         }
         _answerResult.value = AnswerResult.None // Reset answer result state
+    }
+
+    fun resultsList() {
+        results.clear()
+        for (exercise in _exerciseBook.value.historyList) {
+            results.add(
+                ResultDescription(
+                    exercise.equation(),
+                    ResultStatus.fromBooleanPair(
+                        exercise.solved(),
+                        exercise.correct()
+                    )
+                )
+            )
+        }
     }
 
     init {
@@ -227,8 +244,7 @@ fun ExerciseScreen(
         }
         is UiState.SummaryScreen -> {
             val results = (uiState as UiState.SummaryScreen).results
-            // Display the summary UI
-            SummaryComposable(results = results)
+            Results(results = results)
         }
     }
 }
@@ -553,28 +569,6 @@ fun ExerciseComposable(exercise: ExerciseBook.Exercise,
 fun ExerciseComposablePreview() {
     AppTheme {
         ExerciseComposable(ExerciseBook.Addition(1, 2), null, viewModel()) {}
-    }
-}
-
-@Composable
-fun SummaryComposable(results: String) {
-    // UI to display the summary of results
-    Column {
-        Text(text = "Summary:")
-        Text(text = results)
-        // Optionally, add a button to restart exercises or navigate elsewhere
-    }
-}
-
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_NO,
-    showBackground = true,
-    name = "Light Mode"
-)
-@Composable
-fun SummaryComposablePreview() {
-    AppTheme {
-        SummaryComposable("results")
     }
 }
 
