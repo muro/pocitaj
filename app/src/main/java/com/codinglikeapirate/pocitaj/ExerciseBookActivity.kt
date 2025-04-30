@@ -73,8 +73,8 @@ import com.google.mlkit.vision.digitalink.Ink.Stroke as InkStroke
 
 // Which screen are we currently on:
 sealed class UiState {
-    object LoadingModel : UiState()
-    object ExerciseSetup : UiState()
+    data class LoadingModel(val errorMessage: String? = null) : UiState()
+    data object ExerciseSetup : UiState()
     data class ExerciseScreen(val currentExercise: ExerciseBook.Exercise) : UiState()
     data class SummaryScreen(val results: String) : UiState()
 }
@@ -93,7 +93,7 @@ class ExerciseBookViewModel : ViewModel() {
     private val _exerciseBook: MutableState<ExerciseBook> = mutableStateOf(ExerciseBook())
     private var _exerciseIndex = 0
 
-    private val _uiState = MutableStateFlow<UiState>(UiState.LoadingModel)
+    private val _uiState = MutableStateFlow<UiState>(UiState.LoadingModel())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private val _answerResult = MutableStateFlow<AnswerResult>(AnswerResult.None)
@@ -102,11 +102,11 @@ class ExerciseBookViewModel : ViewModel() {
     fun downloadModel(modelManager: ModelManager, languageCode: String) {
         modelManager.setModel(languageCode)
         modelManager.download().addOnSuccessListener {
+            Log.i("ExerciseBookViewModel", "Model download succeeded")
             _uiState.value = UiState.ExerciseSetup
         }.addOnFailureListener {
             Log.e("ExerciseBookViewModel", "Model download failed", it)
-            // stuck in an unhappy place
-        }
+            _uiState.value = UiState.LoadingModel(errorMessage = it.localizedMessage ?: "Unknown error")}
     }
 
     // Function to handle exercise setup completion
@@ -200,7 +200,12 @@ fun ExerciseScreen(
 
     when (uiState) {
         is UiState.LoadingModel -> {
-            LoadingScreen() // Display loading screen
+            LoadingScreen(uiState as UiState.LoadingModel)
+            {
+                modelManager?.let {
+                    exerciseBookViewModel.downloadModel(it, "en-US") // Start download
+                }
+            }
         }
         is UiState.ExerciseSetup -> {
             ExerciseSetupScreen(
@@ -247,16 +252,29 @@ fun ExerciseScreenPreview() {
 }
 
 @Composable
-fun LoadingScreen() {
+fun LoadingScreen(state: UiState.LoadingModel, retry: () -> Unit) {
     // UI for the loading screen (e.g., progress indicator, text)
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        CircularProgressIndicator()
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("Downloading model...")
+        if (state.errorMessage == null) {
+            // Display loading indicator and message
+            CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Downloading model...")
+        } else {
+            // Display error message and potentially a retry button
+            Text("Error downloading model:", color = MaterialTheme.colorScheme.error)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(state.errorMessage)
+            Spacer(modifier = Modifier.height(16.dp))
+            // Add a retry button that calls ViewModel to retry download
+            Button(onClick = { retry() }) {
+                Text("Retry")
+            }
+        }
     }
 }
 
@@ -264,7 +282,9 @@ fun LoadingScreen() {
 fun ExerciseSetupScreen(onStartExercises: (ExerciseConfig) -> Unit) {
     // UI for choosing exercise type and starting exercises
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
