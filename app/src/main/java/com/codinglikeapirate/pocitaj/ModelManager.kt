@@ -1,7 +1,6 @@
 package com.codinglikeapirate.pocitaj
 
 import android.util.Log
-import com.google.android.gms.tasks.SuccessContinuation
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.common.MlKitException
@@ -12,17 +11,12 @@ import com.google.mlkit.vision.digitalink.DigitalInkRecognitionModel
 import com.google.mlkit.vision.digitalink.DigitalInkRecognitionModelIdentifier
 import com.google.mlkit.vision.digitalink.DigitalInkRecognizer
 import com.google.mlkit.vision.digitalink.DigitalInkRecognizerOptions
-import java.util.HashSet
 
 /** Class to manage model downloading, deletion, and selection.  */
 class ModelManager {
     private var model: DigitalInkRecognitionModel? = null
     var recognizer: DigitalInkRecognizer? = null
-    val remoteModelManager = RemoteModelManager.getInstance()
-
-    //     public DigitalInkRecognizer getRecognizer() {
-    //        return recognizer;
-    //    }
+    private val remoteModelManager = RemoteModelManager.getInstance()
 
     fun setModel(languageTag: String): String {
         // Clear the old model and recognizer.
@@ -53,7 +47,7 @@ class ModelManager {
         return "Model set for language: $languageTag"
     }
 
-    fun checkIsModelDownloaded(): Task<Boolean?> {
+    private fun checkIsModelDownloaded(): Task<Boolean?> {
         return remoteModelManager.isModelDownloaded(model!!)
     }
 
@@ -86,23 +80,6 @@ class ModelManager {
                 )
             }
     }
-
-    val downloadedModelLanguages: Task<Set<String>>
-        get() = remoteModelManager
-            .getDownloadedModels(DigitalInkRecognitionModel::class.java)
-            .onSuccessTask(
-                SuccessContinuation { remoteModels: Set<DigitalInkRecognitionModel>? ->
-                    val result: MutableSet<String> = HashSet()
-                    for (model in remoteModels!!) {
-                        result.add(model.modelIdentifier.languageTag)
-                    }
-                    Log.i(
-                        TAG,
-                        "Downloaded models for languages:$result"
-                    )
-                    Tasks.forResult<Set<String>>(result.toSet())
-                }
-            )
 
     fun download(): Task<String?> {
         return if (model == null) {

@@ -111,6 +111,13 @@ class ExerciseBookViewModel : ViewModel() {
             _uiState.value = UiState.LoadingModel(errorMessage = it.localizedMessage ?: "Unknown error")}
     }
 
+    fun deleteActiveModel(modelManager: ModelManager, languageCode: String) {
+        modelManager.setModel(languageCode)
+        modelManager.deleteActiveModel().addOnSuccessListener {
+            Log.i("ExerciseBookViewModel", "Model deleted")
+        }
+    }
+
     // Function to handle exercise setup completion
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
         if (exerciseConfig.type == "addition") {
@@ -157,7 +164,7 @@ class ExerciseBookViewModel : ViewModel() {
         _answerResult.value = AnswerResult.None // Reset answer result state
     }
 
-    fun resultsList() {
+    private fun resultsList() {
         results.clear()
         for (exercise in _exerciseBook.value.historyList) {
             results.add(
@@ -228,6 +235,11 @@ fun ExerciseScreen(
             ExerciseSetupScreen(
                 onStartExercises = { config ->
                     exerciseBookViewModel.startExercises(config)
+                },
+                onModelDelete = {
+                    modelManager?.let {
+                        exerciseBookViewModel.deleteActiveModel(it, "en-US")
+                    }
                 }
             ) // Display exercise setup screen
         }
@@ -295,7 +307,8 @@ fun LoadingScreen(state: UiState.LoadingModel, retry: () -> Unit) {
 }
 
 @Composable
-fun ExerciseSetupScreen(onStartExercises: (ExerciseConfig) -> Unit) {
+fun ExerciseSetupScreen(onStartExercises: (ExerciseConfig) -> Unit,
+                        onModelDelete: () -> Unit) {
     // UI for choosing exercise type and starting exercises
     Column(
         modifier = Modifier
@@ -314,6 +327,13 @@ fun ExerciseSetupScreen(onStartExercises: (ExerciseConfig) -> Unit) {
         }) {
             Text("Start Exercises")
         }
+
+        Spacer(modifier = Modifier.height(64.dp))
+        // Leave in for now
+        Button(onClick = { onModelDelete() }) {
+            Text("Delete model")
+        }
+
     }
 }
 
