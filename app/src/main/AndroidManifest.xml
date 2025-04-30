@@ -16,10 +16,6 @@
         android:theme="@style/Theme.Pocitaj"
         tools:targetApi="31">
         <activity
-            android:name=".ResultsActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Pocitaj" />
-        <activity
             android:name=".ExerciseBookActivity"
             android:exported="true"
             android:theme="@style/Theme.Pocitaj">

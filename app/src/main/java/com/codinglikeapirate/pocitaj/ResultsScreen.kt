@@ -1,10 +1,7 @@
 package com.codinglikeapirate.pocitaj
 
 import android.content.res.Configuration
-import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.compose.material3.Text
-import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
@@ -32,7 +29,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowCompat
 
 enum class ResultStatus {
     CORRECT, INCORRECT, NOT_RECOGNIZED;
@@ -49,45 +45,6 @@ enum class ResultStatus {
 }
 
 data class ResultDescription(val equation: String, val status: ResultStatus)
-
-class ResultsActivity : ComponentActivity() {
-
-    companion object {
-        const val EXERCISES_KEY = "exercises"
-        const val RECOGNIZED_KEY = "recognized"
-        const val CORRECTS_KEY = "corrects"
-    }
-
-    private val results = ArrayList<ResultDescription>()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        val extras = intent.extras
-        val exercises = extras?.getStringArray(EXERCISES_KEY) ?: emptyArray()
-        val recognized = extras?.getBooleanArray(RECOGNIZED_KEY) ?: booleanArrayOf()
-        val corrects = extras?.getBooleanArray(CORRECTS_KEY) ?: booleanArrayOf()
-
-        results.clear()
-        for (i in exercises.indices) {
-            results.add(
-                ResultDescription(
-                    exercises[i],
-                    ResultStatus.fromBooleanPair(
-                        recognized.getOrElse(i) { false },
-                        corrects.getOrElse(i) { false })
-                )
-            )
-        }
-
-        setContent {
-            AppTheme {
-                Results(results)
-            }
-        }
-    }
-}
 
 @Composable
 fun Results(results: List<ResultDescription>, modifier: Modifier = Modifier) {
