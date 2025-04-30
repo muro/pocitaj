@@ -101,19 +101,23 @@ class ExerciseBookViewModel : ViewModel() {
             } else {
                 _answerResult.value = AnswerResult.Incorrect
             }
-            ++_exerciseIndex
             if (_exerciseIndex < _exerciseBook.value.historyList.size) {
-                _uiState.value = UiState.ExerciseScreen(currentExercise())
-            } else {
-                _uiState.value = UiState.SummaryScreen("summary") // _exerciseBook.value.stats)
+                ++_exerciseIndex
             }
         } ?: run {
             _answerResult.value = AnswerResult.Unrecognized
         }
     }
 
-    fun resetAnswerResult() {
-        _answerResult.value = AnswerResult.None
+    fun onResultAnimationFinished() {
+        if (_exerciseIndex < _exerciseBook.value.historyList.size) {
+            _uiState.value = UiState.ExerciseScreen(currentExercise())
+        } else {
+            // All exercises completed, calculate results and transition
+            val results = "You finished all exercises!" // Calculate actual results
+            _uiState.value = UiState.SummaryScreen(results)
+        }
+        _answerResult.value = AnswerResult.None // Reset answer result state
     }
 
     init {
@@ -331,21 +335,24 @@ fun ExerciseComposable(exercise: ExerciseBook.Exercise,
                 showResultImage = true
                 delay(500) // Display for 500 milliseconds
                 showResultImage = false
-                exerciseBookViewModel.resetAnswerResult() // Reset state in ViewModel
+                // Call ViewModel function to signal animation is finished
+                exerciseBookViewModel.onResultAnimationFinished()
             }
             is AnswerResult.Incorrect -> {
                 resultImageRes = R.drawable.cat_cry // Replace with your incorrect image resource
                 showResultImage = true
                 delay(500) // Display for 500 milliseconds
                 showResultImage = false
-                exerciseBookViewModel.resetAnswerResult() // Reset state in ViewModel
+                // Call ViewModel function to signal animation is finished
+                exerciseBookViewModel.onResultAnimationFinished()
             }
             is AnswerResult.Unrecognized -> {
                 resultImageRes = R.drawable.cat_big_eyes // Replace with your incorrect image resource
                 showResultImage = true
                 delay(500) // Display for 500 milliseconds
                 showResultImage = false
-                exerciseBookViewModel.resetAnswerResult() // Reset state in ViewModel
+                // Call ViewModel function to signal animation is finished
+                exerciseBookViewModel.onResultAnimationFinished()
             }
             is AnswerResult.None -> {
                 resultImageRes = null
