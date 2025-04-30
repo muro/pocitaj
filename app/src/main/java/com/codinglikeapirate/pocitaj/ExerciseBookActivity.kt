@@ -60,7 +60,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
@@ -69,7 +68,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import com.google.mlkit.vision.digitalink.Ink.Stroke as InkStroke
 
 
@@ -102,11 +100,12 @@ class ExerciseBookViewModel : ViewModel() {
     val answerResult: StateFlow<AnswerResult> = _answerResult.asStateFlow()
 
     fun downloadModel(modelManager: ModelManager, languageCode: String) {
-        viewModelScope.launch {
-            _uiState.value = UiState.LoadingModel // Ensure we are in loading state
-            delay(2000) // Simulate download time
-            modelManager.setModel(languageCode) // Set the model after simulated download
-            _uiState.value = UiState.ExerciseSetup // Move to setup after download
+        modelManager.setModel(languageCode)
+        modelManager.download().addOnSuccessListener {
+            _uiState.value = UiState.ExerciseSetup
+        }.addOnFailureListener {
+            Log.e("ExerciseBookViewModel", "Model download failed", it)
+            // stuck in an unhappy place
         }
     }
 
