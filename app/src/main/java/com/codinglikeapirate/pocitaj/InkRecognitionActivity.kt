@@ -7,7 +7,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,6 +44,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
@@ -58,9 +65,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import com.google.mlkit.vision.digitalink.Ink.Stroke as InkStroke
 
 
+// Which screen are we currently on:
 sealed class UiState {
     data class ExerciseScreen(val currentExercise: ExerciseBook.Exercise) : UiState()
     data class SummaryScreen(val results: String) : UiState()
+}
+
+// Are we animating a result ack
+sealed class AnswerResult {
+    data object Correct : AnswerResult()
+    data object Incorrect : AnswerResult()
+    data object Unrecognized : AnswerResult()
+    data object None : AnswerResult() // Initial state
 }
 
 class ExerciseBookViewModel : ViewModel() {
@@ -71,6 +87,9 @@ class ExerciseBookViewModel : ViewModel() {
     )
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
+    private val _answerResult = MutableStateFlow<AnswerResult>(AnswerResult.None)
+    val answerResult: StateFlow<AnswerResult> = _answerResult.asStateFlow()
+
     private fun currentExercise(): ExerciseBook.Exercise {
         return _exerciseBook.value.historyList[_exerciseIndex]
     }
@@ -78,9 +97,9 @@ class ExerciseBookViewModel : ViewModel() {
     fun checkAnswer(answer: String) {
         answer.toIntOrNull()?.let {
             if (currentExercise().solve(it)) {
-                // animate the happy state
+                _answerResult.value = AnswerResult.Correct
             } else {
-                // animate the sad state
+                _answerResult.value = AnswerResult.Incorrect
             }
             ++_exerciseIndex
             if (_exerciseIndex < _exerciseBook.value.historyList.size) {
@@ -88,7 +107,13 @@ class ExerciseBookViewModel : ViewModel() {
             } else {
                 _uiState.value = UiState.SummaryScreen("summary") // _exerciseBook.value.stats)
             }
+        } ?: run {
+            _answerResult.value = AnswerResult.Unrecognized
         }
+    }
+
+    fun resetAnswerResult() {
+        _answerResult.value = AnswerResult.None
     }
 
     init {
@@ -112,14 +137,14 @@ class InkRecognitionActivity : ComponentActivity() {
 
         setContent {
             AppTheme {
-                InkRecognitionScreen(modelManager, viewModel)
+                ExerciseScreen(modelManager, viewModel)
             }
         }
     }
 }
 
 @Composable
-fun InkRecognitionScreen(
+fun ExerciseScreen(
     modelManager: ModelManager? = null,
     exerciseBookViewModel: ExerciseBookViewModel
 ) {
@@ -132,6 +157,7 @@ fun InkRecognitionScreen(
             ExerciseComposable(
                 exercise = currentExercise,
                 modelManager = modelManager,
+                exerciseBookViewModel = exerciseBookViewModel,
                 onAnswerSubmit = { answer ->
                     exerciseBookViewModel.checkAnswer(answer)
             })
@@ -155,10 +181,10 @@ fun InkRecognitionScreen(
     name = "Dark Mode"
 )
 @Composable
-fun InkRecognitionScreenPreview() {
+fun ExerciseScreenPreview() {
     // val modelManager = ModelManager()
     AppTheme {
-        InkRecognitionScreen(null, viewModel())
+        ExerciseScreen(null, viewModel())
     }
 }
 
@@ -280,9 +306,53 @@ fun InkRecognitionBox(
 @Composable
 fun ExerciseComposable(exercise: ExerciseBook.Exercise,
                        modelManager: ModelManager? = null,
+                       exerciseBookViewModel: ExerciseBookViewModel,
                        onAnswerSubmit: (String) -> Unit) {
 
     val backgroundAll: ImageBitmap = ImageBitmap.imageResource(id = R.drawable.paper_top)
+
+    // Observe the answer result state
+    val answerResult by exerciseBookViewModel.answerResult.collectAsState()
+    var showResultImage by remember { mutableStateOf(false) }
+    var resultImageRes by remember { mutableStateOf<Int?>(null) }
+
+    val imageScale by animateFloatAsState(
+        targetValue = if (showResultImage) 1.2f else 1f,
+        label = "imageScale")
+    val alphaScale by animateFloatAsState(
+        targetValue = if (showResultImage) 1f else 0f,
+        label = "alphaScale")
+
+
+    LaunchedEffect(answerResult) {
+        when (answerResult) {
+            is AnswerResult.Correct -> {
+                resultImageRes = R.drawable.cat_heart // Replace with your correct image resource
+                showResultImage = true
+                delay(500) // Display for 500 milliseconds
+                showResultImage = false
+                exerciseBookViewModel.resetAnswerResult() // Reset state in ViewModel
+            }
+            is AnswerResult.Incorrect -> {
+                resultImageRes = R.drawable.cat_cry // Replace with your incorrect image resource
+                showResultImage = true
+                delay(500) // Display for 500 milliseconds
+                showResultImage = false
+                exerciseBookViewModel.resetAnswerResult() // Reset state in ViewModel
+            }
+            is AnswerResult.Unrecognized -> {
+                resultImageRes = R.drawable.cat_big_eyes // Replace with your incorrect image resource
+                showResultImage = true
+                delay(500) // Display for 500 milliseconds
+                showResultImage = false
+                exerciseBookViewModel.resetAnswerResult() // Reset state in ViewModel
+            }
+            is AnswerResult.None -> {
+                resultImageRes = null
+                showResultImage = false
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -319,6 +389,32 @@ fun ExerciseComposable(exercise: ExerciseBook.Exercise,
             textAlign = TextAlign.Center,
             fontSize = 18.sp
         )
+
+        // Animated visibility for the result image
+        AnimatedVisibility(
+            visible = showResultImage && resultImageRes != null,
+            enter = fadeIn(), // Fade in the image
+            exit = fadeOut() // Fade out the image
+        ) {
+            // Load the image resource
+            val imageBitmap = resultImageRes?.let { ImageBitmap.imageResource(id = it) }
+
+            if (imageBitmap != null) {
+                Image(
+                    bitmap = imageBitmap,
+                    contentDescription = null, // Provide a proper content description
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally) // Center the image
+                        .size(100.dp) // Set the size of the image
+                        .graphicsLayer {
+                            // Animate scale and alpha for zoom and fade
+                            scaleX = imageScale
+                            scaleY = imageScale
+                            alpha = alphaScale
+                        }
+                )
+            }
+        }
     }
 }
 
@@ -330,7 +426,7 @@ fun ExerciseComposable(exercise: ExerciseBook.Exercise,
 @Composable
 fun ExerciseComposablePreview() {
     AppTheme {
-        ExerciseComposable(ExerciseBook.Addition(1, 2), null) {}
+        ExerciseComposable(ExerciseBook.Addition(1, 2), null, viewModel()) {}
     }
 }
 
