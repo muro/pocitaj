@@ -179,6 +179,10 @@ class ExerciseBookViewModel : ViewModel() {
         }
     }
 
+    fun switchToExerciseSetup() {
+        _uiState.value = UiState.ExerciseSetup
+    }
+
     init {
         // initialize with 2 exercises:
         _exerciseBook.value.generate()
@@ -256,7 +260,9 @@ fun ExerciseScreen(
         }
         is UiState.SummaryScreen -> {
             val results = (uiState as UiState.SummaryScreen).results
-            Results(results = results)
+            Results(results = results) {
+                exerciseBookViewModel.switchToExerciseSetup()
+            }
         }
     }
 }

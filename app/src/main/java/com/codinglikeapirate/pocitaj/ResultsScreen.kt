@@ -5,6 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.res.painterResource
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
@@ -47,15 +49,18 @@ enum class ResultStatus {
 data class ResultDescription(val equation: String, val status: ResultStatus)
 
 @Composable
-fun Results(results: List<ResultDescription>, modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier
+fun Results(results: List<ResultDescription>, onDone: () -> Unit) {
+    Box(
+        modifier = Modifier
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.safeDrawing)
-            .padding(vertical = 16.dp),
-        color = MaterialTheme.colorScheme.background
+            .padding(vertical = 16.dp)
     ) {
-        ResultsList(results)
+        ResultsList(results, modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp))
+            //Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = onDone, modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 32.dp)) {
+            Text("Done")
+        }
     }
 }
 
@@ -77,9 +82,7 @@ fun PreviewResultsList() {
     results.add(ResultDescription("3 + 3 = ?", ResultStatus.NOT_RECOGNIZED))
 
     AppTheme {
-        Surface {
-            ResultsList(results)
-        }
+        ResultsList(results)
     }
 }
 
@@ -137,9 +140,7 @@ fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
 @Composable
 fun PreviewResultCard() {
     AppTheme {
-        Surface {
-            ResultCard(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT))
-        }
+        ResultCard(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT))
     }
 }
 
@@ -160,6 +161,6 @@ fun ResultsPreview() {
     results.add(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT))
     results.add(ResultDescription("3 + 3 ≠ 5", ResultStatus.INCORRECT))
     AppTheme {
-        Results(results)
+        Results(results) {}
     }
 }
