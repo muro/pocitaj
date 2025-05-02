@@ -56,8 +56,9 @@ fun Results(results: List<ResultDescription>, onDone: () -> Unit) {
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .padding(vertical = 16.dp)
     ) {
-        ResultsList(results, modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp))
-            //Spacer(modifier = Modifier.height(16.dp))
+        ResultsList(results, modifier = Modifier.fillMaxSize().padding(
+            bottom = 72.dp, // Add padding at the bottom to make space for the button
+            start = 16.dp, end = 16.dp, top = 16.dp))
         Button(onClick = onDone, modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 32.dp)) {
             Text("Done")
         }
@@ -66,9 +67,9 @@ fun Results(results: List<ResultDescription>, onDone: () -> Unit) {
 
 @Composable
 fun ResultsList(results: List<ResultDescription>, modifier: Modifier = Modifier) {
-    LazyColumn {
+    LazyColumn(modifier) {
         items(results) { result ->
-            ResultCard(result, modifier)
+            ResultCard(result, modifier = Modifier.fillMaxWidth())
         }
     }
 }
@@ -158,8 +159,10 @@ fun PreviewResultCard() {
 @Composable
 fun ResultsPreview() {
     val results = ArrayList<ResultDescription>()
-    results.add(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT))
-    results.add(ResultDescription("3 + 3 ≠ 5", ResultStatus.INCORRECT))
+    for (i in 1..5) {
+        results.add(ResultDescription("$i + ${i + 2} = ${2 * i + 2}", ResultStatus.CORRECT))
+        results.add(ResultDescription("$i + ${i + 1} ≠ $i", ResultStatus.CORRECT))
+    }
     AppTheme {
         Results(results) {}
     }

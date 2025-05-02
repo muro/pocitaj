@@ -184,9 +184,9 @@ class ExerciseBookViewModel : ViewModel() {
     }
 
     init {
-        // initialize with 2 exercises:
-        _exerciseBook.value.generate()
-        _exerciseBook.value.generate()
+        for (i in 1..10) {
+            _exerciseBook.value.generate()
+        }
     }
 }
 
