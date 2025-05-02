@@ -4,6 +4,10 @@ import java.util.Locale
 import java.util.Random
 
 
+enum class ExerciseType {
+    ADDITION,
+    SUBTRACTION
+}
 // Holds a set of exercises to do in a session.
 // Each Exercise can be checked for correct solution
 class ExerciseBook {
@@ -14,25 +18,32 @@ class ExerciseBook {
     }
 
     private val random = Random() //1234)
-    private val history = mutableListOf<Addition>()
+    private val history = mutableListOf<Exercise>()
 
-    init {
-    }
+    fun generate(type: ExerciseType, bound: Int = BOUND) : Exercise {
+        val exercise = when (type) {
+            ExerciseType.ADDITION -> {
+                val a = random.nextInt(bound)
+                val b = random.nextInt(bound)
+                Addition(a, b)
+            }
+            ExerciseType.SUBTRACTION -> {
+                val a = random.nextInt(bound)
+                val b = random.nextInt(a + 1) // Ensure result is non-negative
+                Subtraction(a, b)
+            }
+            // If you add more ExerciseType values, you'll need to handle them here
+        }
 
-    private fun generate(bound: Int = BOUND): Addition {
-        return Addition(random.nextInt(bound), random.nextInt(bound))
-    }
-
-    fun generate() : Exercise {
-        history.add(generate(BOUND))
-        return history.last()
+        history.add(exercise)
+        return exercise
     }
 
     fun clear() {
         history.clear()
     }
 
-    val last: Addition
+    val last: Exercise
         get() = history.last()
 
     val stats: String
@@ -122,6 +133,57 @@ class ExerciseBook {
                 } else {
                     if (solved) {
                         String.format(Locale.ENGLISH, "%d + %d ≠ %d", a, b, solution)
+                    } else {
+                        question()
+                    }
+                }
+            }
+        }
+    }
+
+    class Subtraction(private val a: Int, private val b: Int) : Exercise {
+        private var solution: Int = 0
+        private var solved: Boolean = false
+
+        override fun question(): String {
+            return String.format(Locale.ENGLISH, "%d - %d", a, b)
+        }
+
+        override fun solve(solution: Int): Boolean {
+            this.solution = solution
+            if (solution == NOT_RECOGNIZED) {
+                return false
+            }
+            // only set solved, if it's not the default:
+            this.solved = true
+            return correct()
+        }
+
+        override fun check(solution: Int): Boolean {
+            return solution == getExpectedResult()
+        }
+
+        override fun solved(): Boolean {
+            return solved
+        }
+
+        override fun correct(): Boolean {
+            return solved && check(solution)
+        }
+
+        override fun getExpectedResult(): Int {
+            return a - b
+        }
+
+        override fun equation(): String {
+            return if (correct()) {
+                String.format(Locale.ENGLISH, "%d - %d = %d", a, b, solution)
+            } else {
+                if (solution == NOT_RECOGNIZED) {
+                    String.format(Locale.ENGLISH, "%d - %d ≠ ?", a, b)
+                } else {
+                    if (solved) {
+                        String.format(Locale.ENGLISH, "%d - %d ≠ %d", a, b, solution)
                     } else {
                         question()
                     }

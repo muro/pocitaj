@@ -122,13 +122,14 @@ class ExerciseBookViewModel : ViewModel() {
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
         if (exerciseConfig.type == "addition") {
             _exerciseBook.value.clear()
-            _exerciseBook.value.generate()
-            _exerciseBook.value.generate()
-            _exerciseBook.value.generate()
+            for (i in 1..10) {
+                _exerciseBook.value.generate(ExerciseType.ADDITION, exerciseConfig.level)
+            }
         } else if (exerciseConfig.type == "subtraction") {
             _exerciseBook.value.clear()
-            _exerciseBook.value.generate()
-
+            for (i in 1..6) {
+                _exerciseBook.value.generate(ExerciseType.SUBTRACTION, exerciseConfig.level)
+            }
         }
         _exerciseIndex = 0
         _uiState.value = UiState.ExerciseScreen(currentExercise())
@@ -184,9 +185,6 @@ class ExerciseBookViewModel : ViewModel() {
     }
 
     init {
-        for (i in 1..10) {
-            _exerciseBook.value.generate()
-        }
     }
 }
 
@@ -280,6 +278,8 @@ fun ExerciseScreen(
 @Composable
 fun ExerciseScreenPreview() {
     // val modelManager = ModelManager()
+    val model : ExerciseBookViewModel = viewModel()
+    model.startExercises(ExerciseConfig("subtraction", 12))
     AppTheme {
         ExerciseScreen(null, viewModel())
     }
@@ -328,10 +328,18 @@ fun ExerciseSetupScreen(onStartExercises: (ExerciseConfig) -> Unit,
         // Add UI elements (e.g., Radio buttons, dropdowns) for selecting exercise type and level
         Button(onClick = {
             // Get selected exercise configuration
-            val config = ExerciseConfig("Math", 1) // Replace with actual selection
+            val config = ExerciseConfig("addition", 12) // Replace with actual selection
             onStartExercises(config) // Call ViewModel to start exercises
         }) {
-            Text("Start Exercises")
+            Text("Start Addition")
+        }
+
+        Button(onClick = {
+            // Get selected exercise configuration
+            val config = ExerciseConfig("subtraction", 12) // Replace with actual selection
+            onStartExercises(config) // Call ViewModel to start exercises
+        }) {
+            Text("Start Subtraction")
         }
 
         Spacer(modifier = Modifier.height(64.dp))
