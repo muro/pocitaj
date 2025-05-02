@@ -336,9 +336,9 @@ fun ExerciseSetupScreen(onStartExercises: (ExerciseConfig) -> Unit,
 
         Spacer(modifier = Modifier.height(64.dp))
         // Leave in for now
-        Button(onClick = { onModelDelete() }) {
-            Text("Delete model")
-        }
+        // Button(onClick = { onModelDelete() }) {
+        //    Text("Delete model")
+        // }
 
     }
 }
@@ -348,6 +348,7 @@ fun ExerciseSetupScreen(onStartExercises: (ExerciseConfig) -> Unit,
 fun InkRecognitionBox(
     modifier: Modifier = Modifier,
     modelManager: ModelManager? = null,
+    hint: String,
     onAnswerSubmit: (String) -> Unit
 ) {
     val recognitionDelayMillis = 1000L
@@ -369,7 +370,7 @@ fun InkRecognitionBox(
         if (!isDrawing && inkBuilder.build().strokes.isNotEmpty()) {
             delay(recognitionDelayMillis)
             modelManager?.let { manager ->
-                recognizeInk(manager, inkBuilder.build()) { result ->
+                recognizeInk(manager, inkBuilder.build(), hint) { result ->
                     recognizedText = result
                     onAnswerSubmit(result)
                     // Reset the ink so the next recognized value doesn't include already
@@ -547,7 +548,7 @@ fun ExerciseComposable(exercise: ExerciseBook.Exercise,
         Spacer(modifier = Modifier.height(16.dp))
 
         // box for input here
-        InkRecognitionBox(Modifier, modelManager, onAnswerSubmit)
+        InkRecognitionBox(Modifier, modelManager, exercise.getExpectedResult().toString(), onAnswerSubmit)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -602,10 +603,11 @@ fun ExerciseComposablePreview() {
 private fun recognizeInk(
     modelManager: ModelManager,
     ink: Ink,
+    hint: String,
     onResult: (String) -> Unit
 ) {
     if (modelManager.recognizer == null) {
-        onResult("Recognizer not set")
+        Log.e("InkRecognition", "Recognizer not set")
         return
     }
 
@@ -614,11 +616,13 @@ private fun recognizeInk(
         RecognitionContext.builder().setPreContext("1234").build()
     )
         .addOnSuccessListener { result ->
-            val recognizedText = result.candidates.firstOrNull()?.text ?: ""
+            val recognizedText = result.candidates.firstOrNull { it.text == hint }?.text
+                ?: result.candidates.firstOrNull()?.text
+                ?: ""
             onResult(recognizedText)
         }
         .addOnFailureListener { e: Exception ->
             Log.e("InkRecognition", "Error during recognition", e)
-            onResult("Recognition failed")
+            onResult("")
         }
 }

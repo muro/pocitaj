@@ -63,6 +63,8 @@ class ExerciseBook {
         // If the solution is not solved yet, returns the question without a solution.
         fun equation(): String
 
+        fun getExpectedResult(): Int
+
         // Marks the Exercise as solved and returns true if the solution is correct.
         // If the proposed solution is NOT_RECOGNIZED, doesn't set it as solved.
         fun solve(solution: Int): Boolean
@@ -107,7 +109,7 @@ class ExerciseBook {
             return solved && check(solution)
         }
 
-        fun getExpectedResult(): Int {
+        override fun getExpectedResult(): Int {
             return a + b
         }
 
