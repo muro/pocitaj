@@ -16,6 +16,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -90,6 +91,10 @@ sealed class AnswerResult {
 data class ExerciseConfig(val type: String, val level: Int)
 
 class ExerciseBookViewModel : ViewModel() {
+    companion object {
+        const val DEBUG_TAP_THRESHOLD = 5
+    }
+
     private val _exerciseBook: MutableState<ExerciseBook> = mutableStateOf(ExerciseBook())
     private var _exerciseIndex = 0
 
@@ -98,6 +103,10 @@ class ExerciseBookViewModel : ViewModel() {
 
     private val _answerResult = MutableStateFlow<AnswerResult>(AnswerResult.None)
     val answerResult: StateFlow<AnswerResult> = _answerResult.asStateFlow()
+
+    private val _showDebug = MutableStateFlow(false)
+    val showDebug: StateFlow<Boolean> = _showDebug.asStateFlow()
+    private var tapCount = 0
 
     private val results = ArrayList<ResultDescription>()
 
@@ -184,7 +193,11 @@ class ExerciseBookViewModel : ViewModel() {
         _uiState.value = UiState.ExerciseSetup
     }
 
-    init {
+    fun onSecretAreaTapped() {
+        tapCount++
+        if (tapCount >= DEBUG_TAP_THRESHOLD) {
+            _showDebug.value = true
+        }
     }
 }
 
@@ -234,16 +247,11 @@ fun ExerciseScreen(
             }
         }
         is UiState.ExerciseSetup -> {
-            ExerciseSetupScreen(
-                onStartExercises = { config ->
-                    exerciseBookViewModel.startExercises(config)
-                },
-                onModelDelete = {
-                    modelManager?.let {
-                        exerciseBookViewModel.deleteActiveModel(it, "en-US")
-                    }
+            ExerciseSetupScreen(exerciseBookViewModel) {
+                modelManager?.let {
+                    exerciseBookViewModel.deleteActiveModel(it, "en-US")
                 }
-            ) // Display exercise setup screen
+            }
         }
         is UiState.ExerciseScreen -> {
             val currentExercise = (uiState as UiState.ExerciseScreen).currentExercise
@@ -313,8 +321,10 @@ fun LoadingScreen(state: UiState.LoadingModel, retry: () -> Unit) {
 }
 
 @Composable
-fun ExerciseSetupScreen(onStartExercises: (ExerciseConfig) -> Unit,
+fun ExerciseSetupScreen(exerciseBookViewModel: ExerciseBookViewModel,
                         onModelDelete: () -> Unit) {
+    val showDebug by exerciseBookViewModel.showDebug.collectAsState()
+
     // UI for choosing exercise type and starting exercises
     Column(
         modifier = Modifier
@@ -323,13 +333,15 @@ fun ExerciseSetupScreen(onStartExercises: (ExerciseConfig) -> Unit,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Choose Exercise Type")
+        Text("Choose Exercise Type", modifier = Modifier.clickable {
+            exerciseBookViewModel.onSecretAreaTapped()
+        })
         Spacer(modifier = Modifier.height(16.dp))
         // Add UI elements (e.g., Radio buttons, dropdowns) for selecting exercise type and level
         Button(onClick = {
             // Get selected exercise configuration
             val config = ExerciseConfig("addition", 12) // Replace with actual selection
-            onStartExercises(config) // Call ViewModel to start exercises
+            exerciseBookViewModel.startExercises(config)
         }) {
             Text("Start Addition")
         }
@@ -337,17 +349,18 @@ fun ExerciseSetupScreen(onStartExercises: (ExerciseConfig) -> Unit,
         Button(onClick = {
             // Get selected exercise configuration
             val config = ExerciseConfig("subtraction", 12) // Replace with actual selection
-            onStartExercises(config) // Call ViewModel to start exercises
+            exerciseBookViewModel.startExercises(config)
         }) {
             Text("Start Subtraction")
         }
 
         Spacer(modifier = Modifier.height(64.dp))
         // Leave in for now
-        // Button(onClick = { onModelDelete() }) {
-        //    Text("Delete model")
-        // }
-
+        if (showDebug) {
+            Button(onClick = { onModelDelete() }) {
+                Text("Delete model")
+            }
+        }
     }
 }
 
