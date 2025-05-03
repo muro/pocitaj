@@ -62,6 +62,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
 import com.google.mlkit.vision.digitalink.RecognitionContext
@@ -227,6 +230,7 @@ fun ExerciseScreen(
     exerciseBookViewModel: ExerciseBookViewModel
 ) {
     val uiState by exerciseBookViewModel.uiState.collectAsState()
+    val navController = rememberNavController()
 
     // Trigger model download when the composable is first composed
     LaunchedEffect(Unit) {
@@ -237,37 +241,81 @@ fun ExerciseScreen(
         }
     }
 
-    when (uiState) {
-        is UiState.LoadingModel -> {
-            LoadingScreen(uiState as UiState.LoadingModel)
-            {
-                modelManager?.let {
-                    exerciseBookViewModel.downloadModel(it, "en-US") // Start download
+    LaunchedEffect(uiState) {
+        when (uiState) {
+            is UiState.LoadingModel -> {
+                navController.navigate("loading_route") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = false
+                    }
+                }
+            }
+            is UiState.ExerciseSetup -> {
+                navController.navigate("exercise_setup") {
+                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                }
+            }
+            is UiState.ExerciseScreen -> {
+                navController.navigate("exercise_screen") {
+                    launchSingleTop = true
+                }
+            }
+            is UiState.SummaryScreen -> {
+                navController.navigate("summary_screen") {
+                    // Optional: Clear exercise screen from back stack after finishing
+                    popUpTo("exercise_setup") { inclusive = true }
                 }
             }
         }
-        is UiState.ExerciseSetup -> {
-            ExerciseSetupScreen(exerciseBookViewModel) {
-                modelManager?.let {
-                    exerciseBookViewModel.deleteActiveModel(it, "en-US")
+    }
+
+    NavHost(navController = navController, startDestination = "loading_route") { // Define a start destination
+        composable("loading_route") {
+            val loadingState = uiState as? UiState.LoadingModel
+            if (loadingState != null) {
+                LoadingScreen(loadingState) {
+                    modelManager?.let {
+                        exerciseBookViewModel.downloadModel(it, "en-US") // Start download
+                    }
                 }
+            } else {
+                Log.e("ExerciseScreen", "Expected LoadingModel state but got $uiState")
             }
         }
-        is UiState.ExerciseScreen -> {
-            val currentExercise = (uiState as UiState.ExerciseScreen).currentExercise
-            // Display the current exercise UI
-            ExerciseComposable(
-                exercise = currentExercise,
-                modelManager = modelManager,
-                exerciseBookViewModel = exerciseBookViewModel,
-                onAnswerSubmit = { answer ->
-                    exerciseBookViewModel.checkAnswer(answer)
-            })
+        composable("exercise_setup") {
+            val setupState = uiState as? UiState.ExerciseSetup
+            if (setupState != null) {
+                ExerciseSetupScreen(exerciseBookViewModel) {
+                    modelManager?.let {
+                        exerciseBookViewModel.deleteActiveModel(it, "en-US")
+                    }
+                }
+            } else {
+                Log.e("ExerciseScreen", "Expected ExerciseSetup state but got $uiState")
+            }
         }
-        is UiState.SummaryScreen -> {
-            val results = (uiState as UiState.SummaryScreen).results
-            Results(results = results) {
-                exerciseBookViewModel.switchToExerciseSetup()
+        composable("exercise_screen") {
+            val exerciseState = uiState as? UiState.ExerciseScreen
+            if (exerciseState != null) {
+                ExerciseComposable(
+                    exercise = exerciseState.currentExercise,
+                    modelManager = modelManager,
+                    exerciseBookViewModel = exerciseBookViewModel,
+                    onAnswerSubmit = { answer ->
+                        exerciseBookViewModel.checkAnswer(answer)
+                    })
+            } else {
+                Log.e("ExerciseScreen", "Expected ExerciseScreen state but got $uiState")
+            }
+        }
+        composable("summary_screen") {
+            val results = (uiState as? UiState.SummaryScreen)?.results // Safely cast state
+            if (results != null) {
+                Results(results = results) {
+                    exerciseBookViewModel.switchToExerciseSetup()
+                }
+            } else {
+                Log.e("ExerciseScreen", "results is null")
             }
         }
     }
