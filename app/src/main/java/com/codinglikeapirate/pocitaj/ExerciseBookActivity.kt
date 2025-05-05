@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -91,7 +92,7 @@ sealed class AnswerResult {
     data object None : AnswerResult() // Initial state
 }
 
-data class ExerciseConfig(val type: String, val level: Int)
+data class ExerciseConfig(val type: String, val upTo: Int = 10, val count: Int = 10)
 
 class ExerciseBookViewModel : ViewModel() {
     companion object {
@@ -113,14 +114,25 @@ class ExerciseBookViewModel : ViewModel() {
 
     private val results = ArrayList<ResultDescription>()
 
-    fun downloadModel(modelManager: ModelManager, languageCode: String) {
+    fun downloadModel(
+        modelManager: ModelManager,
+        languageCode: String,
+        navController: NavHostController
+    ) {
         modelManager.setModel(languageCode)
         modelManager.download().addOnSuccessListener {
             Log.i("ExerciseBookViewModel", "Model download succeeded")
             _uiState.value = UiState.ExerciseSetup
+            navController.navigate(Destinations.HOME_ROUTE) {
+                popUpTo(Destinations.LOADING_ROUTE) {
+                    inclusive = true // Remove the "loading" destination itself
+                }
+            }
         }.addOnFailureListener {
             Log.e("ExerciseBookViewModel", "Model download failed", it)
-            _uiState.value = UiState.LoadingModel(errorMessage = it.localizedMessage ?: "Unknown error")}
+            _uiState.value =
+                UiState.LoadingModel(errorMessage = it.localizedMessage ?: "Unknown error")
+        }
     }
 
     fun deleteActiveModel(modelManager: ModelManager, languageCode: String) {
@@ -134,13 +146,13 @@ class ExerciseBookViewModel : ViewModel() {
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
         if (exerciseConfig.type == "addition") {
             _exerciseBook.value.clear()
-            for (i in 1..10) {
-                _exerciseBook.value.generate(ExerciseType.ADDITION, exerciseConfig.level)
+            for (i in 1..exerciseConfig.count) {
+                _exerciseBook.value.generate(ExerciseType.ADDITION, exerciseConfig.upTo)
             }
         } else if (exerciseConfig.type == "subtraction") {
             _exerciseBook.value.clear()
-            for (i in 1..6) {
-                _exerciseBook.value.generate(ExerciseType.SUBTRACTION, exerciseConfig.level)
+            for (i in 1..exerciseConfig.count) {
+                _exerciseBook.value.generate(ExerciseType.SUBTRACTION, exerciseConfig.upTo)
             }
         }
         _exerciseIndex = 0
@@ -166,13 +178,14 @@ class ExerciseBookViewModel : ViewModel() {
         }
     }
 
-    fun onResultAnimationFinished() {
+    fun onResultAnimationFinished(onAllExercisesComplete: () -> Unit) {
         if (_exerciseIndex < _exerciseBook.value.historyList.size) {
             _uiState.value = UiState.ExerciseScreen(currentExercise())
         } else {
             // All exercises completed, calculate results and transition
             resultsList()
             _uiState.value = UiState.SummaryScreen(results)
+            onAllExercisesComplete()
         }
         _answerResult.value = AnswerResult.None // Reset answer result state
     }
@@ -190,10 +203,6 @@ class ExerciseBookViewModel : ViewModel() {
                 )
             )
         }
-    }
-
-    fun switchToExerciseSetup() {
-        _uiState.value = UiState.ExerciseSetup
     }
 
     fun onSecretAreaTapped() {
@@ -218,159 +227,99 @@ class ExerciseBookActivity : ComponentActivity() {
 
         setContent {
             AppTheme {
-                ExerciseScreen(modelManager, viewModel)
+                val navController = rememberNavController()
+                AppNavigation(modelManager, navController, viewModel)
             }
         }
     }
 }
 
+object Destinations {
+    const val LOADING_ROUTE = "loading"
+    const val HOME_ROUTE = "home"
+    const val EXERCISE_ROUTE = "exercise/{type}"
+    const val SUMMARY_ROUTE = "summary"
+    fun exerciseDetailRoute(type: String) = "exercise/$type"
+}
+
 @Composable
-fun ExerciseScreen(
-    modelManager: ModelManager? = null,
-    exerciseBookViewModel: ExerciseBookViewModel
-) {
-    val uiState by exerciseBookViewModel.uiState.collectAsState()
-    val navController = rememberNavController()
-
-    // Trigger model download when the composable is first composed
-    LaunchedEffect(Unit) {
-        // You might want to check if the model is already downloaded here
-        // before starting the download process.
-        modelManager?.let {
-            exerciseBookViewModel.downloadModel(it, "en-US") // Start download
-        }
-    }
-
-    LaunchedEffect(uiState) {
-        when (uiState) {
-            is UiState.LoadingModel -> {
-                navController.navigate("loading_route") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = false
-                    }
-                }
-            }
-            is UiState.ExerciseSetup -> {
-                navController.navigate("exercise_setup") {
-                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
-                }
-            }
-            is UiState.ExerciseScreen -> {
-                navController.navigate("exercise_screen") {
-                    launchSingleTop = true
-                }
-            }
-            is UiState.SummaryScreen -> {
-                navController.navigate("summary_screen") {
-                    // Optional: Clear exercise screen from back stack after finishing
-                    popUpTo("exercise_setup") { inclusive = true }
-                }
+fun AppNavigation(modelManager: ModelManager,
+                  navController: NavHostController = rememberNavController(),
+                  viewModel: ExerciseBookViewModel) {
+    val uiState by viewModel.uiState.collectAsState()
+    NavHost(
+        navController = navController,
+        startDestination = Destinations.LOADING_ROUTE
+    ) {
+        composable(route = Destinations.LOADING_ROUTE) {
+            LoadingScreen(UiState.LoadingModel()) {
+                viewModel.downloadModel(modelManager, "en-US", navController)
             }
         }
-    }
-
-    NavHost(navController = navController, startDestination = "loading_route") { // Define a start destination
-        composable("loading_route") {
-            val loadingState = uiState as? UiState.LoadingModel
-            if (loadingState != null) {
-                LoadingScreen(loadingState) {
-                    modelManager?.let {
-                        exerciseBookViewModel.downloadModel(it, "en-US") // Start download
-                    }
-                }
-            } else {
-                Log.e("ExerciseScreen", "Expected LoadingModel state but got $uiState")
+        composable(route = Destinations.HOME_ROUTE) {
+            ExerciseSetupScreen(navController, viewModel) {
+                viewModel.deleteActiveModel(modelManager, "en-US")
             }
         }
-        composable("exercise_setup") {
-            val setupState = uiState as? UiState.ExerciseSetup
-            if (setupState != null) {
-                ExerciseSetupScreen(exerciseBookViewModel) {
-                    modelManager?.let {
-                        exerciseBookViewModel.deleteActiveModel(it, "en-US")
-                    }
-                }
-            } else {
-                Log.e("ExerciseScreen", "Expected ExerciseSetup state but got $uiState")
-            }
-        }
-        composable("exercise_screen") {
+        composable(route = Destinations.EXERCISE_ROUTE) {
             val exerciseState = uiState as? UiState.ExerciseScreen
             if (exerciseState != null) {
-                ExerciseComposable(
-                    exercise = exerciseState.currentExercise,
-                    modelManager = modelManager,
-                    exerciseBookViewModel = exerciseBookViewModel,
+                val exercise: ExerciseBook.Exercise = exerciseState.currentExercise
+
+                ExerciseScreen(
+                    exercise, modelManager, viewModel,
                     onAnswerSubmit = { answer ->
-                        exerciseBookViewModel.checkAnswer(answer)
+                        viewModel.checkAnswer(answer)
+                    },
+                    onAllExercisesComplete = {
+                        navController.navigate(Destinations.SUMMARY_ROUTE) {
+                            popUpTo(Destinations.HOME_ROUTE) { inclusive = false }
+                        }
                     })
-            } else {
-                Log.e("ExerciseScreen", "Expected ExerciseScreen state but got $uiState")
             }
         }
-        composable("summary_screen") {
-            val results = (uiState as? UiState.SummaryScreen)?.results // Safely cast state
-            if (results != null) {
-                Results(results = results) {
-                    exerciseBookViewModel.switchToExerciseSetup()
+        composable(route = Destinations.SUMMARY_ROUTE) {
+            val summaryState = uiState as? UiState.SummaryScreen
+            if (summaryState != null) {
+                Results(summaryState.results) {
+                    navController.navigate(Destinations.HOME_ROUTE) {
+                        popUpTo(Destinations.HOME_ROUTE) { inclusive = true }
+                    }
                 }
-            } else {
-                Log.e("ExerciseScreen", "results is null")
             }
         }
     }
 }
 
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_NO,
-    showBackground = true,
-    name = "Light Mode"
-)
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true,
-    name = "Dark Mode"
-)
 @Composable
-fun ExerciseScreenPreview() {
-    // val modelManager = ModelManager()
-    val model : ExerciseBookViewModel = viewModel()
-    model.startExercises(ExerciseConfig("subtraction", 12))
-    AppTheme {
-        ExerciseScreen(null, viewModel())
+fun LoadingScreen(state: UiState.LoadingModel, downloadModel: () -> Unit) {
+    LaunchedEffect(Unit) {
+        downloadModel()
     }
-}
 
-@Composable
-fun LoadingScreen(state: UiState.LoadingModel, retry: () -> Unit) {
-    // UI for the loading screen (e.g., progress indicator, text)
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         if (state.errorMessage == null) {
-            // Display loading indicator and message
             CircularProgressIndicator()
             Spacer(modifier = Modifier.height(16.dp))
             Text("Downloading model...")
         } else {
-            // Display error message and potentially a retry button
             Text("Error downloading model:", color = MaterialTheme.colorScheme.error)
             Spacer(modifier = Modifier.height(8.dp))
             Text(state.errorMessage)
             Spacer(modifier = Modifier.height(16.dp))
-            // Add a retry button that calls ViewModel to retry download
-            Button(onClick = { retry() }) {
-                Text("Retry")
-            }
+            Text("Please close the app and restart while an internet connection is available.")
         }
     }
 }
 
 @Composable
-fun ExerciseSetupScreen(exerciseBookViewModel: ExerciseBookViewModel,
-                        onModelDelete: () -> Unit) {
+fun ExerciseSetupScreen(navController: NavHostController,
+                         exerciseBookViewModel: ExerciseBookViewModel,
+                         onModelDelete: () -> Unit) {
     val showDebug by exerciseBookViewModel.showDebug.collectAsState()
 
     // UI for choosing exercise type and starting exercises
@@ -388,16 +337,20 @@ fun ExerciseSetupScreen(exerciseBookViewModel: ExerciseBookViewModel,
         // Add UI elements (e.g., Radio buttons, dropdowns) for selecting exercise type and level
         Button(onClick = {
             // Get selected exercise configuration
-            val config = ExerciseConfig("addition", 12) // Replace with actual selection
+            val config = ExerciseConfig("addition", 10, 2) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
+            Log.i("ExerciseBookActivity", "Starting Addition")
+            navController.navigate(Destinations.exerciseDetailRoute("addition"))
         }) {
             Text("Start Addition")
         }
 
         Button(onClick = {
             // Get selected exercise configuration
-            val config = ExerciseConfig("subtraction", 12) // Replace with actual selection
+            val config = ExerciseConfig("subtraction", 10, 2) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
+            Log.i("ExerciseBookActivity", "Starting Addition")
+            navController.navigate(Destinations.exerciseDetailRoute("subtraction"))
         }) {
             Text("Start Subtraction")
         }
@@ -529,17 +482,26 @@ fun InkRecognitionBox(
 }
 
 @Composable
-fun ExerciseComposable(exercise: ExerciseBook.Exercise,
-                       modelManager: ModelManager? = null,
-                       exerciseBookViewModel: ExerciseBookViewModel,
-                       onAnswerSubmit: (String) -> Unit) {
+fun ExerciseScreen(exercise: ExerciseBook.Exercise,
+                   modelManager: ModelManager,
+                   viewModel: ExerciseBookViewModel,
+                   onAnswerSubmit: (String) -> Unit,
+                   onAllExercisesComplete: () -> Unit) {
 
     val backgroundAll: ImageBitmap = ImageBitmap.imageResource(id = R.drawable.paper_top)
 
     // Observe the answer result state
-    val answerResult by exerciseBookViewModel.answerResult.collectAsState()
+    val answerResult by viewModel.answerResult.collectAsState()
     var showResultImage by remember { mutableStateOf(false) }
     var resultImageRes by remember { mutableStateOf<Int?>(null) }
+    val debug by viewModel.showDebug.collectAsState()
+
+    val catDuration = if (debug) {
+        AppMotion.debugDuration
+    } else {
+        AppMotion.longDuration
+    }
+
 
     val imageScale by animateFloatAsState(
         targetValue = if (showResultImage) 1.2f else 1f,
@@ -554,26 +516,26 @@ fun ExerciseComposable(exercise: ExerciseBook.Exercise,
             is AnswerResult.Correct -> {
                 resultImageRes = R.drawable.cat_heart // Replace with your correct image resource
                 showResultImage = true
-                delay(timeMillis = AppMotion.longDuration.toLong()) // Display for 500 milliseconds
+                delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
                 showResultImage = false
                 // Call ViewModel function to signal animation is finished
-                exerciseBookViewModel.onResultAnimationFinished()
+                viewModel.onResultAnimationFinished(onAllExercisesComplete)
             }
             is AnswerResult.Incorrect -> {
                 resultImageRes = R.drawable.cat_cry // Replace with your incorrect image resource
                 showResultImage = true
-                delay(AppMotion.longDuration.toLong()) // Display for 500 milliseconds
+                delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
                 showResultImage = false
                 // Call ViewModel function to signal animation is finished
-                exerciseBookViewModel.onResultAnimationFinished()
+                viewModel.onResultAnimationFinished(onAllExercisesComplete)
             }
             is AnswerResult.Unrecognized -> {
                 resultImageRes = R.drawable.cat_big_eyes // Replace with your incorrect image resource
                 showResultImage = true
-                delay(AppMotion.mediumDuration.toLong()) // Display for 500 milliseconds
+                delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
                 showResultImage = false
                 // Call ViewModel function to signal animation is finished
-                exerciseBookViewModel.onResultAnimationFinished()
+                viewModel.onResultAnimationFinished(onAllExercisesComplete)
             }
             is AnswerResult.None -> {
                 resultImageRes = null
@@ -599,7 +561,12 @@ fun ExerciseComposable(exercise: ExerciseBook.Exercise,
             targetState = exercise.question(), // Animate when the exercise question changes
             transitionSpec = {
                 // Fade in the new text and fade out the old text
-                fadeIn(animationSpec = tween(AppMotion.mediumDuration)) togetherWith fadeOut(animationSpec = tween(AppMotion.mediumDuration))
+                val duration = if (debug) {
+                    AppMotion.debugDuration
+                } else {
+                    AppMotion.mediumDuration
+                }
+                fadeIn(animationSpec = tween(duration)) togetherWith fadeOut(animationSpec = tween(duration))
             }
         ) { targetText -> // The target state (new exercise question)
             Text(
@@ -661,10 +628,19 @@ fun ExerciseComposable(exercise: ExerciseBook.Exercise,
     showBackground = true,
     name = "Light Mode"
 )
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
 @Composable
-fun ExerciseComposablePreview() {
+fun ExerciseScreenPreview() {
+    val exercise: ExerciseBook.Exercise = ExerciseBook.Addition(1, 2)
+    val viewModel : ExerciseBookViewModel = viewModel()
+    viewModel.startExercises(ExerciseConfig("subtraction", 12))
+    val modelManager = ModelManager()
     AppTheme {
-        ExerciseComposable(ExerciseBook.Addition(1, 2), null, viewModel()) {}
+        ExerciseScreen(exercise, modelManager, viewModel, {}, {})
     }
 }
 

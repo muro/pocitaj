@@ -255,6 +255,7 @@ object AppMotion { // Or integrate into your main Theme object
     const val shortDuration: Int = 150
     const val mediumDuration: Int = 300
     const val longDuration: Int = 500
+    const val debugDuration: Int = 2000
 }
 
 @Composable
