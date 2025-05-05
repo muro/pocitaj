@@ -49,7 +49,7 @@ enum class ResultStatus {
 data class ResultDescription(val equation: String, val status: ResultStatus)
 
 @Composable
-fun Results(results: List<ResultDescription>, onDone: () -> Unit) {
+fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -157,13 +157,13 @@ fun PreviewResultCard() {
     name = "Pixel 9 Pro XL"
 )
 @Composable
-fun ResultsPreview() {
+fun PreviewResultsScreen() {
     val results = ArrayList<ResultDescription>()
     for (i in 1..5) {
         results.add(ResultDescription("$i + ${i + 2} = ${2 * i + 2}", ResultStatus.CORRECT))
         results.add(ResultDescription("$i + ${i + 1} ≠ $i", ResultStatus.CORRECT))
     }
     AppTheme {
-        Results(results) {}
+        ResultsScreen(results) {}
     }
 }

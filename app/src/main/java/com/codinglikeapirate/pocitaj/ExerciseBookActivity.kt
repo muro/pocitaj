@@ -281,7 +281,7 @@ fun AppNavigation(modelManager: ModelManager,
         composable(route = Destinations.SUMMARY_ROUTE) {
             val summaryState = uiState as? UiState.SummaryScreen
             if (summaryState != null) {
-                Results(summaryState.results) {
+                ResultsScreen(summaryState.results) {
                     navController.navigate(Destinations.HOME_ROUTE) {
                         popUpTo(Destinations.HOME_ROUTE) { inclusive = true }
                     }
@@ -634,7 +634,7 @@ fun ExerciseScreen(exercise: ExerciseBook.Exercise,
     name = "Dark Mode"
 )
 @Composable
-fun ExerciseScreenPreview() {
+fun PreviewExerciseScreen() {
     val exercise: ExerciseBook.Exercise = ExerciseBook.Addition(1, 2)
     val viewModel : ExerciseBookViewModel = viewModel()
     viewModel.startExercises(ExerciseConfig("subtraction", 12))
