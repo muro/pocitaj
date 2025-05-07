@@ -172,7 +172,7 @@ fun InkRecognitionBox(
 }
 
 @Composable
-fun ExerciseScreen(exercise: ExerciseBook.Exercise,
+fun ExerciseScreen(exercise: SolvableExercise,
                    modelManager: ModelManager?,
                    viewModel: ExerciseBookViewModel,
                    onAnswerSubmit: (String) -> Unit,
@@ -248,7 +248,7 @@ fun ExerciseScreen(exercise: ExerciseBook.Exercise,
     ) {
         // Animated content for the exercise question text
         AnimatedContent(
-            targetState = exercise.question(), // Animate when the exercise question changes
+            targetState = exercise.exercise.question(), // Animate when the exercise question changes
             transitionSpec = {
                 // Fade in the new text and fade out the old text
                 val duration = if (debug) {
@@ -274,7 +274,7 @@ fun ExerciseScreen(exercise: ExerciseBook.Exercise,
         Spacer(modifier = Modifier.height(16.dp))
 
         // box for input here
-        InkRecognitionBox(Modifier, modelManager, exercise.getExpectedResult().toString(), onAnswerSubmit)
+        InkRecognitionBox(Modifier, modelManager, exercise.exercise.getExpectedResult().toString(), onAnswerSubmit)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -325,12 +325,13 @@ fun ExerciseScreen(exercise: ExerciseBook.Exercise,
 )
 @Composable
 fun PreviewExerciseScreen() {
-    val exercise: ExerciseBook.Exercise = ExerciseBook.Subtraction(14, 2)
+    val exercise: Exercise = Subtraction(14, 2)
+    val solvableExercise = SolvableExercise(exercise, exercise.getExpectedResult())
     val viewModel : ExerciseBookViewModel = viewModel()
     viewModel.startExercises(ExerciseConfig("subtraction", 12))
 
     AppTheme {
-        ExerciseScreen(exercise, null, viewModel, {}, {})
+        ExerciseScreen(solvableExercise, null, viewModel, {}, {})
     }
 }
 

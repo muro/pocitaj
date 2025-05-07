@@ -14,181 +14,159 @@ class ExerciseBook {
 
     companion object {
         const val NOT_RECOGNIZED = -1000
-        private const val BOUND = 10
     }
 
-    private val random = Random() //1234)
-    private val history = mutableListOf<Exercise>()
-
-    fun generate(type: ExerciseType, bound: Int = BOUND) : Exercise {
-        val exercise = when (type) {
-            ExerciseType.ADDITION -> {
-                val a = random.nextInt(bound)
-                val b = random.nextInt(bound)
-                Addition(a, b)
-            }
-            ExerciseType.SUBTRACTION -> {
-                val a = random.nextInt(bound)
-                val b = random.nextInt(a + 1) // Ensure result is non-negative
-                Subtraction(a, b)
-            }
-            // If you add more ExerciseType values, you'll need to handle them here
-        }
-
-        history.add(exercise)
-        return exercise
-    }
+    private val history = mutableListOf<SolvableExercise>() // Store SolvableExercise
 
     fun clear() {
         history.clear()
     }
 
-    val last: Exercise
+    // This method will likely be removed or significantly changed
+    // in favor of a more flexible generation strategy.
+    fun generate(type: ExerciseType, bound: Int = 10): SolvableExercise {
+        // This generation logic will be moved elsewhere
+        val exercise = when (type) {
+            ExerciseType.ADDITION -> {
+                val a = Random().nextInt(bound)
+                val b = Random().nextInt(bound)
+                Addition(a, b)
+            }
+
+            ExerciseType.SUBTRACTION -> {
+                val a = Random().nextInt(bound)
+                val b = Random().nextInt(a + 1)
+                Subtraction(a, b)
+            }
+        }
+        val solvableExercise = SolvableExercise(exercise)
+        history.add(solvableExercise)
+        return solvableExercise
+    }
+
+    // Modify last to return SolvableExercise
+    val last: SolvableExercise
         get() = history.last()
 
     val stats: String
         get() {
-            var solved = 0
-            var correct = 0
-            for (a in history) {
-                if (a.solved()) {
-                    solved++
+            var solvedCount = 0
+            var correctCount = 0
+            for (solvableExercise in history) {
+                if (solvableExercise.solved) { // Access 'solved' property directly
+                    solvedCount++
                 }
-                if (a.correct()) {
-                    correct++
+                if (solvableExercise.correct()) { // Call 'correct()' method
+                    correctCount++
                 }
             }
-            val percent = if (solved != 0) 100f * correct / solved.toFloat() else 0f
-            return String.format(Locale.ENGLISH, "%d / %d (%.0f%%)", correct, solved, percent)
+            val percent = if (solvedCount != 0) 100f * correctCount / solvedCount.toFloat() else 0f
+            return String.format(
+                Locale.ENGLISH,
+                "%d / %d (%.0f%%)",
+                correctCount,
+                solvedCount,
+                percent
+            )
         }
 
-    val historyList: List<Exercise>
+    val historyList: List<SolvableExercise>
         get() = history.toList()
+}
 
-    interface Exercise {
-        // Returns the Exercise question only, without a solution, as a string
-        fun question(): String
 
-        // Returns the Exercise question with the submitted solution as a string.
-        // When the solution was solved incorrectly, it uses the not equal sign.
-        // If the solution is not solved yet, returns the question without a solution.
-        fun equation(): String
 
-        fun getExpectedResult(): Int
+interface Exercise {
+    fun question(): String
+    fun getExpectedResult(): Int
 
-        // Marks the Exercise as solved and returns true if the solution is correct.
-        // If the proposed solution is NOT_RECOGNIZED, doesn't set it as solved.
-        fun solve(solution: Int): Boolean
+    // New helper function to get the basic equation string based on submitted solution
+    fun getEquationString(submittedSolution: Int?): String
+}
 
-        // Returns true, if the proposed solution is correct
-        fun check(solution: Int): Boolean
-
-        // Returns true, if the Exercise has been correctly or incorrectly solved.
-        fun solved(): Boolean
-
-        // Returns true if the Exercise is solved and correct.
-        fun correct(): Boolean
-    }
-
-    class Addition(private val a: Int, private val b: Int) : Exercise {
-        private var solution: Int = 0
-        private var solved: Boolean = false
-
-        override fun question(): String {
-            return String.format(Locale.ENGLISH, "%d + %d", a, b)
-        }
-
-        override fun solve(solution: Int): Boolean {
-            this.solution = solution
-            if (solution == NOT_RECOGNIZED) {
-                return false
-            }
-            // only set solved, if it's not the default:
-            this.solved = true
-            return correct()
-        }
-
-        override fun check(solution: Int): Boolean {
-            return solution == getExpectedResult()
-        }
-
-        override fun solved(): Boolean {
-            return solved
-        }
-
-        override fun correct(): Boolean {
-            return solved && check(solution)
-        }
-
-        override fun getExpectedResult(): Int {
-            return a + b
-        }
-
-        override fun equation(): String {
-            return if (correct()) {
-                String.format(Locale.ENGLISH, "%d + %d = %d", a, b, solution)
-            } else {
-                if (solution == NOT_RECOGNIZED) {
-                    String.format(Locale.ENGLISH, "%d + %d ≠ ?", a, b)
-                } else {
-                    if (solved) {
-                        String.format(Locale.ENGLISH, "%d + %d ≠ %d", a, b, solution)
-                    } else {
-                        question()
-                    }
-                }
-            }
+data class Addition(val a: Int, val b: Int) : Exercise {
+    override fun question(): String = String.format(Locale.ENGLISH, "%d + %d", a, b)
+    override fun getExpectedResult(): Int = a + b
+    override fun getEquationString(submittedSolution: Int?): String {
+        return if (submittedSolution != null) {
+            String.format(Locale.ENGLISH, "%d + %d", a, b)
+        } else {
+            question() // If no solution, just show the question
         }
     }
+}
 
-    class Subtraction(private val a: Int, private val b: Int) : Exercise {
-        private var solution: Int = 0
-        private var solved: Boolean = false
-
-        override fun question(): String {
-            return String.format(Locale.ENGLISH, "%d - %d", a, b)
+data class Subtraction(val a: Int, val b: Int) : Exercise {
+    override fun question(): String = String.format(Locale.ENGLISH, "%d - %d", a, b)
+    override fun getExpectedResult(): Int = a - b
+    override fun getEquationString(submittedSolution: Int?): String {
+        return if (submittedSolution != null) {
+            String.format(Locale.ENGLISH, "%d - %d", a, b)
+        } else {
+            question() // If no solution, just show the question
         }
+    }
+}
 
-        override fun solve(solution: Int): Boolean {
-            this.solution = solution
-            if (solution == NOT_RECOGNIZED) {
-                return false
-            }
-            // only set solved, if it's not the default:
-            this.solved = true
-            return correct()
+data class MissingAddend(val a: Int, val result: Int) : Exercise {
+    val b: Int = result - a // The missing operand
+
+    override fun question(): String = String.format(Locale.ENGLISH, "%d + ? = %d", a, result)
+    override fun getExpectedResult(): Int = b
+    override fun getEquationString(submittedSolution: Int?): String {
+        return if (submittedSolution != null) {
+            String.format(Locale.ENGLISH, "%d + %d = %d", a, submittedSolution, result) // Incorporate submitted solution
+        } else {
+            question() // If no solution, just show the question
         }
+    }
+}
 
-        override fun check(solution: Int): Boolean {
-            return solution == getExpectedResult()
+data class MissingSubtrahend(val a: Int, val result: Int) : Exercise {
+    val b: Int = a - result // The missing operand
+
+    override fun question(): String = String.format(Locale.ENGLISH, "%d - ? = %d", a, result)
+    override fun getExpectedResult(): Int = b
+    override fun getEquationString(submittedSolution: Int?): String {
+        return if (submittedSolution != null) {
+            String.format(Locale.ENGLISH, "%d - %d = %d", a, submittedSolution, result) // Incorporate submitted solution
+        } else {
+            question() // If no solution, just show the question
         }
+    }
+}
 
-        override fun solved(): Boolean {
-            return solved
+data class SolvableExercise(
+    val exercise: Exercise,
+    var submittedSolution: Int? = null,
+    var solved: Boolean = false,
+    var timeTakenMillis: Long? = null
+) {
+    fun correct(): Boolean {
+        if (submittedSolution == ExerciseBook.NOT_RECOGNIZED) {
+            return false
         }
+        return solved && submittedSolution == exercise.getExpectedResult()
+    }
 
-        override fun correct(): Boolean {
-            return solved && check(solution)
+    fun solve(solution: Int, timeMillis: Long? = null): Boolean {
+        this.submittedSolution = solution
+        if (solution == ExerciseBook.NOT_RECOGNIZED) {
+            return false
         }
+        this.solved = true
+        this.timeTakenMillis = timeMillis
+        return correct()
+    }
 
-        override fun getExpectedResult(): Int {
-            return a - b
-        }
+    fun equation(): String {
+        val baseEquation = exercise.getEquationString(submittedSolution)
 
-        override fun equation(): String {
-            return if (correct()) {
-                String.format(Locale.ENGLISH, "%d - %d = %d", a, b, solution)
-            } else {
-                if (solution == NOT_RECOGNIZED) {
-                    String.format(Locale.ENGLISH, "%d - %d ≠ ?", a, b)
-                } else {
-                    if (solved) {
-                        String.format(Locale.ENGLISH, "%d - %d ≠ %d", a, b, solution)
-                    } else {
-                        question()
-                    }
-                }
-            }
+        return when {
+            solved && correct() -> "$baseEquation = $submittedSolution"
+            solved && !correct() -> "$baseEquation ≠ $submittedSolution"
+            submittedSolution == ExerciseBook.NOT_RECOGNIZED -> "${exercise.question()} ≠ ?" // Special case for not recognized
+            else -> exercise.question() // Not solved, show just the question
         }
     }
 }

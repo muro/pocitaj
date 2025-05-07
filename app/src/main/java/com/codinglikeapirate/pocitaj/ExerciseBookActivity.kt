@@ -43,7 +43,7 @@ import kotlinx.coroutines.flow.asStateFlow
 sealed class UiState {
     data class LoadingModel(val errorMessage: String? = null) : UiState()
     data object ExerciseSetup : UiState()
-    data class ExerciseScreen(val currentExercise: ExerciseBook.Exercise) : UiState()
+    data class ExerciseScreen(val currentExercise: SolvableExercise) : UiState()
     data class SummaryScreen(val results: List<ResultDescription>) : UiState()
 }
 
@@ -122,7 +122,7 @@ class ExerciseBookViewModel : ViewModel() {
         _uiState.value = UiState.ExerciseScreen(currentExercise())
     }
 
-    private fun currentExercise(): ExerciseBook.Exercise {
+    private fun currentExercise(): SolvableExercise {
         return _exerciseBook.value.historyList[_exerciseIndex]
     }
 
@@ -160,7 +160,7 @@ class ExerciseBookViewModel : ViewModel() {
                 ResultDescription(
                     exercise.equation(),
                     ResultStatus.fromBooleanPair(
-                        exercise.solved(),
+                        exercise.solved,
                         exercise.correct()
                     )
                 )
@@ -227,7 +227,7 @@ fun AppNavigation(modelManager: ModelManager,
         composable(route = Destinations.EXERCISE_ROUTE) {
             val exerciseState = uiState as? UiState.ExerciseScreen
             if (exerciseState != null) {
-                val exercise: ExerciseBook.Exercise = exerciseState.currentExercise
+                val exercise: SolvableExercise = exerciseState.currentExercise
 
                 ExerciseScreen(
                     exercise, modelManager, viewModel,
