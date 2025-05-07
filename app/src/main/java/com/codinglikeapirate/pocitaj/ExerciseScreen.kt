@@ -172,7 +172,7 @@ fun InkRecognitionBox(
 }
 
 @Composable
-fun ExerciseScreen(exercise: SolvableExercise,
+fun ExerciseScreen(exercise: Exercise,
                    modelManager: ModelManager?,
                    viewModel: ExerciseBookViewModel,
                    onAnswerSubmit: (String) -> Unit,
@@ -326,12 +326,12 @@ fun ExerciseScreen(exercise: SolvableExercise,
 @Composable
 fun PreviewExerciseScreen() {
     val equation: Equation = Subtraction(14, 2)
-    val solvableExercise = SolvableExercise(equation, equation.getExpectedResult())
+    val exercise = Exercise(equation, equation.getExpectedResult())
     val viewModel : ExerciseBookViewModel = viewModel()
     viewModel.startExercises(ExerciseConfig("subtraction", 12))
 
     AppTheme {
-        ExerciseScreen(solvableExercise, null, viewModel, {}, {})
+        ExerciseScreen(exercise, null, viewModel, {}, {})
     }
 }
 

@@ -16,7 +16,7 @@ class ExerciseBook {
         const val NOT_RECOGNIZED = -1000
     }
 
-    private val history = mutableListOf<SolvableExercise>() // Store SolvableExercise
+    private val history = mutableListOf<Exercise>() // Store SolvableExercise
 
     fun clear() {
         history.clear()
@@ -24,7 +24,7 @@ class ExerciseBook {
 
     // This method will likely be removed or significantly changed
     // in favor of a more flexible generation strategy.
-    fun generate(type: ExerciseType, bound: Int = 10): SolvableExercise {
+    fun generate(type: ExerciseType, bound: Int = 10): Exercise {
         // This generation logic will be moved elsewhere
         val equation = when (type) {
             ExerciseType.ADDITION -> {
@@ -39,13 +39,13 @@ class ExerciseBook {
                 Subtraction(a, b)
             }
         }
-        val solvableExercise = SolvableExercise(equation)
-        history.add(solvableExercise)
-        return solvableExercise
+        val exercise = Exercise(equation)
+        history.add(exercise)
+        return exercise
     }
 
     // Modify last to return SolvableExercise
-    val last: SolvableExercise
+    val last: Exercise
         get() = history.last()
 
     val stats: String
@@ -70,7 +70,7 @@ class ExerciseBook {
             )
         }
 
-    val historyList: List<SolvableExercise>
+    val historyList: List<Exercise>
         get() = history.toList()
 }
 
@@ -136,7 +136,7 @@ data class MissingSubtrahend(val a: Int, val result: Int) : Equation {
     }
 }
 
-data class SolvableExercise(
+data class Exercise(
     val exercise: Equation,
     var submittedSolution: Int? = null,
     var solved: Boolean = false,
