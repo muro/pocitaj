@@ -4,9 +4,11 @@ import java.util.Locale
 import java.util.Random
 
 
-enum class ExerciseType {
-    ADDITION,
-    SUBTRACTION
+enum class ExerciseType(val id: String) {
+    ADDITION("addition"),
+    MISSING_ADDEND("missing_addend"),
+    SUBTRACTION("subtraction"),
+    MISSING_SUBTRAHEND("missing_subtrahend")
 }
 // Holds a set of exercises to do in a session.
 // Each Exercise can be checked for correct solution
@@ -32,11 +34,20 @@ class ExerciseBook {
                 val b = Random().nextInt(bound)
                 Addition(a, b)
             }
-
+            ExerciseType.MISSING_ADDEND -> {
+                val a = Random().nextInt(bound)
+                val result = Random().nextInt(bound)
+                MissingAddend(a, result)
+            }
             ExerciseType.SUBTRACTION -> {
                 val a = Random().nextInt(bound)
                 val b = Random().nextInt(a + 1)
                 Subtraction(a, b)
+            }
+            ExerciseType.MISSING_SUBTRAHEND -> {
+                val a = Random().nextInt(bound)
+                val result = Random().nextInt(a + 1)
+                MissingSubtrahend(a, result)
             }
         }
         val exercise = Exercise(equation)

@@ -107,15 +107,25 @@ class ExerciseBookViewModel : ViewModel() {
 
     // Function to handle exercise setup completion
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
-        if (exerciseConfig.type == "addition") {
+        if (exerciseConfig.type == ExerciseType.ADDITION.id) {
             _exerciseBook.value.clear()
             for (i in 1..exerciseConfig.count) {
                 _exerciseBook.value.generate(ExerciseType.ADDITION, exerciseConfig.upTo)
             }
-        } else if (exerciseConfig.type == "subtraction") {
+        } else if (exerciseConfig.type == ExerciseType.MISSING_ADDEND.id) {
+            _exerciseBook.value.clear()
+            for (i in 1..exerciseConfig.count) {
+                _exerciseBook.value.generate(ExerciseType.MISSING_ADDEND, exerciseConfig.upTo)
+            }
+        } else if (exerciseConfig.type == ExerciseType.SUBTRACTION.id) {
             _exerciseBook.value.clear()
             for (i in 1..exerciseConfig.count) {
                 _exerciseBook.value.generate(ExerciseType.SUBTRACTION, exerciseConfig.upTo)
+            }
+        } else if (exerciseConfig.type == ExerciseType.MISSING_SUBTRAHEND.id) {
+            _exerciseBook.value.clear()
+            for (i in 1..exerciseConfig.count) {
+                _exerciseBook.value.generate(ExerciseType.MISSING_SUBTRAHEND, exerciseConfig.upTo)
             }
         }
         _exerciseIndex = 0
@@ -299,23 +309,39 @@ fun ExerciseSetupScreen(navController: NavHostController,
         Spacer(modifier = Modifier.height(16.dp))
         // Add UI elements (e.g., Radio buttons, dropdowns) for selecting exercise type and level
         Button(onClick = {
-            // Get selected exercise configuration
-            val config = ExerciseConfig("addition", 10, 2) // Replace with actual selection
+            val config = ExerciseConfig(ExerciseType.ADDITION.id, 10, 2) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
             Log.i("ExerciseBookActivity", "Starting Addition")
-            navController.navigate(Destinations.exerciseDetailRoute("addition"))
+            navController.navigate(Destinations.exerciseDetailRoute(config.type))
         }) {
             Text("Start Addition")
         }
 
         Button(onClick = {
-            // Get selected exercise configuration
-            val config = ExerciseConfig("subtraction", 10, 2) // Replace with actual selection
+            val config = ExerciseConfig(ExerciseType.MISSING_ADDEND.id, 10, 2) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
             Log.i("ExerciseBookActivity", "Starting Addition")
-            navController.navigate(Destinations.exerciseDetailRoute("subtraction"))
+            navController.navigate(Destinations.exerciseDetailRoute(config.type))
+        }) {
+            Text("Start with missing addend")
+        }
+
+        Button(onClick = {
+            val config = ExerciseConfig(ExerciseType.SUBTRACTION.id, 10, 2) // Replace with actual selection
+            exerciseBookViewModel.startExercises(config)
+            Log.i("ExerciseBookActivity", "Starting Addition")
+            navController.navigate(Destinations.exerciseDetailRoute(config.type))
         }) {
             Text("Start Subtraction")
+        }
+
+        Button(onClick = {
+            val config = ExerciseConfig(ExerciseType.MISSING_SUBTRAHEND.id, 10, 2) // Replace with actual selection
+            exerciseBookViewModel.startExercises(config)
+            Log.i("ExerciseBookActivity", "Starting Addition")
+            navController.navigate(Destinations.exerciseDetailRoute(config.type))
+        }) {
+            Text("Start Subtraction with missing subtrahend")
         }
 
         Spacer(modifier = Modifier.height(64.dp))
