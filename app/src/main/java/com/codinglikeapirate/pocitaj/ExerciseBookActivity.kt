@@ -365,6 +365,25 @@ fun ExerciseSetupScreen(navController: NavHostController,
     }
 }
 
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
+@Composable
+fun PreviewExerciseSetupScreen() {
+    val viewModel : ExerciseBookViewModel = viewModel()
+    val navController = rememberNavController()
+    AppTheme {
+        ExerciseSetupScreen(navController, viewModel) {}
+    }
+}
+
 
 @Composable
 fun InkRecognitionBox(
@@ -483,7 +502,7 @@ fun InkRecognitionBox(
 
 @Composable
 fun ExerciseScreen(exercise: ExerciseBook.Exercise,
-                   modelManager: ModelManager,
+                   modelManager: ModelManager?,
                    viewModel: ExerciseBookViewModel,
                    onAnswerSubmit: (String) -> Unit,
                    onAllExercisesComplete: () -> Unit) {
@@ -635,15 +654,14 @@ fun ExerciseScreen(exercise: ExerciseBook.Exercise,
 )
 @Composable
 fun PreviewExerciseScreen() {
-    val exercise: ExerciseBook.Exercise = ExerciseBook.Addition(1, 2)
+    val exercise: ExerciseBook.Exercise = ExerciseBook.Subtraction(14, 2)
     val viewModel : ExerciseBookViewModel = viewModel()
     viewModel.startExercises(ExerciseConfig("subtraction", 12))
-    val modelManager = ModelManager()
+
     AppTheme {
-        ExerciseScreen(exercise, modelManager, viewModel, {}, {})
+        ExerciseScreen(exercise, null, viewModel, {}, {})
     }
 }
-
 
 private fun recognizeInk(
     modelManager: ModelManager,
