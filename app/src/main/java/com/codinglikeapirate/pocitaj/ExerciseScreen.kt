@@ -325,8 +325,8 @@ fun ExerciseScreen(exercise: SolvableExercise,
 )
 @Composable
 fun PreviewExerciseScreen() {
-    val exercise: Exercise = Subtraction(14, 2)
-    val solvableExercise = SolvableExercise(exercise, exercise.getExpectedResult())
+    val equation: Equation = Subtraction(14, 2)
+    val solvableExercise = SolvableExercise(equation, equation.getExpectedResult())
     val viewModel : ExerciseBookViewModel = viewModel()
     viewModel.startExercises(ExerciseConfig("subtraction", 12))
 

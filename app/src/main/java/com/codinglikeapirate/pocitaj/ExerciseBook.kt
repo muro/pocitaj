@@ -26,7 +26,7 @@ class ExerciseBook {
     // in favor of a more flexible generation strategy.
     fun generate(type: ExerciseType, bound: Int = 10): SolvableExercise {
         // This generation logic will be moved elsewhere
-        val exercise = when (type) {
+        val equation = when (type) {
             ExerciseType.ADDITION -> {
                 val a = Random().nextInt(bound)
                 val b = Random().nextInt(bound)
@@ -39,7 +39,7 @@ class ExerciseBook {
                 Subtraction(a, b)
             }
         }
-        val solvableExercise = SolvableExercise(exercise)
+        val solvableExercise = SolvableExercise(equation)
         history.add(solvableExercise)
         return solvableExercise
     }
@@ -76,7 +76,7 @@ class ExerciseBook {
 
 
 
-interface Exercise {
+interface Equation {
     fun question(): String
     fun getExpectedResult(): Int
 
@@ -84,7 +84,7 @@ interface Exercise {
     fun getEquationString(submittedSolution: Int?): String
 }
 
-data class Addition(val a: Int, val b: Int) : Exercise {
+data class Addition(val a: Int, val b: Int) : Equation {
     override fun question(): String = String.format(Locale.ENGLISH, "%d + %d", a, b)
     override fun getExpectedResult(): Int = a + b
     override fun getEquationString(submittedSolution: Int?): String {
@@ -96,7 +96,7 @@ data class Addition(val a: Int, val b: Int) : Exercise {
     }
 }
 
-data class Subtraction(val a: Int, val b: Int) : Exercise {
+data class Subtraction(val a: Int, val b: Int) : Equation {
     override fun question(): String = String.format(Locale.ENGLISH, "%d - %d", a, b)
     override fun getExpectedResult(): Int = a - b
     override fun getEquationString(submittedSolution: Int?): String {
@@ -108,7 +108,7 @@ data class Subtraction(val a: Int, val b: Int) : Exercise {
     }
 }
 
-data class MissingAddend(val a: Int, val result: Int) : Exercise {
+data class MissingAddend(val a: Int, val result: Int) : Equation {
     val b: Int = result - a // The missing operand
 
     override fun question(): String = String.format(Locale.ENGLISH, "%d + ? = %d", a, result)
@@ -122,7 +122,7 @@ data class MissingAddend(val a: Int, val result: Int) : Exercise {
     }
 }
 
-data class MissingSubtrahend(val a: Int, val result: Int) : Exercise {
+data class MissingSubtrahend(val a: Int, val result: Int) : Equation {
     val b: Int = a - result // The missing operand
 
     override fun question(): String = String.format(Locale.ENGLISH, "%d - ? = %d", a, result)
@@ -137,7 +137,7 @@ data class MissingSubtrahend(val a: Int, val result: Int) : Exercise {
 }
 
 data class SolvableExercise(
-    val exercise: Exercise,
+    val exercise: Equation,
     var submittedSolution: Int? = null,
     var solved: Boolean = false,
     var timeTakenMillis: Long? = null
