@@ -148,7 +148,7 @@ data class MissingSubtrahend(val a: Int, val result: Int) : Equation {
 }
 
 data class Exercise(
-    val exercise: Equation,
+    val equation: Equation,
     var submittedSolution: Int? = null,
     var solved: Boolean = false,
     var timeTakenMillis: Long? = null
@@ -157,7 +157,7 @@ data class Exercise(
         if (submittedSolution == ExerciseBook.NOT_RECOGNIZED) {
             return false
         }
-        return solved && submittedSolution == exercise.getExpectedResult()
+        return solved && submittedSolution == equation.getExpectedResult()
     }
 
     fun solve(solution: Int, timeMillis: Long? = null): Boolean {
@@ -170,14 +170,14 @@ data class Exercise(
         return correct()
     }
 
-    fun equation(): String {
-        val baseEquation = exercise.getEquationString(submittedSolution)
+    fun equationString(): String {
+        val baseEquation = equation.getEquationString(submittedSolution)
 
         return when {
             solved && correct() -> "$baseEquation = $submittedSolution"
             solved && !correct() -> "$baseEquation ≠ $submittedSolution"
-            submittedSolution == ExerciseBook.NOT_RECOGNIZED -> "${exercise.question()} ≠ ?" // Special case for not recognized
-            else -> exercise.question() // Not solved, show just the question
+            submittedSolution == ExerciseBook.NOT_RECOGNIZED -> "${equation.question()} ≠ ?" // Special case for not recognized
+            else -> equation.question() // Not solved, show just the question
         }
     }
 }

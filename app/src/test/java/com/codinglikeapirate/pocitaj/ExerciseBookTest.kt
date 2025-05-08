@@ -21,10 +21,10 @@ class ExerciseBookTest {
     }
 
     @Test
-    fun addition_EquationBeforeSolving() {
+    fun addition_EquationStringBeforeSolving() {
         val equation = Addition(2, 3)
         val exercise = Exercise(equation)
-        assertEquals("2 + 3", exercise.equation())
+        assertEquals("2 + 3", exercise.equationString())
     }
 
     @Test
@@ -36,7 +36,7 @@ class ExerciseBookTest {
         assertFalse(exercise.solve(ExerciseBook.NOT_RECOGNIZED))
         assertFalse(exercise.solved)
         assertFalse(exercise.correct())
-        assertEquals("2 + 3 ≠ ?", exercise.equation())
+        assertEquals("2 + 3 ≠ ?", exercise.equationString())
     }
 
     @Test
@@ -48,7 +48,7 @@ class ExerciseBookTest {
         assertFalse(exercise.solve(7))
         assertTrue(exercise.solved)
         assertFalse(exercise.correct())
-        assertEquals("4 + 2 ≠ 7", exercise.equation())
+        assertEquals("4 + 2 ≠ 7", exercise.equationString())
     }
 
     @Test
@@ -58,7 +58,7 @@ class ExerciseBookTest {
         assertTrue(exercise.solve(5))
         assertTrue(exercise.solved)
         assertTrue(exercise.correct())
-        assertEquals("2 + 3 = 5", exercise.equation())
+        assertEquals("2 + 3 = 5", exercise.equationString())
     }
 
     @Test

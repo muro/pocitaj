@@ -248,7 +248,7 @@ fun ExerciseScreen(exercise: Exercise,
     ) {
         // Animated content for the exercise question text
         AnimatedContent(
-            targetState = exercise.exercise.question(), // Animate when the exercise question changes
+            targetState = exercise.equation.question(), // Animate when the exercise question changes
             transitionSpec = {
                 // Fade in the new text and fade out the old text
                 val duration = if (debug) {
@@ -274,7 +274,7 @@ fun ExerciseScreen(exercise: Exercise,
         Spacer(modifier = Modifier.height(16.dp))
 
         // box for input here
-        InkRecognitionBox(Modifier, modelManager, exercise.exercise.getExpectedResult().toString(), onAnswerSubmit)
+        InkRecognitionBox(Modifier, modelManager, exercise.equation.getExpectedResult().toString(), onAnswerSubmit)
 
         Spacer(modifier = Modifier.height(16.dp))
 

@@ -168,7 +168,7 @@ class ExerciseBookViewModel : ViewModel() {
         for (exercise in _exerciseBook.value.historyList) {
             results.add(
                 ResultDescription(
-                    exercise.equation(),
+                    exercise.equationString(),
                     ResultStatus.fromBooleanPair(
                         exercise.solved,
                         exercise.correct()
