@@ -14,10 +14,6 @@ enum class ExerciseType(val id: String) {
 // Each Exercise can be checked for correct solution
 class ExerciseBook {
 
-    companion object {
-        const val NOT_RECOGNIZED = -1000
-    }
-
     private val history = mutableListOf<Exercise>() // Store SolvableExercise
 
     fun clear() {
@@ -153,8 +149,12 @@ data class Exercise(
     var solved: Boolean = false,
     var timeTakenMillis: Long? = null
 ) {
+    companion object {
+        const val NOT_RECOGNIZED = -1000
+    }
+
     fun correct(): Boolean {
-        if (submittedSolution == ExerciseBook.NOT_RECOGNIZED) {
+        if (submittedSolution == NOT_RECOGNIZED) {
             return false
         }
         return solved && submittedSolution == equation.getExpectedResult()
@@ -162,7 +162,7 @@ data class Exercise(
 
     fun solve(solution: Int, timeMillis: Long? = null): Boolean {
         this.submittedSolution = solution
-        if (solution == ExerciseBook.NOT_RECOGNIZED) {
+        if (solution == NOT_RECOGNIZED) {
             return false
         }
         this.solved = true
@@ -171,12 +171,17 @@ data class Exercise(
     }
 
     fun equationString(): String {
-        val baseEquation = equation.getEquationString(submittedSolution)
+        val baseEquationWithSubmitted = equation.getEquationString(submittedSolution)
 
         return when {
-            solved && correct() -> "$baseEquation = $submittedSolution"
-            solved && !correct() -> "$baseEquation ≠ $submittedSolution"
-            submittedSolution == ExerciseBook.NOT_RECOGNIZED -> "${equation.question()} ≠ ?" // Special case for not recognized
+            solved && correct() -> {
+                when (equation) {
+                    is MissingAddend, is MissingSubtrahend -> baseEquationWithSubmitted
+                    else -> "$baseEquationWithSubmitted = $submittedSolution"
+                }
+            }
+            solved && !correct() -> "${equation.question()} ≠ $submittedSolution"
+            submittedSolution == NOT_RECOGNIZED -> "${equation.question()} ≠ ?" // Special case for not recognized
             else -> equation.question() // Not solved, show just the question
         }
     }
