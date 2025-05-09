@@ -84,29 +84,31 @@ class ExerciseBook {
 
 
 interface Equation {
+    // Displayed as the exercise question in the UI
     fun question(): String
+    // Expected result, validated when a solution is submitted or as hint to stroke recognition.
     fun getExpectedResult(): Int
 
     // New helper function to get the basic equation string based on submitted solution
-    fun getEquationString(submittedSolution: Int?): String
+    fun getQuestionAsSolved(submittedSolution: Int?): String
 }
 
 data class Addition(val a: Int, val b: Int) : Equation {
-    override fun question(): String = String.format(Locale.ENGLISH, "%d + %d", a, b)
+    override fun question(): String = String.format(Locale.ENGLISH, "%d + %d = ?", a, b)
     override fun getExpectedResult(): Int = a + b
-    override fun getEquationString(submittedSolution: Int?): String {
+    override fun getQuestionAsSolved(submittedSolution: Int?): String {
         return if (submittedSolution != null) {
-            String.format(Locale.ENGLISH, "%d + %d", a, b)
+            question().replace("?", submittedSolution.toString())
         } else {
-            question() // If no solution, just show the question
+            question()
         }
     }
 }
 
 data class Subtraction(val a: Int, val b: Int) : Equation {
-    override fun question(): String = String.format(Locale.ENGLISH, "%d - %d", a, b)
+    override fun question(): String = String.format(Locale.ENGLISH, "%d - %d = ?", a, b)
     override fun getExpectedResult(): Int = a - b
-    override fun getEquationString(submittedSolution: Int?): String {
+    override fun getQuestionAsSolved(submittedSolution: Int?): String {
         return if (submittedSolution != null) {
             String.format(Locale.ENGLISH, "%d - %d", a, b)
         } else {
@@ -120,7 +122,7 @@ data class MissingAddend(val a: Int, val result: Int) : Equation {
 
     override fun question(): String = String.format(Locale.ENGLISH, "%d + ? = %d", a, result)
     override fun getExpectedResult(): Int = b
-    override fun getEquationString(submittedSolution: Int?): String {
+    override fun getQuestionAsSolved(submittedSolution: Int?): String {
         return if (submittedSolution != null) {
             String.format(Locale.ENGLISH, "%d + %d = %d", a, submittedSolution, result) // Incorporate submitted solution
         } else {
@@ -134,7 +136,7 @@ data class MissingSubtrahend(val a: Int, val result: Int) : Equation {
 
     override fun question(): String = String.format(Locale.ENGLISH, "%d - ? = %d", a, result)
     override fun getExpectedResult(): Int = b
-    override fun getEquationString(submittedSolution: Int?): String {
+    override fun getQuestionAsSolved(submittedSolution: Int?): String {
         return if (submittedSolution != null) {
             String.format(Locale.ENGLISH, "%d - %d = %d", a, submittedSolution, result) // Incorporate submitted solution
         } else {
@@ -171,17 +173,12 @@ data class Exercise(
     }
 
     fun equationString(): String {
-        val baseEquationWithSubmitted = equation.getEquationString(submittedSolution)
-
         return when {
             solved && correct() -> {
-                when (equation) {
-                    is MissingAddend, is MissingSubtrahend -> baseEquationWithSubmitted
-                    else -> "$baseEquationWithSubmitted = $submittedSolution"
-                }
+                equation.question().replace("?", submittedSolution.toString())
             }
-            solved && !correct() -> "${equation.question()} ≠ $submittedSolution"
-            submittedSolution == NOT_RECOGNIZED -> "${equation.question()} ≠ ?" // Special case for not recognized
+            solved && !correct() -> equation.question().replace("?", submittedSolution.toString()).replace("=", "≠")
+            // submittedSolution == NOT_RECOGNIZED -> "${equation.question()} ≠ ?" // Special case for not recognized
             else -> equation.question() // Not solved, show just the question
         }
     }

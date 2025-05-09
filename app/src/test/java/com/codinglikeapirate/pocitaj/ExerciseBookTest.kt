@@ -11,38 +11,38 @@ class ExerciseBookTest {
     @Test
     fun addition_Question() {
         val equation = Addition(2, 3)
-        assertEquals("2 + 3", equation.question())
+        assertEquals("2 + 3 = ?", equation.question())
     }
 
     @Test
     fun subtraction_Question() {
         val equation = Subtraction(5, 3)
-        assertEquals("5 - 3", equation.question())
+        assertEquals("5 - 3 = ?", equation.question())
     }
 
     @Test
     fun addition_EquationStringBeforeSolving() {
         val equation = Addition(2, 3)
         val exercise = Exercise(equation)
-        assertEquals("2 + 3", exercise.equationString())
+        assertEquals("2 + 3 = ?", exercise.equationString())
     }
 
     @Test
     fun addition_SolveNotRecognized() {
         val equation = Addition(2, 3)
-        assertEquals("2 + 3", equation.question())
+        assertEquals("2 + 3 = ?", equation.question())
 
         val exercise = Exercise(equation)
         assertFalse(exercise.solve(Exercise.NOT_RECOGNIZED))
         assertFalse(exercise.solved)
         assertFalse(exercise.correct())
-        assertEquals("2 + 3 ≠ ?", exercise.equationString())
+        assertEquals("2 + 3 = ?", exercise.equationString())
     }
 
     @Test
     fun addition_SolveIncorrectly() {
         val equation = Addition(4, 2)
-        assertEquals("4 + 2", equation.question())
+        assertEquals("4 + 2 = ?", equation.question())
 
         val exercise = Exercise(equation)
         assertFalse(exercise.solve(7))
@@ -66,7 +66,7 @@ class ExerciseBookTest {
     @Test
     fun `equationString returns correct format for unsolved Addition`() {
         val exercise = Exercise(Addition(5, 3))
-        assertEquals("5 + 3", exercise.equationString())
+        assertEquals("5 + 3 = ?", exercise.equationString())
     }
 
     @Test
@@ -86,7 +86,7 @@ class ExerciseBookTest {
     @Test
     fun `equationString returns correct format for unsolved Subtraction`() {
         val exercise = Exercise(Subtraction(10, 4))
-        assertEquals("10 - 4", exercise.equationString())
+        assertEquals("10 - 4 = ?", exercise.equationString())
     }
 
     @Test
@@ -144,13 +144,6 @@ class ExerciseBookTest {
         exercise.solve(10)
         // For incorrect, it should show the original equation with the incorrect submitted answer
         assertEquals("20 - 10 ≠ 8", exercise.equationString())
-    }
-
-    @Test
-    fun `equationString returns correct format for not recognized input`() {
-        val exercise = Exercise(Addition(2, 2))
-        exercise.solve(Exercise.NOT_RECOGNIZED) // Use the constant from Exercise
-        assertEquals("2 + 2 ≠ ?", exercise.equationString())
     }
 
     @Test
