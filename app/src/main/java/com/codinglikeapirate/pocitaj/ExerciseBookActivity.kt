@@ -127,6 +127,11 @@ class ExerciseBookViewModel : ViewModel() {
             for (i in 1..exerciseConfig.count) {
                 _exerciseBook.value.generate(ExerciseType.MISSING_SUBTRAHEND, exerciseConfig.upTo)
             }
+        } else if (exerciseConfig.type == ExerciseType.MULTIPLICATION.id) {
+            _exerciseBook.value.clear()
+            for (i in 1..exerciseConfig.count) {
+                _exerciseBook.value.generate(ExerciseType.MULTIPLICATION, exerciseConfig.upTo)
+            }
         }
         _exerciseIndex = 0
         _uiState.value = UiState.ExerciseScreen(currentExercise())
@@ -320,7 +325,7 @@ fun ExerciseSetupScreen(navController: NavHostController,
         Button(onClick = {
             val config = ExerciseConfig(ExerciseType.MISSING_ADDEND.id, 10, 2) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
-            Log.i("ExerciseBookActivity", "Starting Addition")
+            Log.i("ExerciseBookActivity", "Starting Addition with missing addend")
             navController.navigate(Destinations.exerciseDetailRoute(config.type))
         }) {
             Text("Start with missing addend")
@@ -329,7 +334,7 @@ fun ExerciseSetupScreen(navController: NavHostController,
         Button(onClick = {
             val config = ExerciseConfig(ExerciseType.SUBTRACTION.id, 10, 2) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
-            Log.i("ExerciseBookActivity", "Starting Addition")
+            Log.i("ExerciseBookActivity", "Starting Subtraction")
             navController.navigate(Destinations.exerciseDetailRoute(config.type))
         }) {
             Text("Start Subtraction")
@@ -338,10 +343,19 @@ fun ExerciseSetupScreen(navController: NavHostController,
         Button(onClick = {
             val config = ExerciseConfig(ExerciseType.MISSING_SUBTRAHEND.id, 10, 2) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
-            Log.i("ExerciseBookActivity", "Starting Addition")
+            Log.i("ExerciseBookActivity", "Starting Subtraction with missing subtrahend")
             navController.navigate(Destinations.exerciseDetailRoute(config.type))
         }) {
             Text("Start Subtraction with missing subtrahend")
+        }
+
+        Button(onClick = {
+            val config = ExerciseConfig(ExerciseType.MULTIPLICATION.id, 10, 2) // Replace with actual selection
+            exerciseBookViewModel.startExercises(config)
+            Log.i("ExerciseBookActivity", "Starting Multiplication")
+            navController.navigate(Destinations.exerciseDetailRoute(config.type))
+        }) {
+            Text("Start Multiplication")
         }
 
         Spacer(modifier = Modifier.height(64.dp))

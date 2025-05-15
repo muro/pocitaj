@@ -8,7 +8,8 @@ enum class ExerciseType(val id: String) {
     ADDITION("addition"),
     MISSING_ADDEND("missing_addend"),
     SUBTRACTION("subtraction"),
-    MISSING_SUBTRAHEND("missing_subtrahend")
+    MISSING_SUBTRAHEND("missing_subtrahend"),
+    MULTIPLICATION("multiplication")
 }
 // Holds a set of exercises to do in a session.
 // Each Exercise can be checked for correct solution
@@ -44,6 +45,11 @@ class ExerciseBook {
                 val a = Random().nextInt(bound)
                 val result = Random().nextInt(a + 1)
                 MissingSubtrahend(a, result)
+            }
+            ExerciseType.MULTIPLICATION -> {
+                val a = Random().nextInt(bound)
+                val b = Random().nextInt(bound)
+                Multiplication(a, b)
             }
         }
         val exercise = Exercise(equation)
@@ -100,7 +106,7 @@ data class Addition(val a: Int, val b: Int) : Equation {
         return if (submittedSolution != null) {
             question().replace("?", submittedSolution.toString())
         } else {
-            question()
+            question() // If no solution, just show the question
         }
     }
 }
@@ -111,6 +117,18 @@ data class Subtraction(val a: Int, val b: Int) : Equation {
     override fun getQuestionAsSolved(submittedSolution: Int?): String {
         return if (submittedSolution != null) {
             String.format(Locale.ENGLISH, "%d - %d", a, b)
+        } else {
+            question() // If no solution, just show the question
+        }
+    }
+}
+
+data class Multiplication(val a: Int, val b: Int) : Equation {
+    override fun question(): String = String.format(Locale.ENGLISH, "%d × %d = ?", a, b) // Using '×' for multiplication symbol
+    override fun getExpectedResult(): Int = a * b
+    override fun getQuestionAsSolved(submittedSolution: Int?): String {
+        return if (submittedSolution != null) {
+            question().replace("?", submittedSolution.toString())
         } else {
             question() // If no solution, just show the question
         }

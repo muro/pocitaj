@@ -104,6 +104,26 @@ class ExerciseBookTest {
     }
 
     @Test
+    fun `equationString returns correct format for unsolved Multiplication`() {
+        val exercise = Exercise(Multiplication(7, 3))
+        assertEquals("7 × 3 = ?", exercise.equationString())
+    }
+
+    @Test
+    fun `equationString returns correct format for solved correct Multiplication`() {
+        val exercise = Exercise(Multiplication(7, 3))
+        exercise.solve(21)
+        assertEquals("7 × 3 = 21", exercise.equationString())
+    }
+
+    @Test
+    fun `equationString returns correct format for solved incorrect Multiplication`() {
+        val exercise = Exercise(Multiplication(7, 3))
+        exercise.solve(5)
+        assertEquals("7 × 3 ≠ 5", exercise.equationString())
+    }
+
+    @Test
     fun `equationString returns correct format for unsolved MissingAddend`() {
         val exercise = Exercise(MissingAddend(7, 15))
         assertEquals("7 + ? = 15", exercise.equationString())
