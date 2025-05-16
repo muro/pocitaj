@@ -177,7 +177,8 @@ class ExerciseBookViewModel : ViewModel() {
                     ResultStatus.fromBooleanPair(
                         exercise.solved,
                         exercise.correct()
-                    )
+                    ),
+                    exercise.timeTakenMillis ?: 0
                 )
             )
         }

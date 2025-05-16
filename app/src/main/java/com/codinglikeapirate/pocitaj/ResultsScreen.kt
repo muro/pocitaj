@@ -46,7 +46,7 @@ enum class ResultStatus {
     }
 }
 
-data class ResultDescription(val equation: String, val status: ResultStatus)
+data class ResultDescription(val equation: String, val status: ResultStatus, val elapsedMs: Int)
 
 @Composable
 fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit) {
@@ -78,9 +78,9 @@ fun ResultsList(results: List<ResultDescription>, modifier: Modifier = Modifier)
 @Composable
 fun PreviewResultsList() {
     val results = ArrayList<ResultDescription>()
-    results.add(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT))
-    results.add(ResultDescription("3 + 3 ≠ 5", ResultStatus.INCORRECT))
-    results.add(ResultDescription("3 + 3 = ?", ResultStatus.NOT_RECOGNIZED))
+    results.add(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT, 1000))
+    results.add(ResultDescription("3 + 3 ≠ 5", ResultStatus.INCORRECT, 2100))
+    results.add(ResultDescription("3 + 3 = ?", ResultStatus.NOT_RECOGNIZED, 3511))
 
     AppTheme {
         ResultsList(results)
@@ -89,7 +89,8 @@ fun PreviewResultsList() {
 
 @Composable
 fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
-    Surface(color = MaterialTheme.colorScheme.primary) {
+    Surface(color = if (result.elapsedMs < 5000) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
+    {
         Row(
             modifier = modifier
                 .padding(8.dp)
@@ -114,16 +115,25 @@ fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
             )
             Spacer(modifier = Modifier.width(12.dp))
 
-            Text(
-                text = result.equation,
-                //color = MaterialTheme.colorScheme.primary,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Light,// , textAlign = TextAlign.Center,
-                fontFamily = FontFamily.SansSerif,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-            )
+                Text(
+                    text = result.equation,
+                    //color = MaterialTheme.colorScheme.primary,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Light,// , textAlign = TextAlign.Center,
+                    fontFamily = FontFamily.SansSerif,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        //.fillMaxWidth()
+                )
+                Text(
+                    text = String.format("%.1fs", result.elapsedMs / 1000.0),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Light,// , textAlign = TextAlign.Center,
+                    fontFamily = FontFamily.SansSerif,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                )
         }
     }
 }
@@ -141,7 +151,24 @@ fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
 @Composable
 fun PreviewResultCard() {
     AppTheme {
-        ResultCard(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT))
+        ResultCard(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT, 123))
+    }
+}
+
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
+@Composable
+fun PreviewResultCardSlow() {
+    AppTheme {
+        ResultCard(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT, 5123))
     }
 }
 
@@ -160,8 +187,8 @@ fun PreviewResultCard() {
 fun PreviewResultsScreen() {
     val results = ArrayList<ResultDescription>()
     for (i in 1..5) {
-        results.add(ResultDescription("$i + ${i + 2} = ${2 * i + 2}", ResultStatus.CORRECT))
-        results.add(ResultDescription("$i + ${i + 1} ≠ $i", ResultStatus.CORRECT))
+        results.add(ResultDescription("$i + ${i + 2} = ${2 * i + 2}", ResultStatus.CORRECT, 1234))
+        results.add(ResultDescription("$i + ${i + 1} ≠ $i", ResultStatus.CORRECT, 1))
     }
     AppTheme {
         ResultsScreen(results) {}
