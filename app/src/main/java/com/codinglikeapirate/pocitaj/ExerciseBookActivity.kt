@@ -141,9 +141,9 @@ class ExerciseBookViewModel : ViewModel() {
         return _exerciseBook.value.historyList[_exerciseIndex]
     }
 
-    fun checkAnswer(answer: String) {
+    fun checkAnswer(answer: String, elapsedMs: Int) {
         answer.toIntOrNull()?.let {
-            if (currentExercise().solve(it)) {
+            if (currentExercise().solve(it, elapsedMs)) {
                 _answerResult.value = AnswerResult.Correct
             } else {
                 _answerResult.value = AnswerResult.Incorrect
@@ -246,8 +246,8 @@ fun AppNavigation(modelManager: ModelManager,
 
                 ExerciseScreen(
                     exercise, modelManager, viewModel,
-                    onAnswerSubmit = { answer ->
-                        viewModel.checkAnswer(answer)
+                    onAnswerSubmit = { answer: String, elapsedMs: Int ->
+                        viewModel.checkAnswer(answer, elapsedMs)
                     },
                     onAllExercisesComplete = {
                         navController.navigate(Destinations.SUMMARY_ROUTE) {

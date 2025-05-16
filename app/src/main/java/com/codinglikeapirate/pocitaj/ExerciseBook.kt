@@ -136,7 +136,7 @@ data class Multiplication(val a: Int, val b: Int) : Equation {
 }
 
 data class MissingAddend(val a: Int, val result: Int) : Equation {
-    val b: Int = result - a // The missing operand
+    private val b: Int = result - a // The missing operand
 
     override fun question(): String = String.format(Locale.ENGLISH, "%d + ? = %d", a, result)
     override fun getExpectedResult(): Int = b
@@ -150,7 +150,7 @@ data class MissingAddend(val a: Int, val result: Int) : Equation {
 }
 
 data class MissingSubtrahend(val a: Int, val result: Int) : Equation {
-    val b: Int = a - result // The missing operand
+    private val b: Int = a - result // The missing operand
 
     override fun question(): String = String.format(Locale.ENGLISH, "%d - ? = %d", a, result)
     override fun getExpectedResult(): Int = b
@@ -167,7 +167,7 @@ data class Exercise(
     val equation: Equation,
     var submittedSolution: Int? = null,
     var solved: Boolean = false,
-    var timeTakenMillis: Long? = null
+    var timeTakenMillis: Int? = null
 ) {
     companion object {
         const val NOT_RECOGNIZED = -1000
@@ -180,7 +180,7 @@ data class Exercise(
         return solved && submittedSolution == equation.getExpectedResult()
     }
 
-    fun solve(solution: Int, timeMillis: Long? = null): Boolean {
+    fun solve(solution: Int, timeMillis: Int? = null): Boolean {
         this.submittedSolution = solution
         if (solution == NOT_RECOGNIZED) {
             return false

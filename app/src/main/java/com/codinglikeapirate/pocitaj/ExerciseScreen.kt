@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -175,7 +176,7 @@ fun InkRecognitionBox(
 fun ExerciseScreen(exercise: Exercise,
                    modelManager: ModelManager?,
                    viewModel: ExerciseBookViewModel,
-                   onAnswerSubmit: (String) -> Unit,
+                   onAnswerSubmit: (String, Int) -> Unit,
                    onAllExercisesComplete: () -> Unit) {
 
     val backgroundAll: ImageBitmap = ImageBitmap.imageResource(id = R.drawable.paper_top)
@@ -185,6 +186,8 @@ fun ExerciseScreen(exercise: Exercise,
     var showResultImage by remember { mutableStateOf(false) }
     var resultImageRes by remember { mutableStateOf<Int?>(null) }
     val debug by viewModel.showDebug.collectAsState()
+
+    var elapsedTimeMillis by remember { mutableIntStateOf(0) }
 
     val catDuration = if (debug) {
         AppMotion.debugDuration
@@ -200,6 +203,19 @@ fun ExerciseScreen(exercise: Exercise,
         targetValue = if (showResultImage) 1f else 0f,
         label = "alphaScale")
 
+    // LaunchedEffect to start the timer when the screen is visible
+    LaunchedEffect(exercise) {
+        val startTime = System.currentTimeMillis()
+        while (true) {
+            elapsedTimeMillis = (System.currentTimeMillis() - startTime).toInt()
+            delay(100) // Update every 100 milliseconds
+        }
+    }
+
+    val submitAnswerWithTime: (String) -> Unit = { answer ->
+        val finalElapsedTime : Int = elapsedTimeMillis
+        onAnswerSubmit(answer, finalElapsedTime)
+    }
 
     LaunchedEffect(answerResult) {
         when (answerResult) {
@@ -274,7 +290,7 @@ fun ExerciseScreen(exercise: Exercise,
         Spacer(modifier = Modifier.height(16.dp))
 
         // box for input here
-        InkRecognitionBox(Modifier, modelManager, exercise.equation.getExpectedResult().toString(), onAnswerSubmit)
+        InkRecognitionBox(Modifier, modelManager, exercise.equation.getExpectedResult().toString(), submitAnswerWithTime)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -310,6 +326,14 @@ fun ExerciseScreen(exercise: Exercise,
                 )
             }
         }
+        Text(
+            text = "Time: ${elapsedTimeMillis / 1000}s ${elapsedTimeMillis % 1000}ms",
+            modifier = Modifier
+                // .align(Alignment.TopEnd) // Align to top-right
+                .padding(8.dp), // Add some padding
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onBackground
+        )
     }
 }
 
@@ -331,7 +355,7 @@ fun PreviewExerciseScreen() {
     viewModel.startExercises(ExerciseConfig("subtraction", 12))
 
     AppTheme {
-        ExerciseScreen(exercise, null, viewModel, {}, {})
+        ExerciseScreen(exercise, null, viewModel, {_: String, _: Int -> }, {})
     }
 }
 
