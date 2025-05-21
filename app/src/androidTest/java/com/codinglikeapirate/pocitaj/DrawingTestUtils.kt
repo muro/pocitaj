@@ -72,6 +72,14 @@ object DrawingTestUtils {
             listOf(p3, p4, p5, p6, p7) // Curve part
         )
     }
+
+    fun getPathForScribble(canvasWidth: Float, canvasHeight: Float): List<List<Offset>> {
+        // This uses the getDrawingOffset helper to respect existing margins.
+        // A horizontal line across the middle of the drawing area.
+        val start = getDrawingOffset(canvasWidth, canvasHeight, 0.0f, 0.5f) // Left-middle of drawing area
+        val end = getDrawingOffset(canvasWidth, canvasHeight, 1.0f, 0.5f)   // Right-middle of drawing area
+        return listOf(listOf(start, end))
+    }
 }
 
 fun performStrokes(canvasNode: SemanticsNodeInteraction, strokes: List<List<Offset>>) {
