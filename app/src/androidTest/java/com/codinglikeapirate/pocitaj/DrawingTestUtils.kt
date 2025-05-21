@@ -80,42 +80,42 @@ object DrawingTestUtils {
         val end = getDrawingOffset(canvasWidth, canvasHeight, 1.0f, 0.5f)   // Right-middle of drawing area
         return listOf(listOf(start, end))
     }
-}
 
-fun performStrokes(canvasNode: SemanticsNodeInteraction, strokes: List<List<Offset>>) {
-    strokes.forEachIndexed { index, strokePoints ->
-        if (strokePoints.size < 2) {
-            // Log or handle cases with less than 2 points, as a swipe needs at least a start and end.
-            // For now, we'll just skip if it's less than 1, the performTouchInput handles 1 point correctly (tap)
-            // but for drawing, we usually expect at least 2 points.
-            // The prompt says "If the list of points is empty or has only one point, log a warning or skip"
-            // An empty list will cause a crash on .first(). A list with one point will perform a tap.
-            // Let's stick to the prompt and skip if less than 2 points.
-            if (strokePoints.isEmpty()) {
-                // Optionally log: println("Skipping empty stroke.")
-                return@forEachIndexed
+    fun performStrokes(canvasNode: SemanticsNodeInteraction, strokes: List<List<Offset>>) {
+        strokes.forEachIndexed { index, strokePoints ->
+            if (strokePoints.size < 2) {
+                // Log or handle cases with less than 2 points, as a swipe needs at least a start and end.
+                // For now, we'll just skip if it's less than 1, the performTouchInput handles 1 point correctly (tap)
+                // but for drawing, we usually expect at least 2 points.
+                // The prompt says "If the list of points is empty or has only one point, log a warning or skip"
+                // An empty list will cause a crash on .first(). A list with one point will perform a tap.
+                // Let's stick to the prompt and skip if less than 2 points.
+                if (strokePoints.isEmpty()) {
+                    // Optionally log: println("Skipping empty stroke.")
+                    return@forEachIndexed
+                }
+                if (strokePoints.size == 1) {
+                    // Optionally log: println("Skipping stroke with only one point (would be a tap): ${strokePoints.first()}")
+                    // To perform a tap for a single point, it would be:
+                    // canvasNode.performTouchInput { down(strokePoints.first()); up() }
+                    // But for "drawing" a stroke, we need at least two points.
+                    return@forEachIndexed
+                }
             }
-            if (strokePoints.size == 1) {
-                // Optionally log: println("Skipping stroke with only one point (would be a tap): ${strokePoints.first()}")
-                // To perform a tap for a single point, it would be:
-                // canvasNode.performTouchInput { down(strokePoints.first()); up() }
-                // But for "drawing" a stroke, we need at least two points.
-                return@forEachIndexed
-            }
-        }
 
-        canvasNode.performTouchInput {
-            // Ensure there are points before proceeding
-            // This check is now more robust due to the size check above
-            down(strokePoints.first()) // Press down at the start of the stroke
-            for (i in 1 until strokePoints.size) {
-                moveTo(strokePoints[i]) // Move to subsequent points
+            canvasNode.performTouchInput {
+                // Ensure there are points before proceeding
+                // This check is now more robust due to the size check above
+                down(strokePoints.first()) // Press down at the start of the stroke
+                for (i in 1 until strokePoints.size) {
+                    moveTo(strokePoints[i]) // Move to subsequent points
+                }
+                up() // Lift up at the end of the stroke
             }
-            up() // Lift up at the end of the stroke
-        }
 
-        if (index < strokes.size - 1) {
-            Thread.sleep(150) // Delay between strokes
+            if (index < strokes.size - 1) {
+                Thread.sleep(150) // Delay between strokes
+            }
         }
     }
 }
