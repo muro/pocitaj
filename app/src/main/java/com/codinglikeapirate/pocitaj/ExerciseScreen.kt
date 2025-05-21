@@ -312,10 +312,16 @@ fun ExerciseScreen(exercise: Exercise,
             // Load the image resource
             val imageBitmap = resultImageRes?.let { ImageBitmap.imageResource(id = it) }
 
-            if (imageBitmap != null) {
+            val contentDesc = when (answerResult) {
+                is AnswerResult.Correct -> "Correct Answer Image"
+                is AnswerResult.Incorrect -> "Incorrect Answer Image"
+                is AnswerResult.Unrecognized -> "Unrecognized Answer Image"
+                else -> null
+            }
+            if (imageBitmap != null && contentDesc != null) {
                 Image(
                     bitmap = imageBitmap,
-                    contentDescription = null, // Provide a proper content description
+                    contentDescription = contentDesc,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally) // Center the image
                         .size(100.dp) // Set the size of the image
