@@ -70,5 +70,6 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.espresso.contrib)
     androidTestImplementation(libs.test.rules)
+    androidTestImplementation(libs.compose.ui.test.junit4)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
