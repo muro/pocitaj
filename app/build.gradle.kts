@@ -66,7 +66,9 @@ dependencies {
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.lifecycle.viewmodel.compose)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.ext.junit.ktx)
     androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.espresso.contrib)
+    androidTestImplementation(libs.test.rules)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

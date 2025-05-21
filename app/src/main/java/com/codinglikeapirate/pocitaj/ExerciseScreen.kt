@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -98,6 +99,7 @@ fun InkRecognitionBox(
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .testTag("InkCanvas")
             .drawBehind {
                 drawImage(
                     image = backgroundAnswer,
