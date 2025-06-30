@@ -1,7 +1,6 @@
 package com.codinglikeapirate.pocitaj
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -55,7 +54,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
 import com.google.mlkit.vision.digitalink.Ink.Stroke
-import com.google.mlkit.vision.digitalink.RecognitionContext
 import kotlinx.coroutines.delay
 
 @Composable
@@ -83,15 +81,13 @@ fun InkRecognitionBox(
     LaunchedEffect(key1 = isDrawing) {
         if (!isDrawing && inkBuilder.build().strokes.isNotEmpty()) {
             delay(recognitionDelayMillis)
-            modelManager?.let { manager ->
-                recognizeInk(manager, inkBuilder.build(), hint) { result ->
-                    recognizedText = result
-                    onAnswerSubmit(result)
-                    // Reset the ink so the next recognized value doesn't include already
-                    // recognized characters.
-                    paths.clear()
-                    inkBuilder = Ink.builder()
-                }
+            modelManager?.recognizeInk(inkBuilder.build(), hint) { result ->
+                recognizedText = result
+                onAnswerSubmit(result)
+                // Reset the ink so the next recognized value doesn't include already
+                // recognized characters.
+                paths.clear()
+                inkBuilder = Ink.builder()
             }
         }
     }
@@ -367,29 +363,3 @@ fun PreviewExerciseScreen() {
     }
 }
 
-private fun recognizeInk(
-    modelManager: ModelManager,
-    ink: Ink,
-    hint: String,
-    onResult: (String) -> Unit
-) {
-    if (modelManager.recognizer == null) {
-        Log.e("InkRecognition", "Recognizer not set")
-        return
-    }
-
-    modelManager.recognizer!!.recognize(
-        ink,
-        RecognitionContext.builder().setPreContext("1234").build()
-    )
-        .addOnSuccessListener { result ->
-            val recognizedText = result.candidates.firstOrNull { it.text == hint }?.text
-                ?: result.candidates.firstOrNull()?.text
-                ?: ""
-            onResult(recognizedText)
-        }
-        .addOnFailureListener { e: Exception ->
-            Log.e("InkRecognition", "Error during recognition", e)
-            onResult("")
-        }
-}

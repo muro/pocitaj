@@ -16,7 +16,34 @@ import com.google.mlkit.vision.digitalink.DigitalInkRecognizerOptions
 class ModelManager {
     private var model: DigitalInkRecognitionModel? = null
     var recognizer: DigitalInkRecognizer? = null
+        private set
     private val remoteModelManager = RemoteModelManager.getInstance()
+
+    fun recognizeInk(
+        ink: com.google.mlkit.vision.digitalink.Ink,
+        hint: String,
+        onResult: (String) -> Unit
+    ) {
+        if (recognizer == null) {
+            Log.e("InkRecognition", "Recognizer not set")
+            return
+        }
+
+        recognizer!!.recognize(
+            ink,
+            com.google.mlkit.vision.digitalink.RecognitionContext.builder().setPreContext("1234").build()
+        )
+            .addOnSuccessListener { result ->
+                val recognizedText = result.candidates.firstOrNull { it.text == hint }?.text
+                    ?: result.candidates.firstOrNull()?.text
+                    ?: ""
+                onResult(recognizedText)
+            }
+            .addOnFailureListener { e: Exception ->
+                Log.e("InkRecognition", "Error during recognition", e)
+                onResult("")
+            }
+    }
 
     fun setModel(languageTag: String): String {
         // Clear the old model and recognizer.
