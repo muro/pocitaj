@@ -34,7 +34,7 @@ abstract class BaseExerciseUiTest {
             try {
                 composeTestRule.onNodeWithText("Start Addition").assertIsDisplayed()
                 setupScreenVisible = true
-            } catch (e: Exception) { // More specific: NoMatchingNodeException or AssertionError
+            } catch (_: Exception) { // More specific: NoMatchingNodeException or AssertionError
                 attempts++
                 Thread.sleep(delayMillis)
             }
@@ -63,7 +63,7 @@ abstract class BaseExerciseUiTest {
             try {
                 composeTestRule.onNodeWithTag("InkCanvas").assertIsDisplayed()
                 exerciseScreenVisible = true
-            } catch (e: Exception) { // More specific: NoMatchingNodeException or AssertionError
+            } catch (_: Exception) { // More specific: NoMatchingNodeException or AssertionError
                 attempts++
                 Thread.sleep(delayMillis)
             }
