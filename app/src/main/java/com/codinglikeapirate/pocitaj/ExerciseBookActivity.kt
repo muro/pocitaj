@@ -194,15 +194,11 @@ class ExerciseBookViewModel : ViewModel() {
 
 class ExerciseBookActivity : ComponentActivity() {
 
-    @JvmField
-    @VisibleForTesting
-    var modelManager: InkModelManager = ModelManager()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val modelManager = (application as PocitajApplication).inkModelManager
         val viewModel: ExerciseBookViewModel by viewModels()
-        modelManager.setModel("en-US")
 
         setContent {
             AppTheme {
