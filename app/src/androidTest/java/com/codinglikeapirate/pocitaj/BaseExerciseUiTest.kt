@@ -2,6 +2,7 @@ package com.codinglikeapirate.pocitaj
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.junit.Before
@@ -51,7 +52,7 @@ abstract class BaseExerciseUiTest {
             .performClick()
 
         // Wait for the ExerciseScreen to be loaded by checking for a unique element.
-        // The placeholder text "Recognized Text: ???" is part of the ExerciseScreen.
+        // The InkCanvas is a good unique identifier for the ExerciseScreen.
         // Allow up to 5 seconds for the screen transition.
         var attempts = 0
         val maxAttempts = 10 // 10 attempts * 500ms = 5 seconds
@@ -60,7 +61,7 @@ abstract class BaseExerciseUiTest {
 
         while (attempts < maxAttempts && !exerciseScreenVisible) {
             try {
-                composeTestRule.onNodeWithText("Recognized Text: ???").assertIsDisplayed()
+                composeTestRule.onNodeWithTag("InkCanvas").assertIsDisplayed()
                 exerciseScreenVisible = true
             } catch (e: Exception) { // More specific: NoMatchingNodeException or AssertionError
                 attempts++
@@ -69,7 +70,7 @@ abstract class BaseExerciseUiTest {
         }
 
         if (!exerciseScreenVisible) {
-            throw AssertionError("ExerciseScreen (with 'Recognized Text: ???') did not become visible after ${maxAttempts * delayMillis / 1000} seconds.")
+            throw AssertionError("ExerciseScreen (with 'InkCanvas') did not become visible after ${maxAttempts * delayMillis / 1000} seconds.")
         }
     }
 }
