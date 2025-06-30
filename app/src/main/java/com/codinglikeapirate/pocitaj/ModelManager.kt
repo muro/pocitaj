@@ -14,10 +14,6 @@ import com.google.mlkit.vision.digitalink.DigitalInkRecognizerOptions
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-import kotlin.coroutines.suspendCoroutine
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-
 /** Class to manage model downloading, deletion, and selection.  */
 class ModelManager : InkModelManager {
     private var model: DigitalInkRecognitionModel? = null
@@ -62,7 +58,7 @@ class ModelManager : InkModelManager {
         val modelIdentifier: DigitalInkRecognitionModelIdentifier?
         modelIdentifier = try {
             DigitalInkRecognitionModelIdentifier.fromLanguageTag(languageTag)
-        } catch (e: MlKitException) {
+        } catch (_: MlKitException) {
             Log.e(
                 TAG,
                 "Failed to parse language '$languageTag'"
