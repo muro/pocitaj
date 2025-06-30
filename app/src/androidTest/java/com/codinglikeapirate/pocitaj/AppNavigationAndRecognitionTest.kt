@@ -1,8 +1,6 @@
 package com.codinglikeapirate.pocitaj
 
 import androidx.compose.ui.test.*
-import androidx.compose.ui.unit.height
-import androidx.compose.ui.unit.width
 import androidx.test.espresso.Espresso // Added for pressBack
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -17,7 +15,7 @@ class AppNavigationAndRecognitionTest : BaseExerciseUiTest() {
                     // useUnmergedTree = true can be helpful if nodes are unexpectedly merged
                     composeTestRule.onNodeWithContentDescription(desc, useUnmergedTree = true).assertIsDisplayed()
                     return true // Found one and it's displayed
-                } catch (e: AssertionError) {
+                } catch (_: AssertionError) {
                     // Node not found or not displayed, try next description or next poll attempt
                 }
             }
@@ -32,7 +30,7 @@ class AppNavigationAndRecognitionTest : BaseExerciseUiTest() {
             try {
                 composeTestRule.onNodeWithText(text).assertIsDisplayed()
                 return true // Found and displayed
-            } catch (e: AssertionError) {
+            } catch (_: AssertionError) {
                 // Node not found or not displayed, try next poll attempt
             }
             Thread.sleep(500) // Poll interval
