@@ -13,13 +13,12 @@ import com.google.mlkit.vision.digitalink.DigitalInkRecognizer
 import com.google.mlkit.vision.digitalink.DigitalInkRecognizerOptions
 
 /** Class to manage model downloading, deletion, and selection.  */
-class ModelManager {
+class ModelManager : InkModelManager {
     private var model: DigitalInkRecognitionModel? = null
-    var recognizer: DigitalInkRecognizer? = null
-        private set
+    private var recognizer: DigitalInkRecognizer? = null
     private val remoteModelManager = RemoteModelManager.getInstance()
 
-    fun recognizeInk(
+    override fun recognizeInk(
         ink: com.google.mlkit.vision.digitalink.Ink,
         hint: String,
         onResult: (String) -> Unit
@@ -45,7 +44,7 @@ class ModelManager {
             }
     }
 
-    fun setModel(languageTag: String): String {
+    override fun setModel(languageTag: String): String {
         // Clear the old model and recognizer.
         model = null
         recognizer?.close()
@@ -78,7 +77,7 @@ class ModelManager {
         return remoteModelManager.isModelDownloaded(model!!)
     }
 
-    fun deleteActiveModel(): Task<String?> {
+    override fun deleteActiveModel(): Task<String?> {
         if (model == null) {
             Log.i(TAG, "Model not set")
             return Tasks.forResult("Model not set")
@@ -108,7 +107,7 @@ class ModelManager {
             }
     }
 
-    fun download(): Task<String?> {
+    override fun download(): Task<String?> {
         return if (model == null) {
             Tasks.forResult("Model not selected.")
         } else remoteModelManager

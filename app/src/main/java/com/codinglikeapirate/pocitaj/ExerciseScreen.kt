@@ -59,7 +59,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun InkRecognitionBox(
     modifier: Modifier = Modifier,
-    modelManager: ModelManager? = null,
+    modelManager: InkModelManager? = null,
     hint: String,
     onAnswerSubmit: (String) -> Unit
 ) {
@@ -172,7 +172,7 @@ fun InkRecognitionBox(
 
 @Composable
 fun ExerciseScreen(exercise: Exercise,
-                   modelManager: ModelManager?,
+                   modelManager: InkModelManager?,
                    viewModel: ExerciseBookViewModel,
                    onAnswerSubmit: (String, Int) -> Unit,
                    onAllExercisesComplete: () -> Unit) {
