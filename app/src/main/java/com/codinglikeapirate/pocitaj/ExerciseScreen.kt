@@ -59,13 +59,11 @@ import kotlinx.coroutines.delay
 @Composable
 fun InkRecognitionBox(
     modifier: Modifier = Modifier,
-    modelManager: InkModelManager? = null,
-    hint: String,
-    onAnswerSubmit: (String) -> Unit
+    viewModel: ExerciseBookViewModel,
+    hint: String
 ) {
     val recognitionDelayMillis = 1000L
 
-    var recognizedText by remember { mutableStateOf("") }
     val currentPath = remember { mutableStateOf(Path()) }
     val paths = remember { mutableStateListOf<Path>() }
     var currentStrokeBuilder = remember { Stroke.builder() }
@@ -81,14 +79,11 @@ fun InkRecognitionBox(
     LaunchedEffect(key1 = isDrawing) {
         if (!isDrawing && inkBuilder.build().strokes.isNotEmpty()) {
             delay(recognitionDelayMillis)
-            modelManager?.recognizeInk(inkBuilder.build(), hint) { result ->
-                recognizedText = result
-                onAnswerSubmit(result)
-                // Reset the ink so the next recognized value doesn't include already
-                // recognized characters.
-                paths.clear()
-                inkBuilder = Ink.builder()
-            }
+            viewModel.recognizeInk(inkBuilder.build(), hint)
+            // Reset the ink so the next recognized value doesn't include already
+            // recognized characters.
+            paths.clear()
+            inkBuilder = Ink.builder()
         }
     }
 
@@ -172,7 +167,6 @@ fun InkRecognitionBox(
 
 @Composable
 fun ExerciseScreen(exercise: Exercise,
-                   modelManager: InkModelManager?,
                    viewModel: ExerciseBookViewModel,
                    onAnswerSubmit: (String, Int) -> Unit,
                    onAllExercisesComplete: () -> Unit) {
@@ -181,6 +175,7 @@ fun ExerciseScreen(exercise: Exercise,
 
     // Observe the answer result state
     val answerResult by viewModel.answerResult.collectAsState()
+    val recognizedText by viewModel.recognizedText.collectAsState()
     var showResultImage by remember { mutableStateOf(false) }
     var resultImageRes by remember { mutableStateOf<Int?>(null) }
     val debug by viewModel.showDebug.collectAsState()
@@ -210,9 +205,11 @@ fun ExerciseScreen(exercise: Exercise,
         }
     }
 
-    val submitAnswerWithTime: (String) -> Unit = { answer ->
-        val finalElapsedTime : Int = elapsedTimeMillis
-        onAnswerSubmit(answer, finalElapsedTime)
+    LaunchedEffect(recognizedText) {
+        recognizedText?.let {
+            val finalElapsedTime = elapsedTimeMillis
+            onAnswerSubmit(it, finalElapsedTime)
+        }
     }
 
     LaunchedEffect(answerResult) {
@@ -288,12 +285,12 @@ fun ExerciseScreen(exercise: Exercise,
         Spacer(modifier = Modifier.height(16.dp))
 
         // box for input here
-        InkRecognitionBox(Modifier, modelManager, exercise.equation.getExpectedResult().toString(), submitAnswerWithTime)
+        InkRecognitionBox(Modifier, viewModel, exercise.equation.getExpectedResult().toString())
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Recognized Text: ???", // $recognizedText",
+            text = "Recognized Text: ${recognizedText ?: "..."}",
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             fontSize = 18.sp
@@ -359,7 +356,7 @@ fun PreviewExerciseScreen() {
     viewModel.startExercises(ExerciseConfig("subtraction", 12))
 
     AppTheme {
-        ExerciseScreen(exercise, null, viewModel, {_: String, _: Int -> }, {})
+        ExerciseScreen(exercise, viewModel, {_: String, _: Int -> }, {})
     }
 }
 

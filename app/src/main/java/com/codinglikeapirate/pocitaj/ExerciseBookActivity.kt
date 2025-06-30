@@ -29,14 +29,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.mlkit.vision.digitalink.Ink
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 
 // Which screen are we currently on:
@@ -57,7 +60,7 @@ sealed class AnswerResult {
 
 data class ExerciseConfig(val type: String, val upTo: Int = 10, val count: Int = 10)
 
-class ExerciseBookViewModel : ViewModel() {
+class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : ViewModel() {
     companion object {
         const val DEBUG_TAP_THRESHOLD = 5
     }
@@ -77,13 +80,18 @@ class ExerciseBookViewModel : ViewModel() {
 
     private val results = ArrayList<ResultDescription>()
 
+    private val _isRecognizing = MutableStateFlow(false)
+    val isRecognizing: StateFlow<Boolean> = _isRecognizing.asStateFlow()
+
+    private val _recognizedText = MutableStateFlow<String?>(null)
+    val recognizedText: StateFlow<String?> = _recognizedText.asStateFlow()
+
     fun downloadModel(
-        modelManager: InkModelManager,
         languageCode: String,
         navController: NavHostController
     ) {
-        modelManager.setModel(languageCode)
-        modelManager.download().addOnSuccessListener {
+        inkModelManager.setModel(languageCode)
+        inkModelManager.download().addOnSuccessListener {
             Log.i("ExerciseBookViewModel", "Model download succeeded")
             _uiState.value = UiState.ExerciseSetup
             navController.navigate(Destinations.HOME_ROUTE) {
@@ -98,9 +106,22 @@ class ExerciseBookViewModel : ViewModel() {
         }
     }
 
-    fun deleteActiveModel(modelManager: InkModelManager, languageCode: String) {
-        modelManager.setModel(languageCode)
-        modelManager.deleteActiveModel().addOnSuccessListener {
+    fun recognizeInk(ink: Ink, hint: String) {
+        viewModelScope.launch {
+            _isRecognizing.value = true
+            _recognizedText.value = null
+            try {
+                val result = inkModelManager.recognizeInk(ink, hint)
+                _recognizedText.value = result
+            } finally {
+                _isRecognizing.value = false
+            }
+        }
+    }
+
+    fun deleteActiveModel(languageCode: String) {
+        inkModelManager.setModel(languageCode)
+        inkModelManager.deleteActiveModel().addOnSuccessListener {
             Log.i("ExerciseBookViewModel", "Model deleted")
         }
     }
@@ -198,12 +219,14 @@ class ExerciseBookActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val modelManager = (application as PocitajApplication).inkModelManager
-        val viewModel: ExerciseBookViewModel by viewModels()
+        val viewModel: ExerciseBookViewModel by viewModels {
+            ExerciseBookViewModelFactory(modelManager)
+        }
 
         setContent {
             AppTheme {
                 val navController = rememberNavController()
-                AppNavigation(modelManager, navController, viewModel)
+                AppNavigation(navController, viewModel)
             }
         }
     }
@@ -218,8 +241,7 @@ object Destinations {
 }
 
 @Composable
-fun AppNavigation(modelManager: InkModelManager,
-                  navController: NavHostController = rememberNavController(),
+fun AppNavigation(navController: NavHostController = rememberNavController(),
                   viewModel: ExerciseBookViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     NavHost(
@@ -228,12 +250,12 @@ fun AppNavigation(modelManager: InkModelManager,
     ) {
         composable(route = Destinations.LOADING_ROUTE) {
             LoadingScreen(UiState.LoadingModel()) {
-                viewModel.downloadModel(modelManager, "en-US", navController)
+                viewModel.downloadModel("en-US", navController)
             }
         }
         composable(route = Destinations.HOME_ROUTE) {
             ExerciseSetupScreen(navController, viewModel) {
-                viewModel.deleteActiveModel(modelManager, "en-US")
+                viewModel.deleteActiveModel("en-US")
             }
         }
         composable(route = Destinations.EXERCISE_ROUTE) {
@@ -242,7 +264,7 @@ fun AppNavigation(modelManager: InkModelManager,
                 val exercise: Exercise = exerciseState.currentExercise
 
                 ExerciseScreen(
-                    exercise, modelManager, viewModel,
+                    exercise, viewModel,
                     onAnswerSubmit = { answer: String, elapsedMs: Int ->
                         viewModel.checkAnswer(answer, elapsedMs)
                     },

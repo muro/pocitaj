@@ -17,9 +17,8 @@ interface InkModelManager {
      * Recognizes the ink from the user's drawing.
      * @param hint A hint to the recognizer to improve accuracy.
      */
-    fun recognizeInk(
+    suspend fun recognizeInk(
         ink: Ink,
-        hint: String,
-        onResult: (String) -> Unit
-    )
+        hint: String
+    ): String
 }
