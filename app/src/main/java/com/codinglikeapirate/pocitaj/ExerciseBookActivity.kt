@@ -78,7 +78,7 @@ class ExerciseBookViewModel : ViewModel() {
     private val results = ArrayList<ResultDescription>()
 
     fun downloadModel(
-        modelManager: ModelManager,
+        modelManager: InkModelManager,
         languageCode: String,
         navController: NavHostController
     ) {
@@ -98,7 +98,7 @@ class ExerciseBookViewModel : ViewModel() {
         }
     }
 
-    fun deleteActiveModel(modelManager: ModelManager, languageCode: String) {
+    fun deleteActiveModel(modelManager: InkModelManager, languageCode: String) {
         modelManager.setModel(languageCode)
         modelManager.deleteActiveModel().addOnSuccessListener {
             Log.i("ExerciseBookViewModel", "Model deleted")
@@ -196,7 +196,7 @@ class ExerciseBookActivity : ComponentActivity() {
 
     @JvmField
     @VisibleForTesting
-    var modelManager = ModelManager()
+    var modelManager: InkModelManager = ModelManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -222,7 +222,7 @@ object Destinations {
 }
 
 @Composable
-fun AppNavigation(modelManager: ModelManager,
+fun AppNavigation(modelManager: InkModelManager,
                   navController: NavHostController = rememberNavController(),
                   viewModel: ExerciseBookViewModel) {
     val uiState by viewModel.uiState.collectAsState()

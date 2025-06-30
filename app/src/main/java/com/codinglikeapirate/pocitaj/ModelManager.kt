@@ -37,6 +37,7 @@ class ModelManager : InkModelManager {
                     ?: result.candidates.firstOrNull()?.text
                     ?: ""
                 onResult(recognizedText)
+                Log.i("ModelManager", "Recognized text: $recognizedText")
             }
             .addOnFailureListener { e: Exception ->
                 Log.e("InkRecognition", "Error during recognition", e)
