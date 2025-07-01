@@ -2,10 +2,9 @@ package com.codinglikeapirate.pocitaj
 
 import androidx.compose.ui.test.*
 import androidx.test.espresso.Espresso // Added for pressBack
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class AppNavigationAndRecognitionTest : BaseExerciseUiTest() {
+class ExerciseFlowTest : BaseExerciseUiTest() {
 
     @Test
     fun testFullAppFlow_DrawingRecognized() {
