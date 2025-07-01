@@ -69,16 +69,18 @@ fun InkRecognitionBox(
     var currentStrokeBuilder = remember { Stroke.builder() }
     var inkBuilder by remember { mutableStateOf(Ink.builder()) }
     var currentPathPoints by remember { mutableStateOf(listOf<Offset>()) }
-    var isDrawing by remember { mutableStateOf(false) }
+
+    // A boolean would be sufficient except in tests, where touch events are batched.
+    var trigger by remember { mutableIntStateOf(0) }
 
     val backgroundAnswer: ImageBitmap = ImageBitmap.imageResource(id = R.drawable.paper_answer)
 
-    val strokeColor = MaterialTheme.colorScheme.errorContainer // MaterialTheme.colorScheme.primary
+    val strokeColor = MaterialTheme.colorScheme.errorContainer
     val activeStrokeColor = MaterialTheme.colorScheme.error
     val strokeWidth = 5.dp
 
-    LaunchedEffect(key1 = paths.size) {
-        if (paths.isNotEmpty()) {
+    LaunchedEffect(key1 = trigger) {
+        if (inkBuilder.build().strokes.isNotEmpty()) {
             delay(recognitionDelayMillis)
             val ink = inkBuilder.build()
             paths.clear()
@@ -101,7 +103,6 @@ fun InkRecognitionBox(
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset ->
-                        isDrawing = true
                         currentPath.value.moveTo(offset.x, offset.y)
                         currentStrokeBuilder.addPoint(Point.create(offset.x, offset.y))
                         currentPathPoints = listOf(offset)
@@ -118,12 +119,12 @@ fun InkRecognitionBox(
                         currentPathPoints = currentPathPoints + newOffset
                     },
                     onDragEnd = {
-                        isDrawing = false
                         paths.add(currentPath.value)
                         currentPath.value = Path()
                         inkBuilder.addStroke(currentStrokeBuilder.build())
                         currentStrokeBuilder = Stroke.builder()
                         currentPathPoints = emptyList()
+                        trigger++ // Manually trigger the effect
                     }
                 )
             }

@@ -72,6 +72,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         val strokesForOne = DrawingTestUtils.getPathForDigitOne(canvasWidth, canvasHeight)
         DrawingTestUtils.performStrokes(composeTestRule, canvasNode, strokesForOne)
+        composeTestRule.mainClock.advanceTimeBy(1100)
 
         val feedbackImageContentDescriptions = listOf(
             "Correct Answer Image",
@@ -84,6 +85,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // Second Question
         composeTestRule.waitForIdle() // Wait for UI to settle (e.g., next question loaded)
+        composeTestRule.mainClock.advanceTimeBy(1200)
 
         val canvasNodeSecond = composeTestRule.onNodeWithTag("InkCanvas")
         canvasNodeSecond.assertExists("InkCanvas not found for the second question.")
@@ -98,8 +100,9 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         val strokesForZero = DrawingTestUtils.getPathForDigitOne(canvasWidthSecond, canvasHeightSecond) // getPathForDigitZero
         DrawingTestUtils.performStrokes(composeTestRule, canvasNodeSecond, strokesForOne)
+        composeTestRule.mainClock.advanceTimeBy(1100)
 
-        composeTestRule.waitUntil(timeoutMillis = 10000) {
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
             composeTestRule.onAllNodesWithContentDescription(feedbackImageContentDescriptions[1]).fetchSemanticsNodes().isNotEmpty()
         }
     }
@@ -176,6 +179,8 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     fun testRecognition_UnrecognizedInput() {
         navigateToExerciseType("Start Addition")
 
+        composeTestRule.waitForIdle()
+
         val canvasNode = composeTestRule.onNodeWithTag("InkCanvas")
         canvasNode.assertExists("InkCanvas not found.") // Ensure canvas is there
         val canvasBounds = canvasNode.fetchSemanticsNode().boundsInRoot
@@ -186,6 +191,8 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         if (canvasWidth <= 0 || canvasHeight <= 0) {
             throw AssertionError("Canvas dimensions are invalid: Width=$canvasWidth, Height=$canvasHeight. Ensure the canvas is visible and has size.")
         }
+
+        composeTestRule.waitForIdle()
 
         val scribbleStrokes = DrawingTestUtils.getPathForScribble(canvasWidth, canvasHeight)
         DrawingTestUtils.performStrokes(composeTestRule, canvasNode, scribbleStrokes)
