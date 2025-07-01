@@ -2,9 +2,15 @@ package com.codinglikeapirate.pocitaj
 
 import androidx.compose.ui.test.*
 import androidx.test.espresso.Espresso // Added for pressBack
+import org.junit.Before
 import org.junit.Test
 
 class ExerciseFlowTest : BaseExerciseUiTest() {
+
+    @Before
+    fun setup() {
+        FakeInkModelManager.recognitionResult = "1"
+    }
 
     @Test
     fun testFullAppFlow_DrawingRecognized() {
@@ -199,6 +205,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
     @Test
     fun testRecognition_UnrecognizedInput() {
+        FakeInkModelManager.recognitionResult = ""
         navigateToExerciseType("Start Addition")
 
         composeTestRule.waitForIdle()
@@ -213,8 +220,6 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         if (canvasWidth <= 0 || canvasHeight <= 0) {
             throw AssertionError("Canvas dimensions are invalid: Width=$canvasWidth, Height=$canvasHeight. Ensure the canvas is visible and has size.")
         }
-
-        composeTestRule.waitForIdle()
 
         val scribbleStrokes = DrawingTestUtils.getPathForScribble(canvasWidth, canvasHeight)
         DrawingTestUtils.performStrokes(composeTestRule, canvasNode, scribbleStrokes)
