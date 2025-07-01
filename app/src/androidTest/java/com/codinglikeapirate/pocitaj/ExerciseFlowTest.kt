@@ -163,7 +163,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // Verify Navigation to Summary Screen (ResultsScreen)
         composeTestRule.waitUntil(timeoutMillis = 3000) {
-            composeTestRule.onAllNodesWithText("Results").fetchSemanticsNodes().isNotEmpty()
+            composeTestRule.onAllNodesWithText("Done").fetchSemanticsNodes().isNotEmpty()
         }
 
         // Navigate Back to Setup Screen
