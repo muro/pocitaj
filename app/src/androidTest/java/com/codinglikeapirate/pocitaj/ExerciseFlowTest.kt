@@ -85,7 +85,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // Second Question
         composeTestRule.waitForIdle() // Wait for UI to settle (e.g., next question loaded)
-        composeTestRule.mainClock.advanceTimeBy(1200)
+        composeTestRule.mainClock.advanceTimeBy(2000)
 
         val canvasNodeSecond = composeTestRule.onNodeWithTag("InkCanvas")
         canvasNodeSecond.assertExists("InkCanvas not found for the second question.")
@@ -109,47 +109,69 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
     @Test
     fun testFullNavigationFlow_SetupToSummaryToSetup() {
-        navigateToExerciseType("Start Addition") // Navigates to the first question
+        navigateToExerciseType("Start Addition")
+
+        // First Question
+        val canvasNode = composeTestRule.onNodeWithTag("InkCanvas")
+        canvasNode.assertExists("InkCanvas not found for the first question.")
+
+        val canvasBounds = canvasNode.fetchSemanticsNode().boundsInRoot
+        val canvasWidth = canvasBounds.width
+        val canvasHeight = canvasBounds.height
+
+        if (canvasWidth <= 0 || canvasHeight <= 0) {
+            throw AssertionError("Canvas dimensions are invalid for the first question: Width=$canvasWidth, Height=$canvasHeight.")
+        }
+
+        val strokesForOne = DrawingTestUtils.getPathForDigitOne(canvasWidth, canvasHeight)
+        DrawingTestUtils.performStrokes(composeTestRule, canvasNode, strokesForOne)
+        composeTestRule.mainClock.advanceTimeBy(1100)
 
         val feedbackImageContentDescriptions = listOf(
             "Correct Answer Image",
             "Incorrect Answer Image",
             "Unrecognized Answer Image"
         )
-
-        // Answer First Question
-        val canvasNode1 = composeTestRule.onNodeWithTag("InkCanvas")
-        canvasNode1.assertExists("InkCanvas not found for the first question.")
-        val canvasBounds1 = canvasNode1.fetchSemanticsNode().boundsInRoot
-        val strokesForOne = DrawingTestUtils.getPathForDigitOne(canvasBounds1.width, canvasBounds1.height)
-        DrawingTestUtils.performStrokes(composeTestRule, canvasNode1, strokesForOne)
         composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithContentDescription(feedbackImageContentDescriptions[1]).fetchSemanticsNodes().isNotEmpty()
         }
-        composeTestRule.waitForIdle()
 
-        // Answer Second Question
-        val canvasNode2 = composeTestRule.onNodeWithTag("InkCanvas") // Re-acquire
-        canvasNode2.assertExists("InkCanvas not found for the second question.")
-        val canvasBounds2 = canvasNode2.fetchSemanticsNode().boundsInRoot
-        val strokesForTwo = DrawingTestUtils.getPathForDigitTwo(canvasBounds2.width, canvasBounds2.height)
-        DrawingTestUtils.performStrokes(composeTestRule, canvasNode2, strokesForTwo)
-        composeTestRule.waitUntil(timeoutMillis = 10000) {
+        // Second Question
+        composeTestRule.waitForIdle() // Wait for UI to settle (e.g., next question loaded)
+        composeTestRule.mainClock.advanceTimeBy(2000)
+
+        val canvasNodeSecond = composeTestRule.onNodeWithTag("InkCanvas")
+        canvasNodeSecond.assertExists("InkCanvas not found for the second question.")
+
+        val canvasBoundsSecond = canvasNodeSecond.fetchSemanticsNode().boundsInRoot
+        val canvasWidthSecond = canvasBoundsSecond.width
+        val canvasHeightSecond = canvasBoundsSecond.height
+
+        if (canvasWidthSecond <= 0 || canvasHeightSecond <= 0) {
+            throw AssertionError("Canvas dimensions are invalid for the second question: Width=$canvasWidthSecond, Height=$canvasHeightSecond.")
+        }
+
+        val strokesForZero = DrawingTestUtils.getPathForDigitOne(canvasWidthSecond, canvasHeightSecond) // getPathForDigitZero
+        DrawingTestUtils.performStrokes(composeTestRule, canvasNodeSecond, strokesForOne)
+        composeTestRule.mainClock.advanceTimeBy(1100)
+
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
             composeTestRule.onAllNodesWithContentDescription(feedbackImageContentDescriptions[1]).fetchSemanticsNodes().isNotEmpty()
         }
         composeTestRule.waitForIdle()
+        composeTestRule.mainClock.advanceTimeBy(2000)
 
         // Verify Navigation to Summary Screen (ResultsScreen)
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
             composeTestRule.onAllNodesWithText("Results").fetchSemanticsNodes().isNotEmpty()
         }
 
         // Navigate Back to Setup Screen
-        composeTestRule.onNodeWithText("Back to menu").performClick()
+        composeTestRule.onNodeWithText("Done").performClick()
         composeTestRule.waitForIdle()
 
         // Verify Navigation to Exercise Setup Screen
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = 3000) {
             composeTestRule.onAllNodesWithText("Start Addition").fetchSemanticsNodes().isNotEmpty()
         }
     }
