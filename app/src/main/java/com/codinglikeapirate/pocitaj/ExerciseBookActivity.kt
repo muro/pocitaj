@@ -188,6 +188,7 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
             onAllExercisesComplete()
         }
         _answerResult.value = AnswerResult.None // Reset answer result state
+        _recognizedText.value = null // Reset recognition state
     }
 
     private fun resultsList() {
