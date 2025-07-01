@@ -2,6 +2,7 @@ package com.codinglikeapirate.pocitaj
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performTouchInput
 
 object DrawingTestUtils {
@@ -20,9 +21,14 @@ object DrawingTestUtils {
     }
 
     fun getPathForDigitOne(canvasWidth: Float, canvasHeight: Float): List<List<Offset>> {
-        val start = getDrawingOffset(canvasWidth, canvasHeight, 0.5f, 0.1f) // Top-middle
-        val end = getDrawingOffset(canvasWidth, canvasHeight, 0.5f, 0.9f)   // Bottom-middle
-        return listOf(listOf(start, end))
+
+        val p1 = getDrawingOffset(canvasWidth, canvasHeight, 0.4f, 0.3f) // Top-center
+        val p2 = getDrawingOffset(canvasWidth, canvasHeight, 0.5f, 0.0f) // Middle-right
+        val p3 = getDrawingOffset(canvasWidth, canvasHeight, 0.5f, 1.0f) // Bottom-center
+
+        return listOf(
+            listOf(p1, p2, p3)
+        )
     }
 
     fun getPathForDigitZero(canvasWidth: Float, canvasHeight: Float): List<List<Offset>> {
@@ -81,40 +87,28 @@ object DrawingTestUtils {
         return listOf(listOf(start, end))
     }
 
-    fun performStrokes(canvasNode: SemanticsNodeInteraction, strokes: List<List<Offset>>) {
+    fun performStrokes(rule: ComposeTestRule, canvasNode: SemanticsNodeInteraction, strokes: List<List<Offset>>) {
+        rule.waitForIdle()
         strokes.forEachIndexed { index, strokePoints ->
             if (strokePoints.size < 2) {
-                // Log or handle cases with less than 2 points, as a swipe needs at least a start and end.
-                // For now, we'll just skip if it's less than 1, the performTouchInput handles 1 point correctly (tap)
-                // but for drawing, we usually expect at least 2 points.
-                // The prompt says "If the list of points is empty or has only one point, log a warning or skip"
-                // An empty list will cause a crash on .first(). A list with one point will perform a tap.
-                // Let's stick to the prompt and skip if less than 2 points.
                 if (strokePoints.isEmpty()) {
-                    // Optionally log: println("Skipping empty stroke.")
                     return@forEachIndexed
                 }
                 if (strokePoints.size == 1) {
-                    // Optionally log: println("Skipping stroke with only one point (would be a tap): ${strokePoints.first()}")
-                    // To perform a tap for a single point, it would be:
-                    // canvasNode.performTouchInput { down(strokePoints.first()); up() }
-                    // But for "drawing" a stroke, we need at least two points.
                     return@forEachIndexed
                 }
             }
 
             canvasNode.performTouchInput {
-                // Ensure there are points before proceeding
-                // This check is now more robust due to the size check above
-                down(strokePoints.first()) // Press down at the start of the stroke
+                down(strokePoints.first())
                 for (i in 1 until strokePoints.size) {
-                    moveTo(strokePoints[i]) // Move to subsequent points
+                    moveTo(strokePoints[i])
                 }
-                up() // Lift up at the end of the stroke
+                up()
             }
 
             if (index < strokes.size - 1) {
-                Thread.sleep(150) // Delay between strokes
+                rule.waitForIdle()
             }
         }
     }

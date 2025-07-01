@@ -73,17 +73,17 @@ fun InkRecognitionBox(
 
     val backgroundAnswer: ImageBitmap = ImageBitmap.imageResource(id = R.drawable.paper_answer)
 
-    val strokeColor = MaterialTheme.colorScheme.primary
+    val strokeColor = MaterialTheme.colorScheme.errorContainer // MaterialTheme.colorScheme.primary
+    val activeStrokeColor = MaterialTheme.colorScheme.error
     val strokeWidth = 5.dp
 
-    LaunchedEffect(key1 = isDrawing) {
-        if (!isDrawing && inkBuilder.build().strokes.isNotEmpty()) {
+    LaunchedEffect(key1 = paths.size) {
+        if (paths.isNotEmpty()) {
             delay(recognitionDelayMillis)
-            viewModel.recognizeInk(inkBuilder.build(), hint)
-            // Reset the ink so the next recognized value doesn't include already
-            // recognized characters.
+            val ink = inkBuilder.build()
             paths.clear()
             inkBuilder = Ink.builder()
+            viewModel.recognizeInk(ink, hint)
         }
     }
 
@@ -153,7 +153,7 @@ fun InkRecognitionBox(
                 }
                 drawPath(
                     path = path,
-                    color = strokeColor,
+                    color = activeStrokeColor,
                     style = androidx.compose.ui.graphics.drawscope.Stroke(
                         width = strokeWidth.toPx(),
                         cap = StrokeCap.Round,

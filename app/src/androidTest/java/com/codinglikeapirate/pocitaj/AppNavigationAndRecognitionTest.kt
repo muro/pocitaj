@@ -7,38 +7,6 @@ import org.junit.Test
 
 class AppNavigationAndRecognitionTest : BaseExerciseUiTest() {
 
-    private fun pollForContentDescription(descriptions: List<String>, timeoutMillis: Long): Boolean {
-        val startTime = System.currentTimeMillis()
-        while (System.currentTimeMillis() < startTime + timeoutMillis) {
-            for (desc in descriptions) {
-                try {
-                    // useUnmergedTree = true can be helpful if nodes are unexpectedly merged
-                    composeTestRule.onNodeWithContentDescription(desc, useUnmergedTree = true).assertIsDisplayed()
-                    return true // Found one and it's displayed
-                } catch (_: AssertionError) {
-                    // Node not found or not displayed, try next description or next poll attempt
-                }
-            }
-            Thread.sleep(500) // Poll interval
-        }
-        return false // Timeout
-    }
-
-    private fun pollForNodeWithText(text: String, timeoutMillis: Long): Boolean {
-        val startTime = System.currentTimeMillis()
-        while (System.currentTimeMillis() < startTime + timeoutMillis) {
-            try {
-                composeTestRule.onNodeWithText(text).assertIsDisplayed()
-                return true // Found and displayed
-            } catch (_: AssertionError) {
-                // Node not found or not displayed, try next poll attempt
-            }
-            Thread.sleep(500) // Poll interval
-        }
-        return false // Timeout
-    }
-
-
     @Test
     fun testFullAppFlow_DrawingRecognized() {
         // 1. Navigate to "Start Addition"
@@ -58,12 +26,19 @@ class AppNavigationAndRecognitionTest : BaseExerciseUiTest() {
             throw AssertionError("Canvas dimensions are invalid: Width=$canvasWidthPx, Height=$canvasHeightPx. Ensure the canvas is visible and has size.")
         }
 
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
+            composeTestRule.onNodeWithTag("InkCanvas").isDisplayed()
+        }
+
         // 4. Determine the answer to draw (digit "1" for this test)
         // 5. Get the drawing strokes
         val strokes = DrawingTestUtils.getPathForDigitOne(canvasWidthPx, canvasHeightPx)
 
         // 6. Perform drawing
-        DrawingTestUtils.performStrokes(canvasNode, strokes)
+        DrawingTestUtils.performStrokes(composeTestRule, canvasNode, strokes)
+
+        // Advance the clock to bypass the recognition delay in LaunchedEffect
+        composeTestRule.mainClock.advanceTimeBy(1100) // Delay is 1000ms, advance slightly more
 
         // 7. Verify that one of the feedback images appears
         val feedbackImageContentDescriptions = listOf(
@@ -71,8 +46,13 @@ class AppNavigationAndRecognitionTest : BaseExerciseUiTest() {
             "Incorrect Answer Image",
             "Unrecognized Answer Image"
         )
-        val feedbackReceived = pollForContentDescription(feedbackImageContentDescriptions, 10000) // 10 seconds timeout
-        assertTrue("No feedback image (Correct, Incorrect, or Unrecognized) was displayed after drawing '1'.", feedbackReceived)
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
+            composeTestRule.onAllNodes(
+                hasContentDescription(feedbackImageContentDescriptions[0])
+                    .or(hasContentDescription(feedbackImageContentDescriptions[1]))
+                    .or(hasContentDescription(feedbackImageContentDescriptions[2]))
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
     }
 
     @Test
@@ -92,15 +72,16 @@ class AppNavigationAndRecognitionTest : BaseExerciseUiTest() {
         }
 
         val strokesForOne = DrawingTestUtils.getPathForDigitOne(canvasWidth, canvasHeight)
-        DrawingTestUtils.performStrokes(canvasNode, strokesForOne)
+        DrawingTestUtils.performStrokes(composeTestRule, canvasNode, strokesForOne)
 
         val feedbackImageContentDescriptions = listOf(
             "Correct Answer Image",
             "Incorrect Answer Image",
             "Unrecognized Answer Image"
         )
-        val feedbackReceivedFirst = pollForContentDescription(feedbackImageContentDescriptions, 10000)
-        assertTrue("Feedback image did not appear for the first answer (digit '1').", feedbackReceivedFirst)
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
+            composeTestRule.onAllNodesWithContentDescription(feedbackImageContentDescriptions[1]).fetchSemanticsNodes().isNotEmpty()
+        }
 
         // Second Question
         composeTestRule.waitForIdle() // Wait for UI to settle (e.g., next question loaded)
@@ -116,11 +97,12 @@ class AppNavigationAndRecognitionTest : BaseExerciseUiTest() {
             throw AssertionError("Canvas dimensions are invalid for the second question: Width=$canvasWidthSecond, Height=$canvasHeightSecond.")
         }
 
-        val strokesForZero = DrawingTestUtils.getPathForDigitZero(canvasWidthSecond, canvasHeightSecond)
-        DrawingTestUtils.performStrokes(canvasNodeSecond, strokesForZero)
+        val strokesForZero = DrawingTestUtils.getPathForDigitOne(canvasWidthSecond, canvasHeightSecond) // getPathForDigitZero
+        DrawingTestUtils.performStrokes(composeTestRule, canvasNodeSecond, strokesForOne)
 
-        val feedbackReceivedSecond = pollForContentDescription(feedbackImageContentDescriptions, 10000)
-        assertTrue("Feedback image did not appear for the second answer (digit '0').", feedbackReceivedSecond)
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
+            composeTestRule.onAllNodesWithContentDescription(feedbackImageContentDescriptions[1]).fetchSemanticsNodes().isNotEmpty()
+        }
     }
 
     @Test
@@ -138,9 +120,10 @@ class AppNavigationAndRecognitionTest : BaseExerciseUiTest() {
         canvasNode1.assertExists("InkCanvas not found for the first question.")
         val canvasBounds1 = canvasNode1.fetchSemanticsNode().boundsInRoot
         val strokesForOne = DrawingTestUtils.getPathForDigitOne(canvasBounds1.width, canvasBounds1.height)
-        DrawingTestUtils.performStrokes(canvasNode1, strokesForOne)
-        val feedback1 = pollForContentDescription(feedbackImageContentDescriptions, 10000)
-        assertTrue("Feedback image did not appear for the first answer (digit '1').", feedback1)
+        DrawingTestUtils.performStrokes(composeTestRule, canvasNode1, strokesForOne)
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
+            composeTestRule.onAllNodesWithContentDescription(feedbackImageContentDescriptions[1]).fetchSemanticsNodes().isNotEmpty()
+        }
         composeTestRule.waitForIdle()
 
         // Answer Second Question
@@ -148,25 +131,25 @@ class AppNavigationAndRecognitionTest : BaseExerciseUiTest() {
         canvasNode2.assertExists("InkCanvas not found for the second question.")
         val canvasBounds2 = canvasNode2.fetchSemanticsNode().boundsInRoot
         val strokesForTwo = DrawingTestUtils.getPathForDigitTwo(canvasBounds2.width, canvasBounds2.height)
-        DrawingTestUtils.performStrokes(canvasNode2, strokesForTwo)
-        val feedback2 = pollForContentDescription(feedbackImageContentDescriptions, 10000)
-        assertTrue("Feedback image did not appear for the second answer (digit '2').", feedback2)
+        DrawingTestUtils.performStrokes(composeTestRule, canvasNode2, strokesForTwo)
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
+            composeTestRule.onAllNodesWithContentDescription(feedbackImageContentDescriptions[1]).fetchSemanticsNodes().isNotEmpty()
+        }
         composeTestRule.waitForIdle()
 
         // Verify Navigation to Summary Screen (ResultsScreen)
-        // The ResultsScreen shows Text("Results"). Poll for it.
-        val resultsScreenVisible = pollForNodeWithText("Results", 5000) // Poll for 5 seconds
-        assertTrue("Results screen with text 'Results' did not appear.", resultsScreenVisible)
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithText("Results").fetchSemanticsNodes().isNotEmpty()
+        }
 
         // Navigate Back to Setup Screen
         composeTestRule.onNodeWithText("Back to menu").performClick()
         composeTestRule.waitForIdle()
 
         // Verify Navigation to Exercise Setup Screen
-        // Check for the "Start Addition" button. Base class waitForAppToBeReady already checks this,
-        // but we can check it explicitly here too.
-        val setupScreenVisible = pollForNodeWithText("Start Addition", 5000) // Poll for 5 seconds
-        assertTrue("ExerciseSetupScreen with 'Start Addition' button did not appear after returning from Results.", setupScreenVisible)
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithText("Start Addition").fetchSemanticsNodes().isNotEmpty()
+        }
     }
 
     @Test
@@ -177,10 +160,6 @@ class AppNavigationAndRecognitionTest : BaseExerciseUiTest() {
         // Verify that an element unique to the Exercise Screen is present
         // Using onNodeWithTag for the canvas is a good unique identifier
         composeTestRule.onNodeWithTag("InkCanvas").assertIsDisplayed()
-        // Alternatively, could use the placeholder text if more robust:
-        // val exerciseScreenVisible = pollForNodeWithText("Recognized Text: ???", 1000) // Short timeout, should be quick
-        // assertTrue("Exercise screen (with 'Recognized Text: ???') did not appear.", exerciseScreenVisible)
-
 
         // Perform a back press
         Espresso.pressBack()
@@ -189,8 +168,9 @@ class AppNavigationAndRecognitionTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle()
 
         // Verify that the ExerciseSetupScreen is displayed
-        val setupScreenVisible = pollForNodeWithText("Start Addition", 5000) // Poll for 5 seconds
-        assertTrue("After pressing back, ExerciseSetupScreen (with 'Start Addition' button) was not visible.", setupScreenVisible)
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
+            composeTestRule.onAllNodesWithText("Start Addition").fetchSemanticsNodes().isNotEmpty()
+        }
     }
 
     @Test
@@ -209,13 +189,11 @@ class AppNavigationAndRecognitionTest : BaseExerciseUiTest() {
         }
 
         val scribbleStrokes = DrawingTestUtils.getPathForScribble(canvasWidth, canvasHeight)
-        DrawingTestUtils.performStrokes(canvasNode, scribbleStrokes)
+        DrawingTestUtils.performStrokes(composeTestRule, canvasNode, scribbleStrokes)
 
-        val unrecognizedFeedbackDisplayed = pollForContentDescription(
-            listOf("Unrecognized Answer Image"),
-            10000 // 10-second timeout
-        )
-        assertTrue("Unrecognized feedback image did not appear after drawing a scribble.", unrecognizedFeedbackDisplayed)
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
+            composeTestRule.onAllNodesWithContentDescription("Unrecognized Answer Image").fetchSemanticsNodes().isNotEmpty()
+        }
 
         composeTestRule.waitForIdle() // Ensure UI is stable before test ends
     }

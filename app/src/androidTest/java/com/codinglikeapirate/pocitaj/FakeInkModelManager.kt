@@ -5,7 +5,7 @@ import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.digitalink.Ink
 
 class FakeInkModelManager : InkModelManager {
-    var recognitionResult = "FAKE_RESULT"
+    var recognitionResult = "123"
     var recognitionShouldFail = false
 
     override fun setModel(languageTag: String): String {
