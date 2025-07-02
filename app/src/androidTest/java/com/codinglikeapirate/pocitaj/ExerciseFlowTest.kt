@@ -8,7 +8,7 @@ import org.junit.Test
 class ExerciseFlowTest : BaseExerciseUiTest() {
 
     @Test
-    fun testFullAppFlow_DrawingRecognized() {
+    fun whenCorrectAnswerDrawn_thenCorrectFeedbackIsShown() {
         // 1. Navigate to "Start Addition"
         navigateToExerciseType("Start Addition")
 
@@ -36,7 +36,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     }
 
     @Test
-    fun testAnswerTwoQuestionsSequentially() {
+    fun whenTwoQuestionsAnswered_thenUIAdvancesAndShowsFeedback() {
         navigateToExerciseType("Start Addition")
 
         // First Question
@@ -53,7 +53,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     }
 
     @Test
-    fun testFullNavigationFlow_SetupToSummaryToSetup() {
+    fun whenFullExerciseLoopCompleted_thenReturnsToSetupScreen() {
         navigateToExerciseType("Start Addition")
 
         // First Question
@@ -86,7 +86,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     }
 
     @Test
-    fun testNavigation_BackFromExerciseToSetup() {
+    fun whenSystemBackButtonPressedOnExerciseScreen_thenNavigatesToSetup() {
         // Navigate to the Exercise Screen
         navigateToExerciseType("Start Addition")
 
@@ -107,7 +107,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     }
 
     @Test
-    fun testRecognition_UnrecognizedInput() {
+    fun whenUnrecognizedAnswerDrawn_thenUnrecognizedFeedbackIsShown() {
         navigateToExerciseType("Start Addition")
 
         composeTestRule.waitForIdle()
