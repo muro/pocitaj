@@ -21,6 +21,10 @@ class ExerciseBook {
         history.clear()
     }
 
+    fun addExercise(exercise: Exercise) {
+        history.add(exercise)
+    }
+
     // This method will likely be removed or significantly changed
     // in favor of a more flexible generation strategy.
     fun generate(type: ExerciseType, bound: Int = 10): Exercise {

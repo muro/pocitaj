@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -66,7 +67,7 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
         const val DEBUG_TAP_THRESHOLD = 5
     }
 
-    private val _exerciseBook: MutableState<ExerciseBook> = mutableStateOf(ExerciseBook())
+    private var _exerciseBook: MutableState<ExerciseBook> = mutableStateOf(ExerciseBook())
     private var _exerciseIndex = 0
 
     private val _uiState = MutableStateFlow<UiState>(UiState.LoadingModel())
@@ -212,6 +213,13 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
         if (tapCount >= DEBUG_TAP_THRESHOLD) {
             _showDebug.value = true
         }
+    }
+
+    @VisibleForTesting
+    fun setExerciseBookForTesting(book: ExerciseBook) {
+        _exerciseBook.value = book
+        _exerciseIndex = 0
+        _uiState.value = UiState.ExerciseScreen(currentExercise())
     }
 }
 
@@ -411,3 +419,4 @@ fun PreviewExerciseSetupScreen() {
         ExerciseSetupScreen(navController, viewModel) {}
     }
 }
+

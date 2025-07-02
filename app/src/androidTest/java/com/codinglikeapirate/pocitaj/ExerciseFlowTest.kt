@@ -1,6 +1,7 @@
 package com.codinglikeapirate.pocitaj
 
 import androidx.compose.ui.test.*
+import androidx.lifecycle.ViewModelProvider
 import androidx.test.espresso.Espresso // Added for pressBack
 import org.junit.Test
 
@@ -11,11 +12,24 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         // 1. Navigate to "Start Addition"
         navigateToExerciseType("Start Addition")
 
-        // 2. Draw the answer "1"
-        drawAnswer("1")
+        // 2. Create a custom exercise book - needs to happen after navigating to ExerciseScreen,
+        // otherwise it would be overwritten when the screen is displayed.
+        val exerciseBook = ExerciseBook()
+        exerciseBook.addExercise(Exercise(Addition(5, 3))) // 5 + 3 = 8
 
-        // 3. Verify that the correct feedback image appears
-        verifyFeedback(FeedbackType.INCORRECT)
+        lateinit var viewModel: ExerciseBookViewModel
+        composeTestRule.activityRule.scenario.onActivity { activity ->
+            viewModel = ViewModelProvider(activity,
+                ViewModelProvider.AndroidViewModelFactory.getInstance(activity.application))
+                .get(ExerciseBookViewModel::class.java)
+            viewModel.setExerciseBookForTesting(exerciseBook)
+        }
+
+        // 4. Draw the correct answer "8"
+        drawAnswer("8")
+
+        // 5. Verify that the correct feedback image appears
+        verifyFeedback(FeedbackType.CORRECT)
     }
 
     @Test
