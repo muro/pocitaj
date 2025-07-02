@@ -1,6 +1,5 @@
 package com.codinglikeapirate.pocitaj
 
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -20,12 +19,6 @@ abstract class BaseExerciseUiTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ExerciseBookActivity>()
-
-    // Model Handling Note:
-    // Currently, we are letting the app attempt to download the Digital Ink Recognition model
-    // if it's not already present. If tests become flaky due to network issues or download times,
-    // we will need to introduce a mechanism to mock or pre-prime the InkModelManager
-    // (e.g., by using a fake/test version or ensuring the model is downloaded before tests run).
 
     @Before
     fun waitForAppToBeReady() {
