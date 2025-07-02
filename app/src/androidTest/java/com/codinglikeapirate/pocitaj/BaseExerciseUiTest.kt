@@ -3,6 +3,8 @@ package com.codinglikeapirate.pocitaj
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -22,56 +24,26 @@ abstract class BaseExerciseUiTest {
 
     @Before
     fun waitForAppToBeReady() {
-        // Wait for the loading screen to disappear and setup screen to be visible.
-        // Look for a button that uniquely identifies the ExerciseSetupScreen.
-        // The text "Start Addition" is on one of the buttons.
+        // Wait for the loading screen to disappear and the setup screen to be visible.
+        // The "Start Addition" button uniquely identifies the ExerciseSetupScreen.
         // Allow up to 30 seconds for the model to download, though it should be faster.
-        var attempts = 0
-        val maxAttempts = 30 // 30 attempts * 1000ms = 30 seconds
-        val delayMillis = 1000L
-        var setupScreenVisible = false
-
-        while (attempts < maxAttempts && !setupScreenVisible) {
-            try {
-                composeTestRule.onNodeWithText("Start Addition").assertIsDisplayed()
-                setupScreenVisible = true
-            } catch (_: Exception) { // More specific: NoMatchingNodeException or AssertionError
-                attempts++
-                Thread.sleep(delayMillis)
-            }
-        }
-
-        if (!setupScreenVisible) {
-            throw AssertionError("ExerciseSetupScreen (with 'Start Addition' button) did not become visible after ${maxAttempts * delayMillis / 1000} seconds.")
+        composeTestRule.waitUntil(timeoutMillis = 30_000) {
+            composeTestRule
+                .onAllNodesWithText("Start Addition")
+                .fetchSemanticsNodes().size == 1
         }
     }
 
     fun navigateToExerciseType(exerciseTypeButtonText: String) {
         // Click on the button to start the specific exercise type
-        composeTestRule.onNodeWithText(exerciseTypeButtonText)
-            //.assertIsDisplayed() // Optional: performClick will fail if not displayed
-            .performClick()
+        composeTestRule.onNodeWithText(exerciseTypeButtonText).performClick()
 
         // Wait for the ExerciseScreen to be loaded by checking for a unique element.
         // The InkCanvas is a good unique identifier for the ExerciseScreen.
-        // Allow up to 5 seconds for the screen transition.
-        var attempts = 0
-        val maxAttempts = 10 // 10 attempts * 500ms = 5 seconds
-        val delayMillis = 500L
-        var exerciseScreenVisible = false
-
-        while (attempts < maxAttempts && !exerciseScreenVisible) {
-            try {
-                composeTestRule.onNodeWithTag("InkCanvas").assertIsDisplayed()
-                exerciseScreenVisible = true
-            } catch (_: Exception) { // More specific: NoMatchingNodeException or AssertionError
-                attempts++
-                Thread.sleep(delayMillis)
-            }
-        }
-
-        if (!exerciseScreenVisible) {
-            throw AssertionError("ExerciseScreen (with 'InkCanvas') did not become visible after ${maxAttempts * delayMillis / 1000} seconds.")
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodesWithTag("InkCanvas")
+                .fetchSemanticsNodes().size == 1
         }
     }
 
