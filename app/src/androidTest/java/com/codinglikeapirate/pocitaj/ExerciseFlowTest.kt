@@ -12,11 +12,11 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         // 1. Navigate to "Start Addition"
         navigateToExerciseType("Start Addition")
 
-        // 2. Create a custom exercise book - needs to happen after navigating to ExerciseScreen,
-        // otherwise it would be overwritten when the screen is displayed.
+        // 2. Create a custom exercise book
         val exerciseBook = ExerciseBook()
         exerciseBook.addExercise(Exercise(Addition(5, 3))) // 5 + 3 = 8
 
+        // 3. Set the custom exercise book on the view model
         lateinit var viewModel: ExerciseBookViewModel
         composeTestRule.activityRule.scenario.onActivity { activity ->
             viewModel = ViewModelProvider(activity,
@@ -25,10 +25,13 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
             viewModel.setExerciseBookForTesting(exerciseBook)
         }
 
-        // 4. Draw the correct answer "8"
+        // 4. Wait for the UI to settle
+        composeTestRule.waitForIdle()
+
+        // 5. Draw the correct answer "8"
         drawAnswer("8")
 
-        // 5. Verify that the correct feedback image appears
+        // 6. Verify that the correct feedback image appears
         verifyFeedback(FeedbackType.CORRECT)
     }
 
