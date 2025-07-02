@@ -1,12 +1,20 @@
 package com.codinglikeapirate.pocitaj
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.junit.Before
 import org.junit.Rule
+
+enum class FeedbackType(val contentDescription: String) {
+    CORRECT("Correct Answer Image"),
+    INCORRECT("Incorrect Answer Image"),
+    UNRECOGNIZED("Unrecognized Answer Image")
+}
 
 abstract class BaseExerciseUiTest {
 
@@ -106,4 +114,17 @@ abstract class BaseExerciseUiTest {
         // 5. Advance the clock to trigger recognition
         composeTestRule.mainClock.advanceTimeBy(1100) // Delay is 1000ms, advance slightly more
     }
+
+    /**
+     * Verifies that the correct feedback image is displayed.
+     *
+     * @param type The type of feedback to expect.
+     */
+    fun verifyFeedback(type: FeedbackType) {
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
+            composeTestRule.onAllNodes(hasContentDescription(type.contentDescription))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
 }
+

@@ -14,19 +14,8 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         // 2. Draw the answer "1"
         drawAnswer("1")
 
-        // 3. Verify that one of the feedback images appears
-        val feedbackImageContentDescriptions = listOf(
-            "Correct Answer Image",
-            "Incorrect Answer Image",
-            "Unrecognized Answer Image"
-        )
-        composeTestRule.waitUntil(timeoutMillis = 10000) {
-            composeTestRule.onAllNodes(
-                hasContentDescription(feedbackImageContentDescriptions[0])
-                    .or(hasContentDescription(feedbackImageContentDescriptions[1]))
-                    .or(hasContentDescription(feedbackImageContentDescriptions[2]))
-            ).fetchSemanticsNodes().isNotEmpty()
-        }
+        // 3. Verify that the correct feedback image appears
+        verifyFeedback(FeedbackType.INCORRECT)
     }
 
     @Test
@@ -35,25 +24,15 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // First Question
         drawAnswer("1")
+        verifyFeedback(FeedbackType.INCORRECT)
 
-        val feedbackImageContentDescriptions = listOf(
-            "Correct Answer Image",
-            "Incorrect Answer Image",
-            "Unrecognized Answer Image"
-        )
-        composeTestRule.waitUntil(timeoutMillis = 10000) {
-            composeTestRule.onAllNodesWithContentDescription(feedbackImageContentDescriptions[1]).fetchSemanticsNodes().isNotEmpty()
-        }
 
         // Second Question
         composeTestRule.waitForIdle() // Wait for UI to settle (e.g., next question loaded)
         composeTestRule.mainClock.advanceTimeBy(2000)
 
         drawAnswer("1") // Assuming "1" is also the answer for the second question
-
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
-            composeTestRule.onAllNodesWithContentDescription(feedbackImageContentDescriptions[1]).fetchSemanticsNodes().isNotEmpty()
-        }
+        verifyFeedback(FeedbackType.INCORRECT)
     }
 
     @Test
@@ -62,25 +41,15 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // First Question
         drawAnswer("1")
-
-        val feedbackImageContentDescriptions = listOf(
-            "Correct Answer Image",
-            "Incorrect Answer Image",
-            "Unrecognized Answer Image"
-        )
-        composeTestRule.waitUntil(timeoutMillis = 10000) {
-            composeTestRule.onAllNodesWithContentDescription(feedbackImageContentDescriptions[1]).fetchSemanticsNodes().isNotEmpty()
-        }
+        verifyFeedback(FeedbackType.INCORRECT)
 
         // Second Question
         composeTestRule.waitForIdle() // Wait for UI to settle (e.g., next question loaded)
         composeTestRule.mainClock.advanceTimeBy(2000)
 
         drawAnswer("1")
+        verifyFeedback(FeedbackType.INCORRECT)
 
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
-            composeTestRule.onAllNodesWithContentDescription(feedbackImageContentDescriptions[1]).fetchSemanticsNodes().isNotEmpty()
-        }
         composeTestRule.waitForIdle()
         composeTestRule.mainClock.advanceTimeBy(2000)
 
@@ -127,10 +96,8 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle()
 
         drawAnswer("") // Empty string for unrecognized input
+        verifyFeedback(FeedbackType.UNRECOGNIZED)
 
-        composeTestRule.waitUntil(timeoutMillis = 10000) {
-            composeTestRule.onAllNodesWithContentDescription("Unrecognized Answer Image").fetchSemanticsNodes().isNotEmpty()
-        }
 
         composeTestRule.waitForIdle() // Ensure UI is stable before test ends
     }
