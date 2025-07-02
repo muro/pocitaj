@@ -73,4 +73,37 @@ abstract class BaseExerciseUiTest {
             throw AssertionError("ExerciseScreen (with 'InkCanvas') did not become visible after ${maxAttempts * delayMillis / 1000} seconds.")
         }
     }
+
+    /**
+     * Simulates drawing an answer on the InkCanvas.
+     *
+     * @param answer The string that the fake recognizer should return.
+     */
+    fun drawAnswer(answer: String) {
+        // Set the fake recognition result
+        FakeInkModelManager.recognitionResult = answer
+
+        // 1. Locate the drawing canvas
+        val canvasNode = composeTestRule.onNodeWithTag("InkCanvas")
+        canvasNode.assertExists("InkCanvas not found on screen.")
+
+        // 2. Get canvas dimensions
+        val canvasBounds = canvasNode.fetchSemanticsNode().boundsInRoot
+        val canvasWidthPx = canvasBounds.width
+        val canvasHeightPx = canvasBounds.height
+
+        // Ensure dimensions are valid
+        if (canvasWidthPx <= 0 || canvasHeightPx <= 0) {
+            throw AssertionError("Canvas dimensions are invalid: Width=$canvasWidthPx, Height=$canvasHeightPx. Ensure the canvas is visible and has size.")
+        }
+
+        // 3. Get a generic drawing stroke (e.g., a simple line)
+        val strokes = DrawingTestUtils.getPathForDigitOne(canvasWidthPx, canvasHeightPx)
+
+        // 4. Perform drawing
+        DrawingTestUtils.performStrokes(composeTestRule, canvasNode, strokes)
+
+        // 5. Advance the clock to trigger recognition
+        composeTestRule.mainClock.advanceTimeBy(1100) // Delay is 1000ms, advance slightly more
+    }
 }

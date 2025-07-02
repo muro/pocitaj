@@ -2,50 +2,19 @@ package com.codinglikeapirate.pocitaj
 
 import androidx.compose.ui.test.*
 import androidx.test.espresso.Espresso // Added for pressBack
-import org.junit.Before
 import org.junit.Test
 
 class ExerciseFlowTest : BaseExerciseUiTest() {
-
-    @Before
-    fun setup() {
-        FakeInkModelManager.recognitionResult = "1"
-    }
 
     @Test
     fun testFullAppFlow_DrawingRecognized() {
         // 1. Navigate to "Start Addition"
         navigateToExerciseType("Start Addition")
 
-        // 2. Locate the drawing canvas
-        val canvasNode = composeTestRule.onNodeWithTag("InkCanvas")
-        canvasNode.assertExists("InkCanvas not found on screen.") // Ensure canvas is there
+        // 2. Draw the answer "1"
+        drawAnswer("1")
 
-        // 3. Get canvas dimensions
-        val canvasBounds = canvasNode.fetchSemanticsNode().boundsInRoot
-        val canvasWidthPx = canvasBounds.width
-        val canvasHeightPx = canvasBounds.height
-
-        // Ensure dimensions are valid
-        if (canvasWidthPx <= 0 || canvasHeightPx <= 0) {
-            throw AssertionError("Canvas dimensions are invalid: Width=$canvasWidthPx, Height=$canvasHeightPx. Ensure the canvas is visible and has size.")
-        }
-
-        composeTestRule.waitUntil(timeoutMillis = 10000) {
-            composeTestRule.onNodeWithTag("InkCanvas").isDisplayed()
-        }
-
-        // 4. Determine the answer to draw (digit "1" for this test)
-        // 5. Get the drawing strokes
-        val strokes = DrawingTestUtils.getPathForDigitOne(canvasWidthPx, canvasHeightPx)
-
-        // 6. Perform drawing
-        DrawingTestUtils.performStrokes(composeTestRule, canvasNode, strokes)
-
-        // Advance the clock to bypass the recognition delay in LaunchedEffect
-        composeTestRule.mainClock.advanceTimeBy(1100) // Delay is 1000ms, advance slightly more
-
-        // 7. Verify that one of the feedback images appears
+        // 3. Verify that one of the feedback images appears
         val feedbackImageContentDescriptions = listOf(
             "Correct Answer Image",
             "Incorrect Answer Image",
@@ -65,20 +34,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         navigateToExerciseType("Start Addition")
 
         // First Question
-        val canvasNode = composeTestRule.onNodeWithTag("InkCanvas")
-        canvasNode.assertExists("InkCanvas not found for the first question.")
-
-        val canvasBounds = canvasNode.fetchSemanticsNode().boundsInRoot
-        val canvasWidth = canvasBounds.width
-        val canvasHeight = canvasBounds.height
-
-        if (canvasWidth <= 0 || canvasHeight <= 0) {
-            throw AssertionError("Canvas dimensions are invalid for the first question: Width=$canvasWidth, Height=$canvasHeight.")
-        }
-
-        val strokesForOne = DrawingTestUtils.getPathForDigitOne(canvasWidth, canvasHeight)
-        DrawingTestUtils.performStrokes(composeTestRule, canvasNode, strokesForOne)
-        composeTestRule.mainClock.advanceTimeBy(1100)
+        drawAnswer("1")
 
         val feedbackImageContentDescriptions = listOf(
             "Correct Answer Image",
@@ -93,20 +49,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle() // Wait for UI to settle (e.g., next question loaded)
         composeTestRule.mainClock.advanceTimeBy(2000)
 
-        val canvasNodeSecond = composeTestRule.onNodeWithTag("InkCanvas")
-        canvasNodeSecond.assertExists("InkCanvas not found for the second question.")
-        
-        val canvasBoundsSecond = canvasNodeSecond.fetchSemanticsNode().boundsInRoot
-        val canvasWidthSecond = canvasBoundsSecond.width
-        val canvasHeightSecond = canvasBoundsSecond.height
-
-        if (canvasWidthSecond <= 0 || canvasHeightSecond <= 0) {
-            throw AssertionError("Canvas dimensions are invalid for the second question: Width=$canvasWidthSecond, Height=$canvasHeightSecond.")
-        }
-
-        val strokesForZero = DrawingTestUtils.getPathForDigitOne(canvasWidthSecond, canvasHeightSecond) // getPathForDigitZero
-        DrawingTestUtils.performStrokes(composeTestRule, canvasNodeSecond, strokesForOne)
-        composeTestRule.mainClock.advanceTimeBy(1100)
+        drawAnswer("1") // Assuming "1" is also the answer for the second question
 
         composeTestRule.waitUntil(timeoutMillis = 3000) {
             composeTestRule.onAllNodesWithContentDescription(feedbackImageContentDescriptions[1]).fetchSemanticsNodes().isNotEmpty()
@@ -118,20 +61,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         navigateToExerciseType("Start Addition")
 
         // First Question
-        val canvasNode = composeTestRule.onNodeWithTag("InkCanvas")
-        canvasNode.assertExists("InkCanvas not found for the first question.")
-
-        val canvasBounds = canvasNode.fetchSemanticsNode().boundsInRoot
-        val canvasWidth = canvasBounds.width
-        val canvasHeight = canvasBounds.height
-
-        if (canvasWidth <= 0 || canvasHeight <= 0) {
-            throw AssertionError("Canvas dimensions are invalid for the first question: Width=$canvasWidth, Height=$canvasHeight.")
-        }
-
-        val strokesForOne = DrawingTestUtils.getPathForDigitOne(canvasWidth, canvasHeight)
-        DrawingTestUtils.performStrokes(composeTestRule, canvasNode, strokesForOne)
-        composeTestRule.mainClock.advanceTimeBy(1100)
+        drawAnswer("1")
 
         val feedbackImageContentDescriptions = listOf(
             "Correct Answer Image",
@@ -146,20 +76,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle() // Wait for UI to settle (e.g., next question loaded)
         composeTestRule.mainClock.advanceTimeBy(2000)
 
-        val canvasNodeSecond = composeTestRule.onNodeWithTag("InkCanvas")
-        canvasNodeSecond.assertExists("InkCanvas not found for the second question.")
-
-        val canvasBoundsSecond = canvasNodeSecond.fetchSemanticsNode().boundsInRoot
-        val canvasWidthSecond = canvasBoundsSecond.width
-        val canvasHeightSecond = canvasBoundsSecond.height
-
-        if (canvasWidthSecond <= 0 || canvasHeightSecond <= 0) {
-            throw AssertionError("Canvas dimensions are invalid for the second question: Width=$canvasWidthSecond, Height=$canvasHeightSecond.")
-        }
-
-        val strokesForZero = DrawingTestUtils.getPathForDigitOne(canvasWidthSecond, canvasHeightSecond) // getPathForDigitZero
-        DrawingTestUtils.performStrokes(composeTestRule, canvasNodeSecond, strokesForOne)
-        composeTestRule.mainClock.advanceTimeBy(1100)
+        drawAnswer("1")
 
         composeTestRule.waitUntil(timeoutMillis = 3000) {
             composeTestRule.onAllNodesWithContentDescription(feedbackImageContentDescriptions[1]).fetchSemanticsNodes().isNotEmpty()
@@ -205,24 +122,11 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
     @Test
     fun testRecognition_UnrecognizedInput() {
-        FakeInkModelManager.recognitionResult = ""
         navigateToExerciseType("Start Addition")
 
         composeTestRule.waitForIdle()
 
-        val canvasNode = composeTestRule.onNodeWithTag("InkCanvas")
-        canvasNode.assertExists("InkCanvas not found.") // Ensure canvas is there
-        val canvasBounds = canvasNode.fetchSemanticsNode().boundsInRoot
-        val canvasWidth = canvasBounds.width
-        val canvasHeight = canvasBounds.height
-
-        // Ensure dimensions are valid before drawing
-        if (canvasWidth <= 0 || canvasHeight <= 0) {
-            throw AssertionError("Canvas dimensions are invalid: Width=$canvasWidth, Height=$canvasHeight. Ensure the canvas is visible and has size.")
-        }
-
-        val scribbleStrokes = DrawingTestUtils.getPathForScribble(canvasWidth, canvasHeight)
-        DrawingTestUtils.performStrokes(composeTestRule, canvasNode, scribbleStrokes)
+        drawAnswer("") // Empty string for unrecognized input
 
         composeTestRule.waitUntil(timeoutMillis = 10000) {
             composeTestRule.onAllNodesWithContentDescription("Unrecognized Answer Image").fetchSemanticsNodes().isNotEmpty()
