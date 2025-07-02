@@ -20,7 +20,7 @@ enum class FeedbackType(val contentDescription: String) {
 abstract class BaseExerciseUiTest {
 
     companion object {
-        const val DEFAULT_UI_TIMEOUT = 10_000L
+        const val DEFAULT_UI_TIMEOUT = 1_000L
         // This is not a timeout, but a value to advance the test clock,
         // chosen to be slightly longer than the 1000ms recognition delay in the app.
         const val RECOGNITION_CLOCK_ADVANCE = 1100L
