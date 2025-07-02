@@ -19,6 +19,13 @@ enum class FeedbackType(val contentDescription: String) {
 
 abstract class BaseExerciseUiTest {
 
+    companion object {
+        const val DEFAULT_UI_TIMEOUT = 10_000L
+        // This is not a timeout, but a value to advance the test clock,
+        // chosen to be slightly longer than the 1000ms recognition delay in the app.
+        const val RECOGNITION_CLOCK_ADVANCE = 1100L
+    }
+
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ExerciseBookActivity>()
 
@@ -26,8 +33,7 @@ abstract class BaseExerciseUiTest {
     fun waitForAppToBeReady() {
         // Wait for the loading screen to disappear and the setup screen to be visible.
         // The "Start Addition" button uniquely identifies the ExerciseSetupScreen.
-        // Allow up to 30 seconds for the model to download, though it should be faster.
-        composeTestRule.waitUntil(timeoutMillis = 30_000) {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
             composeTestRule
                 .onAllNodesWithText("Start Addition")
                 .fetchSemanticsNodes().size == 1
@@ -40,7 +46,7 @@ abstract class BaseExerciseUiTest {
 
         // Wait for the ExerciseScreen to be loaded by checking for a unique element.
         // The InkCanvas is a good unique identifier for the ExerciseScreen.
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
             composeTestRule
                 .onAllNodesWithTag("InkCanvas")
                 .fetchSemanticsNodes().size == 1
@@ -77,7 +83,7 @@ abstract class BaseExerciseUiTest {
         DrawingTestUtils.performStrokes(composeTestRule, canvasNode, strokes)
 
         // 5. Advance the clock to trigger recognition
-        composeTestRule.mainClock.advanceTimeBy(1100) // Delay is 1000ms, advance slightly more
+        composeTestRule.mainClock.advanceTimeBy(RECOGNITION_CLOCK_ADVANCE)
     }
 
     /**
@@ -86,7 +92,7 @@ abstract class BaseExerciseUiTest {
      * @param type The type of feedback to expect.
      */
     fun verifyFeedback(type: FeedbackType) {
-        composeTestRule.waitUntil(timeoutMillis = 10000) {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
             composeTestRule.onAllNodes(hasContentDescription(type.contentDescription))
                 .fetchSemanticsNodes().isNotEmpty()
         }

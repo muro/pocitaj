@@ -54,7 +54,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         composeTestRule.mainClock.advanceTimeBy(2000)
 
         // Verify Navigation to Summary Screen (ResultsScreen)
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
             composeTestRule.onAllNodesWithText("Done").fetchSemanticsNodes().isNotEmpty()
         }
 
@@ -63,7 +63,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle()
 
         // Verify Navigation to Exercise Setup Screen
-        composeTestRule.waitUntil(timeoutMillis = 3000) {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
             composeTestRule.onAllNodesWithText("Start Addition").fetchSemanticsNodes().isNotEmpty()
         }
     }
@@ -84,7 +84,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle()
 
         // Verify that the ExerciseSetupScreen is displayed
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
             composeTestRule.onAllNodesWithText("Start Addition").fetchSemanticsNodes().isNotEmpty()
         }
     }
@@ -102,3 +102,4 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle() // Ensure UI is stable before test ends
     }
 }
+
