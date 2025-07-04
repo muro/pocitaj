@@ -31,8 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -228,14 +226,7 @@ class ExerciseBookActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val modelManager = (application as PocitajApplication).inkModelManager
-        val viewModel: ExerciseBookViewModel by viewModels {
-            viewModelFactory {
-                initializer {
-                    ExerciseBookViewModel(modelManager)
-                }
-            }
-        }
+        val viewModel: ExerciseBookViewModel by viewModels { ExerciseBookViewModelFactory }
 
         setContent {
             AppTheme {
