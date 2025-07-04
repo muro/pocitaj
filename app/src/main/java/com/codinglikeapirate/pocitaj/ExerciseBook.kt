@@ -31,29 +31,37 @@ class ExerciseBook {
         // This generation logic will be moved elsewhere
         val equation = when (type) {
             ExerciseType.ADDITION -> {
-                val a = Random().nextInt(bound)
-                val b = Random().nextInt(bound)
-                Addition(a, b)
-            }
-            ExerciseType.MISSING_ADDEND -> {
-                val a = Random().nextInt(bound)
-                val result = Random().nextInt(bound)
-                MissingAddend(a, result)
+                if (bound > 3 && Random().nextBoolean()) {
+                    val a = Random().nextInt(bound)
+                    val result = Random().nextInt(bound)
+                    MissingAddend(a, result)
+                } else {
+                    val a = Random().nextInt(bound)
+                    val b = Random().nextInt(bound)
+                    Addition(a, b)
+                }
             }
             ExerciseType.SUBTRACTION -> {
-                val a = Random().nextInt(bound)
-                val b = Random().nextInt(a + 1)
-                Subtraction(a, b)
-            }
-            ExerciseType.MISSING_SUBTRAHEND -> {
-                val a = Random().nextInt(bound)
-                val result = Random().nextInt(a + 1)
-                MissingSubtrahend(a, result)
+                if (bound > 3 && Random().nextBoolean()) {
+                    val a = Random().nextInt(bound)
+                    val result = Random().nextInt(a + 1)
+                    MissingSubtrahend(a, result)
+                } else {
+                    val a = Random().nextInt(bound)
+                    val b = Random().nextInt(a + 1)
+                    Subtraction(a, b)
+                }
             }
             ExerciseType.MULTIPLICATION -> {
                 val a = Random().nextInt(bound)
                 val b = Random().nextInt(bound)
                 Multiplication(a, b)
+            }
+            else -> {
+                // Fallback for other types, though they are not selectable in the UI anymore
+                val a = Random().nextInt(bound)
+                val b = Random().nextInt(bound)
+                Addition(a, b)
             }
         }
         val exercise = Exercise(equation)

@@ -2,30 +2,39 @@ package com.codinglikeapirate.pocitaj
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -97,9 +106,12 @@ fun AppNavigation(viewModel: ExerciseBookViewModel) {
             }
         }
         composable(route = Destinations.HOME_ROUTE) {
-            ExerciseSetupScreen(viewModel) {
-                viewModel.deleteActiveModel("en-US")
-            }
+            ExerciseSetupScreen(
+                onStartClicked = { exerciseType, count, difficulty ->
+                    val config = ExerciseConfig(exerciseType.id, difficulty, count)
+                    viewModel.startExercises(config)
+                }
+            )
         }
         composable(route = Destinations.EXERCISE_ROUTE) {
             val exerciseState = uiState as? UiState.ExerciseScreen
@@ -148,84 +160,95 @@ fun LoadingScreen(state: UiState.LoadingModel, downloadModel: () -> Unit) {
 
 @Composable
 fun ExerciseSetupScreen(
-    exerciseBookViewModel: ExerciseBookViewModel,
-    onModelDelete: () -> Unit
+    onStartClicked: (exerciseType: ExerciseType, count: Int, difficulty: Int) -> Unit
 ) {
-    val showDebug by exerciseBookViewModel.showDebug.collectAsState()
+    var questionCount by remember { mutableStateOf(10f) }
+    var difficulty by remember { mutableStateOf(10) }
 
-    // UI for choosing exercise type and starting exercises
+    val exerciseTypes = listOf(
+        ExerciseType.ADDITION,
+        ExerciseType.SUBTRACTION,
+        ExerciseType.MULTIPLICATION
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Text("Choose Exercise Type", modifier = Modifier.clickable {
-            exerciseBookViewModel.onSecretAreaTapped()
-        })
-        Spacer(modifier = Modifier.height(16.dp))
-        // Add UI elements (e.g., Radio buttons, dropdowns) for selecting exercise type and level
-        Button(onClick = {
-            val config =
-                ExerciseConfig(ExerciseType.ADDITION.id, 10, 2) // Replace with actual selection
-            exerciseBookViewModel.startExercises(config)
-            Log.i("ExerciseBookActivity", "Starting Addition")
-        }) {
-            Text("Start Addition")
-        }
+        // Title
+        Text("Choose Your Challenge", style = MaterialTheme.typography.headlineMedium)
 
-        Button(onClick = {
-            val config = ExerciseConfig(
-                ExerciseType.MISSING_ADDEND.id,
-                10,
-                2
-            ) // Replace with actual selection
-            exerciseBookViewModel.startExercises(config)
-            Log.i("ExerciseBookActivity", "Starting Addition with missing addend")
-        }) {
-            Text("Start with missing addend")
-        }
-
-        Button(onClick = {
-            val config =
-                ExerciseConfig(ExerciseType.SUBTRACTION.id, 10, 2) // Replace with actual selection
-            exerciseBookViewModel.startExercises(config)
-            Log.i("ExerciseBookActivity", "Starting Subtraction")
-        }) {
-            Text("Start Subtraction")
-        }
-
-        Button(onClick = {
-            val config = ExerciseConfig(
-                ExerciseType.MISSING_SUBTRAHEND.id,
-                10,
-                2
-            ) // Replace with actual selection
-            exerciseBookViewModel.startExercises(config)
-            Log.i("ExerciseBookActivity", "Starting Subtraction with missing subtrahend")
-        }) {
-            Text("Start Subtraction with missing subtrahend")
-        }
-
-        Button(onClick = {
-            val config = ExerciseConfig(
-                ExerciseType.MULTIPLICATION.id,
-                10,
-                2
-            ) // Replace with actual selection
-            exerciseBookViewModel.startExercises(config)
-            Log.i("ExerciseBookActivity", "Starting Multiplication")
-        }) {
-            Text("Start Multiplication")
-        }
-
-        Spacer(modifier = Modifier.height(64.dp))
-        // Leave in for now
-        if (showDebug) {
-            Button(onClick = { onModelDelete() }) {
-                Text("Delete model")
+        // Grid of Exercise Cards
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(exerciseTypes) { type ->
+                ExerciseCard(
+                    exerciseType = type,
+                    onClick = {
+                        onStartClicked(type, questionCount.toInt(), difficulty)
+                    }
+                )
             }
+        }
+
+        // Configuration Section
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            // Difficulty Selector
+            Text("Difficulty (Numbers up to)", style = MaterialTheme.typography.titleMedium)
+            Row {
+                OutlinedButton(onClick = { difficulty = 10 }) {
+                    Text("10")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedButton(onClick = { difficulty = 20 }) {
+                    Text("20")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedButton(onClick = { difficulty = 100 }) {
+                    Text("100")
+                }
+            }
+
+            // Question Count Slider
+            Text("Number of Questions: ${questionCount.toInt()}", style = MaterialTheme.typography.titleMedium)
+            Slider(
+                value = questionCount,
+                onValueChange = { questionCount = it },
+                valueRange = 5f..20f,
+                steps = 14
+            )
+        }
+    }
+}
+
+@Composable
+fun ExerciseCard(exerciseType: ExerciseType, onClick: (ExerciseType) -> Unit) {
+    Card(
+        modifier = Modifier
+            .aspectRatio(1f)
+            .clickable { onClick(exerciseType) }
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = when (exerciseType) {
+                    ExerciseType.ADDITION -> "+"
+                    ExerciseType.SUBTRACTION -> "-"
+                    ExerciseType.MULTIPLICATION -> "×"
+                    else -> ""
+                },
+                fontSize = 48.sp
+            )
+            Text(exerciseType.id.replace("_", " ").replaceFirstChar { it.uppercase() })
         }
     }
 }
@@ -242,9 +265,8 @@ fun ExerciseSetupScreen(
 )
 @Composable
 fun PreviewExerciseSetupScreen() {
-    val viewModel: ExerciseBookViewModel = viewModel()
     AppTheme {
-        ExerciseSetupScreen(viewModel) {}
+        ExerciseSetupScreen(onStartClicked = { _, _, _ -> })
     }
 }
 
