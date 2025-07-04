@@ -94,9 +94,6 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
 
     private val results = ArrayList<ResultDescription>()
 
-    private val _isRecognizing = MutableStateFlow(false)
-    val isRecognizing: StateFlow<Boolean> = _isRecognizing.asStateFlow()
-
     private val _recognizedText = MutableStateFlow<String?>(null)
     val recognizedText: StateFlow<String?> = _recognizedText.asStateFlow()
 
@@ -117,14 +114,11 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
 
     fun recognizeInk(ink: Ink, hint: String) {
         viewModelScope.launch {
-            _isRecognizing.value = true
             _recognizedText.value = null
             try {
                 val result = inkModelManager.recognizeInk(ink, hint)
                 _recognizedText.value = result
-            } finally {
-                _isRecognizing.value = false
-            }
+            } finally {}
         }
     }
 
