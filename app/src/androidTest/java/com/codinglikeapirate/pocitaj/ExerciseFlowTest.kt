@@ -123,7 +123,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         val canvasNode = composeTestRule.onNodeWithTag("InkCanvas")
         canvasNode.assertExists("InkCanvas not found on screen.")
         val canvasBounds = canvasNode.fetchSemanticsNode().boundsInRoot
-        val strokes = DrawingTestUtils.getPathForDigitOne(canvasBounds.width, canvasBounds.height)
+        val strokes = DrawingTestUtils.getDefaultDrawingPath(canvasBounds.width, canvasBounds.height)
         DrawingTestUtils.performStrokes(composeTestRule, canvasNode, strokes)
         if (delay > 0) {
             composeTestRule.mainClock.advanceTimeBy(delay)

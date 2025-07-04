@@ -1,6 +1,5 @@
 package com.codinglikeapirate.pocitaj
 
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -77,7 +76,7 @@ abstract class BaseExerciseUiTest {
         }
 
         // 3. Get a generic drawing stroke (e.g., a simple line)
-        val strokes = DrawingTestUtils.getPathForDigitOne(canvasWidthPx, canvasHeightPx)
+        val strokes = DrawingTestUtils.getDefaultDrawingPath(canvasWidthPx, canvasHeightPx)
 
         // 4. Perform drawing
         DrawingTestUtils.performStrokes(composeTestRule, canvasNode, strokes)
