@@ -221,7 +221,7 @@ fun ExerciseScreen(exercise: Exercise,
                 delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
                 showResultImage = false
                 // Call ViewModel function to signal animation is finished
-                viewModel.onResultAnimationFinished(onAllExercisesComplete)
+                viewModel.onResultAnimationFinished()
             }
             is AnswerResult.Incorrect -> {
                 resultImageRes = R.drawable.cat_cry // Replace with your incorrect image resource
@@ -229,7 +229,7 @@ fun ExerciseScreen(exercise: Exercise,
                 delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
                 showResultImage = false
                 // Call ViewModel function to signal animation is finished
-                viewModel.onResultAnimationFinished(onAllExercisesComplete)
+                viewModel.onResultAnimationFinished()
             }
             is AnswerResult.Unrecognized -> {
                 resultImageRes = R.drawable.cat_big_eyes // Replace with your incorrect image resource
@@ -237,7 +237,7 @@ fun ExerciseScreen(exercise: Exercise,
                 delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
                 showResultImage = false
                 // Call ViewModel function to signal animation is finished
-                viewModel.onResultAnimationFinished(onAllExercisesComplete)
+                viewModel.onResultAnimationFinished()
             }
             is AnswerResult.None -> {
                 resultImageRes = null

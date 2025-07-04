@@ -31,13 +31,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.mlkit.vision.digitalink.Ink
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -58,6 +60,15 @@ sealed class AnswerResult {
     data object None : AnswerResult() // Initial state
 }
 
+// One-time navigation events
+sealed class NavigationEvent {
+    data object NavigateToHome : NavigationEvent()
+    data class NavigateToExercise(val type: String) : NavigationEvent()
+    data object NavigateToSummary : NavigationEvent()
+    data object NavigateBackToHome : NavigationEvent()
+}
+
+
 data class ExerciseConfig(val type: String, val upTo: Int = 10, val count: Int = 10)
 
 class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : ViewModel() {
@@ -74,6 +85,9 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
     private val _answerResult = MutableStateFlow<AnswerResult>(AnswerResult.None)
     val answerResult: StateFlow<AnswerResult> = _answerResult.asStateFlow()
 
+    private val _navigationEvents = MutableSharedFlow<NavigationEvent>()
+    val navigationEvents: SharedFlow<NavigationEvent> = _navigationEvents.asSharedFlow()
+
     private val _showDebug = MutableStateFlow(false)
     val showDebug: StateFlow<Boolean> = _showDebug.asStateFlow()
     private var tapCount = 0
@@ -86,18 +100,13 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
     private val _recognizedText = MutableStateFlow<String?>(null)
     val recognizedText: StateFlow<String?> = _recognizedText.asStateFlow()
 
-    fun downloadModel(
-        languageCode: String,
-        navController: NavHostController
-    ) {
+    fun downloadModel(languageCode: String) {
         inkModelManager.setModel(languageCode)
         inkModelManager.download().addOnSuccessListener {
             Log.i("ExerciseBookViewModel", "Model download succeeded")
             _uiState.value = UiState.ExerciseSetup
-            navController.navigate(Destinations.HOME_ROUTE) {
-                popUpTo(Destinations.LOADING_ROUTE) {
-                    inclusive = true // Remove the "loading" destination itself
-                }
+            viewModelScope.launch {
+                _navigationEvents.emit(NavigationEvent.NavigateToHome)
             }
         }.addOnFailureListener {
             Log.e("ExerciseBookViewModel", "Model download failed", it)
@@ -156,6 +165,9 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
         }
         _exerciseIndex = 0
         _uiState.value = UiState.ExerciseScreen(currentExercise())
+        viewModelScope.launch {
+            _navigationEvents.emit(NavigationEvent.NavigateToExercise(exerciseConfig.type))
+        }
     }
 
     private fun currentExercise(): Exercise {
@@ -177,14 +189,16 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
         }
     }
 
-    fun onResultAnimationFinished(onAllExercisesComplete: () -> Unit) {
+    fun onResultAnimationFinished() {
         if (_exerciseIndex < _exerciseBook.value.historyList.size) {
             _uiState.value = UiState.ExerciseScreen(currentExercise())
         } else {
             // All exercises completed, calculate results and transition
             resultsList()
             _uiState.value = UiState.SummaryScreen(results)
-            onAllExercisesComplete()
+            viewModelScope.launch {
+                _navigationEvents.emit(NavigationEvent.NavigateToSummary)
+            }
         }
         _answerResult.value = AnswerResult.None // Reset answer result state
         _recognizedText.value = null // Reset recognition state
@@ -203,6 +217,12 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
                     exercise.timeTakenMillis ?: 0
                 )
             )
+        }
+    }
+
+    fun onSummaryDone() {
+        viewModelScope.launch {
+            _navigationEvents.emit(NavigationEvent.NavigateBackToHome)
         }
     }
 
@@ -230,8 +250,7 @@ class ExerciseBookActivity : ComponentActivity() {
 
         setContent {
             AppTheme {
-                val navController = rememberNavController()
-                AppNavigation(navController, viewModel)
+                AppNavigation(viewModel)
             }
         }
     }
@@ -246,20 +265,46 @@ object Destinations {
 }
 
 @Composable
-fun AppNavigation(navController: NavHostController = rememberNavController(),
-                  viewModel: ExerciseBookViewModel) {
+fun AppNavigation(viewModel: ExerciseBookViewModel) {
     val uiState by viewModel.uiState.collectAsState()
+    val navController = rememberNavController()
+
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvents.collect { event ->
+            when (event) {
+                is NavigationEvent.NavigateToHome -> {
+                    navController.navigate(Destinations.HOME_ROUTE) {
+                        popUpTo(Destinations.LOADING_ROUTE) { inclusive = true }
+                    }
+                }
+                is NavigationEvent.NavigateToExercise -> {
+                    navController.navigate(Destinations.exerciseDetailRoute(event.type))
+                }
+                is NavigationEvent.NavigateToSummary -> {
+                    navController.navigate(Destinations.SUMMARY_ROUTE) {
+                        popUpTo(Destinations.HOME_ROUTE) { inclusive = false }
+                    }
+                }
+                is NavigationEvent.NavigateBackToHome -> {
+                    navController.navigate(Destinations.HOME_ROUTE) {
+                        popUpTo(Destinations.HOME_ROUTE) { inclusive = true }
+                    }
+                }
+            }
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = Destinations.LOADING_ROUTE
     ) {
         composable(route = Destinations.LOADING_ROUTE) {
             LoadingScreen(UiState.LoadingModel()) {
-                viewModel.downloadModel("en-US", navController)
+                viewModel.downloadModel("en-US")
             }
         }
         composable(route = Destinations.HOME_ROUTE) {
-            ExerciseSetupScreen(navController, viewModel) {
+            ExerciseSetupScreen(viewModel) {
                 viewModel.deleteActiveModel("en-US")
             }
         }
@@ -274,9 +319,7 @@ fun AppNavigation(navController: NavHostController = rememberNavController(),
                         viewModel.checkAnswer(answer, elapsedMs)
                     },
                     onAllExercisesComplete = {
-                        navController.navigate(Destinations.SUMMARY_ROUTE) {
-                            popUpTo(Destinations.HOME_ROUTE) { inclusive = false }
-                        }
+                        viewModel.onResultAnimationFinished()
                     })
             }
         }
@@ -284,9 +327,7 @@ fun AppNavigation(navController: NavHostController = rememberNavController(),
             val summaryState = uiState as? UiState.SummaryScreen
             if (summaryState != null) {
                 ResultsScreen(summaryState.results) {
-                    navController.navigate(Destinations.HOME_ROUTE) {
-                        popUpTo(Destinations.HOME_ROUTE) { inclusive = true }
-                    }
+                    viewModel.onSummaryDone()
                 }
             }
         }
@@ -319,9 +360,10 @@ fun LoadingScreen(state: UiState.LoadingModel, downloadModel: () -> Unit) {
 }
 
 @Composable
-fun ExerciseSetupScreen(navController: NavHostController,
-                         exerciseBookViewModel: ExerciseBookViewModel,
-                         onModelDelete: () -> Unit) {
+fun ExerciseSetupScreen(
+    exerciseBookViewModel: ExerciseBookViewModel,
+    onModelDelete: () -> Unit
+) {
     val showDebug by exerciseBookViewModel.showDebug.collectAsState()
 
     // UI for choosing exercise type and starting exercises
@@ -341,7 +383,6 @@ fun ExerciseSetupScreen(navController: NavHostController,
             val config = ExerciseConfig(ExerciseType.ADDITION.id, 10, 2) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
             Log.i("ExerciseBookActivity", "Starting Addition")
-            navController.navigate(Destinations.exerciseDetailRoute(config.type))
         }) {
             Text("Start Addition")
         }
@@ -350,7 +391,6 @@ fun ExerciseSetupScreen(navController: NavHostController,
             val config = ExerciseConfig(ExerciseType.MISSING_ADDEND.id, 10, 2) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
             Log.i("ExerciseBookActivity", "Starting Addition with missing addend")
-            navController.navigate(Destinations.exerciseDetailRoute(config.type))
         }) {
             Text("Start with missing addend")
         }
@@ -359,7 +399,6 @@ fun ExerciseSetupScreen(navController: NavHostController,
             val config = ExerciseConfig(ExerciseType.SUBTRACTION.id, 10, 2) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
             Log.i("ExerciseBookActivity", "Starting Subtraction")
-            navController.navigate(Destinations.exerciseDetailRoute(config.type))
         }) {
             Text("Start Subtraction")
         }
@@ -368,7 +407,6 @@ fun ExerciseSetupScreen(navController: NavHostController,
             val config = ExerciseConfig(ExerciseType.MISSING_SUBTRAHEND.id, 10, 2) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
             Log.i("ExerciseBookActivity", "Starting Subtraction with missing subtrahend")
-            navController.navigate(Destinations.exerciseDetailRoute(config.type))
         }) {
             Text("Start Subtraction with missing subtrahend")
         }
@@ -377,7 +415,6 @@ fun ExerciseSetupScreen(navController: NavHostController,
             val config = ExerciseConfig(ExerciseType.MULTIPLICATION.id, 10, 2) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
             Log.i("ExerciseBookActivity", "Starting Multiplication")
-            navController.navigate(Destinations.exerciseDetailRoute(config.type))
         }) {
             Text("Start Multiplication")
         }
@@ -405,9 +442,8 @@ fun ExerciseSetupScreen(navController: NavHostController,
 @Composable
 fun PreviewExerciseSetupScreen() {
     val viewModel : ExerciseBookViewModel = viewModel()
-    val navController = rememberNavController()
     AppTheme {
-        ExerciseSetupScreen(navController, viewModel) {}
+        ExerciseSetupScreen(viewModel) {}
     }
 }
 
