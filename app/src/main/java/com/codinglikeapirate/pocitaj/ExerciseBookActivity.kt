@@ -118,7 +118,8 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
             try {
                 val result = inkModelManager.recognizeInk(ink, hint)
                 _recognizedText.value = result
-            } finally {}
+            } finally {
+            }
         }
     }
 
@@ -131,32 +132,24 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
 
     // Function to handle exercise setup completion
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
-        if (exerciseConfig.type == ExerciseType.ADDITION.id) {
-            _exerciseBook.value.clear()
-            for (i in 1..exerciseConfig.count) {
-                _exerciseBook.value.generate(ExerciseType.ADDITION, exerciseConfig.upTo)
-            }
-        } else if (exerciseConfig.type == ExerciseType.MISSING_ADDEND.id) {
-            _exerciseBook.value.clear()
-            for (i in 1..exerciseConfig.count) {
-                _exerciseBook.value.generate(ExerciseType.MISSING_ADDEND, exerciseConfig.upTo)
-            }
-        } else if (exerciseConfig.type == ExerciseType.SUBTRACTION.id) {
-            _exerciseBook.value.clear()
-            for (i in 1..exerciseConfig.count) {
-                _exerciseBook.value.generate(ExerciseType.SUBTRACTION, exerciseConfig.upTo)
-            }
-        } else if (exerciseConfig.type == ExerciseType.MISSING_SUBTRAHEND.id) {
-            _exerciseBook.value.clear()
-            for (i in 1..exerciseConfig.count) {
-                _exerciseBook.value.generate(ExerciseType.MISSING_SUBTRAHEND, exerciseConfig.upTo)
-            }
-        } else if (exerciseConfig.type == ExerciseType.MULTIPLICATION.id) {
-            _exerciseBook.value.clear()
-            for (i in 1..exerciseConfig.count) {
-                _exerciseBook.value.generate(ExerciseType.MULTIPLICATION, exerciseConfig.upTo)
+        _exerciseBook.value.clear()
+
+        val exerciseType:ExerciseType = when (exerciseConfig.type) {
+            ExerciseType.ADDITION.id -> ExerciseType.ADDITION
+            ExerciseType.MISSING_ADDEND.id -> ExerciseType.MISSING_ADDEND
+            ExerciseType.SUBTRACTION.id -> ExerciseType.SUBTRACTION
+            ExerciseType.MISSING_SUBTRAHEND.id -> ExerciseType.MISSING_SUBTRAHEND
+            ExerciseType.MULTIPLICATION.id -> ExerciseType.MULTIPLICATION
+            else -> {
+                Log.e("ExerciseBookViewModel", "Unknown exercise type: ${exerciseConfig.type}")
+                ExerciseType.ADDITION
             }
         }
+
+        for (i in 1..exerciseConfig.count) {
+            _exerciseBook.value.generate(exerciseType, exerciseConfig.upTo)
+        }
+
         _exerciseIndex = 0
         _uiState.value = UiState.ExerciseScreen(currentExercise())
         viewModelScope.launch {
@@ -271,14 +264,17 @@ fun AppNavigation(viewModel: ExerciseBookViewModel) {
                         popUpTo(Destinations.LOADING_ROUTE) { inclusive = true }
                     }
                 }
+
                 is NavigationEvent.NavigateToExercise -> {
                     navController.navigate(Destinations.exerciseDetailRoute(event.type))
                 }
+
                 is NavigationEvent.NavigateToSummary -> {
                     navController.navigate(Destinations.SUMMARY_ROUTE) {
                         popUpTo(Destinations.HOME_ROUTE) { inclusive = false }
                     }
                 }
+
                 is NavigationEvent.NavigateBackToHome -> {
                     navController.navigate(Destinations.HOME_ROUTE) {
                         popUpTo(Destinations.HOME_ROUTE) { inclusive = true }
@@ -374,7 +370,8 @@ fun ExerciseSetupScreen(
         Spacer(modifier = Modifier.height(16.dp))
         // Add UI elements (e.g., Radio buttons, dropdowns) for selecting exercise type and level
         Button(onClick = {
-            val config = ExerciseConfig(ExerciseType.ADDITION.id, 10, 2) // Replace with actual selection
+            val config =
+                ExerciseConfig(ExerciseType.ADDITION.id, 10, 2) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
             Log.i("ExerciseBookActivity", "Starting Addition")
         }) {
@@ -382,7 +379,11 @@ fun ExerciseSetupScreen(
         }
 
         Button(onClick = {
-            val config = ExerciseConfig(ExerciseType.MISSING_ADDEND.id, 10, 2) // Replace with actual selection
+            val config = ExerciseConfig(
+                ExerciseType.MISSING_ADDEND.id,
+                10,
+                2
+            ) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
             Log.i("ExerciseBookActivity", "Starting Addition with missing addend")
         }) {
@@ -390,7 +391,8 @@ fun ExerciseSetupScreen(
         }
 
         Button(onClick = {
-            val config = ExerciseConfig(ExerciseType.SUBTRACTION.id, 10, 2) // Replace with actual selection
+            val config =
+                ExerciseConfig(ExerciseType.SUBTRACTION.id, 10, 2) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
             Log.i("ExerciseBookActivity", "Starting Subtraction")
         }) {
@@ -398,7 +400,11 @@ fun ExerciseSetupScreen(
         }
 
         Button(onClick = {
-            val config = ExerciseConfig(ExerciseType.MISSING_SUBTRAHEND.id, 10, 2) // Replace with actual selection
+            val config = ExerciseConfig(
+                ExerciseType.MISSING_SUBTRAHEND.id,
+                10,
+                2
+            ) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
             Log.i("ExerciseBookActivity", "Starting Subtraction with missing subtrahend")
         }) {
@@ -406,7 +412,11 @@ fun ExerciseSetupScreen(
         }
 
         Button(onClick = {
-            val config = ExerciseConfig(ExerciseType.MULTIPLICATION.id, 10, 2) // Replace with actual selection
+            val config = ExerciseConfig(
+                ExerciseType.MULTIPLICATION.id,
+                10,
+                2
+            ) // Replace with actual selection
             exerciseBookViewModel.startExercises(config)
             Log.i("ExerciseBookActivity", "Starting Multiplication")
         }) {
@@ -435,7 +445,7 @@ fun ExerciseSetupScreen(
 )
 @Composable
 fun PreviewExerciseSetupScreen() {
-    val viewModel : ExerciseBookViewModel = viewModel()
+    val viewModel: ExerciseBookViewModel = viewModel()
     AppTheme {
         ExerciseSetupScreen(viewModel) {}
     }
