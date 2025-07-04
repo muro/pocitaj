@@ -30,19 +30,20 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -54,7 +55,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
 import com.google.mlkit.vision.digitalink.Ink.Stroke
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun InkRecognitionBox(
@@ -70,24 +73,14 @@ fun InkRecognitionBox(
     var inkBuilder by remember { mutableStateOf(Ink.builder()) }
     var currentPathPoints by remember { mutableStateOf(listOf<Offset>()) }
 
-    // A boolean would be sufficient except in tests, where touch events are batched.
-    var trigger by remember { mutableIntStateOf(0) }
+    val scope = rememberCoroutineScope()
+    var recognitionJob by remember { mutableStateOf<Job?>(null) }
 
     val backgroundAnswer: ImageBitmap = ImageBitmap.imageResource(id = R.drawable.paper_answer)
 
     val strokeColor = MaterialTheme.colorScheme.errorContainer
     val activeStrokeColor = MaterialTheme.colorScheme.error
     val strokeWidth = 5.dp
-
-    LaunchedEffect(key1 = trigger) {
-        if (inkBuilder.build().strokes.isNotEmpty()) {
-            delay(recognitionDelayMillis)
-            val ink = inkBuilder.build()
-            paths.clear()
-            inkBuilder = Ink.builder()
-            viewModel.recognizeInk(ink, hint)
-        }
-    }
 
     Box(
         modifier = modifier
@@ -103,6 +96,7 @@ fun InkRecognitionBox(
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset ->
+                        recognitionJob?.cancel() // Cancel any pending recognition
                         currentPath.value.moveTo(offset.x, offset.y)
                         currentStrokeBuilder.addPoint(Point.create(offset.x, offset.y))
                         currentPathPoints = listOf(offset)
@@ -124,7 +118,13 @@ fun InkRecognitionBox(
                         inkBuilder.addStroke(currentStrokeBuilder.build())
                         currentStrokeBuilder = Stroke.builder()
                         currentPathPoints = emptyList()
-                        trigger++ // Manually trigger the effect
+                        recognitionJob = scope.launch { // Launch a new recognition job
+                            delay(recognitionDelayMillis)
+                            val ink = inkBuilder.build()
+                            paths.clear()
+                            inkBuilder = Ink.builder()
+                            viewModel.recognizeInk(ink, hint)
+                        }
                     }
                 )
             }
