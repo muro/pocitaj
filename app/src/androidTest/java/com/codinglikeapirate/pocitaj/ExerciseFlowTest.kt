@@ -118,5 +118,50 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         composeTestRule.waitForIdle() // Ensure UI is stable before test ends
     }
+
+    private fun drawDigitWithDelay(delay: Long) {
+        val canvasNode = composeTestRule.onNodeWithTag("InkCanvas")
+        canvasNode.assertExists("InkCanvas not found on screen.")
+        val canvasBounds = canvasNode.fetchSemanticsNode().boundsInRoot
+        val strokes = DrawingTestUtils.getPathForDigitOne(canvasBounds.width, canvasBounds.height)
+        DrawingTestUtils.performStrokes(composeTestRule, canvasNode, strokes)
+        if (delay > 0) {
+            composeTestRule.mainClock.advanceTimeBy(delay)
+        }
+    }
+
+    @Test
+    fun threeDigitNumber_withDelays_isRecognizedCorrectly() {
+        // 1. Navigate and set up a custom exercise
+        navigateToExerciseType("Start Addition")
+        val exerciseBook = ExerciseBook()
+        exerciseBook.addExercise(Exercise(Addition(100, 23))) // Answer is 123
+        lateinit var viewModel: ExerciseBookViewModel
+        composeTestRule.activityRule.scenario.onActivity { activity ->
+            viewModel = ViewModelProvider(activity,
+                ViewModelProvider.AndroidViewModelFactory.getInstance(activity.application))
+                .get(ExerciseBookViewModel::class.java)
+            viewModel.setExerciseBookForTesting(exerciseBook)
+        }
+        composeTestRule.waitForIdle()
+
+        // 2. Draw the digits with delays, updating the fake result each time
+        FakeInkModelManager.recognitionResult = "1"
+        drawDigitWithDelay(800) // Draw "1", wait 0.8s
+        assertNoFeedbackIsShown()
+
+        FakeInkModelManager.recognitionResult = "12"
+        drawDigitWithDelay(800) // Draw "2", wait 0.8s
+        assertNoFeedbackIsShown()
+
+        FakeInkModelManager.recognitionResult = "123"
+        drawDigitWithDelay(0)   // Draw "3", no extra wait
+
+        // 3. Wait for the final recognition timer to fire
+        composeTestRule.mainClock.advanceTimeBy(RECOGNITION_CLOCK_ADVANCE)
+
+        // 4. Verify that the correct feedback is shown
+        verifyFeedback(FeedbackType.CORRECT)
+    }
 }
 

@@ -65,7 +65,7 @@ fun InkRecognitionBox(
     viewModel: ExerciseBookViewModel,
     hint: String
 ) {
-    val recognitionDelayMillis = 1000L
+    val recognitionDelayMillis = 1_000L
 
     val currentPath = remember { mutableStateOf(Path()) }
     val paths = remember { mutableStateListOf<Path>() }

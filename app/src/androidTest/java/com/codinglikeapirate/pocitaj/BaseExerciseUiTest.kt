@@ -97,5 +97,11 @@ abstract class BaseExerciseUiTest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
     }
+
+    fun assertNoFeedbackIsShown() {
+        composeTestRule.onNode(hasContentDescription(FeedbackType.CORRECT.contentDescription)).assertDoesNotExist()
+        composeTestRule.onNode(hasContentDescription(FeedbackType.INCORRECT.contentDescription)).assertDoesNotExist()
+        composeTestRule.onNode(hasContentDescription(FeedbackType.UNRECOGNIZED.contentDescription)).assertDoesNotExist()
+    }
 }
 
