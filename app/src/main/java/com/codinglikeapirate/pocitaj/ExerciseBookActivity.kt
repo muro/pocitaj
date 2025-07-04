@@ -146,7 +146,7 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
             }
         }
 
-        for (i in 1..exerciseConfig.count) {
+        repeat(exerciseConfig.count) {
             _exerciseBook.value.generate(exerciseType, exerciseConfig.upTo)
         }
 
