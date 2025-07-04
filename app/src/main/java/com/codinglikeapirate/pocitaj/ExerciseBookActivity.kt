@@ -134,7 +134,7 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
         _exerciseBook.value.clear()
 
-        val exerciseType:ExerciseType = when (exerciseConfig.type) {
+        val exerciseType: ExerciseType = when (exerciseConfig.type) {
             ExerciseType.ADDITION.id -> ExerciseType.ADDITION
             ExerciseType.MISSING_ADDEND.id -> ExerciseType.MISSING_ADDEND
             ExerciseType.SUBTRACTION.id -> ExerciseType.SUBTRACTION
@@ -302,15 +302,9 @@ fun AppNavigation(viewModel: ExerciseBookViewModel) {
             val exerciseState = uiState as? UiState.ExerciseScreen
             if (exerciseState != null) {
                 val exercise: Exercise = exerciseState.currentExercise
-
-                ExerciseScreen(
-                    exercise, viewModel,
-                    onAnswerSubmit = { answer: String, elapsedMs: Int ->
-                        viewModel.checkAnswer(answer, elapsedMs)
-                    },
-                    onAllExercisesComplete = {
-                        viewModel.onResultAnimationFinished()
-                    })
+                ExerciseScreen(exercise, viewModel) { answer: String, elapsedMs: Int ->
+                    viewModel.checkAnswer(answer, elapsedMs)
+                }
             }
         }
         composable(route = Destinations.SUMMARY_ROUTE) {

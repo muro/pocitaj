@@ -169,8 +169,7 @@ fun InkRecognitionBox(
 @Composable
 fun ExerciseScreen(exercise: Exercise,
                    viewModel: ExerciseBookViewModel,
-                   onAnswerSubmit: (String, Int) -> Unit,
-                   onAllExercisesComplete: () -> Unit) {
+                   onAnswerSubmit: (String, Int) -> Unit) {
 
     val backgroundAll: ImageBitmap = ImageBitmap.imageResource(id = R.drawable.paper_top)
 
@@ -246,7 +245,7 @@ fun ExerciseScreen(exercise: Exercise,
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
@@ -258,50 +257,67 @@ fun ExerciseScreen(exercise: Exercise,
                 )
             }
     ) {
-        // Animated content for the exercise question text
-        AnimatedContent(
-            targetState = exercise.equation.question(), // Animate when the exercise question changes
-            transitionSpec = {
-                // Fade in the new text and fade out the old text
-                val duration = if (debug) {
-                    AppMotion.debugDuration
-                } else {
-                    AppMotion.mediumDuration
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Animated content for the exercise question text
+            AnimatedContent(
+                targetState = exercise.equation.question(), // Animate when the exercise question changes
+                transitionSpec = {
+                    // Fade in the new text and fade out the old text
+                    val duration = if (debug) {
+                        AppMotion.debugDuration
+                    } else {
+                        AppMotion.mediumDuration
+                    }
+                    fadeIn(animationSpec = tween(duration)) togetherWith fadeOut(animationSpec = tween(duration))
                 }
-                fadeIn(animationSpec = tween(duration)) togetherWith fadeOut(animationSpec = tween(duration))
+            ) { targetText -> // The target state (new exercise question)
+                Text(
+                    text = targetText,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(312.dp)
+                        .wrapContentHeight(align = Alignment.CenterVertically),
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 96.sp,
+                )
             }
-        ) { targetText -> // The target state (new exercise question)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // box for input here
+            InkRecognitionBox(
+                Modifier,
+                viewModel,
+                exercise.equation.getExpectedResult().toString()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
-                text = targetText,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(312.dp)
-                    .wrapContentHeight(align = Alignment.CenterVertically),
+                text = "Recognized Text: ${recognizedText ?: "..."}",
+                modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 96.sp,
+                fontSize = 18.sp
+            )
+
+            Text(
+                text = "Time: ${elapsedTimeMillis / 1000}s ${elapsedTimeMillis % 1000}ms",
+                modifier = Modifier
+                    // .align(Alignment.TopEnd) // Align to top-right
+                    .padding(8.dp), // Add some padding
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // box for input here
-        InkRecognitionBox(Modifier, viewModel, exercise.equation.getExpectedResult().toString())
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Recognized Text: ${recognizedText ?: "..."}",
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            fontSize = 18.sp
-        )
-
         // Animated visibility for the result image
         AnimatedVisibility(
             visible = showResultImage && resultImageRes != null,
             enter = fadeIn(), // Fade in the image
-            exit = fadeOut() // Fade out the image
+            exit = fadeOut(), // Fade out the image
+            modifier = Modifier.align(Alignment.Center)
         ) {
             // Load the image resource
             val imageBitmap = resultImageRes?.let { ImageBitmap.imageResource(id = it) }
@@ -317,8 +333,7 @@ fun ExerciseScreen(exercise: Exercise,
                     bitmap = imageBitmap,
                     contentDescription = contentDesc,
                     modifier = Modifier
-                        .align(Alignment.CenterHorizontally) // Center the image
-                        .size(100.dp) // Set the size of the image
+                        .size(200.dp) // Set the size of the image
                         .graphicsLayer {
                             // Animate scale and alpha for zoom and fade
                             scaleX = imageScale
@@ -328,14 +343,6 @@ fun ExerciseScreen(exercise: Exercise,
                 )
             }
         }
-        Text(
-            text = "Time: ${elapsedTimeMillis / 1000}s ${elapsedTimeMillis % 1000}ms",
-            modifier = Modifier
-                // .align(Alignment.TopEnd) // Align to top-right
-                .padding(8.dp), // Add some padding
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onBackground
-        )
     }
 }
 
@@ -357,7 +364,7 @@ fun PreviewExerciseScreen() {
     viewModel.startExercises(ExerciseConfig("subtraction", 12))
 
     AppTheme {
-        ExerciseScreen(exercise, viewModel, {_: String, _: Int -> }, {})
+        ExerciseScreen(exercise, viewModel) {_: String, _: Int -> }
     }
 }
 
