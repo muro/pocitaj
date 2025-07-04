@@ -35,12 +35,7 @@ object DrawingTestUtils {
         rule.waitForIdle()
         strokes.forEachIndexed { index, strokePoints ->
             if (strokePoints.size < 2) {
-                if (strokePoints.isEmpty()) {
-                    return@forEachIndexed
-                }
-                if (strokePoints.size == 1) {
-                    return@forEachIndexed
-                }
+                return@forEachIndexed
             }
 
             canvasNode.performTouchInput {
