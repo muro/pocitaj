@@ -6,36 +6,40 @@ This document outlines the step-by-step plan to implement the adaptive learning 
 
 ### Phase 1: The Core Data Layer
 
-**Step 1: Define the `ExerciseHistory` Data Table**
+**Step 1: Define the `ExerciseAttempt` Data Table [DONE]**
 *   **Purpose:** To create a detailed, timestamped log of every single exercise attempt for the teacher/parent view.
 *   **Action:**
-    *   Create a new data class `ExerciseHistory`.
+    *   Create a new data class `ExerciseAttempt`.
     *   This will be a Room "entity" (i.e., it will define a database table).
     *   **Columns:**
         *   `id` (auto-generating primary key)
+        *   `userId` (long, foreign key to User)
         *   `timestamp` (the date and time of the attempt)
-        *   `operation` (e.g., "ADDITION")
-        *   `operand1`, `operand2`
-        *   `was_correct` (boolean)
-        *   `duration_ms` (long - the time in milliseconds it took to answer)
-*   **Testing:** Write a Room migration test to add the new `ExerciseHistory` table to the database.
+        *   `problemText` (string)
+        *   `logicalOperation` (Operation enum)
+        *   `correctAnswer` (int)
+        *   `submittedAnswer` (int)
+        *   `wasCorrect` (boolean)
+        *   `durationMs` (long)
+*   **Testing:** Write a Room migration test to add the new `ExerciseAttempt` table to the database.
 
-**Step 2: Define the `FactMastery` Data Table**
+**Step 2: Define the `FactMastery` Data Table [DONE]**
 *   **Purpose:** To efficiently store the current learning state (strength) of every unique fact. This table will power the `ExerciseProvider`.
 *   **Action:**
     *   Create a new data class `FactMastery`.
     *   This will also be a Room entity.
     *   **Columns:**
-        *   `fact_id` (a unique text primary key, e.g., "ADD_2_3" for 2+3)
+        *   `factId` (a unique text primary key, e.g., "ADD_2_3")
+        *   `userId` (long, foreign key to User)
         *   `strength` (integer from 1 to 5)
-        *   `last_tested_timestamp`
+        *   `lastTestedTimestamp`
 *   **Testing:** Write a Room migration test to add the new `FactMastery` table.
 
-**Step 3: Implement the Database Access Objects (DAOs)**
+**Step 3: Implement the Database Access Objects (DAOs) [DONE]**
 *   **Purpose:** Create the interfaces that Room will use to generate the code for database queries.
 *   **Action:**
-    *   Create `ExerciseHistoryDao` with a method to `insert(history: ExerciseHistory)`.
-    *   Create `FactMasteryDao` with methods to `getFact(factId: String)` and `upsertFact(mastery: FactMastery)` (upsert means insert or update).
+    *   Create `UserDao`, `ExerciseAttemptDao`, and `FactMasteryDao`.
+    *   Register them in `AppDatabase`.
 *   **Testing:** Write unit tests for the DAOs to ensure they correctly insert and retrieve data from a test database.
 
 ---
@@ -51,7 +55,7 @@ This document outlines the step-by-step plan to implement the adaptive learning 
 *   **Purpose:** To intelligently select the next question.
 *   **Action:**
     *   Create the `ExerciseProvider` class.
-    *   Its `getNextExercise()` method will now query the `FactMastery` table to determine the user's progress and select a question based on the 80/20 new/review logic.
+    *   Its `getNextExercise()` method will query the `FactMastery` table to determine the user's progress and select a question based on the 80/20 new/review logic.
 *   **Testing:** Write comprehensive **unit tests** for `ExerciseProvider`, feeding it a mocked `FactMasteryDao` with various states of progress and asserting it makes correct choices.
 
 **Step 6: Integrate the New System into the `ExerciseBookViewModel`**
@@ -59,11 +63,11 @@ This document outlines the step-by-step plan to implement the adaptive learning 
 *   **Action:**
     *   Modify `ExerciseBookViewModel` to use the `ExerciseProvider`.
     *   When an answer is submitted, it will:
-        1.  Calculate the `duration_ms`.
-        2.  Create and insert an `ExerciseHistory` record.
+        1.  Calculate the `durationMs`.
+        2.  Create and insert an `ExerciseAttempt` record.
         3.  Update the `FactMastery` record for that fact with its new strength.
 *   **Testing:**
-    *   Update existing **UI tests** (`ExerciseFlowTest`) to work with the new provider.
+    *   Update existing **UI tests** (`ExerciseFlowT`est) to work with the new provider.
     *   Add **unit tests** to the ViewModel to verify that it correctly logs history and updates mastery upon receiving an answer.
 
 ---
@@ -88,7 +92,7 @@ This document outlines the step-by-step plan to implement the adaptive learning 
 *   **Purpose:** To display the detailed log of all attempts.
 *   **Action:**
     *   This could be a separate screen or a drill-down from the heatmap.
-    *   Create a ViewModel that queries the `ExerciseHistory` DAO.
+    *   Create a ViewModel that queries the `ExerciseAttempt` DAO.
     *   Display the results in a simple, scrollable list showing the date, exercise, result, and duration for each attempt.
 *   **Testing:** Write a **UI test** that verifies the list displays the correct data provided by a mocked ViewModel.
 

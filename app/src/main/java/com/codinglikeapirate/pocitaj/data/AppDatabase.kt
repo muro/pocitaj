@@ -9,7 +9,9 @@ import androidx.room.TypeConverters
 @TypeConverters(AppDatabase.Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
-    // We will add abstract DAO functions here in the next step.
+    abstract fun userDao(): UserDao
+    abstract fun exerciseAttemptDao(): ExerciseAttemptDao
+    abstract fun factMasteryDao(): FactMasteryDao
 
     /**
      * Type converters to allow Room to store custom types.
