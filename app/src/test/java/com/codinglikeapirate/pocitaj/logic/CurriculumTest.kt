@@ -6,21 +6,33 @@ import org.junit.Test
 class CurriculumTest {
 
     @Test
+    fun `getAllLevels returns all levels in correct order`() {
+        val expectedIds = listOf("ADD_SUM_5", "ADD_SUM_10")
+        val actualIds = Curriculum.getAllLevels().map { it.id }
+        assertEquals("The list of level IDs should match the expected order", expectedIds, actualIds)
+    }
+
+    @Test
     fun `SumsUpTo5 level generates correct fact IDs`() {
         val level = Curriculum.getAllLevels().find { it.id == "ADD_SUM_5" }!!
         val factIds = level.getAllPossibleFactIds()
 
-        // Total number of unique facts for sums up to 5 (including 0+0, 0+1, 1+0, etc.)
-        // 0: 1 (0+0)
-        // 1: 2 (0+1, 1+0)
-        // 2: 3 (0+2, 1+1, 2+0)
-        // 3: 4 (0+3, 1+2, 2+1, 3+0)
-        // 4: 5 (0+4, 1+3, 2+2, 3+1, 4+0)
-        // 5: 6 (0+5, 1+4, 2+3, 3+2, 4+1, 5+0)
-        // Total = 1+2+3+4+5+6 = 21
+        // Sums up to 5: 1+2+3+4+5+6 = 21 facts
         assertEquals(21, factIds.size)
         assertEquals(true, factIds.contains("ADDITION_0_5"))
         assertEquals(true, factIds.contains("ADDITION_5_0"))
         assertEquals(true, factIds.contains("ADDITION_2_3"))
+    }
+
+    @Test
+    fun `SumsUpTo10 level generates correct fact IDs`() {
+        val level = Curriculum.getAllLevels().find { it.id == "ADD_SUM_10" }!!
+        val factIds = level.getAllPossibleFactIds()
+
+        // Sums up to 10: 1+2+3+4+5+6+7+8+9+10+11 = 66 facts
+        assertEquals(66, factIds.size)
+        assertEquals(true, factIds.contains("ADDITION_0_10"))
+        assertEquals(true, factIds.contains("ADDITION_10_0"))
+        assertEquals(true, factIds.contains("ADDITION_4_6"))
     }
 }
