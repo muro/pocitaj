@@ -58,6 +58,8 @@ import com.google.mlkit.vision.digitalink.Ink.Stroke
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.codinglikeapirate.pocitaj.ui.theme.AppMotion
+import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 
 @Composable
 fun InkRecognitionBox(

@@ -31,16 +31,16 @@ abstract class BaseExerciseUiTest {
     @Before
     fun waitForAppToBeReady() {
         // Wait for the loading screen to disappear and the setup screen to be visible.
-        // The "Start Addition" button uniquely identifies the ExerciseSetupScreen.
+        // The "Choose Your Challenge" title uniquely identifies the ExerciseSetupScreen.
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
             composeTestRule
-                .onAllNodesWithText("Start Addition")
+                .onAllNodesWithText("Choose Your Challenge")
                 .fetchSemanticsNodes().size == 1
         }
     }
 
     fun navigateToExerciseType(exerciseTypeButtonText: String) {
-        // Click on the button to start the specific exercise type
+        // Click on the card to start the specific exercise type
         composeTestRule.onNodeWithText(exerciseTypeButtonText).performClick()
 
         // Wait for the ExerciseScreen to be loaded by checking for a unique element.

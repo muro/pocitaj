@@ -10,7 +10,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     @Test
     fun whenCorrectAnswerDrawn_thenCorrectFeedbackIsShown() {
         // 1. Navigate to "Start Addition"
-        navigateToExerciseType("Start Addition")
+        navigateToExerciseType("Addition")
 
         // 2. Create a custom exercise book
         val exerciseBook = ExerciseBook()
@@ -37,7 +37,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
     @Test
     fun whenTwoQuestionsAnswered_thenUIAdvancesAndShowsFeedback() {
-        navigateToExerciseType("Start Addition")
+        navigateToExerciseType("Addition")
 
         // First Question
         drawAnswer("1")
@@ -54,41 +54,57 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
     @Test
     fun whenFullExerciseLoopCompleted_thenReturnsToSetupScreen() {
-        navigateToExerciseType("Start Addition")
+        // 1. Navigate to "Addition"
+        navigateToExerciseType("Addition")
 
-        // First Question
+        // 2. Create a custom exercise book with two exercises
+        val exerciseBook = ExerciseBook()
+        exerciseBook.addExercise(Exercise(Addition(1, 1)))
+        exerciseBook.addExercise(Exercise(Addition(2, 2)))
+
+        // 3. Set the custom exercise book on the view model
+        lateinit var viewModel: ExerciseBookViewModel
+        composeTestRule.activityRule.scenario.onActivity { activity ->
+            viewModel = ViewModelProvider(
+                activity,
+                ViewModelProvider.AndroidViewModelFactory.getInstance(activity.application)
+            ).get(ExerciseBookViewModel::class.java)
+            viewModel.setExerciseBookForTesting(exerciseBook)
+        }
+
+        // 4. Wait for the UI to settle
+        composeTestRule.waitForIdle()
+
+        // 5. Answer the two questions
         drawAnswer("1")
-        verifyFeedback(FeedbackType.INCORRECT)
-
-        // Second Question
-        composeTestRule.waitForIdle() // Wait for UI to settle (e.g., next question loaded)
-        composeTestRule.mainClock.advanceTimeBy(2000)
-
-        drawAnswer("1")
-        verifyFeedback(FeedbackType.INCORRECT)
-
+        verifyFeedback(FeedbackType.INCORRECT) // This is incorrect, but the test is about flow
         composeTestRule.waitForIdle()
         composeTestRule.mainClock.advanceTimeBy(2000)
 
-        // Verify Navigation to Summary Screen (ResultsScreen)
+        drawAnswer("1")
+        verifyFeedback(FeedbackType.INCORRECT)
+        composeTestRule.waitForIdle()
+        composeTestRule.mainClock.advanceTimeBy(2000)
+
+        // 6. Verify Navigation to Summary Screen (ResultsScreen)
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
             composeTestRule.onAllNodesWithText("Done").fetchSemanticsNodes().isNotEmpty()
         }
 
-        // Navigate Back to Setup Screen
+        // 7. Navigate Back to Setup Screen
         composeTestRule.onNodeWithText("Done").performClick()
         composeTestRule.waitForIdle()
 
-        // Verify Navigation to Exercise Setup Screen
+        // 8. Verify Navigation to Exercise Setup Screen
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onAllNodesWithText("Start Addition").fetchSemanticsNodes().isNotEmpty()
+            composeTestRule.onAllNodesWithText("Choose Your Challenge").fetchSemanticsNodes().isNotEmpty()
         }
     }
 
     @Test
     fun whenSystemBackButtonPressedOnExerciseScreen_thenNavigatesToSetup() {
         // Navigate to the Exercise Screen
-        navigateToExerciseType("Start Addition")
+        navigateToExerciseType("Addition")
 
         // Verify that an element unique to the Exercise Screen is present
         // Using onNodeWithTag for the canvas is a good unique identifier
@@ -102,13 +118,13 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // Verify that the ExerciseSetupScreen is displayed
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onAllNodesWithText("Start Addition").fetchSemanticsNodes().isNotEmpty()
+            composeTestRule.onAllNodesWithText("Choose Your Challenge").fetchSemanticsNodes().isNotEmpty()
         }
     }
 
     @Test
     fun whenUnrecognizedAnswerDrawn_thenUnrecognizedFeedbackIsShown() {
-        navigateToExerciseType("Start Addition")
+        navigateToExerciseType("Addition")
 
         composeTestRule.waitForIdle()
 
@@ -133,7 +149,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     @Test
     fun threeDigitNumber_withDelays_isRecognizedCorrectly() {
         // 1. Navigate and set up a custom exercise
-        navigateToExerciseType("Start Addition")
+        navigateToExerciseType("Addition")
         val exerciseBook = ExerciseBook()
         exerciseBook.addExercise(Exercise(Addition(100, 23))) // Answer is 123
         lateinit var viewModel: ExerciseBookViewModel

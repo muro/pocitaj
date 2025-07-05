@@ -1,4 +1,4 @@
-package com.codinglikeapirate.pocitaj
+package com.codinglikeapirate.pocitaj.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val primaryLight = Color(0xFF0277BD)
@@ -36,6 +36,13 @@ val surfaceContainerLowLight = Color(0xFFFAF3E5)
 val surfaceContainerLight = Color(0xFFF4EDDF)
 val surfaceContainerHighLight = Color(0xFFEEE8DA)
 val surfaceContainerHighestLight = Color(0xFFE8E2D4)
+
+val additionGradientStartLight = Color(0xFFF9A825)
+val additionGradientEndLight = Color(0xFFFDD835)
+val subtractionGradientStartLight = Color(0xFF29B6F6)
+val subtractionGradientEndLight = Color(0xFF26A69A)
+val multiplicationGradientStartLight = Color(0xFFAB47BC)
+val multiplicationGradientEndLight = Color(0xFFEC407A)
 
 val primaryLightMediumContrast = Color(0xFF403600)
 val onPrimaryLightMediumContrast = Color(0xFFFFFFFF)
@@ -144,6 +151,13 @@ val surfaceContainerLowDark = Color(0xFF1E1B13)
 val surfaceContainerDark = Color(0xFF222017)
 val surfaceContainerHighDark = Color(0xFF2D2A21)
 val surfaceContainerHighestDark = Color(0xFF38352B)
+
+val additionGradientStartDark = Color(0xFFF9A825)
+val additionGradientEndDark = Color(0xFFFDD835)
+val subtractionGradientStartDark = Color(0xFF29B6F6)
+val subtractionGradientEndDark = Color(0xFF26A69A)
+val multiplicationGradientStartDark = Color(0xFFAB47BC)
+val multiplicationGradientEndDark = Color(0xFFEC407A)
 
 val primaryDarkMediumContrast = Color(0xFFF2DC82)
 val onPrimaryDarkMediumContrast = Color(0xFF2D2500)

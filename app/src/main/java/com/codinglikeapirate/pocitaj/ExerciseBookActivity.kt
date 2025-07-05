@@ -38,6 +38,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
+import com.codinglikeapirate.pocitaj.ui.theme.PocitajTheme
 
 
 class ExerciseBookActivity : ComponentActivity() {
@@ -171,6 +178,27 @@ fun ExerciseSetupScreen(
         ExerciseType.MULTIPLICATION
     )
 
+    val gradients = listOf(
+        Brush.linearGradient(
+            listOf(
+                PocitajTheme.customColors.additionGradientStart,
+                PocitajTheme.customColors.additionGradientEnd
+            )
+        ),
+        Brush.linearGradient(
+            listOf(
+                PocitajTheme.customColors.subtractionGradientStart,
+                PocitajTheme.customColors.subtractionGradientEnd
+            )
+        ),
+        Brush.linearGradient(
+            listOf(
+                PocitajTheme.customColors.multiplicationGradientStart,
+                PocitajTheme.customColors.multiplicationGradientEnd
+            )
+        )
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -187,11 +215,12 @@ fun ExerciseSetupScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(exerciseTypes) { type ->
+            items(exerciseTypes.size) { index ->
                 ExerciseCard(
-                    exerciseType = type,
+                    exerciseType = exerciseTypes[index],
+                    gradient = gradients[index % gradients.size],
                     onClick = {
-                        onStartClicked(type, questionCount.toInt(), difficulty)
+                        onStartClicked(exerciseTypes[index], questionCount.toInt(), difficulty)
                     }
                 )
             }
@@ -228,14 +257,16 @@ fun ExerciseSetupScreen(
 }
 
 @Composable
-fun ExerciseCard(exerciseType: ExerciseType, onClick: (ExerciseType) -> Unit) {
-    Card(
+fun ExerciseCard(exerciseType: ExerciseType, gradient: Brush, onClick: (ExerciseType) -> Unit) {
+    Box(
         modifier = Modifier
-            .aspectRatio(1f)
+            .clip(RoundedCornerShape(24.dp))
+            .background(gradient)
             .clickable { onClick(exerciseType) }
+            .aspectRatio(1f),
+        contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -246,9 +277,13 @@ fun ExerciseCard(exerciseType: ExerciseType, onClick: (ExerciseType) -> Unit) {
                     ExerciseType.MULTIPLICATION -> "×"
                     else -> ""
                 },
-                fontSize = 48.sp
+                fontSize = 48.sp,
+                color = MaterialTheme.colorScheme.onPrimary
             )
-            Text(exerciseType.id.replace("_", " ").replaceFirstChar { it.uppercase() })
+            Text(
+                exerciseType.id.replace("_", " ").replaceFirstChar { it.uppercase() },
+                color = MaterialTheme.colorScheme.onPrimary
+            )
         }
     }
 }

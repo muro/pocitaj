@@ -1,0 +1,30 @@
+package com.codinglikeapirate.pocitaj.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+data class CustomColors(
+    val additionGradientStart: Color,
+    val additionGradientEnd: Color,
+    val subtractionGradientStart: Color,
+    val subtractionGradientEnd: Color,
+    val multiplicationGradientStart: Color,
+    val multiplicationGradientEnd: Color,
+)
+
+val lightCustomColors = CustomColors(
+    additionGradientStart = additionGradientStartLight,
+    additionGradientEnd = additionGradientEndLight,
+    subtractionGradientStart = subtractionGradientStartLight,
+    subtractionGradientEnd = subtractionGradientEndLight,
+    multiplicationGradientStart = multiplicationGradientStartLight,
+    multiplicationGradientEnd = multiplicationGradientEndLight,
+)
+
+val darkCustomColors = CustomColors(
+    additionGradientStart = additionGradientStartDark,
+    additionGradientEnd = additionGradientEndDark,
+    subtractionGradientStart = subtractionGradientStartDark,
+    subtractionGradientEnd = subtractionGradientEndDark,
+    multiplicationGradientStart = multiplicationGradientStartDark,
+    multiplicationGradientEnd = multiplicationGradientEndDark,
+)
