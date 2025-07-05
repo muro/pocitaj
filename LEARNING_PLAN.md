@@ -40,18 +40,18 @@ This document outlines the step-by-step plan to implement the adaptive learning 
 *   **Action:**
     *   Create `UserDao`, `ExerciseAttemptDao`, and `FactMasteryDao`.
     *   Register them in `AppDatabase`.
-*   **Testing:** Write unit tests for the DAOs to ensure they correctly insert and retrieve data from a test database.
+*   **Testing:** Write unit tests for the DAOs to ensure they correctly insert and retrieve data from a test database. [DONE]
 
 ---
 
 ### Phase 2: The Learning & UI Logic
 
-**Step 4: Define the `Curriculum`**
+**Step 4: Define the `Curriculum` [DONE]**
 *   **Purpose:** Codify the mastery levels.
 *   **Action:** Create a `Curriculum` object/enum that defines the levels as we've outlined.
 *   **Testing:** N/A (static data).
 
-**Step 5: Create the `ExerciseProvider`**
+**Step 5: Create the `ExerciseProvider` [DONE]**
 *   **Purpose:** To intelligently select the next question.
 *   **Action:**
     *   Create the `ExerciseProvider` class.
