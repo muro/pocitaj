@@ -10,7 +10,7 @@ object Curriculum {
 
     // --- Level Definitions ---
 
-    object SumsUpTo5 : Level {
+    private object SumsUpTo5 : Level {
         override val id = "ADD_SUM_5"
         override val operation = Operation.ADDITION
 
@@ -19,9 +19,17 @@ object Curriculum {
             val op2 = Random.nextInt(0, 6 - op1)
             return Exercise(op1, op2, op1 + op2, operation)
         }
+
+        override fun getAllPossibleFactIds(): List<String> {
+            return (0..5).flatMap { op1 ->
+                (0..(5 - op1)).map { op2 ->
+                    "${operation.name}_${op1}_${op2}"
+                }
+            }
+        }
     }
 
-    object SumsUpTo10 : Level {
+    private object SumsUpTo10 : Level {
         override val id = "ADD_SUM_10"
         override val operation = Operation.ADDITION
 
@@ -29,6 +37,16 @@ object Curriculum {
             val op1 = Random.nextInt(0, 11)
             val op2 = Random.nextInt(0, 11 - op1)
             return Exercise(op1, op2, op1 + op2, operation)
+        }
+
+        override fun getAllPossibleFactIds(): List<String> {
+            // This logic needs to be more robust to handle the exclusive nature
+            // of the level. For now, this is a simplified placeholder.
+            return (0..10).flatMap { op1 ->
+                (0..(10 - op1)).map { op2 ->
+                    "${operation.name}_${op1}_${op2}"
+                }
+            }
         }
     }
 

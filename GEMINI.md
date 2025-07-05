@@ -4,6 +4,8 @@
 # When creating git commit messages, do not use any quotes (single or double)
 # or backticks (`). Using them will break the commit message on this platform.
 # Also, please always ask before committing to git.
+# When creating commit messages, please don't include every tiny detail.
+# When I reply with "LGTM", it means OK or proceed.
 
 # When asked to check the project or run tests, run all unit and android instrumentation
 # tests.
