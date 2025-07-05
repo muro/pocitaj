@@ -2,8 +2,8 @@ package com.codinglikeapirate.pocitaj
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewmodel.CreationExtras
 
 object ExerciseBookViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")

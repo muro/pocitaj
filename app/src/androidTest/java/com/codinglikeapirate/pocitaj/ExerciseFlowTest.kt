@@ -1,8 +1,12 @@
 package com.codinglikeapirate.pocitaj
 
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.lifecycle.ViewModelProvider
-import androidx.test.espresso.Espresso // Added for pressBack
+import androidx.test.espresso.Espresso
 import org.junit.Test
 
 class ExerciseFlowTest : BaseExerciseUiTest() {

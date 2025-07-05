@@ -52,14 +52,14 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.codinglikeapirate.pocitaj.ui.theme.AppMotion
+import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
 import com.google.mlkit.vision.digitalink.Ink.Stroke
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.codinglikeapirate.pocitaj.ui.theme.AppMotion
-import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 
 @Composable
 fun InkRecognitionBox(
