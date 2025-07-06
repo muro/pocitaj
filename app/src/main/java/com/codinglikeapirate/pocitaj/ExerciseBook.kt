@@ -15,10 +15,10 @@ enum class ExerciseType(val id: String) {
 // Each Exercise can be checked for correct solution
 class ExerciseBook {
 
-    private val history = mutableListOf<Exercise>() // Store SolvableExercise
+    private val exercises = mutableListOf<Exercise>() // Renamed from 'history'
 
     fun clear() {
-        history.clear()
+        exercises.clear()
     }
 
     /**
@@ -26,8 +26,8 @@ class ExerciseBook {
      * This is the primary way to set up a predictable state for UI tests.
      */
     fun loadSession(predefinedExercises: List<Exercise>) {
-        history.clear()
-        history.addAll(predefinedExercises)
+        exercises.clear()
+        exercises.addAll(predefinedExercises)
     }
 
     // This method will likely be removed or significantly changed
@@ -70,19 +70,19 @@ class ExerciseBook {
             }
         }
         val exercise = Exercise(equation)
-        history.add(exercise)
+        exercises.add(exercise)
         return exercise
     }
 
     // Modify last to return SolvableExercise
     val last: Exercise
-        get() = history.last()
+        get() = exercises.last()
 
     val stats: String
         get() {
             var solvedCount = 0
             var correctCount = 0
-            for (solvableExercise in history) {
+            for (solvableExercise in exercises) {
                 if (solvableExercise.solved) { // Access 'solved' property directly
                     solvedCount++
                 }
@@ -101,7 +101,7 @@ class ExerciseBook {
         }
 
     val historyList: List<Exercise>
-        get() = history.toList()
+        get() = exercises.toList()
 }
 
 
