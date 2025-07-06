@@ -11,7 +11,8 @@ object ExerciseBookViewModelFactory : ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(ExerciseBookViewModel::class.java)) {
             val application = checkNotNull(extras[APPLICATION_KEY]) as PocitajApplication
             val inkModelManager = application.inkModelManager
-            return ExerciseBookViewModel(inkModelManager) as T
+            val exerciseBook = application.exerciseBook
+            return ExerciseBookViewModel(inkModelManager, exerciseBook) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

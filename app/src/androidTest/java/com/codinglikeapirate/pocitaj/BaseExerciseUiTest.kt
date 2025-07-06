@@ -7,7 +7,9 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Before
 import org.junit.Rule
 
@@ -58,15 +60,8 @@ abstract class BaseExerciseUiTest {
      * This is the primary way to create a predictable state for UI tests.
      */
     fun setExercises(exercises: List<Exercise>) {
-        val exerciseBook = ExerciseBook()
-        exerciseBook.loadSession(exercises)
-        composeTestRule.activityRule.scenario.onActivity { activity ->
-            val viewModel = ViewModelProvider(
-                activity,
-                ViewModelProvider.AndroidViewModelFactory.getInstance(activity.application)
-            ).get(ExerciseBookViewModel::class.java)
-            viewModel.setExerciseBookForTesting(exerciseBook)
-        }
+        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as PocitajApplication
+        application.exerciseBook.loadSession(exercises)
     }
 
     /**

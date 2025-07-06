@@ -42,12 +42,15 @@ sealed class NavigationEvent {
 
 data class ExerciseConfig(val type: String, val upTo: Int = 10, val count: Int = 10)
 
-class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : ViewModel() {
+class ExerciseBookViewModel(
+    private val inkModelManager: InkModelManager,
+    private val exerciseBook: ExerciseBook
+) : ViewModel() {
     companion object {
         const val DEBUG_TAP_THRESHOLD = 5
     }
 
-    private var _exerciseBook: MutableState<ExerciseBook> = mutableStateOf(ExerciseBook())
+    private var _exerciseBook: MutableState<ExerciseBook> = mutableStateOf(exerciseBook)
     private var _exerciseIndex = 0
 
     private val _uiState = MutableStateFlow<UiState>(UiState.LoadingModel())
@@ -189,12 +192,5 @@ class ExerciseBookViewModel(private val inkModelManager: InkModelManager) : View
         if (tapCount >= DEBUG_TAP_THRESHOLD) {
             _showDebug.value = true
         }
-    }
-
-    @VisibleForTesting
-    fun setExerciseBookForTesting(book: ExerciseBook) {
-        _exerciseBook.value = book
-        _exerciseIndex = 0
-        _uiState.value = UiState.ExerciseScreen(currentExercise())
     }
 }

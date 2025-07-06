@@ -9,6 +9,10 @@ open class PocitajApplication : Application() {
         ModelManager()
     }
 
+    open val exerciseBook: ExerciseBook by lazy {
+        ExerciseBook()
+    }
+
     val database: AppDatabase by lazy {
         Room.databaseBuilder(
             applicationContext,
