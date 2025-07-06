@@ -49,10 +49,22 @@ Each fact has a strength from 1 to 5.
 
 When a student answers correctly, the strength increases by 1. An incorrect answer resets the strength to 1.
 
-### Question Selection
+### Question Selection (The "Working Set" Method)
+To avoid boring, repetitive drills, the app uses a "Working Set" method to select questions. This ensures a student is focused on a small, manageable group of facts while still getting enough variety.
+
 In each session, the app creates a mix of questions:
-- **80% "New" Questions:** From the student's current, unmastered level. The app prioritizes facts with the lowest strength.
-- **20% "Review" Questions:** From all previously mastered levels to ensure long-term retention.
+- **80% "Learning" Questions:** These come from the student's current, unmastered level.
+- **20% "Review" Questions:** These come from all previously mastered levels to ensure long-term retention.
+
+The selection of a "Learning" question follows a specific algorithm:
+1.  **Identify Unmastered Facts:** The system first looks at all facts in the current level that have a strength less than 5.
+2.  **Form the Working Set:**
+    *   If there are **5 or fewer** unmastered facts, they all become the Working Set.
+    *   If there are **more than 5** unmastered facts, the Working Set is formed from the **5 weakest facts** (based on lowest strength and oldest timestamp).
+    *   If the user is starting a brand new level (i.e., there are no unmastered facts with a history), the Working Set is seeded with **5 new, random facts** from that level.
+3.  **Random Selection:** The app then randomly picks one exercise from this Working Set.
+
+This approach ensures that a student is always practicing the concepts they need most, but in a varied, engaging way. As they master a fact, it is automatically replaced with a new one from the level, creating a smooth learning progression.
 
 ## Progress Reporting: The Heatmap
 

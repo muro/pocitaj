@@ -58,6 +58,13 @@ This document outlines the step-by-step plan to implement the adaptive learning 
     *   Its `getNextExercise()` method will query the `FactMastery` table to determine the user's progress and select a question based on the 80/20 new/review logic.
 *   **Testing:** Write comprehensive **unit tests** for `ExerciseProvider`, feeding it a mocked `FactMasteryDao` with various states of progress and asserting it makes correct choices.
 
+**Step 5a: Implement "Working Set" Algorithm**
+*   **Purpose:** To make the learning process more engaging and less repetitive.
+*   **Action:**
+    *   Update the `ExerciseProvider` to use the "Working Set" method.
+    *   This involves identifying a small group of weak or new facts for the user to focus on in each session.
+*   **Testing:** Add new unit tests to `ExerciseProviderTest` to validate the "Working Set" logic, including scenarios for initial set creation, limiting the set size, and replacing mastered facts.
+
 **Step 6: Integrate the New System into the `ExerciseBookViewModel`**
 *   **Purpose:** To connect the new data and logic layers to the main exercise screen.
 *   **Action:**
