@@ -16,18 +16,8 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         // 1. Navigate to "Start Addition"
         navigateToExerciseType("Addition")
 
-        // 2. Create a custom exercise book and load a test session
-        val exerciseBook = ExerciseBook()
-        exerciseBook.loadSession(listOf(Exercise(Addition(5, 3)))) // 5 + 3 = 8
-
-        // 3. Set the custom exercise book on the view model
-        lateinit var viewModel: ExerciseBookViewModel
-        composeTestRule.activityRule.scenario.onActivity { activity ->
-            viewModel = ViewModelProvider(activity,
-                ViewModelProvider.AndroidViewModelFactory.getInstance(activity.application))
-                .get(ExerciseBookViewModel::class.java)
-            viewModel.setExerciseBookForTesting(exerciseBook)
-        }
+        // 2. Set the exercises for the test
+        setExercises(listOf(Exercise(Addition(5, 3)))) // 5 + 3 = 8
 
         // 4. Wait for the UI to settle
         composeTestRule.waitForIdle()
@@ -61,19 +51,8 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         // 1. Navigate to "Addition"
         navigateToExerciseType("Addition")
 
-        // 2. Create a custom exercise book and load a test session with two exercises
-        val exerciseBook = ExerciseBook()
-        exerciseBook.loadSession(listOf(Exercise(Addition(1, 1)), Exercise(Addition(2, 2))))
-
-        // 3. Set the custom exercise book on the view model
-        lateinit var viewModel: ExerciseBookViewModel
-        composeTestRule.activityRule.scenario.onActivity { activity ->
-            viewModel = ViewModelProvider(
-                activity,
-                ViewModelProvider.AndroidViewModelFactory.getInstance(activity.application)
-            ).get(ExerciseBookViewModel::class.java)
-            viewModel.setExerciseBookForTesting(exerciseBook)
-        }
+        // 2. Set the exercises for the test
+        setExercises(listOf(Exercise(Addition(1, 1)), Exercise(Addition(2, 2))))
 
         // 4. Wait for the UI to settle
         composeTestRule.waitForIdle()
@@ -153,15 +132,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     fun threeDigitNumber_withDelays_isRecognizedCorrectly() {
         // 1. Navigate and set up a custom exercise
         navigateToExerciseType("Addition")
-        val exerciseBook = ExerciseBook()
-        exerciseBook.loadSession(listOf(Exercise(Addition(100, 23)))) // Answer is 123
-        lateinit var viewModel: ExerciseBookViewModel
-        composeTestRule.activityRule.scenario.onActivity { activity ->
-            viewModel = ViewModelProvider(activity,
-                ViewModelProvider.AndroidViewModelFactory.getInstance(activity.application))
-                .get(ExerciseBookViewModel::class.java)
-            viewModel.setExerciseBookForTesting(exerciseBook)
-        }
+        setExercises(listOf(Exercise(Addition(100, 23)))) // Answer is 123
         composeTestRule.waitForIdle()
 
         // 2. Draw the digits with delays, updating the fake result each time

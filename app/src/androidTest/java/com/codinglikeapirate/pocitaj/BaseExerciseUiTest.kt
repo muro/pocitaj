@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.ViewModelProvider
 import org.junit.Before
 import org.junit.Rule
 
@@ -49,6 +50,22 @@ abstract class BaseExerciseUiTest {
             composeTestRule
                 .onAllNodesWithTag("InkCanvas")
                 .fetchSemanticsNodes().size == 1
+        }
+    }
+
+    /**
+     * A helper function to set a specific list of exercises for a test run.
+     * This is the primary way to create a predictable state for UI tests.
+     */
+    fun setExercises(exercises: List<Exercise>) {
+        val exerciseBook = ExerciseBook()
+        exerciseBook.loadSession(exercises)
+        composeTestRule.activityRule.scenario.onActivity { activity ->
+            val viewModel = ViewModelProvider(
+                activity,
+                ViewModelProvider.AndroidViewModelFactory.getInstance(activity.application)
+            ).get(ExerciseBookViewModel::class.java)
+            viewModel.setExerciseBookForTesting(exerciseBook)
         }
     }
 
