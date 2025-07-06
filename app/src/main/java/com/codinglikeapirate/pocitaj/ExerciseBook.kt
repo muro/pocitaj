@@ -29,11 +29,6 @@ class ExerciseBook {
         }
     }
 
-    fun clear() {
-        exercises.clear()
-        currentIndex = -1
-    }
-
     /**
      * Clears the current session and loads a predefined list of exercises for testing.
      * This is the primary way to set up a predictable state for UI tests.
@@ -49,7 +44,8 @@ class ExerciseBook {
         if (exercises.isNotEmpty()) {
             return
         }
-        clear()
+        // no clear, as we know exercises are empty
+        currentIndex = -1
 
         val exerciseType: ExerciseType = when (exerciseConfig.type) {
             ExerciseType.ADDITION.id -> ExerciseType.ADDITION
