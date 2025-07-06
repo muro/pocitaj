@@ -45,7 +45,7 @@ class ExerciseBookViewModel(
         const val DEBUG_TAP_THRESHOLD = 5
     }
 
-    private var _exerciseIndex = 0
+    private var currentExercise: Exercise? = null
 
     private val _uiState = MutableStateFlow<UiState>(UiState.LoadingModel())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -94,26 +94,21 @@ class ExerciseBookViewModel(
     // Function to handle exercise setup completion
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
         exerciseBook.generateExercises(exerciseConfig)
-        _exerciseIndex = 0
-        _uiState.value = UiState.ExerciseScreen(currentExercise())
+        currentExercise = exerciseBook.getNextExercise()
+        _uiState.value = UiState.ExerciseScreen(currentExercise!!)
         viewModelScope.launch {
             _navigationEvents.emit(NavigationEvent.NavigateToExercise(exerciseConfig.type))
         }
     }
 
-    private fun currentExercise(): Exercise {
-        return exerciseBook.historyList[_exerciseIndex]
-    }
+    
 
     fun checkAnswer(answer: String, elapsedMs: Int) {
         answer.toIntOrNull()?.let {
-            if (currentExercise().solve(it, elapsedMs)) {
+            if (currentExercise!!.solve(it, elapsedMs)) {
                 _answerResult.value = AnswerResult.Correct
             } else {
                 _answerResult.value = AnswerResult.Incorrect
-            }
-            if (_exerciseIndex < exerciseBook.historyList.size) {
-                ++_exerciseIndex
             }
         } ?: run {
             _answerResult.value = AnswerResult.Unrecognized
@@ -121,8 +116,9 @@ class ExerciseBookViewModel(
     }
 
     fun onResultAnimationFinished() {
-        if (_exerciseIndex < exerciseBook.historyList.size) {
-            _uiState.value = UiState.ExerciseScreen(currentExercise())
+        currentExercise = exerciseBook.getNextExercise()
+        if (currentExercise != null) {
+            _uiState.value = UiState.ExerciseScreen(currentExercise!!)
         } else {
             // All exercises completed, calculate results and transition
             resultsList()

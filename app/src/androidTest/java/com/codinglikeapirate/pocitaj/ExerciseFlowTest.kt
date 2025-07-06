@@ -13,24 +13,25 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
     @Test
     fun whenCorrectAnswerDrawn_thenCorrectFeedbackIsShown() {
-        // 1. Navigate to "Start Addition"
-        navigateToExerciseType("Addition")
-
-        // 2. Set the exercises for the test
+        // 1. Set the exercises for the test
         setExercises(listOf(Exercise(Addition(5, 3)))) // 5 + 3 = 8
 
-        // 4. Wait for the UI to settle
+        // 2. Navigate to "Start Addition"
+        navigateToExerciseType("Addition")
+
+        // 3. Wait for the UI to settle
         composeTestRule.waitForIdle()
 
-        // 5. Draw the correct answer "8"
+        // 4. Draw the correct answer "8"
         drawAnswer("8")
 
-        // 6. Verify that the correct feedback image appears
+        // 5. Verify that the correct feedback image appears
         verifyFeedback(FeedbackType.CORRECT)
     }
 
     @Test
     fun whenTwoQuestionsAnswered_thenUIAdvancesAndShowsFeedback() {
+        setExercises(listOf(Exercise(Addition(1, 1)), Exercise(Addition(2, 2))))
         navigateToExerciseType("Addition")
 
         // First Question
@@ -48,16 +49,16 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
     @Test
     fun whenFullExerciseLoopCompleted_thenReturnsToSetupScreen() {
-        // 1. Navigate to "Addition"
-        navigateToExerciseType("Addition")
-
-        // 2. Set the exercises for the test
+        // 1. Set the exercises for the test
         setExercises(listOf(Exercise(Addition(1, 1)), Exercise(Addition(2, 2))))
 
-        // 4. Wait for the UI to settle
+        // 2. Navigate to "Addition"
+        navigateToExerciseType("Addition")
+
+        // 3. Wait for the UI to settle
         composeTestRule.waitForIdle()
 
-        // 5. Answer the two questions
+        // 4. Answer the two questions
         drawAnswer("1")
         verifyFeedback(FeedbackType.INCORRECT) // This is incorrect, but the test is about flow
         composeTestRule.waitForIdle()
@@ -68,16 +69,16 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle()
         composeTestRule.mainClock.advanceTimeBy(2000)
 
-        // 6. Verify Navigation to Summary Screen (ResultsScreen)
+        // 5. Verify Navigation to Summary Screen (ResultsScreen)
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
             composeTestRule.onAllNodesWithText("Done").fetchSemanticsNodes().isNotEmpty()
         }
 
-        // 7. Navigate Back to Setup Screen
+        // 6. Navigate Back to Setup Screen
         composeTestRule.onNodeWithText("Done").performClick()
         composeTestRule.waitForIdle()
 
-        // 8. Verify Navigation to Exercise Setup Screen
+        // 7. Verify Navigation to Exercise Setup Screen
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
             composeTestRule.onAllNodesWithText("Choose Your Challenge").fetchSemanticsNodes().isNotEmpty()
         }
@@ -106,6 +107,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
     @Test
     fun whenUnrecognizedAnswerDrawn_thenUnrecognizedFeedbackIsShown() {
+        setExercises(listOf(Exercise(Addition(1, 1))))
         navigateToExerciseType("Addition")
 
         composeTestRule.waitForIdle()
@@ -130,12 +132,14 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
     @Test
     fun threeDigitNumber_withDelays_isRecognizedCorrectly() {
-        // 1. Navigate and set up a custom exercise
-        navigateToExerciseType("Addition")
+        // 1. Set up a custom exercise
         setExercises(listOf(Exercise(Addition(100, 23)))) // Answer is 123
+
+        // 2. Navigate
+        navigateToExerciseType("Addition")
         composeTestRule.waitForIdle()
 
-        // 2. Draw the digits with delays, updating the fake result each time
+        // 3. Draw the digits with delays, updating the fake result each time
         FakeInkModelManager.recognitionResult = "1"
         drawDigitWithDelay(800) // Draw "1", wait 0.8s
         assertNoFeedbackIsShown()
@@ -147,10 +151,10 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         FakeInkModelManager.recognitionResult = "123"
         drawDigitWithDelay(0)   // Draw "3", no extra wait
 
-        // 3. Wait for the final recognition timer to fire
+        // 4. Wait for the final recognition timer to fire
         composeTestRule.mainClock.advanceTimeBy(RECOGNITION_CLOCK_ADVANCE)
 
-        // 4. Verify that the correct feedback is shown
+        // 5. Verify that the correct feedback is shown
         verifyFeedback(FeedbackType.CORRECT)
     }
 }

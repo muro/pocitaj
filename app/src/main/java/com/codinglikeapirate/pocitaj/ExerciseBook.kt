@@ -17,10 +17,21 @@ enum class ExerciseType(val id: String) {
 // Each Exercise can be checked for correct solution
 class ExerciseBook {
 
-    private val exercises = mutableListOf<Exercise>() // Renamed from 'history'
+    private val exercises = mutableListOf<Exercise>()
+    private var currentIndex = -1
+
+    fun getNextExercise(): Exercise? {
+        currentIndex++
+        return if (currentIndex < exercises.size) {
+            exercises[currentIndex]
+        } else {
+            null
+        }
+    }
 
     fun clear() {
         exercises.clear()
+        currentIndex = -1
     }
 
     /**
@@ -30,10 +41,14 @@ class ExerciseBook {
     fun loadSession(predefinedExercises: List<Exercise>) {
         exercises.clear()
         exercises.addAll(predefinedExercises)
+        currentIndex = -1
     }
 
     // Function to handle exercise setup completion
     fun generateExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
+        if (exercises.isNotEmpty()) {
+            return
+        }
         clear()
 
         val exerciseType: ExerciseType = when (exerciseConfig.type) {
