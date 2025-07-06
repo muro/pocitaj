@@ -16,9 +16,9 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         // 1. Navigate to "Start Addition"
         navigateToExerciseType("Addition")
 
-        // 2. Create a custom exercise book
+        // 2. Create a custom exercise book and load a test session
         val exerciseBook = ExerciseBook()
-        exerciseBook.addExercise(Exercise(Addition(5, 3))) // 5 + 3 = 8
+        exerciseBook.loadSession(listOf(Exercise(Addition(5, 3)))) // 5 + 3 = 8
 
         // 3. Set the custom exercise book on the view model
         lateinit var viewModel: ExerciseBookViewModel
@@ -61,10 +61,9 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         // 1. Navigate to "Addition"
         navigateToExerciseType("Addition")
 
-        // 2. Create a custom exercise book with two exercises
+        // 2. Create a custom exercise book and load a test session with two exercises
         val exerciseBook = ExerciseBook()
-        exerciseBook.addExercise(Exercise(Addition(1, 1)))
-        exerciseBook.addExercise(Exercise(Addition(2, 2)))
+        exerciseBook.loadSession(listOf(Exercise(Addition(1, 1)), Exercise(Addition(2, 2))))
 
         // 3. Set the custom exercise book on the view model
         lateinit var viewModel: ExerciseBookViewModel
@@ -155,7 +154,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         // 1. Navigate and set up a custom exercise
         navigateToExerciseType("Addition")
         val exerciseBook = ExerciseBook()
-        exerciseBook.addExercise(Exercise(Addition(100, 23))) // Answer is 123
+        exerciseBook.loadSession(listOf(Exercise(Addition(100, 23)))) // Answer is 123
         lateinit var viewModel: ExerciseBookViewModel
         composeTestRule.activityRule.scenario.onActivity { activity ->
             viewModel = ViewModelProvider(activity,

@@ -21,8 +21,13 @@ class ExerciseBook {
         history.clear()
     }
 
-    fun addExercise(exercise: Exercise) {
-        history.add(exercise)
+    /**
+     * Clears the current session and loads a predefined list of exercises for testing.
+     * This is the primary way to set up a predictable state for UI tests.
+     */
+    fun loadSession(predefinedExercises: List<Exercise>) {
+        history.clear()
+        history.addAll(predefinedExercises)
     }
 
     // This method will likely be removed or significantly changed
