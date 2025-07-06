@@ -18,3 +18,7 @@
 # When editing any kotlin or java files, please double-check that all imports are at the top of the file.
 
 # After you make changes, please verify that all unit and instrumented tests pass.
+
+# When running tests and attempting to fix failing tests, take into account which tests changed status
+# and whether previously failing tests started to pass.
+# Consider individual test cases, not just full tests.

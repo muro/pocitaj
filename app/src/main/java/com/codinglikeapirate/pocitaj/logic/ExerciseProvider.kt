@@ -15,7 +15,8 @@ import kotlin.random.Random
  */
 class ExerciseProvider(
     private val curriculum: List<Level>,
-    private val userMastery: Map<String, FactMastery>
+    private val userMastery: Map<String, FactMastery>,
+    private val random: Random = Random.Default
 ) {
     companion object {
         private const val MASTERY_STRENGTH = 5
@@ -26,22 +27,32 @@ class ExerciseProvider(
      * Intelligently selects and returns the next best exercise for the user.
      */
     fun getNextExercise(): Exercise {
-        val currentLevel = findCurrentLevel()
+        var currentLevel = findCurrentLevel()
         val masteredLevels = getMasteredLevels(currentLevel)
 
         // Decide whether to practice a new concept or review an old one.
-        val isLearningExercise = masteredLevels.isEmpty() || Random.nextFloat() < LEARNING_EXERCISE_PROBABILITY
+        val isLearningExercise = masteredLevels.isEmpty() || random.nextFloat() < LEARNING_EXERCISE_PROBABILITY
 
-        val levelToPractice = if (isLearningExercise) {
+        var levelToPractice = if (isLearningExercise) {
             // Focus on the current, unmastered level.
             currentLevel
         } else {
             // Pick a random mastered level to review and prevent forgetting.
-            masteredLevels.random()
+            masteredLevels.random(random)
         }
 
         // Find the weakest fact within that chosen level.
-        val weakestFactId = findWeakestFactIn(levelToPractice)
+        var weakestFactId = findWeakestFactIn(levelToPractice)
+        var strength = userMastery[weakestFactId]?.strength ?: 0
+
+        // If the weakest fact is already mastered, it means the level is complete.
+        // Move to the next level.
+        if (strength >= MASTERY_STRENGTH) {
+            currentLevel = findCurrentLevel()
+            levelToPractice = currentLevel
+            weakestFactId = findWeakestFactIn(levelToPractice)
+        }
+
 
         // Generate the exercise from the chosen fact ID.
         return Exercise.fromFactId(weakestFactId)
@@ -51,7 +62,7 @@ class ExerciseProvider(
      * Finds the user's current level. This is the first level in the curriculum
      * that is not yet fully mastered.
      */
-    private fun findCurrentLevel(): Level {
+    fun findCurrentLevel(): Level {
         return curriculum.firstOrNull { !isLevelMastered(it) }
             ?: curriculum.last() // If all levels are mastered, default to the last one for practice.
     }
@@ -87,12 +98,18 @@ class ExerciseProvider(
      */
     private fun findWeakestFactIn(level: Level): String {
         val allFactsInLevel = level.getAllPossibleFactIds()
+        val knownFacts = allFactsInLevel.filter { userMastery.containsKey(it) }
 
-        // This is the core selection algorithm.
-        return allFactsInLevel.minWithOrNull(compareBy({ factId ->
-            userMastery[factId]?.strength ?: 0
-        }, { factId ->
-            userMastery[factId]?.lastTestedTimestamp ?: 0
-        })) ?: allFactsInLevel.random() // As a safe fallback, return a random fact.
+        if (knownFacts.isNotEmpty()) {
+            return knownFacts.minWithOrNull(compareBy(
+                { userMastery[it]?.strength ?: 0 },
+                { userMastery[it]?.lastTestedTimestamp ?: 0 },
+                { it.split("_")[1].toInt() },
+                { it.split("_")[2].toInt() }
+            ))!!
+        }
+
+        // If no facts are known, return a random one.
+        return allFactsInLevel.random(random)
     }
 }
