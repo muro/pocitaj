@@ -4,6 +4,8 @@ import java.util.Locale
 import java.util.Random
 
 
+data class ExerciseConfig(val type: String, val upTo: Int = 10, val count: Int = 10)
+
 enum class ExerciseType(val id: String) {
     ADDITION("addition"),
     MISSING_ADDEND("missing_addend"),
@@ -28,6 +30,26 @@ class ExerciseBook {
     fun loadSession(predefinedExercises: List<Exercise>) {
         exercises.clear()
         exercises.addAll(predefinedExercises)
+    }
+
+    // Function to handle exercise setup completion
+    fun generateExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
+        clear()
+
+        val exerciseType: ExerciseType = when (exerciseConfig.type) {
+            ExerciseType.ADDITION.id -> ExerciseType.ADDITION
+            ExerciseType.MISSING_ADDEND.id -> ExerciseType.MISSING_ADDEND
+            ExerciseType.SUBTRACTION.id -> ExerciseType.SUBTRACTION
+            ExerciseType.MISSING_SUBTRAHEND.id -> ExerciseType.MISSING_SUBTRAHEND
+            ExerciseType.MULTIPLICATION.id -> ExerciseType.MULTIPLICATION
+            else -> {
+                ExerciseType.ADDITION
+            }
+        }
+
+        repeat(exerciseConfig.count) {
+            generate(exerciseType, exerciseConfig.upTo)
+        }
     }
 
     // This method will likely be removed or significantly changed

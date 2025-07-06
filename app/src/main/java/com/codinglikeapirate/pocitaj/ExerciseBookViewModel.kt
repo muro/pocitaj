@@ -1,9 +1,6 @@
 package com.codinglikeapirate.pocitaj
 
 import android.util.Log
-import androidx.annotation.VisibleForTesting
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.mlkit.vision.digitalink.Ink
@@ -40,8 +37,6 @@ sealed class NavigationEvent {
 }
 
 
-data class ExerciseConfig(val type: String, val upTo: Int = 10, val count: Int = 10)
-
 class ExerciseBookViewModel(
     private val inkModelManager: InkModelManager,
     private val exerciseBook: ExerciseBook
@@ -50,7 +45,6 @@ class ExerciseBookViewModel(
         const val DEBUG_TAP_THRESHOLD = 5
     }
 
-    private var _exerciseBook: MutableState<ExerciseBook> = mutableStateOf(exerciseBook)
     private var _exerciseIndex = 0
 
     private val _uiState = MutableStateFlow<UiState>(UiState.LoadingModel())
@@ -97,33 +91,9 @@ class ExerciseBookViewModel(
         }
     }
 
-    fun deleteActiveModel(languageCode: String) {
-        inkModelManager.setModel(languageCode)
-        inkModelManager.deleteActiveModel().addOnSuccessListener {
-            Log.i("ExerciseBookViewModel", "Model deleted")
-        }
-    }
-
     // Function to handle exercise setup completion
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
-        _exerciseBook.value.clear()
-
-        val exerciseType: ExerciseType = when (exerciseConfig.type) {
-            ExerciseType.ADDITION.id -> ExerciseType.ADDITION
-            ExerciseType.MISSING_ADDEND.id -> ExerciseType.MISSING_ADDEND
-            ExerciseType.SUBTRACTION.id -> ExerciseType.SUBTRACTION
-            ExerciseType.MISSING_SUBTRAHEND.id -> ExerciseType.MISSING_SUBTRAHEND
-            ExerciseType.MULTIPLICATION.id -> ExerciseType.MULTIPLICATION
-            else -> {
-                Log.e("ExerciseBookViewModel", "Unknown exercise type: ${exerciseConfig.type}")
-                ExerciseType.ADDITION
-            }
-        }
-
-        repeat(exerciseConfig.count) {
-            _exerciseBook.value.generate(exerciseType, exerciseConfig.upTo)
-        }
-
+        exerciseBook.generateExercises(exerciseConfig)
         _exerciseIndex = 0
         _uiState.value = UiState.ExerciseScreen(currentExercise())
         viewModelScope.launch {
@@ -132,7 +102,7 @@ class ExerciseBookViewModel(
     }
 
     private fun currentExercise(): Exercise {
-        return _exerciseBook.value.historyList[_exerciseIndex]
+        return exerciseBook.historyList[_exerciseIndex]
     }
 
     fun checkAnswer(answer: String, elapsedMs: Int) {
@@ -142,7 +112,7 @@ class ExerciseBookViewModel(
             } else {
                 _answerResult.value = AnswerResult.Incorrect
             }
-            if (_exerciseIndex < _exerciseBook.value.historyList.size) {
+            if (_exerciseIndex < exerciseBook.historyList.size) {
                 ++_exerciseIndex
             }
         } ?: run {
@@ -151,7 +121,7 @@ class ExerciseBookViewModel(
     }
 
     fun onResultAnimationFinished() {
-        if (_exerciseIndex < _exerciseBook.value.historyList.size) {
+        if (_exerciseIndex < exerciseBook.historyList.size) {
             _uiState.value = UiState.ExerciseScreen(currentExercise())
         } else {
             // All exercises completed, calculate results and transition
@@ -167,7 +137,7 @@ class ExerciseBookViewModel(
 
     private fun resultsList() {
         results.clear()
-        for (exercise in _exerciseBook.value.historyList) {
+        for (exercise in exerciseBook.historyList) {
             results.add(
                 ResultDescription(
                     exercise.equationString(),
