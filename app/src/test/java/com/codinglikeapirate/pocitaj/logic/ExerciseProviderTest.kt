@@ -13,7 +13,7 @@ class ExerciseProviderTest {
         val curriculum = Curriculum.getAllLevels()
         val userMastery = emptyMap<String, FactMastery>()
 
-        val provider = ExerciseProvider(curriculum, userMastery)
+        val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
         val exercise = provider.getNextExercise()
 
         val exerciseLevel = Curriculum.getLevelForExercise(exercise)
@@ -29,7 +29,7 @@ class ExerciseProviderTest {
             "ADDITION_1_3" to FactMastery("ADDITION_1_3", 1, 5, 0)
         )
 
-        val provider = ExerciseProvider(curriculum, userMastery)
+        val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
         val exercise = provider.getNextExercise()
 
         // The working set should contain the weakest fact, plus new facts
@@ -46,7 +46,7 @@ class ExerciseProviderTest {
             "ADDITION_1_3" to FactMastery("ADDITION_1_3", 1, 3, 1500L)
         )
 
-        val provider = ExerciseProvider(curriculum, userMastery)
+        val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
         val exercise = provider.getNextExercise()
 
         val exerciseId = "${exercise.operation.name}_${exercise.operand1}_${exercise.operand2}"
@@ -61,7 +61,7 @@ class ExerciseProviderTest {
             FactMastery(factId, 1, 5, 0) // Strength 5 = mastered
         }
 
-        val provider = ExerciseProvider(curriculum, userMastery)
+        val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
         val exercise = provider.getNextExercise()
 
         val exerciseLevel = Curriculum.getLevelForExercise(exercise)
@@ -95,7 +95,7 @@ class ExerciseProviderTest {
         val curriculum = Curriculum.getAllLevels()
         val userMastery = emptyMap<String, FactMastery>()
 
-        val provider = ExerciseProvider(curriculum, userMastery)
+        val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
         val workingSet = mutableSetOf<String>()
         repeat(10) {
             val exercise = provider.getNextExercise()
@@ -114,7 +114,7 @@ class ExerciseProviderTest {
             userMastery["ADDITION_1_$i"] = FactMastery("ADDITION_1_$i", 1, i + 1, 0)
         }
 
-        val provider = ExerciseProvider(curriculum, userMastery)
+        val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
         val workingSet = mutableSetOf<String>()
         repeat(20) { // Repeat enough times to likely get all facts from the working set
             val exercise = provider.getNextExercise()
@@ -140,7 +140,7 @@ class ExerciseProviderTest {
         // Create 1 mastered fact
         userMastery["ADDITION_1_4"] = FactMastery("ADDITION_1_4", 1, 5, 0)
 
-        val provider = ExerciseProvider(curriculum, userMastery)
+        val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
         val workingSet = mutableSetOf<String>()
         repeat(20) {
             val exercise = provider.getNextExercise()
