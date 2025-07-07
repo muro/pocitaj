@@ -1,5 +1,11 @@
 package com.codinglikeapirate.pocitaj
 
+import com.codinglikeapirate.pocitaj.logic.Addition
+import com.codinglikeapirate.pocitaj.logic.Exercise
+import com.codinglikeapirate.pocitaj.logic.MissingAddend
+import com.codinglikeapirate.pocitaj.logic.MissingSubtrahend
+import com.codinglikeapirate.pocitaj.logic.Multiplication
+import com.codinglikeapirate.pocitaj.logic.Subtraction
 import java.util.Locale
 import java.util.Random
 
@@ -29,6 +35,11 @@ class ExerciseBook {
         }
     }
 
+    fun clear() {
+        exercises.clear()
+        currentIndex = -1
+    }
+
     /**
      * Clears the current session and loads a predefined list of exercises for testing.
      * This is the primary way to set up a predictable state for UI tests.
@@ -44,8 +55,7 @@ class ExerciseBook {
         if (exercises.isNotEmpty()) {
             return
         }
-        // no clear, as we know exercises are empty
-        currentIndex = -1
+        clear()
 
         val exerciseType: ExerciseType = when (exerciseConfig.type) {
             ExerciseType.ADDITION.id -> ExerciseType.ADDITION
@@ -135,119 +145,4 @@ class ExerciseBook {
 
     val historyList: List<Exercise>
         get() = exercises.toList()
-}
-
-
-
-interface Equation {
-    // Displayed as the exercise question in the UI
-    fun question(): String
-    // Expected result, validated when a solution is submitted or as hint to stroke recognition.
-    fun getExpectedResult(): Int
-
-    // New helper function to get the basic equation string based on submitted solution
-    fun getQuestionAsSolved(submittedSolution: Int?): String
-}
-
-data class Addition(val a: Int, val b: Int) : Equation {
-    override fun question(): String = String.format(Locale.ENGLISH, "%d + %d = ?", a, b)
-    override fun getExpectedResult(): Int = a + b
-    override fun getQuestionAsSolved(submittedSolution: Int?): String {
-        return if (submittedSolution != null) {
-            question().replace("?", submittedSolution.toString())
-        } else {
-            question() // If no solution, just show the question
-        }
-    }
-}
-
-data class Subtraction(val a: Int, val b: Int) : Equation {
-    override fun question(): String = String.format(Locale.ENGLISH, "%d - %d = ?", a, b)
-    override fun getExpectedResult(): Int = a - b
-    override fun getQuestionAsSolved(submittedSolution: Int?): String {
-        return if (submittedSolution != null) {
-            String.format(Locale.ENGLISH, "%d - %d", a, b)
-        } else {
-            question() // If no solution, just show the question
-        }
-    }
-}
-
-data class Multiplication(val a: Int, val b: Int) : Equation {
-    override fun question(): String = String.format(Locale.ENGLISH, "%d × %d = ?", a, b) // Using '×' for multiplication symbol
-    override fun getExpectedResult(): Int = a * b
-    override fun getQuestionAsSolved(submittedSolution: Int?): String {
-        return if (submittedSolution != null) {
-            question().replace("?", submittedSolution.toString())
-        } else {
-            question() // If no solution, just show the question
-        }
-    }
-}
-
-data class MissingAddend(val a: Int, val result: Int) : Equation {
-    private val b: Int = result - a // The missing operand
-
-    override fun question(): String = String.format(Locale.ENGLISH, "%d + ? = %d", a, result)
-    override fun getExpectedResult(): Int = b
-    override fun getQuestionAsSolved(submittedSolution: Int?): String {
-        return if (submittedSolution != null) {
-            String.format(Locale.ENGLISH, "%d + %d = %d", a, submittedSolution, result) // Incorporate submitted solution
-        } else {
-            question() // If no solution, just show the question
-        }
-    }
-}
-
-data class MissingSubtrahend(val a: Int, val result: Int) : Equation {
-    private val b: Int = a - result // The missing operand
-
-    override fun question(): String = String.format(Locale.ENGLISH, "%d - ? = %d", a, result)
-    override fun getExpectedResult(): Int = b
-    override fun getQuestionAsSolved(submittedSolution: Int?): String {
-        return if (submittedSolution != null) {
-            String.format(Locale.ENGLISH, "%d - %d = %d", a, submittedSolution, result) // Incorporate submitted solution
-        } else {
-            question() // If no solution, just show the question
-        }
-    }
-}
-
-data class Exercise(
-    val equation: Equation,
-    var submittedSolution: Int? = null,
-    var solved: Boolean = false,
-    var timeTakenMillis: Int? = null
-) {
-    companion object {
-        const val NOT_RECOGNIZED = -1000
-    }
-
-    fun correct(): Boolean {
-        if (submittedSolution == NOT_RECOGNIZED) {
-            return false
-        }
-        return solved && submittedSolution == equation.getExpectedResult()
-    }
-
-    fun solve(solution: Int, timeMillis: Int? = null): Boolean {
-        this.submittedSolution = solution
-        if (solution == NOT_RECOGNIZED) {
-            return false
-        }
-        this.solved = true
-        this.timeTakenMillis = timeMillis
-        return correct()
-    }
-
-    fun equationString(): String {
-        return when {
-            solved && correct() -> {
-                equation.question().replace("?", submittedSolution.toString())
-            }
-            solved && !correct() -> equation.question().replace("?", submittedSolution.toString()).replace("=", "≠")
-            // submittedSolution == NOT_RECOGNIZED -> "${equation.question()} ≠ ?" // Special case for not recognized
-            else -> equation.question() // Not solved, show just the question
-        }
-    }
 }

@@ -52,6 +52,9 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.codinglikeapirate.pocitaj.logic.Equation
+import com.codinglikeapirate.pocitaj.logic.Exercise
+import com.codinglikeapirate.pocitaj.logic.Subtraction
 import com.codinglikeapirate.pocitaj.ui.theme.AppMotion
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import com.google.mlkit.vision.digitalink.Ink

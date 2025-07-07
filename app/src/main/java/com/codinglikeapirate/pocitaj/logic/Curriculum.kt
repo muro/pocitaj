@@ -17,7 +17,7 @@ object Curriculum {
         override fun generateExercise(): Exercise {
             val op1 = Random.nextInt(0, 6)
             val op2 = Random.nextInt(0, 6 - op1)
-            return Exercise(op1, op2, op1 + op2, operation)
+            return Exercise(Addition(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
@@ -36,7 +36,7 @@ object Curriculum {
         override fun generateExercise(): Exercise {
             val op1 = Random.nextInt(0, 11)
             val op2 = Random.nextInt(0, 11 - op1)
-            return Exercise(op1, op2, op1 + op2, operation)
+            return Exercise(Addition(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
@@ -57,7 +57,7 @@ object Curriculum {
     }
 
     fun getLevelForExercise(exercise: Exercise): Level? {
-        val factId = "${exercise.operation.name}_${exercise.operand1}_${exercise.operand2}"
+        val factId = exercise.getFactId()
         return getAllLevels().find { level ->
             level.getAllPossibleFactIds().contains(factId)
         }

@@ -1,5 +1,11 @@
 package com.codinglikeapirate.pocitaj
 
+import com.codinglikeapirate.pocitaj.logic.Addition
+import com.codinglikeapirate.pocitaj.logic.Exercise
+import com.codinglikeapirate.pocitaj.logic.MissingAddend
+import com.codinglikeapirate.pocitaj.logic.MissingSubtrahend
+import com.codinglikeapirate.pocitaj.logic.Multiplication
+import com.codinglikeapirate.pocitaj.logic.Subtraction
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

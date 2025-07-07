@@ -20,20 +20,20 @@ class ExerciseRepository(
 
     suspend fun recordAttempt(userId: Long, exercise: Exercise, submittedAnswer: Int, durationMs: Long) {
         withContext(Dispatchers.IO) {
-            val wasCorrect = exercise.result == submittedAnswer
+            val wasCorrect = exercise.equation.getExpectedResult() == submittedAnswer
             val attempt = ExerciseAttempt(
                 userId = userId,
                 timestamp = System.currentTimeMillis(),
-                problemText = "${exercise.operand1} ${exercise.operation.name} ${exercise.operand2}",
-                logicalOperation = exercise.operation,
-                correctAnswer = exercise.result,
+                problemText = exercise.equation.question(),
+                logicalOperation = exercise.getFactId().split("_")[0].let { Operation.valueOf(it) },
+                correctAnswer = exercise.equation.getExpectedResult(),
                 submittedAnswer = submittedAnswer,
                 wasCorrect = wasCorrect,
                 durationMs = durationMs
             )
             exerciseAttemptDao.insert(attempt)
 
-            val factId = "${exercise.operation.name}_${exercise.operand1}_${exercise.operand2}"
+            val factId = exercise.getFactId()
             val currentMastery = factMasteryDao.getFactMastery(userId, factId)
             val newStrength = if (wasCorrect) {
                 (currentMastery?.strength ?: 0) + 1

@@ -1,5 +1,6 @@
 package com.codinglikeapirate.pocitaj.data
 
+import com.codinglikeapirate.pocitaj.logic.Addition
 import com.codinglikeapirate.pocitaj.logic.Curriculum
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.codinglikeapirate.pocitaj.logic.ExerciseProvider
@@ -36,15 +37,14 @@ class ExerciseRepositoryTest {
         coVerify { factMasteryDao.getAllFactsForUser(userId) }
         // We can't easily verify the provider was called without more complex setup,
         // but we can check that the returned exercise is valid.
-        assert(exercise.operand1 >= 0)
-        assert(exercise.operand2 >= 0)
+        assert(exercise.equation is Addition)
     }
 
     @Test
     fun `recordAttempt saves attempt and updates mastery`() = runBlocking {
         // Given
         val userId = 1L
-        val exercise = Exercise(1, 1, 2, Operation.ADDITION)
+        val exercise = Exercise(Addition(1, 1))
         val submittedAnswer = 2
         val durationMs = 1000L
         val factId = "ADDITION_1_1"

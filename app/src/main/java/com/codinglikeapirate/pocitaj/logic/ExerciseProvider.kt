@@ -1,5 +1,6 @@
 package com.codinglikeapirate.pocitaj.logic
 
+import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.data.FactMastery
 import kotlin.random.Random
 
@@ -46,7 +47,19 @@ class ExerciseProvider(
         }
 
         val factId = findWeakestFactIn(levelToPractice)
-        return Exercise.fromFactId(factId)
+        // TODO: consider refactoring this in the future
+        val parts = factId.split("_")
+        val operation = Operation.valueOf(parts[0])
+        val op1 = parts[1].toInt()
+        val op2 = parts[2].toInt()
+
+        val equation = when (operation) {
+            Operation.ADDITION -> Addition(op1, op2)
+            Operation.SUBTRACTION -> Subtraction(op1, op2)
+            Operation.MULTIPLICATION -> Multiplication(op1, op2)
+            Operation.DIVISION -> throw NotImplementedError("Division not yet implemented")
+        }
+        return Exercise(equation)
     }
 
     private fun findWeakestFactIn(level: Level): String {

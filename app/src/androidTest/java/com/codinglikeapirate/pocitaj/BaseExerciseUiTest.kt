@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performClick
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.platform.app.InstrumentationRegistry
+import com.codinglikeapirate.pocitaj.logic.Exercise
 import org.junit.Before
 import org.junit.Rule
 

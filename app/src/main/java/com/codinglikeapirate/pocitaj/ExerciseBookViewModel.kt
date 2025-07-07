@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codinglikeapirate.pocitaj.data.ExerciseRepository
+import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.google.mlkit.vision.digitalink.Ink
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -33,7 +33,7 @@ class ExerciseProviderTest {
         val exercise = provider.getNextExercise()
 
         // The working set should contain the weakest fact, plus new facts
-        val exerciseId = "${exercise.operation.name}_${exercise.operand1}_${exercise.operand2}"
+        val exerciseId = exercise.getFactId()
         assert(exerciseId == "ADDITION_1_2" || !userMastery.containsKey(exerciseId))
     }
 
@@ -49,7 +49,7 @@ class ExerciseProviderTest {
         val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
         val exercise = provider.getNextExercise()
 
-        val exerciseId = "${exercise.operation.name}_${exercise.operand1}_${exercise.operand2}"
+        val exerciseId = exercise.getFactId()
         assert(exerciseId == "ADDITION_1_2" || !userMastery.containsKey(exerciseId))
     }
 
@@ -98,8 +98,7 @@ class ExerciseProviderTest {
         val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
         val workingSet = mutableSetOf<String>()
         repeat(10) {
-            val exercise = provider.getNextExercise()
-            workingSet.add("${exercise.operation.name}_${exercise.operand1}_${exercise.operand2}")
+            workingSet.add(provider.getNextExercise().getFactId())
         }
 
         assertEquals(5, workingSet.size)
@@ -117,8 +116,7 @@ class ExerciseProviderTest {
         val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
         val workingSet = mutableSetOf<String>()
         repeat(20) { // Repeat enough times to likely get all facts from the working set
-            val exercise = provider.getNextExercise()
-            workingSet.add("${exercise.operation.name}_${exercise.operand1}_${exercise.operand2}")
+            workingSet.add(provider.getNextExercise().getFactId())
         }
 
         assertEquals(5, workingSet.size)
@@ -143,8 +141,7 @@ class ExerciseProviderTest {
         val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
         val workingSet = mutableSetOf<String>()
         repeat(20) {
-            val exercise = provider.getNextExercise()
-            workingSet.add("${exercise.operation.name}_${exercise.operand1}_${exercise.operand2}")
+            workingSet.add(provider.getNextExercise().getFactId())
         }
 
         assertEquals(5, workingSet.size)
