@@ -11,4 +11,7 @@ interface FactMasteryDao {
 
     @Query("SELECT * FROM fact_mastery WHERE factId = :factId AND userId = :userId")
     suspend fun getFactMastery(userId: Long, factId: String): FactMastery?
+
+    @Query("SELECT * FROM fact_mastery WHERE userId = :userId")
+    suspend fun getAllFactsForUser(userId: Long): List<FactMastery>
 }

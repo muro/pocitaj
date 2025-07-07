@@ -21,6 +21,7 @@ navigationCompose = "2.9.0"
 desugar = "2.1.5"
 room = "2.7.2"
 ksp = "2.2.0-2.0.2"
+mockk = "1.13.12"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -49,6 +50,7 @@ desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", ver
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

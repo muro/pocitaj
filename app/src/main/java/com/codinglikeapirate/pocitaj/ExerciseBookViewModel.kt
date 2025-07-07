@@ -3,6 +3,7 @@ package com.codinglikeapirate.pocitaj
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.codinglikeapirate.pocitaj.data.ExerciseRepository
 import com.google.mlkit.vision.digitalink.Ink
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,7 +40,8 @@ sealed class NavigationEvent {
 
 class ExerciseBookViewModel(
     private val inkModelManager: InkModelManager,
-    private val exerciseBook: ExerciseBook
+    private val exerciseBook: ExerciseBook,
+    private val exerciseRepository: ExerciseRepository
 ) : ViewModel() {
     companion object {
         const val DEBUG_TAP_THRESHOLD = 5
