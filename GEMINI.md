@@ -4,7 +4,7 @@
 # When creating git commit messages, do not use any quotes (single or double)
 # or backticks (`). Using them will break the commit message on this platform.
 # Also, please always ask before committing to git by showing me the proposed commit message. If I approve the message, you should proceed with the commit.
-# When creating commit messages, please don't include every tiny detail. When committing, also do a push.
+# When creating commit messages, please don't include every tiny detail - make them concise and readable, using the Conventional Commits format. When committing, also do a push.
 # Always confirm when you want to run git checkout to revert changes.
 # When I reply with "LGTM", it means OK or proceed.
 
