@@ -55,4 +55,11 @@ object Curriculum {
     fun getAllLevels(): List<Level> {
         return listOf(SumsUpTo5, SumsUpTo10)
     }
+
+    fun getLevelForExercise(exercise: Exercise): Level? {
+        val factId = "${exercise.operation.name}_${exercise.operand1}_${exercise.operand2}"
+        return getAllLevels().find { level ->
+            level.getAllPossibleFactIds().contains(factId)
+        }
+    }
 }
