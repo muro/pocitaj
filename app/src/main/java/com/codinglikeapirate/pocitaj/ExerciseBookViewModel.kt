@@ -46,6 +46,7 @@ class ExerciseBookViewModel(
 ) : ViewModel() {
     companion object {
         const val DEBUG_TAP_THRESHOLD = 5
+        private const val DEFAULT_USER_ID = 1L // Placeholder for user management
     }
 
     private var currentExercise: Exercise? = null
@@ -130,15 +131,19 @@ class ExerciseBookViewModel(
 
 
     fun checkAnswer(answer: String, elapsedMs: Int) {
-        currentExercise?.let {
-            answer.toIntOrNull()?.let { intAnswer ->
-                if (it.solve(intAnswer, elapsedMs)) {
-                    _answerResult.value = AnswerResult.Correct
-                } else {
-                    _answerResult.value = AnswerResult.Incorrect
+        viewModelScope.launch {
+            currentExercise?.let { exercise ->
+                answer.toIntOrNull()?.let { intAnswer ->
+                    val isCorrect = exercise.solve(intAnswer, elapsedMs)
+                    exerciseRepository.recordAttempt(DEFAULT_USER_ID, exercise, intAnswer, elapsedMs.toLong())
+                    if (isCorrect) {
+                        _answerResult.value = AnswerResult.Correct
+                    } else {
+                        _answerResult.value = AnswerResult.Incorrect
+                    }
+                } ?: run {
+                    _answerResult.value = AnswerResult.Unrecognized
                 }
-            } ?: run {
-                _answerResult.value = AnswerResult.Unrecognized
             }
         }
     }

@@ -22,6 +22,7 @@ desugar = "2.1.5"
 room = "2.7.2"
 ksp = "2.2.0-2.0.2"
 mockk = "1.13.12"
+coroutinesTest = "1.8.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -51,6 +52,7 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

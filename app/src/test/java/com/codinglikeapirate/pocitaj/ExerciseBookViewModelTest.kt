@@ -1,0 +1,100 @@
+package com.codinglikeapirate.pocitaj
+
+import com.codinglikeapirate.pocitaj.data.ExerciseRepository
+import com.codinglikeapirate.pocitaj.logic.Addition
+import com.codinglikeapirate.pocitaj.logic.Exercise
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+
+@ExperimentalCoroutinesApi
+class ExerciseBookViewModelTest {
+
+    private lateinit var viewModel: ExerciseBookViewModel
+    private lateinit var inkModelManager: InkModelManager
+    private lateinit var exerciseBook: ExerciseBook
+    private lateinit var exerciseRepository: ExerciseRepository
+
+    private val testDispatcher = StandardTestDispatcher()
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(testDispatcher)
+        inkModelManager = mockk(relaxed = true)
+        exerciseBook = mockk(relaxed = true)
+        exerciseRepository = mockk(relaxed = true)
+        viewModel = ExerciseBookViewModel(inkModelManager, exerciseBook, exerciseRepository)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `checkAnswer with correct answer sets Correct state`() = runTest {
+        val exercise = Exercise(Addition(2, 2))
+        coEvery { exerciseBook.getNextExercise() } returns exercise
+
+        viewModel.startExercises(ExerciseConfig("addition", count = 1))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.checkAnswer("4", 1000)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(AnswerResult.Correct, viewModel.answerResult.value)
+    }
+
+    @Test
+    fun `checkAnswer with incorrect answer sets Incorrect state`() = runTest {
+        val exercise = Exercise(Addition(2, 2))
+        coEvery { exerciseBook.getNextExercise() } returns exercise
+
+        viewModel.startExercises(ExerciseConfig("addition", count = 1))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.checkAnswer("5", 1000)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(AnswerResult.Incorrect, viewModel.answerResult.value)
+    }
+
+    @Test
+    fun `onResultAnimationFinished transitions to summary screen when no exercises left`() = runTest {
+        val exercise = Exercise(Addition(2, 2))
+        coEvery { exerciseBook.getNextExercise() } returns exercise andThen null
+
+        viewModel.startExercises(ExerciseConfig("addition", count = 1))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onResultAnimationFinished()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value is UiState.SummaryScreen)
+    }
+
+    @Test
+    fun `checkAnswer calls repository to record attempt`() = runTest {
+        val exercise = Exercise(Addition(3, 4))
+        coEvery { exerciseBook.getNextExercise() } returns exercise
+
+        viewModel.startExercises(ExerciseConfig("addition", count = 1))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.checkAnswer("7", 1234)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        coVerify { exerciseRepository.recordAttempt(any(), exercise, 7, 1234) }
+    }
+}

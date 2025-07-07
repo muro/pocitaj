@@ -6,11 +6,32 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
+import androidx.test.platform.app.InstrumentationRegistry
+import com.codinglikeapirate.pocitaj.data.User
 import com.codinglikeapirate.pocitaj.logic.Addition
 import com.codinglikeapirate.pocitaj.logic.Exercise
+import kotlinx.coroutines.runBlocking
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 class ExerciseFlowTest : BaseExerciseUiTest() {
+
+    @Before
+    fun setupUser() {
+        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as PocitajApplication
+        runBlocking {
+            application.database.userDao().insert(User(id = 1, name = "test_user"))
+        }
+    }
+
+    @After
+    fun tearDown() {
+        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as PocitajApplication
+        runBlocking {
+            application.database.clearAllTables()
+        }
+    }
 
     @Test
     fun whenCorrectAnswerDrawn_thenCorrectFeedbackIsShown() {
