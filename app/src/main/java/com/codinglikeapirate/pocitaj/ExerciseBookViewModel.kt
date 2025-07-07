@@ -49,6 +49,7 @@ class ExerciseBookViewModel(
     }
 
     private var currentExercise: Exercise? = null
+    private var exercisesRemaining: Int = 0
 
     private val _uiState = MutableStateFlow<UiState>(UiState.LoadingModel())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -97,38 +98,54 @@ class ExerciseBookViewModel(
     // Function to handle exercise setup completion
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
         viewModelScope.launch {
+            exercisesRemaining = exerciseConfig.count
             exerciseBook.generateExercises(exerciseConfig)
-            currentExercise = exerciseBook.getNextExercise()
-            _uiState.value = UiState.ExerciseScreen(currentExercise!!)
-            _navigationEvents.emit(NavigationEvent.NavigateToExercise(exerciseConfig.type))
+            advanceToNextExercise()
+            if (currentExercise != null) {
+                _navigationEvents.emit(NavigationEvent.NavigateToExercise(exerciseConfig.type))
+            }
         }
     }
 
-    
+    private suspend fun advanceToNextExercise() {
+        if (exercisesRemaining > 0) {
+            currentExercise = exerciseBook.getNextExercise()
+            if (currentExercise != null) {
+                exercisesRemaining--
+            }
+        } else {
+            currentExercise = null
+        }
+
+        if (currentExercise != null) {
+            _uiState.value = UiState.ExerciseScreen(currentExercise!!)
+        } else {
+            // All exercises completed, calculate results and transition
+            resultsList()
+            _uiState.value = UiState.SummaryScreen(results)
+            _navigationEvents.emit(NavigationEvent.NavigateToSummary)
+        }
+    }
+
+
 
     fun checkAnswer(answer: String, elapsedMs: Int) {
-        answer.toIntOrNull()?.let {
-            if (currentExercise!!.solve(it, elapsedMs)) {
-                _answerResult.value = AnswerResult.Correct
-            } else {
-                _answerResult.value = AnswerResult.Incorrect
+        currentExercise?.let {
+            answer.toIntOrNull()?.let { intAnswer ->
+                if (it.solve(intAnswer, elapsedMs)) {
+                    _answerResult.value = AnswerResult.Correct
+                } else {
+                    _answerResult.value = AnswerResult.Incorrect
+                }
+            } ?: run {
+                _answerResult.value = AnswerResult.Unrecognized
             }
-        } ?: run {
-            _answerResult.value = AnswerResult.Unrecognized
         }
     }
 
     fun onResultAnimationFinished() {
         viewModelScope.launch {
-            currentExercise = exerciseBook.getNextExercise()
-            if (currentExercise != null) {
-                _uiState.value = UiState.ExerciseScreen(currentExercise!!)
-            } else {
-                // All exercises completed, calculate results and transition
-                resultsList()
-                _uiState.value = UiState.SummaryScreen(results)
-                _navigationEvents.emit(NavigationEvent.NavigateToSummary)
-            }
+            advanceToNextExercise()
             _answerResult.value = AnswerResult.None // Reset answer result state
             _recognizedText.value = null // Reset recognition state
         }
