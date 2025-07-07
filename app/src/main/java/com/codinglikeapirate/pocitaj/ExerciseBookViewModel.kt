@@ -96,10 +96,10 @@ class ExerciseBookViewModel(
 
     // Function to handle exercise setup completion
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
-        exerciseBook.generateExercises(exerciseConfig)
-        currentExercise = exerciseBook.getNextExercise()
-        _uiState.value = UiState.ExerciseScreen(currentExercise!!)
         viewModelScope.launch {
+            exerciseBook.generateExercises(exerciseConfig)
+            currentExercise = exerciseBook.getNextExercise()
+            _uiState.value = UiState.ExerciseScreen(currentExercise!!)
             _navigationEvents.emit(NavigationEvent.NavigateToExercise(exerciseConfig.type))
         }
     }
@@ -119,19 +119,19 @@ class ExerciseBookViewModel(
     }
 
     fun onResultAnimationFinished() {
-        currentExercise = exerciseBook.getNextExercise()
-        if (currentExercise != null) {
-            _uiState.value = UiState.ExerciseScreen(currentExercise!!)
-        } else {
-            // All exercises completed, calculate results and transition
-            resultsList()
-            _uiState.value = UiState.SummaryScreen(results)
-            viewModelScope.launch {
+        viewModelScope.launch {
+            currentExercise = exerciseBook.getNextExercise()
+            if (currentExercise != null) {
+                _uiState.value = UiState.ExerciseScreen(currentExercise!!)
+            } else {
+                // All exercises completed, calculate results and transition
+                resultsList()
+                _uiState.value = UiState.SummaryScreen(results)
                 _navigationEvents.emit(NavigationEvent.NavigateToSummary)
             }
+            _answerResult.value = AnswerResult.None // Reset answer result state
+            _recognizedText.value = null // Reset recognition state
         }
-        _answerResult.value = AnswerResult.None // Reset answer result state
-        _recognizedText.value = null // Reset recognition state
     }
 
     private fun resultsList() {

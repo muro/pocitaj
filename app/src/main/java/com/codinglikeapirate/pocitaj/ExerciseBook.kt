@@ -26,7 +26,7 @@ class ExerciseBook {
     private val exercises = mutableListOf<Exercise>()
     private var currentIndex = -1
 
-    fun getNextExercise(): Exercise? {
+    suspend fun getNextExercise(): Exercise? {
         currentIndex++
         return if (currentIndex < exercises.size) {
             exercises[currentIndex]
