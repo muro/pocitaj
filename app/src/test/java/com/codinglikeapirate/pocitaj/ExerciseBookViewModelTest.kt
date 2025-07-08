@@ -97,4 +97,30 @@ class ExerciseBookViewModelTest {
 
         coVerify { exerciseRepository.recordAttempt(any(), exercise, 7, 1234) }
     }
+
+    @Test
+    fun `whenAnswerUnrecognized_doesNotAdvanceToNextExercise`() = runTest {
+        // GIVEN: An exercise is underway
+        val exercise1 = Exercise(Addition(2, 2))
+        val exercise2 = Exercise(Addition(3, 3))
+        coEvery { exerciseBook.getNextExercise() } returns exercise1 andThen exercise2
+
+        viewModel.startExercises(ExerciseConfig("addition", count = 2))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val initialState = viewModel.uiState.value
+        assertTrue(initialState is UiState.ExerciseScreen && initialState.currentExercise == exercise1)
+
+        // WHEN: An unrecognized answer is submitted and the animation finishes
+        viewModel.checkAnswer("?", 1000) // Invalid answer
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertEquals(AnswerResult.Unrecognized, viewModel.answerResult.value)
+
+        viewModel.onResultAnimationFinished()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // THEN: The view model should NOT have advanced to the next exercise
+        val finalState = viewModel.uiState.value
+        assertTrue(finalState is UiState.ExerciseScreen && finalState.currentExercise == exercise1)
+    }
 }

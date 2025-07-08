@@ -150,7 +150,11 @@ class ExerciseBookViewModel(
 
     fun onResultAnimationFinished() {
         viewModelScope.launch {
-            advanceToNextExercise()
+            // If the answer was unrecognized, don't advance to the next question.
+            // Just reset the state and let the user try again.
+            if (_answerResult.value != AnswerResult.Unrecognized) {
+                advanceToNextExercise()
+            }
             _answerResult.value = AnswerResult.None // Reset answer result state
             _recognizedText.value = null // Reset recognition state
         }
