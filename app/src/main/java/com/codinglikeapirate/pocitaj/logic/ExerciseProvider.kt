@@ -1,7 +1,7 @@
 package com.codinglikeapirate.pocitaj.logic
 
-import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.data.FactMastery
+import com.codinglikeapirate.pocitaj.data.Operation
 import kotlin.random.Random
 
 /**

@@ -1,6 +1,5 @@
 package com.codinglikeapirate.pocitaj.logic
 
-import com.codinglikeapirate.pocitaj.data.Operation
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

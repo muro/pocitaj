@@ -26,6 +26,7 @@ class ExerciseBook {
     private val exercises = mutableListOf<Exercise>()
     private var currentIndex = -1
 
+    @Suppress("RedundantSuspendModifier")
     suspend fun getNextExercise(): Exercise? {
         currentIndex++
         return if (currentIndex < exercises.size) {

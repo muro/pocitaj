@@ -6,8 +6,6 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.codinglikeapirate.pocitaj.data.AppDatabase
-import com.codinglikeapirate.pocitaj.data.User
-import kotlinx.coroutines.runBlocking
 
 open class PocitajApplication : Application() {
     open val inkModelManager: InkModelManager by lazy {

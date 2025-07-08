@@ -1,9 +1,7 @@
 package com.codinglikeapirate.pocitaj.data
 
 import com.codinglikeapirate.pocitaj.logic.Addition
-import com.codinglikeapirate.pocitaj.logic.Curriculum
 import com.codinglikeapirate.pocitaj.logic.Exercise
-import com.codinglikeapirate.pocitaj.logic.ExerciseProvider
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
