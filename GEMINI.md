@@ -5,7 +5,7 @@
 # single quote (') in a message, wrap the entire multi-line message in double
 # quotes ("). Do not use backticks (`).
 # Also, please always ask before committing to git by showing me the proposed commit message. If I approve the message, you should proceed with the commit.
-# When creating commit messages, please don't include every tiny detail - make them concise and readable, using the Conventional Commits format. When committing, also do a push.
+# When creating commit messages, keep them concise. A message should have a short title and an optional, brief body (1-2 sentences) explaining the 'why'. For complex changes, a more detailed explanation or a bulleted list is acceptable if it adds important context. Use the Conventional Commits format and push after committing.
 # Always confirm when you want to run git checkout to revert changes.
 # When I reply with "LGTM", it means OK or proceed.
 
