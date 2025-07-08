@@ -26,3 +26,5 @@
 # Whenever running tests, get details of every failing test case so that failure can be better pinpointed. It will also make it clearer when there is progress by fixing a subset of failing test
 cases, where the overall test doesn't change status.
 # When reporting on test results, list each failing test case individually. This helps track progress even if the overall test suite is still failing.
+
+# Ensure all source files end with a single newline character.
