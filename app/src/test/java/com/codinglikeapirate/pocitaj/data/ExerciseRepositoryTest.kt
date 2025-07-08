@@ -59,4 +59,20 @@ class ExerciseRepositoryTest {
         coVerify { exerciseAttemptDao.insert(any()) }
         coVerify { factMasteryDao.upsert(any()) }
     }
+
+    @Test
+    fun `getNextExercise_afterStartingSession_returnsExerciseOfCorrectType`() = runBlocking {
+        // GIVEN: The repository is initialized for ADDITION exercises
+        val config = com.codinglikeapirate.pocitaj.ExerciseConfig("addition")
+        repository.startSession(config)
+
+        // AND: The DAO returns no mastery information
+        coEvery { factMasteryDao.getAllFactsForUser(any()) } returns emptyList()
+
+        // WHEN: We get the next exercise
+        val exercise = repository.getNextExercise(1L)
+
+        // THEN: The exercise should be an addition problem
+        assert(exercise.equation is Addition)
+    }
 }
