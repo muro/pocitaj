@@ -101,6 +101,7 @@ class ExerciseBookViewModel(
         viewModelScope.launch {
             exerciseHistory.clear()
             exercisesRemaining = exerciseConfig.count
+            exerciseRepository.startSession(exerciseConfig)
             exerciseBook.generateExercises(exerciseConfig)
             advanceToNextExercise()
             if (currentExercise != null) {

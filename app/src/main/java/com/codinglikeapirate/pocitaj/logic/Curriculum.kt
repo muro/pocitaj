@@ -62,4 +62,8 @@ object Curriculum {
             level.getAllPossibleFactIds().contains(factId)
         }
     }
+
+    fun getLevelsFor(operation: Operation): List<Level> {
+        return getAllLevels().filter { it.operation == operation }
+    }
 }

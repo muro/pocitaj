@@ -1,5 +1,6 @@
 package com.codinglikeapirate.pocitaj.data
 
+import com.codinglikeapirate.pocitaj.ExerciseConfig
 import com.codinglikeapirate.pocitaj.logic.Curriculum
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.codinglikeapirate.pocitaj.logic.ExerciseProvider
@@ -12,9 +13,16 @@ class ExerciseRepository(
     private val userDao: UserDao
 ) {
 
+    private var activeOperation: Operation? = null
+
+    fun startSession(config: ExerciseConfig) {
+        activeOperation = Operation.fromString(config.type)
+    }
+
     suspend fun getNextExercise(userId: Long): Exercise {
         val userMastery = factMasteryDao.getAllFactsForUser(userId).associateBy { it.factId }
-        val provider = ExerciseProvider(Curriculum.getAllLevels(), userMastery)
+        val levels = activeOperation?.let { Curriculum.getLevelsFor(it) } ?: Curriculum.getAllLevels()
+        val provider = ExerciseProvider(levels, userMastery)
         return provider.getNextExercise()
     }
 

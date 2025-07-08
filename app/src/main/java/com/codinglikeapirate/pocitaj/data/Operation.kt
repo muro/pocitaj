@@ -7,5 +7,11 @@ enum class Operation {
     ADDITION,
     SUBTRACTION,
     MULTIPLICATION,
-    DIVISION
+    DIVISION;
+
+    companion object {
+        fun fromString(type: String): Operation? {
+            return entries.find { it.name.equals(type, ignoreCase = true) }
+        }
+    }
 }

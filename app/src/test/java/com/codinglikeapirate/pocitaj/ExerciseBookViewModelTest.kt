@@ -148,4 +148,17 @@ class ExerciseBookViewModelTest {
         val finalState = viewModel.uiState.value
         assertTrue(finalState is UiState.ExerciseScreen && finalState.currentExercise == exercise1)
     }
+
+    @Test
+    fun `startExercises_callsRepositoryToStartSession`() = runTest {
+        // GIVEN: An exercise config
+        val config = ExerciseConfig("addition", count = 5)
+
+        // WHEN: startExercises is called
+        viewModel.startExercises(config)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // THEN: The repository's startSession method should be called with the same config
+        coVerify { exerciseRepository.startSession(config) }
+    }
 }
