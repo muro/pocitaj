@@ -46,9 +46,10 @@ This document outlines the step-by-step plan to implement the adaptive learning 
 
 ### Phase 2: The Learning & UI Logic
 
-**Step 4: Define the `Curriculum` [DONE]**
+**Step 4: Define the `Curriculum` [PARTIALLY DONE]**
 *   **Purpose:** Codify the mastery levels.
 *   **Action:** Create a `Curriculum` object/enum that defines the levels as we've outlined.
+*   **Note:** The `Curriculum` currently only contains two addition levels. It needs to be expanded to include all operations and levels defined in `LEARNING_MODEL.md`.
 *   **Testing:** N/A (static data).
 
 **Step 5: Create the `ExerciseProvider` [DONE]**
@@ -58,7 +59,7 @@ This document outlines the step-by-step plan to implement the adaptive learning 
     *   Its `getNextExercise()` method will query the `FactMastery` table to determine the user's progress and select a question based on the 80/20 new/review logic.
 *   **Testing:** Write comprehensive **unit tests** for `ExerciseProvider`, feeding it a mocked `FactMasteryDao` with various states of progress and asserting it makes correct choices.
 
-**Step 5a: Implement "Working Set" Algorithm**
+**Step 5a: Implement "Working Set" Algorithm" [DONE]**
 *   **Purpose:** To make the learning process more engaging and less repetitive.
 *   **Action:**
     *   Update the `ExerciseProvider` to use the "Working Set" method.
