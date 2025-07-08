@@ -66,11 +66,9 @@ This document outlines the step-by-step plan to implement the adaptive learning 
     *   This involves identifying a small group of weak or new facts for the user to focus on in each session.
 *   **Testing:** Add new unit tests to `ExerciseProviderTest` to validate the "Working Set" logic, including scenarios for initial set creation, limiting the set size, and replacing mastered facts.
 
-**Step 6: Integrate the New System into the `ExerciseBookViewModel` [IN PROGRESS]**
+**Step 6: Integrate the New System into the `ExerciseBookViewModel` [DONE]**
 *   **Purpose:** To connect the new data and logic layers to the main exercise screen.
-*   **Progress:**
-    *   The `ExerciseRepository` is now session-aware. It has a `startSession` method that configures it for a specific operation type. This is verified by unit tests. **[DONE]**
-*   **Next Action:**
+*   **Action:**
     *   Modify `ExerciseBookViewModel` to use the `ExerciseRepository` for fetching exercises, removing the old `ExerciseBook` dependency.
     *   When an answer is submitted, it will:
         1.  Calculate the `durationMs`.
