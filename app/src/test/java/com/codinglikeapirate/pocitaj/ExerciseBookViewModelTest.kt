@@ -1,6 +1,5 @@
 package com.codinglikeapirate.pocitaj
 
-import com.codinglikeapirate.pocitaj.data.ExerciseRepository
 import com.codinglikeapirate.pocitaj.data.ExerciseSource
 import com.codinglikeapirate.pocitaj.logic.Addition
 import com.codinglikeapirate.pocitaj.logic.Exercise
