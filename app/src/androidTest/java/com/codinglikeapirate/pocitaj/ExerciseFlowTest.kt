@@ -19,18 +19,17 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
     @Before
     fun setupUser() {
-        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as PocitajApplication
-        runBlocking {
-            application.database.userDao().insert(User(id = 1, name = "test_user"))
-        }
+        // TODO: Rely on the default user created by the application's onCreate callback.
+//        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as PocitajApplication
+//        runBlocking {
+//            application.database.userDao().insert(User(id = 1, name = "test_user"))
+//        }
     }
 
     @After
     fun tearDown() {
-        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as PocitajApplication
-        runBlocking {
-            application.database.clearAllTables()
-        }
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        context.deleteDatabase("pocitaj-db")
     }
 
     @Test
