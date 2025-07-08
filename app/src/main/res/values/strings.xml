@@ -1,6 +1,3 @@
 <resources>
     <string name="app_name">Pocitaj</string>
-    <string name="recognition_animation_desc">"Animation for the result"</string>
-    <string name="results_top_label">Results</string>
-    <string name="result_status_icon_desc">Status whether the result is correct</string>
 </resources>

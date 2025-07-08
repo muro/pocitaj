@@ -28,6 +28,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -168,8 +170,9 @@ fun LoadingScreen(state: UiState.LoadingModel, downloadModel: () -> Unit) {
 fun ExerciseSetupScreen(
     onStartClicked: (exerciseType: ExerciseType, count: Int, difficulty: Int) -> Unit
 ) {
-    var questionCount by remember { mutableStateOf(10f) }
-    var difficulty by remember { mutableStateOf(10) }
+    // The Slider component works with a Float value, which we convert to an Int when needed.
+    var questionCount by remember { mutableFloatStateOf(10f) }
+    var difficulty by remember { mutableIntStateOf(10) }
 
     val exerciseTypes = listOf(
         ExerciseType.ADDITION,

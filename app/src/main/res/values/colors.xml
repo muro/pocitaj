@@ -1,7 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary_text_color">#FF0277BD</color>
-    <color name="incorrect_text_color">#FFFF4F38</color>
-    <color name="correct_text_color">#FF116611</color>
-    <color name="current_stroke_color">#FF0277BD</color>
 </resources>
