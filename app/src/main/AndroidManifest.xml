@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Pocitaj"
         android:enableOnBackInvokedCallback="true"
-        tools:targetApi="31">
+        tools:targetApi="33">
         <activity
             android:name=".ExerciseBookActivity"
             android:exported="true"

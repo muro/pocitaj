@@ -11,7 +11,7 @@
 # When asked to check the project or run tests, run all unit and android instrumentation
 # tests.
 
-# If you are adding depenendencies, please use libs.versions.toml and if the same version
+# If you are adding dependencies, please use libs.versions.toml and if the same version
 # is used across multiple libraries, use just one version contact with a good name - update the
 # name if the use changes. Use names with clarity and consistency. For the version, avoid "version"
 # suffix and kebab-style - use caml case.

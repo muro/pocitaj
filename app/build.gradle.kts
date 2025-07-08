@@ -12,15 +12,12 @@ android {
     defaultConfig {
         applicationId = "com.codinglikeapirate.pocitaj"
         minSdk = 28
+        //noinspection OldTargetApi
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "com.codinglikeapirate.pocitaj.PocitajTestRunner"
-
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
     }
 
     buildTypes {
@@ -84,4 +81,8 @@ dependencies {
     androidTestImplementation(libs.test.rules)
     androidTestImplementation(libs.compose.ui.test.junit4)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }

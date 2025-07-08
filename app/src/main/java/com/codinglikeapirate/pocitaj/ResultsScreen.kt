@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
+import java.util.Locale
 
 enum class ResultStatus {
     CORRECT, INCORRECT, NOT_RECOGNIZED;
@@ -127,7 +128,7 @@ fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
                         //.fillMaxWidth()
                 )
                 Text(
-                    text = String.format("%.1fs", result.elapsedMs / 1000.0),
+                    text = String.format(Locale.US, "%.1fs", result.elapsedMs / 1000.0),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Light,// , textAlign = TextAlign.Center,
                     fontFamily = FontFamily.SansSerif,

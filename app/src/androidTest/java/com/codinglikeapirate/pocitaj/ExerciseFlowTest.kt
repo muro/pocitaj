@@ -17,6 +17,7 @@ import org.junit.Test
 
 class ExerciseFlowTest : BaseExerciseUiTest() {
 
+    @Suppress("EmptyMethod")
     @Before
     fun setupUser() {
         // TODO: Rely on the default user created by the application's onCreate callback.
