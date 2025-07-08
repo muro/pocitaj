@@ -1,6 +1,7 @@
 package com.codinglikeapirate.pocitaj
 
 import com.codinglikeapirate.pocitaj.data.ExerciseRepository
+import com.codinglikeapirate.pocitaj.data.ExerciseSource
 import com.codinglikeapirate.pocitaj.logic.Addition
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import io.mockk.coEvery
@@ -23,8 +24,7 @@ class ExerciseBookViewModelTest {
 
     private lateinit var viewModel: ExerciseBookViewModel
     private lateinit var inkModelManager: InkModelManager
-    private lateinit var exerciseBook: ExerciseBook
-    private lateinit var exerciseRepository: ExerciseRepository
+    private lateinit var exerciseSource: ExerciseSource
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -32,9 +32,8 @@ class ExerciseBookViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         inkModelManager = mockk(relaxed = true)
-        exerciseBook = mockk(relaxed = true)
-        exerciseRepository = mockk(relaxed = true)
-        viewModel = ExerciseBookViewModel(inkModelManager, exerciseBook, exerciseRepository)
+        exerciseSource = mockk(relaxed = true)
+        viewModel = ExerciseBookViewModel(inkModelManager, exerciseSource)
     }
 
     @After
@@ -45,7 +44,7 @@ class ExerciseBookViewModelTest {
     @Test
     fun `checkAnswer with correct answer sets Correct state`() = runTest {
         val exercise = Exercise(Addition(2, 2))
-        coEvery { exerciseBook.getNextExercise() } returns exercise
+        coEvery { exerciseSource.getNextExercise() } returns exercise
 
         viewModel.startExercises(ExerciseConfig("addition", count = 1))
         testDispatcher.scheduler.advanceUntilIdle()
@@ -59,7 +58,7 @@ class ExerciseBookViewModelTest {
     @Test
     fun `checkAnswer with incorrect answer sets Incorrect state`() = runTest {
         val exercise = Exercise(Addition(2, 2))
-        coEvery { exerciseBook.getNextExercise() } returns exercise
+        coEvery { exerciseSource.getNextExercise() } returns exercise
 
         viewModel.startExercises(ExerciseConfig("addition", count = 1))
         testDispatcher.scheduler.advanceUntilIdle()
@@ -75,7 +74,7 @@ class ExerciseBookViewModelTest {
         // GIVEN: A set of two exercises
         val exercise1 = Exercise(Addition(2, 2))
         val exercise2 = Exercise(Addition(3, 3))
-        coEvery { exerciseBook.getNextExercise() } returns exercise1 andThen exercise2 andThen null
+        coEvery { exerciseSource.getNextExercise() } returns exercise1 andThen exercise2 andThen null
 
         viewModel.startExercises(ExerciseConfig("addition", count = 2))
         testDispatcher.scheduler.advanceUntilIdle()
@@ -112,7 +111,7 @@ class ExerciseBookViewModelTest {
     @Test
     fun `checkAnswer calls repository to record attempt`() = runTest {
         val exercise = Exercise(Addition(3, 4))
-        coEvery { exerciseBook.getNextExercise() } returns exercise
+        coEvery { exerciseSource.getNextExercise() } returns exercise
 
         viewModel.startExercises(ExerciseConfig("addition", count = 1))
         testDispatcher.scheduler.advanceUntilIdle()
@@ -120,7 +119,7 @@ class ExerciseBookViewModelTest {
         viewModel.checkAnswer("7", 1234)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        coVerify { exerciseRepository.recordAttempt(any(), exercise, 7, 1234) }
+        coVerify { exerciseSource.recordAttempt(any(), 7, 1234) }
     }
 
     @Test
@@ -128,7 +127,7 @@ class ExerciseBookViewModelTest {
         // GIVEN: An exercise is underway
         val exercise1 = Exercise(Addition(2, 2))
         val exercise2 = Exercise(Addition(3, 3))
-        coEvery { exerciseBook.getNextExercise() } returns exercise1 andThen exercise2
+        coEvery { exerciseSource.getNextExercise() } returns exercise1 andThen exercise2
 
         viewModel.startExercises(ExerciseConfig("addition", count = 2))
         testDispatcher.scheduler.advanceUntilIdle()
@@ -150,15 +149,18 @@ class ExerciseBookViewModelTest {
     }
 
     @Test
-    fun `startExercises_callsRepositoryToStartSession`() = runTest {
-        // GIVEN: An exercise config
-        val config = ExerciseConfig("addition", count = 5)
+    fun `startExercises clears history`() = runTest {
+        // GIVEN: The history is not empty
+        viewModel.startExercises(ExerciseConfig("addition", count = 1))
+        viewModel.checkAnswer("1", 1000)
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertTrue(viewModel.resultsList().isNotEmpty())
 
-        // WHEN: startExercises is called
-        viewModel.startExercises(config)
+        // WHEN: startExercises is called again
+        viewModel.startExercises(ExerciseConfig("addition", count = 1))
         testDispatcher.scheduler.advanceUntilIdle()
 
-        // THEN: The repository's startSession method should be called with the same config
-        coVerify { exerciseRepository.startSession(config) }
+        // THEN: The history should be empty
+        assertTrue(viewModel.resultsList().isEmpty())
     }
 }

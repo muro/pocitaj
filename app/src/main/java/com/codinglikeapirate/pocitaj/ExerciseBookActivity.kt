@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -39,6 +40,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -49,21 +52,30 @@ import com.codinglikeapirate.pocitaj.ui.theme.PocitajTheme
 
 class ExerciseBookActivity : ComponentActivity() {
 
+    private val startupViewModel: StartupViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val viewModel: ExerciseBookViewModel by viewModels { ExerciseBookViewModelFactory }
-
         setContent {
             AppTheme {
-                AppNavigation(viewModel)
+                val isInitialized by startupViewModel.isInitialized.collectAsState()
+                val error by startupViewModel.error.collectAsState()
+
+                if (isInitialized) {
+                    AppNavigation()
+                } else {
+                    LoadingScreen(
+                        error = error,
+                        onRetry = { startupViewModel.initializeApp() }
+                    )
+                }
             }
         }
     }
 }
 
 object Destinations {
-    const val LOADING_ROUTE = "loading"
     const val HOME_ROUTE = "home"
     const val EXERCISE_ROUTE = "exercise/{type}"
     const val SUMMARY_ROUTE = "summary"
@@ -71,47 +83,35 @@ object Destinations {
 }
 
 @Composable
-fun AppNavigation(viewModel: ExerciseBookViewModel) {
-    val uiState by viewModel.uiState.collectAsState()
+fun AppNavigation() {
     val navController = rememberNavController()
+    val viewModel: ExerciseBookViewModel = viewModel(factory = ExerciseBookViewModelFactory)
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvents.collect { event ->
             when (event) {
-                is NavigationEvent.NavigateToHome -> {
-                    navController.navigate(Destinations.HOME_ROUTE) {
-                        popUpTo(Destinations.LOADING_ROUTE) { inclusive = true }
-                    }
-                }
-
                 is NavigationEvent.NavigateToExercise -> {
                     navController.navigate(Destinations.exerciseDetailRoute(event.type))
                 }
-
                 is NavigationEvent.NavigateToSummary -> {
                     navController.navigate(Destinations.SUMMARY_ROUTE) {
                         popUpTo(Destinations.HOME_ROUTE) { inclusive = false }
                     }
                 }
-
                 is NavigationEvent.NavigateBackToHome -> {
                     navController.navigate(Destinations.HOME_ROUTE) {
                         popUpTo(Destinations.HOME_ROUTE) { inclusive = true }
                     }
                 }
+                else -> {}
             }
         }
     }
 
     NavHost(
         navController = navController,
-        startDestination = Destinations.LOADING_ROUTE
+        startDestination = Destinations.HOME_ROUTE
     ) {
-        composable(route = Destinations.LOADING_ROUTE) {
-            LoadingScreen(UiState.LoadingModel()) {
-                viewModel.downloadModel("en-US")
-            }
-        }
         composable(route = Destinations.HOME_ROUTE) {
             ExerciseSetupScreen(
                 onStartClicked = { exerciseType, count, difficulty ->
@@ -121,6 +121,7 @@ fun AppNavigation(viewModel: ExerciseBookViewModel) {
             )
         }
         composable(route = Destinations.EXERCISE_ROUTE) {
+            val uiState by viewModel.uiState.collectAsState()
             val exerciseState = uiState as? UiState.ExerciseScreen
             if (exerciseState != null) {
                 val exercise: Exercise = exerciseState.currentExercise
@@ -130,6 +131,7 @@ fun AppNavigation(viewModel: ExerciseBookViewModel) {
             }
         }
         composable(route = Destinations.SUMMARY_ROUTE) {
+            val uiState by viewModel.uiState.collectAsState()
             val summaryState = uiState as? UiState.SummaryScreen
             if (summaryState != null) {
                 ResultsScreen(summaryState.results) {
@@ -141,9 +143,9 @@ fun AppNavigation(viewModel: ExerciseBookViewModel) {
 }
 
 @Composable
-fun LoadingScreen(state: UiState.LoadingModel, downloadModel: () -> Unit) {
+fun LoadingScreen(error: String?, onRetry: () -> Unit) {
     LaunchedEffect(Unit) {
-        downloadModel()
+        onRetry()
     }
 
     Column(
@@ -151,16 +153,18 @@ fun LoadingScreen(state: UiState.LoadingModel, downloadModel: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        if (state.errorMessage == null) {
+        if (error == null) {
             CircularProgressIndicator()
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Downloading model...")
+            Text("Loading...")
         } else {
-            Text("Error downloading model:", color = MaterialTheme.colorScheme.error)
+            Text("Error:", color = MaterialTheme.colorScheme.error)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(state.errorMessage)
+            Text(error)
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Please close the app and restart while an internet connection is available.")
+            Button(onClick = onRetry) {
+                Text("Retry")
+            }
         }
     }
 }

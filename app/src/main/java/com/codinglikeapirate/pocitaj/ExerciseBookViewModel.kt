@@ -3,7 +3,7 @@ package com.codinglikeapirate.pocitaj
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.codinglikeapirate.pocitaj.data.ExerciseRepository
+import com.codinglikeapirate.pocitaj.data.ExerciseSource
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.google.mlkit.vision.digitalink.Ink
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -38,19 +38,17 @@ sealed class NavigationEvent {
     data object NavigateBackToHome : NavigationEvent()
 }
 
-
 class ExerciseBookViewModel(
     private val inkModelManager: InkModelManager,
-    private val exerciseBook: ExerciseBook,
-    private val exerciseRepository: ExerciseRepository
+    private val exerciseSource: ExerciseSource
 ) : ViewModel() {
     companion object {
         const val DEBUG_TAP_THRESHOLD = 5
-        private const val DEFAULT_USER_ID = 1L // Placeholder for user management
     }
 
     private var currentExercise: Exercise? = null
     private var exercisesRemaining: Int = 0
+    private val exerciseHistory = mutableListOf<Exercise>()
 
     private val _uiState = MutableStateFlow<UiState>(UiState.LoadingModel())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -65,23 +63,17 @@ class ExerciseBookViewModel(
     val showDebug: StateFlow<Boolean> = _showDebug.asStateFlow()
     private var tapCount = 0
 
-    private val exerciseHistory = mutableListOf<Exercise>()
-
     private val _recognizedText = MutableStateFlow<String?>(null)
     val recognizedText: StateFlow<String?> = _recognizedText.asStateFlow()
 
-    fun downloadModel(languageCode: String) {
-        inkModelManager.setModel(languageCode)
-        inkModelManager.download().addOnSuccessListener {
-            Log.i("ExerciseBookViewModel", "Model download succeeded")
-            _uiState.value = UiState.ExerciseSetup
-            viewModelScope.launch {
-                _navigationEvents.emit(NavigationEvent.NavigateToHome)
+    fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
+        viewModelScope.launch {
+            exerciseHistory.clear()
+            exercisesRemaining = exerciseConfig.count
+            advanceToNextExercise()
+            if (currentExercise != null) {
+                _navigationEvents.emit(NavigationEvent.NavigateToExercise(exerciseConfig.type))
             }
-        }.addOnFailureListener {
-            Log.e("ExerciseBookViewModel", "Model download failed", it)
-            _uiState.value =
-                UiState.LoadingModel(errorMessage = it.localizedMessage ?: "Unknown error")
         }
     }
 
@@ -96,23 +88,9 @@ class ExerciseBookViewModel(
         }
     }
 
-    // Function to handle exercise setup completion
-    fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
-        viewModelScope.launch {
-            exerciseHistory.clear()
-            exercisesRemaining = exerciseConfig.count
-            exerciseRepository.startSession(exerciseConfig)
-            exerciseBook.generateExercises(exerciseConfig)
-            advanceToNextExercise()
-            if (currentExercise != null) {
-                _navigationEvents.emit(NavigationEvent.NavigateToExercise(exerciseConfig.type))
-            }
-        }
-    }
-
     private suspend fun advanceToNextExercise() {
         if (exercisesRemaining > 0) {
-            currentExercise = exerciseBook.getNextExercise()
+            currentExercise = exerciseSource.getNextExercise()
             if (currentExercise != null) {
                 exercisesRemaining--
             }
@@ -141,7 +119,7 @@ class ExerciseBookViewModel(
                 // Always record the attempt and add to history
                 exerciseHistory.add(exercise)
                 if (intAnswer != null) {
-                    exerciseRepository.recordAttempt(DEFAULT_USER_ID, exercise, intAnswer, elapsedMs.toLong())
+                    exerciseSource.recordAttempt(exercise, intAnswer, elapsedMs.toLong())
                 }
 
                 // Set the UI state based on the result
@@ -166,7 +144,7 @@ class ExerciseBookViewModel(
         }
     }
 
-    private fun resultsList(): List<ResultDescription> {
+    fun resultsList(): List<ResultDescription> {
         return exerciseHistory.map { exercise ->
             ResultDescription(
                 exercise.equationString(),

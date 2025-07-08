@@ -1,6 +1,11 @@
 package com.codinglikeapirate.pocitaj
 
+import com.codinglikeapirate.pocitaj.data.ExerciseSource
+
 class TestPocitajApplication : PocitajApplication() {
-    override val inkModelManager: InkModelManager
-        get() = FakeInkModelManager
+    override fun onCreate() {
+        super.onCreate()
+        inkModelManager = FakeInkModelManager
+        exerciseSource = ExerciseBook()
+    }
 }

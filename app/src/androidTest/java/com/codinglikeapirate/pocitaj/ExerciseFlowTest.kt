@@ -106,6 +106,9 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
     @Test
     fun whenSystemBackButtonPressedOnExerciseScreen_thenNavigatesToSetup() {
+        // Set a dummy exercise to prevent crashes
+        setExercises(listOf(Exercise(Addition(1, 1))))
+
         // Navigate to the Exercise Screen
         navigateToExerciseType("Addition")
 

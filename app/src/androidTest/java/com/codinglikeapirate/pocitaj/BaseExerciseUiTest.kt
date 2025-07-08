@@ -59,8 +59,8 @@ abstract class BaseExerciseUiTest {
      * This is the primary way to create a predictable state for UI tests.
      */
     fun setExercises(exercises: List<Exercise>) {
-        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as PocitajApplication
-        application.exerciseBook.loadSession(exercises)
+        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestPocitajApplication
+        (application.exerciseSource as ExerciseBook).loadSession(exercises)
     }
 
     /**

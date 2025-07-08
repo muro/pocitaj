@@ -6,15 +6,16 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.codinglikeapirate.pocitaj.data.AppDatabase
+import com.codinglikeapirate.pocitaj.data.ExerciseSource
 
 open class PocitajApplication : Application() {
-    open val inkModelManager: InkModelManager by lazy {
-        ModelManager()
-    }
+    lateinit var inkModelManager: InkModelManager
+    val isInkModelManagerInitialized: Boolean
+        get() = ::inkModelManager.isInitialized
 
-    open val exerciseBook: ExerciseBook by lazy {
-        ExerciseBook()
-    }
+    lateinit var exerciseSource: ExerciseSource
+    val isExerciseSourceInitialized: Boolean
+        get() = ::exerciseSource.isInitialized
 
     val database: AppDatabase by lazy {
         Log.e("PocitajApplication", "database - lazy")
