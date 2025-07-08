@@ -65,7 +65,7 @@ class ExerciseBookViewModel(
     val showDebug: StateFlow<Boolean> = _showDebug.asStateFlow()
     private var tapCount = 0
 
-    private val results = ArrayList<ResultDescription>()
+    private val exerciseHistory = mutableListOf<Exercise>()
 
     private val _recognizedText = MutableStateFlow<String?>(null)
     val recognizedText: StateFlow<String?> = _recognizedText.asStateFlow()
@@ -99,6 +99,7 @@ class ExerciseBookViewModel(
     // Function to handle exercise setup completion
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
         viewModelScope.launch {
+            exerciseHistory.clear()
             exercisesRemaining = exerciseConfig.count
             exerciseBook.generateExercises(exerciseConfig)
             advanceToNextExercise()
@@ -122,7 +123,7 @@ class ExerciseBookViewModel(
             _uiState.value = UiState.ExerciseScreen(currentExercise!!)
         } else {
             // All exercises completed, calculate results and transition
-            resultsList()
+            val results = resultsList()
             _uiState.value = UiState.SummaryScreen(results)
             _navigationEvents.emit(NavigationEvent.NavigateToSummary)
         }
@@ -133,16 +134,20 @@ class ExerciseBookViewModel(
     fun checkAnswer(answer: String, elapsedMs: Int) {
         viewModelScope.launch {
             currentExercise?.let { exercise ->
-                answer.toIntOrNull()?.let { intAnswer ->
-                    val isCorrect = exercise.solve(intAnswer, elapsedMs)
+                val intAnswer = answer.toIntOrNull()
+                val isCorrect = intAnswer?.let { exercise.solve(it, elapsedMs) } ?: false
+
+                // Always record the attempt and add to history
+                exerciseHistory.add(exercise)
+                if (intAnswer != null) {
                     exerciseRepository.recordAttempt(DEFAULT_USER_ID, exercise, intAnswer, elapsedMs.toLong())
-                    if (isCorrect) {
-                        _answerResult.value = AnswerResult.Correct
-                    } else {
-                        _answerResult.value = AnswerResult.Incorrect
-                    }
-                } ?: run {
-                    _answerResult.value = AnswerResult.Unrecognized
+                }
+
+                // Set the UI state based on the result
+                _answerResult.value = when {
+                    intAnswer == null -> AnswerResult.Unrecognized
+                    isCorrect -> AnswerResult.Correct
+                    else -> AnswerResult.Incorrect
                 }
             }
         }
@@ -160,18 +165,15 @@ class ExerciseBookViewModel(
         }
     }
 
-    private fun resultsList() {
-        results.clear()
-        for (exercise in exerciseBook.historyList) {
-            results.add(
-                ResultDescription(
-                    exercise.equationString(),
-                    ResultStatus.fromBooleanPair(
-                        exercise.solved,
-                        exercise.correct()
-                    ),
-                    exercise.timeTakenMillis ?: 0
-                )
+    private fun resultsList(): List<ResultDescription> {
+        return exerciseHistory.map { exercise ->
+            ResultDescription(
+                exercise.equationString(),
+                ResultStatus.fromBooleanPair(
+                    exercise.solved,
+                    exercise.correct()
+                ),
+                exercise.timeTakenMillis ?: 0
             )
         }
     }

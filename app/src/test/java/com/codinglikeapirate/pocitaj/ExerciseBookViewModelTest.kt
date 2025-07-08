@@ -71,17 +71,42 @@ class ExerciseBookViewModelTest {
     }
 
     @Test
-    fun `onResultAnimationFinished transitions to summary screen when no exercises left`() = runTest {
-        val exercise = Exercise(Addition(2, 2))
-        coEvery { exerciseBook.getNextExercise() } returns exercise andThen null
+    fun `onResultAnimationFinished transitions to summary screen with correct results`() = runTest {
+        // GIVEN: A set of two exercises
+        val exercise1 = Exercise(Addition(2, 2))
+        val exercise2 = Exercise(Addition(3, 3))
+        coEvery { exerciseBook.getNextExercise() } returns exercise1 andThen exercise2 andThen null
 
-        viewModel.startExercises(ExerciseConfig("addition", count = 1))
+        viewModel.startExercises(ExerciseConfig("addition", count = 2))
         testDispatcher.scheduler.advanceUntilIdle()
 
+        // WHEN: The first answer is correct
+        viewModel.checkAnswer("4", 1000)
+        testDispatcher.scheduler.advanceUntilIdle()
         viewModel.onResultAnimationFinished()
         testDispatcher.scheduler.advanceUntilIdle()
 
-        assertTrue(viewModel.uiState.value is UiState.SummaryScreen)
+        // WHEN: The second answer is incorrect
+        viewModel.checkAnswer("5", 1500)
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.onResultAnimationFinished()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // THEN: The UI state should be SummaryScreen
+        val uiState = viewModel.uiState.value
+        assertTrue(uiState is UiState.SummaryScreen)
+
+        // AND: The results should be correct
+        val summaryScreen = uiState as UiState.SummaryScreen
+        assertEquals(2, summaryScreen.results.size)
+
+        assertEquals("2 + 2 = 4", summaryScreen.results[0].equation)
+        assertEquals(ResultStatus.CORRECT, summaryScreen.results[0].status)
+        assertEquals(1000, summaryScreen.results[0].elapsedMs)
+
+        assertEquals("3 + 3 ≠ 5", summaryScreen.results[1].equation)
+        assertEquals(ResultStatus.INCORRECT, summaryScreen.results[1].status)
+        assertEquals(1500, summaryScreen.results[1].elapsedMs)
     }
 
     @Test
