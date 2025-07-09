@@ -174,7 +174,7 @@ fun ExerciseSetupScreen(
     onStartClicked: (exerciseType: ExerciseType, count: Int, difficulty: Int) -> Unit
 ) {
     // The Slider component works with a Float value, which we convert to an Int when needed.
-    var questionCount by remember { mutableFloatStateOf(10f) }
+    var questionCount by remember { mutableFloatStateOf(2f) }
     var difficulty by remember { mutableIntStateOf(10) }
 
     val exerciseTypes = listOf(
@@ -261,8 +261,8 @@ fun ExerciseSetupScreen(
             Slider(
                 value = questionCount,
                 onValueChange = { questionCount = it },
-                valueRange = 5f..20f,
-                steps = 14
+                valueRange = 2f..15f,
+                steps = 12
             )
         }
     }
