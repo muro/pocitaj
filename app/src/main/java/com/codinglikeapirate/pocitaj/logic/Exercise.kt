@@ -44,6 +44,7 @@ data class Exercise(
             is Addition -> Operation.ADDITION
             is Subtraction -> Operation.SUBTRACTION
             is Multiplication -> Operation.MULTIPLICATION
+            is Division -> Operation.DIVISION
             is MissingAddend -> Operation.ADDITION // Or a new operation type
             is MissingSubtrahend -> Operation.SUBTRACTION // Or a new operation type
             else -> throw IllegalStateException("Unknown equation type")
@@ -52,6 +53,7 @@ data class Exercise(
             is Addition -> Pair(equation.a, equation.b)
             is Subtraction -> Pair(equation.a, equation.b)
             is Multiplication -> Pair(equation.a, equation.b)
+            is Division -> Pair(equation.a, equation.b)
             is MissingAddend -> Pair(equation.a, equation.getExpectedResult())
             is MissingSubtrahend -> Pair(equation.a, equation.getExpectedResult())
             else -> throw IllegalStateException("Unknown equation type")

@@ -75,3 +75,15 @@ data class MissingSubtrahend(val a: Int, val result: Int) : Equation {
         }
     }
 }
+
+data class Division(val a: Int, val b: Int) : Equation {
+    override fun question(): String = String.format(Locale.ENGLISH, "%d ÷ %d = ?", a, b)
+    override fun getExpectedResult(): Int = a / b
+    override fun getQuestionAsSolved(submittedSolution: Int?): String {
+        return if (submittedSolution != null) {
+            question().replace("?", submittedSolution.toString())
+        } else {
+            question()
+        }
+    }
+}
