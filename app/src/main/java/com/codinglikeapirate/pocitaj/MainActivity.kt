@@ -51,7 +51,7 @@ import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import com.codinglikeapirate.pocitaj.ui.theme.customColors
 
 
-class ExerciseBookActivity : ComponentActivity() {
+class MainActivity : ComponentActivity() {
 
     private val startupViewModel: StartupViewModel by viewModels()
 

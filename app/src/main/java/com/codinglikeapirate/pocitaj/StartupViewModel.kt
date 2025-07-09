@@ -25,7 +25,7 @@ class StartupViewModel(
 
     fun initializeApp() {
         viewModelScope.launch {
-            val app = getApplication<PocitajApplication>()
+            val app = getApplication<App>()
 
             val modelDownload = async {
                 if (!app.isInkModelManagerInitialized) {
@@ -51,7 +51,7 @@ class StartupViewModel(
     private suspend fun downloadModel(): Boolean {
         Log.i("StartupViewModel", "Downloading model...")
         return suspendCoroutine { continuation ->
-            val inkModelManager = getApplication<PocitajApplication>().inkModelManager
+            val inkModelManager = getApplication<App>().inkModelManager
             inkModelManager.setModel("en-US")
             inkModelManager.download()
                 .addOnSuccessListener {
@@ -67,7 +67,7 @@ class StartupViewModel(
     }
 
     private suspend fun createExerciseSource() {
-        val app = getApplication<PocitajApplication>()
+        val app = getApplication<App>()
         app.exerciseSource = AdaptiveExerciseSource.create(
             app.database.factMasteryDao(),
             app.database.exerciseAttemptDao(),

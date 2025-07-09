@@ -1,6 +1,6 @@
 package com.codinglikeapirate.pocitaj
 
-class TestPocitajApplication : PocitajApplication() {
+class TestApp : App() {
     override fun onCreate() {
         super.onCreate()
         inkModelManager = FakeInkModelManager

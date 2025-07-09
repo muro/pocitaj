@@ -8,7 +8,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.codinglikeapirate.pocitaj.data.AppDatabase
 import com.codinglikeapirate.pocitaj.data.ExerciseSource
 
-open class PocitajApplication : Application() {
+open class App : Application() {
     lateinit var inkModelManager: InkModelManager
     val isInkModelManagerInitialized: Boolean
         get() = ::inkModelManager.isInitialized

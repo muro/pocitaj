@@ -8,7 +8,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 object ExerciseBookViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-        val application = extras[APPLICATION_KEY] as PocitajApplication
+        val application = extras[APPLICATION_KEY] as App
         return ExerciseBookViewModel(
             inkModelManager = application.inkModelManager,
             exerciseSource = application.exerciseSource
