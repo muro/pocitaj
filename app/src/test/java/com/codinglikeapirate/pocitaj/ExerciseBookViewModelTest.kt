@@ -122,7 +122,7 @@ class ExerciseBookViewModelTest {
     }
 
     @Test
-    fun `whenAnswerUnrecognized_doesNotAdvanceToNextExercise`() = runTest {
+    fun `onResultAnimationFinished stays on same exercise on an unrecognized answer`() = runTest {
         // GIVEN: An exercise is underway
         val exercise1 = Exercise(Addition(2, 2))
         val exercise2 = Exercise(Addition(3, 3))

@@ -112,7 +112,7 @@ class ExerciseProvider(
         if (allFactsInLevel.isEmpty()) return true // An empty level is considered mastered.
 
         return allFactsInLevel.all { factId ->
-            userMastery[factId]?.strength ?: 0 >= MASTERY_STRENGTH
+            (userMastery[factId]?.strength ?: 0) >= MASTERY_STRENGTH
         }
     }
 }

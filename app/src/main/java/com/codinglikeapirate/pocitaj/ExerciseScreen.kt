@@ -55,8 +55,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.codinglikeapirate.pocitaj.logic.Equation
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.codinglikeapirate.pocitaj.logic.Subtraction
-import com.codinglikeapirate.pocitaj.ui.theme.AppMotion
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
+import com.codinglikeapirate.pocitaj.ui.theme.motion
 import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
 import com.google.mlkit.vision.digitalink.Ink.Stroke
@@ -188,9 +188,15 @@ fun ExerciseScreen(exercise: Exercise,
     var elapsedTimeMillis by remember { mutableIntStateOf(0) }
 
     val catDuration = if (debug) {
-        AppMotion.debugDuration
+        MaterialTheme.motion.debug
     } else {
-        AppMotion.longDuration
+        MaterialTheme.motion.long
+    }
+
+    val fadeDuration = if (debug) {
+        MaterialTheme.motion.debug
+    } else {
+        MaterialTheme.motion.medium
     }
 
 
@@ -270,12 +276,7 @@ fun ExerciseScreen(exercise: Exercise,
                 targetState = exercise.equation.question(), // Animate when the exercise question changes
                 transitionSpec = {
                     // Fade in the new text and fade out the old text
-                    val duration = if (debug) {
-                        AppMotion.debugDuration
-                    } else {
-                        AppMotion.mediumDuration
-                    }
-                    fadeIn(animationSpec = tween(duration)) togetherWith fadeOut(animationSpec = tween(duration))
+                    fadeIn(animationSpec = tween(fadeDuration)) togetherWith fadeOut(animationSpec = tween(fadeDuration))
                 }
             ) { targetText -> // The target state (new exercise question)
                 Text(

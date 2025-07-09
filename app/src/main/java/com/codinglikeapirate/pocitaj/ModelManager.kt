@@ -55,8 +55,7 @@ class ModelManager : InkModelManager {
         recognizer = null
 
         // Try to parse the languageTag and get a model from it.
-        val modelIdentifier: DigitalInkRecognitionModelIdentifier?
-        modelIdentifier = try {
+        val modelIdentifier = try {
             DigitalInkRecognitionModelIdentifier.fromLanguageTag(languageTag)
         } catch (_: MlKitException) {
             Log.e(

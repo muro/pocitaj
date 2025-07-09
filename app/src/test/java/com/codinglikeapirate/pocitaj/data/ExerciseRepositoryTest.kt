@@ -61,7 +61,7 @@ class ExerciseRepositoryTest {
     }
 
     @Test
-    fun `getNextExercise_afterStartingSession_returnsExerciseOfCorrectType`() = runBlocking {
+    fun `getNextExercise returns an exercise of the correct type for the active session`() = runBlocking {
         // GIVEN: The repository is initialized for ADDITION exercises
         val config = com.codinglikeapirate.pocitaj.ExerciseConfig("addition")
         repository.startSession(config)

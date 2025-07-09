@@ -1,4 +1,5 @@
 package com.codinglikeapirate.pocitaj.ui.theme
+
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -8,6 +9,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 
@@ -87,12 +89,17 @@ private val darkScheme = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDark,
 )
 
-object AppMotion { // Or integrate into your main Theme object
-    const val shortDuration: Int = 150
-    const val mediumDuration: Int = 300
-    const val longDuration: Int = 500
-    const val debugDuration: Int = 2000
-}
+data class Motion(
+    @SuppressWarnings("unused")
+    val short: Int = 150,
+    val medium: Int = 300,
+    val long: Int = 500,
+    val debug: Int = 2000
+)
+
+private val defaultMotion = Motion()
+
+internal val LocalMotion = staticCompositionLocalOf { defaultMotion }
 
 private val LocalCustomColors = staticCompositionLocalOf { lightCustomColors }
 
@@ -114,8 +121,12 @@ fun AppTheme(
     }
 
     val customColors = if (darkTheme) darkCustomColors else lightCustomColors
+    val motion = defaultMotion
 
-    CompositionLocalProvider(LocalCustomColors provides customColors) {
+    CompositionLocalProvider(
+        LocalCustomColors provides customColors,
+        LocalMotion provides motion
+    ) {
         MaterialTheme(
             colorScheme = colorScheme,
             content = content
@@ -123,9 +134,14 @@ fun AppTheme(
     }
 }
 
-object PocitajTheme {
-    val customColors: CustomColors
-        @Composable
-        get() = LocalCustomColors.current
-}
+@Suppress("UnusedReceiverParameter")
+val MaterialTheme.customColors: CustomColors
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalCustomColors.current
 
+@Suppress("UnusedReceiverParameter")
+val MaterialTheme.motion: Motion
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalMotion.current

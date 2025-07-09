@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 
 // Which screen are we currently on:
 sealed class UiState {
-    data class LoadingModel(val errorMessage: String? = null) : UiState()
     data object ExerciseSetup : UiState()
     data class ExerciseScreen(val currentExercise: Exercise) : UiState()
     data class SummaryScreen(val results: List<ResultDescription>) : UiState()
@@ -31,7 +30,6 @@ sealed class AnswerResult {
 
 // One-time navigation events
 sealed class NavigationEvent {
-    data object NavigateToHome : NavigationEvent()
     data class NavigateToExercise(val type: String) : NavigationEvent()
     data object NavigateToSummary : NavigationEvent()
     data object NavigateBackToHome : NavigationEvent()
@@ -49,7 +47,7 @@ class ExerciseBookViewModel(
     private var exercisesRemaining: Int = 0
     private val exerciseHistory = mutableListOf<Exercise>()
 
-    private val _uiState = MutableStateFlow<UiState>(UiState.LoadingModel())
+    private val _uiState = MutableStateFlow<UiState>(UiState.ExerciseSetup)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private val _answerResult = MutableStateFlow<AnswerResult>(AnswerResult.None)

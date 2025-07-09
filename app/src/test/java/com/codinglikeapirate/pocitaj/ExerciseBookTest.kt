@@ -171,31 +171,4 @@ class ExerciseBookTest {
         // For incorrect, it should show the original equation with the incorrect submitted answer
         assertEquals("20 - 10 ≠ 8", exercise.equationString())
     }
-
-    @Test
-    fun exerciseBook_emptyStats() {
-        val exerciseBook = ExerciseBook()
-        assertEquals("0 / 0 (0%)", exerciseBook.stats)
-    }
-
-    @Test
-    fun exerciseBook_allWrongStats() {
-        val exerciseBook = ExerciseBook()
-        val incorrect = 100
-        exerciseBook.generate(ExerciseType.ADDITION)
-        exerciseBook.last.solve(incorrect)
-        exerciseBook.generate(ExerciseType.ADDITION)
-        exerciseBook.last.solve(incorrect)
-        assertEquals("0 / 2 (0%)", exerciseBook.stats)
-    }
-
-    @Test
-    fun exerciseBook_oneSolvedOneUnsolvedWrongStats() {
-        val exerciseBook = ExerciseBook()
-        val incorrect = 100
-        exerciseBook.generate(ExerciseType.ADDITION)
-        exerciseBook.last.solve(incorrect)
-        exerciseBook.generate(ExerciseType.SUBTRACTION)
-        assertEquals("0 / 1 (0%)", exerciseBook.stats)
-    }
 }

@@ -46,7 +46,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
-import com.codinglikeapirate.pocitaj.ui.theme.PocitajTheme
+import com.codinglikeapirate.pocitaj.ui.theme.customColors
 
 
 class ExerciseBookActivity : ComponentActivity() {
@@ -102,7 +102,6 @@ fun AppNavigation() {
                         popUpTo(Destinations.HOME_ROUTE) { inclusive = true }
                     }
                 }
-                else -> {}
             }
         }
     }
@@ -185,20 +184,20 @@ fun ExerciseSetupScreen(
     val gradients = listOf(
         Brush.linearGradient(
             listOf(
-                PocitajTheme.customColors.additionGradientStart,
-                PocitajTheme.customColors.additionGradientEnd
+                MaterialTheme.customColors.additionGradientStart,
+                MaterialTheme.customColors.additionGradientEnd
             )
         ),
         Brush.linearGradient(
             listOf(
-                PocitajTheme.customColors.subtractionGradientStart,
-                PocitajTheme.customColors.subtractionGradientEnd
+                MaterialTheme.customColors.subtractionGradientStart,
+                MaterialTheme.customColors.subtractionGradientEnd
             )
         ),
         Brush.linearGradient(
             listOf(
-                PocitajTheme.customColors.multiplicationGradientStart,
-                PocitajTheme.customColors.multiplicationGradientEnd
+                MaterialTheme.customColors.multiplicationGradientStart,
+                MaterialTheme.customColors.multiplicationGradientEnd
             )
         )
     )
