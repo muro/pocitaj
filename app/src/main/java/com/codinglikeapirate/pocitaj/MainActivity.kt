@@ -80,16 +80,17 @@ object Destinations {
     const val HOME_ROUTE = "home"
     const val EXERCISE_ROUTE = "exercise/{type}"
     const val SUMMARY_ROUTE = "summary"
+    const val PROGRESS_ROUTE = "progress"
     fun exerciseDetailRoute(type: String) = "exercise/$type"
 }
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val viewModel: ExerciseBookViewModel = viewModel(factory = ExerciseBookViewModelFactory)
+    val exerciseViewModel: ExerciseBookViewModel = viewModel(factory = ExerciseBookViewModelFactory)
 
     LaunchedEffect(Unit) {
-        viewModel.navigationEvents.collect { event ->
+        exerciseViewModel.navigationEvents.collect { event ->
             when (event) {
                 is NavigationEvent.NavigateToExercise -> {
                     navController.navigate(Destinations.exerciseDetailRoute(event.type))
@@ -116,28 +117,34 @@ fun AppNavigation() {
             ExerciseSetupScreen(
                 onStartClicked = { exerciseType, count, difficulty ->
                     val config = ExerciseConfig(exerciseType.id, difficulty, count)
-                    viewModel.startExercises(config)
+                    exerciseViewModel.startExercises(config)
+                },
+                onProgressClicked = {
+                    navController.navigate(Destinations.PROGRESS_ROUTE)
                 }
             )
         }
         composable(route = Destinations.EXERCISE_ROUTE) {
-            val uiState by viewModel.uiState.collectAsState()
+            val uiState by exerciseViewModel.uiState.collectAsState()
             val exerciseState = uiState as? UiState.ExerciseScreen
             if (exerciseState != null) {
                 val exercise: Exercise = exerciseState.currentExercise
-                ExerciseScreen(exercise, viewModel) { answer: String, elapsedMs: Int ->
-                    viewModel.checkAnswer(answer, elapsedMs)
+                ExerciseScreen(exercise, exerciseViewModel) { answer: String, elapsedMs: Int ->
+                    exerciseViewModel.checkAnswer(answer, elapsedMs)
                 }
             }
         }
         composable(route = Destinations.SUMMARY_ROUTE) {
-            val uiState by viewModel.uiState.collectAsState()
+            val uiState by exerciseViewModel.uiState.collectAsState()
             val summaryState = uiState as? UiState.SummaryScreen
             if (summaryState != null) {
                 ResultsScreen(summaryState.results) {
-                    viewModel.onSummaryDone()
+                    exerciseViewModel.onSummaryDone()
                 }
             }
+        }
+        composable(route = Destinations.PROGRESS_ROUTE) {
+            ProgressReportScreen()
         }
     }
 }
@@ -171,7 +178,8 @@ fun LoadingScreen(error: String?, onRetry: () -> Unit) {
 
 @Composable
 fun ExerciseSetupScreen(
-    onStartClicked: (exerciseType: ExerciseType, count: Int, difficulty: Int) -> Unit
+    onStartClicked: (exerciseType: ExerciseType, count: Int, difficulty: Int) -> Unit,
+    onProgressClicked: () -> Unit
 ) {
     // The Slider component works with a Float value, which we convert to an Int when needed.
     var questionCount by remember { mutableFloatStateOf(2f) }
@@ -218,8 +226,14 @@ fun ExerciseSetupScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // Title
-        Text("Choose Your Challenge", style = MaterialTheme.typography.headlineMedium)
+        Row {
+            // Title
+            Text("Choose Your Challenge", style = MaterialTheme.typography.headlineMedium)
+            // Progress Button
+            Button(onClick = onProgressClicked) {
+                Text("Progress")
+            }
+        }
 
         // Grid of Exercise Cards
         LazyVerticalGrid(
@@ -313,7 +327,7 @@ fun ExerciseCard(exerciseType: ExerciseType, gradient: Brush, onClick: (Exercise
 @Composable
 fun PreviewExerciseSetupScreen() {
     AppTheme {
-        ExerciseSetupScreen(onStartClicked = { _, _, _ -> })
+        ExerciseSetupScreen(onStartClicked = { _, _, _ -> }, onProgressClicked = {})
     }
 }
 
