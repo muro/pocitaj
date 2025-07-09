@@ -108,3 +108,15 @@ This document outlines the step-by-step plan to implement the adaptive learning 
 *   **Purpose:** To connect all the new screens.
 *   **Action:** Add buttons and update the navigation graph to link the setup screen to the progress report and history views.
 *   **Testing:** Update **UI tests** to confirm that clicking the navigation buttons takes the user to the correct screens.
+
+---
+
+### Phase 4: Algorithm Tuning & Evaluation
+
+**Step 11: Build a Learning Simulator**
+*   **Purpose:** To rapidly test and evaluate changes to the learning algorithm without needing real user data.
+*   **Action:**
+    *   Create a simulation environment that models a virtual student's learning process.
+    *   The simulator will interact with the `ExerciseProvider` and have configurable parameters (e.g., probability of making a mistake on a new vs. known fact, learning speed).
+    *   Develop scripts or a simple dashboard to visualize the simulated learning progress, identify how the algorithm adapts, and analyze the effectiveness of the "Working Set" and "Spaced Repetition" logic under different conditions.
+*   **Testing:** N/A (internal development tool).
