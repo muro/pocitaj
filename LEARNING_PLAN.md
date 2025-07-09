@@ -46,10 +46,10 @@ This document outlines the step-by-step plan to implement the adaptive learning 
 
 ### Phase 2: The Learning & UI Logic
 
-**Step 4: Define the `Curriculum` [PARTIALLY DONE]**
+**Step 4: Define the `Curriculum` [IN PROGRESS]**
 *   **Purpose:** Codify the mastery levels.
 *   **Action:** Create a `Curriculum` object/enum that defines the levels as we've outlined.
-*   **Note:** The `Curriculum` currently only contains two addition levels. It needs to be expanded to include all operations and levels defined in `LEARNING_MODEL.md`.
+*   **Note:** The first level for each of the four operations (Addition, Subtraction, Multiplication, Division) has been implemented. The curriculum still needs to be expanded to include all levels defined in `LEARNING_MODEL.md`.
 *   **Testing:** N/A (static data).
 
 **Step 5: Create the `ExerciseProvider` [DONE]**
