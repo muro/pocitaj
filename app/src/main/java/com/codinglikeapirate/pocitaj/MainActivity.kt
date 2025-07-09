@@ -288,7 +288,6 @@ fun ExerciseCard(exerciseType: ExerciseType, gradient: Brush, onClick: (Exercise
                     ExerciseType.SUBTRACTION -> "-"
                     ExerciseType.MULTIPLICATION -> "×"
                     ExerciseType.DIVISION -> "÷"
-                    else -> ""
                 },
                 fontSize = 48.sp,
                 color = MaterialTheme.colorScheme.onPrimary
