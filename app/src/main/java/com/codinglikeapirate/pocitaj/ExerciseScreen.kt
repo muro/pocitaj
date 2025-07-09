@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.codinglikeapirate.pocitaj.data.ExerciseConfig
 import com.codinglikeapirate.pocitaj.logic.Equation
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.codinglikeapirate.pocitaj.logic.Subtraction
@@ -367,7 +368,7 @@ fun PreviewExerciseScreen() {
     val equation: Equation = Subtraction(14, 2)
     val exercise = Exercise(equation, equation.getExpectedResult())
     val viewModel : ExerciseBookViewModel = viewModel()
-    viewModel.startExercises(ExerciseConfig("subtraction", 12))
+    viewModel.startExercises(ExerciseConfig("subtraction", 12, 10))
 
     AppTheme {
         ExerciseScreen(exercise, viewModel) {_: String, _: Int -> }

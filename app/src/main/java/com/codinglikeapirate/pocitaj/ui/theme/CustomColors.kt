@@ -9,6 +9,8 @@ data class CustomColors(
     val subtractionGradientEnd: Color,
     val multiplicationGradientStart: Color,
     val multiplicationGradientEnd: Color,
+    val divisionGradientStart: Color,
+    val divisionGradientEnd: Color,
 )
 
 val lightCustomColors = CustomColors(
@@ -18,6 +20,8 @@ val lightCustomColors = CustomColors(
     subtractionGradientEnd = subtractionGradientEndLight,
     multiplicationGradientStart = multiplicationGradientStartLight,
     multiplicationGradientEnd = multiplicationGradientEndLight,
+    divisionGradientStart = divisionGradientStartLight,
+    divisionGradientEnd = divisionGradientEndLight,
 )
 
 val darkCustomColors = CustomColors(
@@ -27,4 +31,6 @@ val darkCustomColors = CustomColors(
     subtractionGradientEnd = subtractionGradientEndDark,
     multiplicationGradientStart = multiplicationGradientStartDark,
     multiplicationGradientEnd = multiplicationGradientEndDark,
+    divisionGradientStart = divisionGradientStartDark,
+    divisionGradientEnd = divisionGradientEndDark,
 )

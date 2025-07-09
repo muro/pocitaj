@@ -43,6 +43,8 @@ val subtractionGradientStartLight = Color(0xFF29B6F6)
 val subtractionGradientEndLight = Color(0xFF26A69A)
 val multiplicationGradientStartLight = Color(0xFFAB47BC)
 val multiplicationGradientEndLight = Color(0xFFEC407A)
+val divisionGradientStartLight = Color(0xFF66BB6A)
+val divisionGradientEndLight = Color(0xFF9CCC65)
 
 val primaryDark = Color(0xFFDBC66E)
 val onPrimaryDark = Color(0xFF3A3000)
@@ -86,6 +88,8 @@ val subtractionGradientStartDark = Color(0xFF29B6F6)
 val subtractionGradientEndDark = Color(0xFF26A69A)
 val multiplicationGradientStartDark = Color(0xFFAB47BC)
 val multiplicationGradientEndDark = Color(0xFFEC407A)
+val divisionGradientStartDark = Color(0xFF66BB6A)
+val divisionGradientEndDark = Color(0xFF9CCC65)
 
 
 

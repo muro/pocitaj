@@ -57,7 +57,7 @@ class ExerciseProvider(
             Operation.ADDITION -> Addition(op1, op2)
             Operation.SUBTRACTION -> Subtraction(op1, op2)
             Operation.MULTIPLICATION -> Multiplication(op1, op2)
-            Operation.DIVISION -> throw NotImplementedError("Division not yet implemented")
+            Operation.DIVISION -> Division(op1, op2)
         }
         return Exercise(equation)
     }

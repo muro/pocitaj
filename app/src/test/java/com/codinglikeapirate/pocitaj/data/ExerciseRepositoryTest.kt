@@ -1,78 +1,66 @@
 package com.codinglikeapirate.pocitaj.data
 
 import com.codinglikeapirate.pocitaj.logic.Addition
+import com.codinglikeapirate.pocitaj.logic.Curriculum
 import com.codinglikeapirate.pocitaj.logic.Exercise
+import com.codinglikeapirate.pocitaj.logic.Multiplication
+import com.codinglikeapirate.pocitaj.logic.Subtraction
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
+@ExperimentalCoroutinesApi
 class ExerciseRepositoryTest {
 
     private lateinit var repository: ExerciseRepository
-    private val factMasteryDao: FactMasteryDao = mockk()
-    private val exerciseAttemptDao: ExerciseAttemptDao = mockk()
-    private val userDao: UserDao = mockk()
+    private lateinit var factMasteryDao: FactMasteryDao
+    private lateinit var exerciseAttemptDao: ExerciseAttemptDao
+    private lateinit var userDao: UserDao
 
     @Before
-    fun setup() {
+    fun setUp() {
+        factMasteryDao = mockk(relaxed = true)
+        exerciseAttemptDao = mockk(relaxed = true)
+        userDao = mockk(relaxed = true)
         repository = ExerciseRepository(factMasteryDao, exerciseAttemptDao, userDao)
     }
 
     @Test
-    fun `getNextExercise fetches mastery and uses provider`() = runBlocking {
-        // Given
-        val userId = 1L
-        val masteryList = listOf(FactMastery("ADDITION_1_1", userId, 1, 0))
-        coEvery { factMasteryDao.getAllFactsForUser(userId) } returns masteryList
-
-        // When
-        val exercise = repository.getNextExercise(userId)
-
-        // Then
-        coVerify { factMasteryDao.getAllFactsForUser(userId) }
-        // We can't easily verify the provider was called without more complex setup,
-        // but we can check that the returned exercise is valid.
-        assert(exercise.equation is Addition)
+    fun `getNextExercise returns addition when specified`() = runTest {
+        coEvery { factMasteryDao.getAllFactsForUser(any()) } returns emptyList()
+        repository.startSession(ExerciseConfig("addition", 10, 10))
+        val exercise = repository.getNextExercise(1L)
+        assertTrue(exercise.equation is Addition)
     }
 
     @Test
-    fun `recordAttempt saves attempt and updates mastery`() = runBlocking {
-        // Given
-        val userId = 1L
-        val exercise = Exercise(Addition(1, 1))
-        val submittedAnswer = 2
-        val durationMs = 1000L
-        val factId = "ADDITION_1_1"
-        val currentMastery = FactMastery(factId, userId, 2, 100)
-        coEvery { factMasteryDao.getFactMastery(userId, factId) } returns currentMastery
-        coEvery { exerciseAttemptDao.insert(any()) } returns Unit
-        coEvery { factMasteryDao.upsert(any()) } returns Unit
+    fun `getNextExercise returns subtraction when specified`() = runTest {
+        coEvery { factMasteryDao.getAllFactsForUser(any()) } returns emptyList()
+        repository.startSession(ExerciseConfig("subtraction", 10, 10))
+        val exercise = repository.getNextExercise(1L)
+        assertTrue(exercise.equation is Subtraction)
+    }
 
-
-        // When
-        repository.recordAttempt(userId, exercise, submittedAnswer, durationMs)
-
-        // Then
+    @Test
+    fun `recordAttempt inserts attempt and updates mastery`() = runTest {
+        val exercise = Exercise(Multiplication(2, 3))
+        repository.recordAttempt(1L, exercise, 6, 1000)
         coVerify { exerciseAttemptDao.insert(any()) }
         coVerify { factMasteryDao.upsert(any()) }
     }
 
     @Test
-    fun `getNextExercise returns an exercise of the correct type for the active session`() = runBlocking {
-        // GIVEN: The repository is initialized for ADDITION exercises
-        val config = com.codinglikeapirate.pocitaj.ExerciseConfig("addition")
-        repository.startSession(config)
-
-        // AND: The DAO returns no mastery information
+    fun `startSession filters levels for the provider`() = runTest {
         coEvery { factMasteryDao.getAllFactsForUser(any()) } returns emptyList()
-
-        // WHEN: We get the next exercise
+        val config = ExerciseConfig("multiplication", 10, 10)
+        repository.startSession(config)
         val exercise = repository.getNextExercise(1L)
-
-        // THEN: The exercise should be an addition problem
-        assert(exercise.equation is Addition)
+        assertEquals(Operation.MULTIPLICATION, exercise.getFactId().let { Operation.valueOf(it.split("_")[0]) })
     }
 }

@@ -2,6 +2,7 @@ package com.codinglikeapirate.pocitaj.logic
 
 import com.codinglikeapirate.pocitaj.data.FactMastery
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 import kotlin.random.Random
@@ -125,6 +126,19 @@ class ExerciseProviderTest {
             val strength = userMastery[factId]?.strength ?: 0
             assert(strength <= 5)
         }
+    }
+
+    @Test
+    fun `provider creates division exercise`() {
+        val curriculum = Curriculum.getLevelsFor(com.codinglikeapirate.pocitaj.data.Operation.DIVISION)
+        val userMastery = emptyMap<String, FactMastery>()
+
+        val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
+        val exercise = provider.getNextExercise()
+
+        val exerciseLevel = Curriculum.getLevelForExercise(exercise)
+        assertEquals("DIV_BY_2_5_10", exerciseLevel?.id)
+        assertTrue(exercise.equation is Division)
     }
 
     @Test

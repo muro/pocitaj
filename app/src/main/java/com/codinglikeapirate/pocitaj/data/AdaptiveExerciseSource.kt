@@ -4,6 +4,7 @@ import com.codinglikeapirate.pocitaj.logic.Curriculum
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.codinglikeapirate.pocitaj.logic.ExerciseProvider
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 class AdaptiveExerciseSource internal constructor(
@@ -11,8 +12,24 @@ class AdaptiveExerciseSource internal constructor(
     private val exerciseAttemptDao: ExerciseAttemptDao,
     private val userDao: UserDao,
     private val userId: Long,
-    private val exerciseProvider: ExerciseProvider
+    private var exerciseProvider: ExerciseProvider
 ) : ExerciseSource {
+
+    private var currentOperation: Operation? = null
+
+    override fun initialize(config: ExerciseConfig) {
+        currentOperation = Operation.fromString(config.type)
+        // Re-create the exercise provider with a filtered curriculum
+        val filteredCurriculum = if (currentOperation != null) {
+            Curriculum.getAllLevels().filter { it.operation == currentOperation }
+        } else {
+            Curriculum.getAllLevels()
+        }
+        val userMastery = runBlocking {
+            factMasteryDao.getAllFactsForUser(userId).associateBy { it.factId }
+        }
+        exerciseProvider = ExerciseProvider(filteredCurriculum, userMastery)
+    }
 
     companion object {
         suspend fun create(

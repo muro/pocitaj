@@ -3,22 +3,16 @@ package com.codinglikeapirate.pocitaj
 import com.codinglikeapirate.pocitaj.data.ExerciseSource
 import com.codinglikeapirate.pocitaj.logic.Exercise
 
-
-data class ExerciseConfig(val type: String, val upTo: Int = 10, val count: Int = 10)
-
-enum class ExerciseType(val id: String) {
-    ADDITION("addition"),
-    MISSING_ADDEND("missing_addend"),
-    SUBTRACTION("subtraction"),
-    MISSING_SUBTRAHEND("missing_subtrahend"),
-    MULTIPLICATION("multiplication")
-}
 // Holds a set of exercises to do in a session.
 // Each Exercise can be checked for correct solution
 class ExerciseBook : ExerciseSource {
 
     private val exercises = mutableListOf<Exercise>()
     private var currentIndex = -1
+
+    override fun initialize(config: com.codinglikeapirate.pocitaj.data.ExerciseConfig) {
+        // No-op for the test implementation
+    }
 
     override suspend fun getNextExercise(): Exercise? {
         currentIndex++

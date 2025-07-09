@@ -2,6 +2,7 @@ package com.codinglikeapirate.pocitaj
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.codinglikeapirate.pocitaj.data.ExerciseConfig
 import com.codinglikeapirate.pocitaj.data.ExerciseSource
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.google.mlkit.vision.digitalink.Ink
@@ -65,6 +66,7 @@ class ExerciseBookViewModel(
 
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
         viewModelScope.launch {
+            exerciseSource.initialize(exerciseConfig)
             exerciseHistory.clear()
             exercisesRemaining = exerciseConfig.count
             advanceToNextExercise()

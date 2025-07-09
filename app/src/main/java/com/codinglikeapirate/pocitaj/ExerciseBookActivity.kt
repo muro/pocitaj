@@ -44,6 +44,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.codinglikeapirate.pocitaj.data.ExerciseConfig
+import com.codinglikeapirate.pocitaj.data.ExerciseType
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import com.codinglikeapirate.pocitaj.ui.theme.customColors
@@ -178,7 +180,8 @@ fun ExerciseSetupScreen(
     val exerciseTypes = listOf(
         ExerciseType.ADDITION,
         ExerciseType.SUBTRACTION,
-        ExerciseType.MULTIPLICATION
+        ExerciseType.MULTIPLICATION,
+        ExerciseType.DIVISION
     )
 
     val gradients = listOf(
@@ -198,6 +201,12 @@ fun ExerciseSetupScreen(
             listOf(
                 MaterialTheme.customColors.multiplicationGradientStart,
                 MaterialTheme.customColors.multiplicationGradientEnd
+            )
+        ),
+        Brush.linearGradient(
+            listOf(
+                MaterialTheme.customColors.divisionGradientStart,
+                MaterialTheme.customColors.divisionGradientEnd
             )
         )
     )
@@ -278,6 +287,7 @@ fun ExerciseCard(exerciseType: ExerciseType, gradient: Brush, onClick: (Exercise
                     ExerciseType.ADDITION -> "+"
                     ExerciseType.SUBTRACTION -> "-"
                     ExerciseType.MULTIPLICATION -> "×"
+                    ExerciseType.DIVISION -> "÷"
                     else -> ""
                 },
                 fontSize = 48.sp,

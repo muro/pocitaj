@@ -1,8 +1,11 @@
 package com.codinglikeapirate.pocitaj
 
+import com.codinglikeapirate.pocitaj.data.ExerciseConfig
 import com.codinglikeapirate.pocitaj.data.ExerciseSource
 import com.codinglikeapirate.pocitaj.logic.Addition
 import com.codinglikeapirate.pocitaj.logic.Exercise
+import com.codinglikeapirate.pocitaj.logic.Subtraction
+import com.google.mlkit.vision.digitalink.Ink
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -45,7 +48,7 @@ class ExerciseBookViewModelTest {
         val exercise = Exercise(Addition(2, 2))
         coEvery { exerciseSource.getNextExercise() } returns exercise
 
-        viewModel.startExercises(ExerciseConfig("addition", count = 1))
+        viewModel.startExercises(ExerciseConfig("addition", 10, 1))
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.checkAnswer("4", 1000)
@@ -59,7 +62,7 @@ class ExerciseBookViewModelTest {
         val exercise = Exercise(Addition(2, 2))
         coEvery { exerciseSource.getNextExercise() } returns exercise
 
-        viewModel.startExercises(ExerciseConfig("addition", count = 1))
+        viewModel.startExercises(ExerciseConfig("addition", 10, 1))
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.checkAnswer("5", 1000)
@@ -75,7 +78,7 @@ class ExerciseBookViewModelTest {
         val exercise2 = Exercise(Addition(3, 3))
         coEvery { exerciseSource.getNextExercise() } returns exercise1 andThen exercise2 andThen null
 
-        viewModel.startExercises(ExerciseConfig("addition", count = 2))
+        viewModel.startExercises(ExerciseConfig("addition", 10, 2))
         testDispatcher.scheduler.advanceUntilIdle()
 
         // WHEN: The first answer is correct
@@ -112,7 +115,7 @@ class ExerciseBookViewModelTest {
         val exercise = Exercise(Addition(3, 4))
         coEvery { exerciseSource.getNextExercise() } returns exercise
 
-        viewModel.startExercises(ExerciseConfig("addition", count = 1))
+        viewModel.startExercises(ExerciseConfig("addition", 10, 1))
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.checkAnswer("7", 1234)
@@ -128,7 +131,7 @@ class ExerciseBookViewModelTest {
         val exercise2 = Exercise(Addition(3, 3))
         coEvery { exerciseSource.getNextExercise() } returns exercise1 andThen exercise2
 
-        viewModel.startExercises(ExerciseConfig("addition", count = 2))
+        viewModel.startExercises(ExerciseConfig("addition", 10, 2))
         testDispatcher.scheduler.advanceUntilIdle()
 
         val initialState = viewModel.uiState.value
@@ -150,13 +153,13 @@ class ExerciseBookViewModelTest {
     @Test
     fun `startExercises clears history`() = runTest {
         // GIVEN: The history is not empty
-        viewModel.startExercises(ExerciseConfig("addition", count = 1))
+        viewModel.startExercises(ExerciseConfig("addition", 10, 1))
         viewModel.checkAnswer("1", 1000)
         testDispatcher.scheduler.advanceUntilIdle()
         assertTrue(viewModel.resultsList().isNotEmpty())
 
         // WHEN: startExercises is called again
-        viewModel.startExercises(ExerciseConfig("addition", count = 1))
+        viewModel.startExercises(ExerciseConfig("addition", 10, 1))
         testDispatcher.scheduler.advanceUntilIdle()
 
         // THEN: The history should be empty
