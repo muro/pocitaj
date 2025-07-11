@@ -9,7 +9,7 @@
 # Always confirm when you want to run git checkout to revert changes.
 # When I reply with "LGTM", it means OK or proceed.
 
-# When asked to check the project or run tests, run all unit and android instrumentation
+# When asked to check the project or run tests, run both unit and android instrumentation
 # tests.
 
 # If you are adding dependencies, please use libs.versions.toml and if the same version
@@ -18,6 +18,7 @@
 # suffix and kebab-style - use caml case.
 
 # When editing any kotlin or java files, please double-check that all imports are at the top of the file.
+# ViewModel factories should be in the same file as the ViewModel.
 
 # After you make changes, please verify that all unit and instrumented tests pass.
 
