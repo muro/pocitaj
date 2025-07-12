@@ -1,7 +1,11 @@
-package com.codinglikeapirate.pocitaj
+package com.codinglikeapirate.pocitaj.ui.exercise
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
+import com.codinglikeapirate.pocitaj.App
+import com.codinglikeapirate.pocitaj.InkModelManager
 import com.codinglikeapirate.pocitaj.data.ExerciseConfig
 import com.codinglikeapirate.pocitaj.data.ExerciseSource
 import com.codinglikeapirate.pocitaj.logic.Exercise
@@ -167,5 +171,16 @@ class ExerciseBookViewModel(
         if (tapCount >= DEBUG_TAP_THRESHOLD) {
             _showDebug.value = true
         }
+    }
+}
+
+object ExerciseBookViewModelFactory : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+        val application = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as App
+        return ExerciseBookViewModel(
+            inkModelManager = application.inkModelManager,
+            exerciseSource = application.exerciseSource
+        ) as T
     }
 }

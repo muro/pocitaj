@@ -1,4 +1,4 @@
-package com.codinglikeapirate.pocitaj
+package com.codinglikeapirate.pocitaj.ui.exercise
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedContent
@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.codinglikeapirate.pocitaj.R
 import com.codinglikeapirate.pocitaj.data.ExerciseConfig
 import com.codinglikeapirate.pocitaj.logic.Equation
 import com.codinglikeapirate.pocitaj.logic.Exercise

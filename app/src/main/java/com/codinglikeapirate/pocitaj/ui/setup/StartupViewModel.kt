@@ -1,9 +1,11 @@
-package com.codinglikeapirate.pocitaj
+package com.codinglikeapirate.pocitaj.ui.setup
 
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.codinglikeapirate.pocitaj.App
+import com.codinglikeapirate.pocitaj.ModelManager
 import com.codinglikeapirate.pocitaj.data.AdaptiveExerciseSource
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow

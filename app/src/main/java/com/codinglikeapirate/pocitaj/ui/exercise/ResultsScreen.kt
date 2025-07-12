@@ -1,4 +1,4 @@
-package com.codinglikeapirate.pocitaj
+package com.codinglikeapirate.pocitaj.ui.exercise
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.codinglikeapirate.pocitaj.R
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import java.util.Locale
 
