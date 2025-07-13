@@ -13,16 +13,17 @@ object Curriculum {
     private object SumsUpTo5 : Level {
         override val id = "ADD_SUM_5"
         override val operation = Operation.ADDITION
+        private const val max_sum = 5
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, 6)
-            val op2 = Random.nextInt(0, 6 - op1)
+            val op1 = Random.nextInt(0, max_sum + 1)
+            val op2 = Random.nextInt(0, max_sum + 1)
             return Exercise(Addition(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..5).flatMap { op1 ->
-                (0..(5 - op1)).map { op2 ->
+            return (0..max_sum).flatMap { op1 ->
+                (0..max_sum).map { op2 ->
                     "${operation.name}_${op1}_${op2}"
                 }
             }
@@ -32,18 +33,18 @@ object Curriculum {
     private object SumsUpTo10 : Level {
         override val id = "ADD_SUM_10"
         override val operation = Operation.ADDITION
+        private const val max_sum = 10
+
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, 11)
-            val op2 = Random.nextInt(0, 11 - op1)
+            val op1 = Random.nextInt(0, max_sum + 1)
+            val op2 = Random.nextInt(0, max_sum + 1)
             return Exercise(Addition(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            // This logic needs to be more robust to handle the exclusive nature
-            // of the level. For now, this is a simplified placeholder.
-            return (0..10).flatMap { op1 ->
-                (0..(10 - op1)).map { op2 ->
+            return (0..max_sum).flatMap { op1 ->
+                (0..max_sum).map { op2 ->
                     "${operation.name}_${op1}_${op2}"
                 }
             }
@@ -53,15 +54,16 @@ object Curriculum {
     private object SubtractionFrom5 : Level {
         override val id = "SUB_FROM_5"
         override val operation = Operation.SUBTRACTION
+        private const val max_minuend = 5
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, 6)
+            val op1 = Random.nextInt(0, max_minuend + 1)
             val op2 = Random.nextInt(0, op1 + 1)
             return Exercise(Subtraction(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..5).flatMap { op1 ->
+            return (0..max_minuend).flatMap { op1 ->
                 (0..op1).map { op2 ->
                     "${operation.name}_${op1}_${op2}"
                 }
@@ -75,17 +77,25 @@ object Curriculum {
         private val tables = listOf(0, 1, 2, 5, 10)
 
         override fun generateExercise(): Exercise {
-            val op1 = tables.random()
-            val op2 = Random.nextInt(0, 11)
+            var op1 = tables.random()
+            var op2 = Random.nextInt(0, 11)
+            if (Random.nextBoolean()) {
+                val temp = op1
+                op1 = op2
+                op2 = temp
+            }
             return Exercise(Multiplication(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return tables.flatMap { op1 ->
-                (0..10).map { op2 ->
-                    "${operation.name}_${op1}_${op2}"
+            val facts = mutableSetOf<String>()
+            tables.forEach { op1 ->
+                (0..10).forEach { op2 ->
+                    facts.add("${operation.name}_${op1}_${op2}")
+                    facts.add("${operation.name}_${op2}_${op1}")
                 }
             }
+            return facts.toList()
         }
     }
 

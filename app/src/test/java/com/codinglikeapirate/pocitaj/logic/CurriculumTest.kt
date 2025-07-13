@@ -24,8 +24,7 @@ class CurriculumTest {
         val level = Curriculum.getAllLevels().find { it.id == "ADD_SUM_5" }!!
         val factIds = level.getAllPossibleFactIds()
 
-        // Sums up to 5: 1+2+3+4+5+6 = 21 facts
-        assertEquals(21, factIds.size)
+        assertEquals(6 * 6, factIds.size)
         assertTrue(factIds.contains("ADDITION_0_5"))
         assertTrue(factIds.contains("ADDITION_5_0"))
         assertTrue(factIds.contains("ADDITION_2_3"))
@@ -36,8 +35,7 @@ class CurriculumTest {
         val level = Curriculum.getAllLevels().find { it.id == "ADD_SUM_10" }!!
         val factIds = level.getAllPossibleFactIds()
 
-        // Sums up to 10: 1+2+3+4+5+6+7+8+9+10+11 = 66 facts
-        assertEquals(66, factIds.size)
+        assertEquals(11 * 11, factIds.size)
         assertTrue(factIds.contains("ADDITION_0_10"))
         assertTrue(factIds.contains("ADDITION_10_0"))
         assertTrue(factIds.contains("ADDITION_4_6"))
@@ -59,10 +57,11 @@ class CurriculumTest {
         val level = Curriculum.getAllLevels().find { it.id == "MUL_TABLES_0_1_2_5_10" }!!
         val factIds = level.getAllPossibleFactIds()
 
-        assertEquals(5 * 11, factIds.size)
+        assertEquals(85, factIds.size)
         assertTrue(factIds.contains("MULTIPLICATION_0_10"))
         assertTrue(factIds.contains("MULTIPLICATION_5_5"))
         assertTrue(factIds.contains("MULTIPLICATION_2_8"))
+        assertTrue(factIds.contains("MULTIPLICATION_8_2"))
     }
 
     @Test

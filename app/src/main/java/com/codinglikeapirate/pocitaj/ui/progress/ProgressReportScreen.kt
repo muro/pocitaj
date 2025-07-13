@@ -1,6 +1,7 @@
 package com.codinglikeapirate.pocitaj.ui.progress
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -85,8 +86,11 @@ fun FactGrid(facts: List<FactProgress>, operation: Operation) {
         return
     }
 
-    val op1Values = factsWithCoords.map { it.first }.distinct().sorted()
-    val op2Values = factsWithCoords.map { it.second }.distinct().sorted()
+    val maxOp1 = factsWithCoords.maxOfOrNull { it.first } ?: 0
+    val maxOp2 = factsWithCoords.maxOfOrNull { it.second } ?: 0
+    val maxOperand = maxOf(maxOp1, maxOp2)
+
+    val opValues = (0..maxOperand).toList()
 
     val factsMap = factsWithCoords.associateBy { Pair(it.first, it.second) }
 
@@ -106,7 +110,7 @@ fun FactGrid(facts: List<FactProgress>, operation: Operation) {
             ) {
                 Text(text = operation.toSymbol(), style = MaterialTheme.typography.bodySmall)
             }
-            op2Values.forEach { op2 ->
+            opValues.forEach { op2 ->
                 Box(
                     modifier = Modifier
                         .size(28.dp)
@@ -118,7 +122,7 @@ fun FactGrid(facts: List<FactProgress>, operation: Operation) {
             }
         }
 
-        op1Values.forEach { op1 ->
+        opValues.forEach { op1 ->
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -132,36 +136,42 @@ fun FactGrid(facts: List<FactProgress>, operation: Operation) {
                     Text(text = op1.toString(), style = MaterialTheme.typography.bodySmall)
                 }
 
-                op2Values.forEach { op2 ->
+                opValues.forEach { op2 ->
                     val factProgress = factsMap[Pair(op1, op2)]?.third
                     val isPossible = factProgress != null
 
-                    if (isPossible) {
-                        val strength = factProgress?.mastery?.strength ?: 0
-                        val color = when {
+                    val strength = factProgress?.mastery?.strength ?: 0
+                    val color = if (isPossible) {
+                        when {
                             strength >= 5 -> Color(0xFF4CAF50) // Green
                             strength >= 3 -> Color(0xFFFFEB3B) // Yellow
                             strength > 0 -> Color(0xFFF44336)  // Red
-                            else -> Color(0xFFE0E0E0)         // LightGray
-                        }
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .background(color, shape = RoundedCornerShape(4.dp))
-                                .padding(4.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (strength > 0) {
-                                Text(
-                                    text = strength.toString(),
-                                    fontSize = 10.sp,
-                                    color = Color.Black,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
+                            else -> Color(0xFFE0E0E0)         // LightGray for possible but not attempted
                         }
                     } else {
-                        Spacer(modifier = Modifier.size(28.dp))
+                        Color.Transparent // Not in the level
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .background(color, shape = RoundedCornerShape(4.dp))
+                            .border(
+                                1.dp,
+                                if (isPossible) Color.Transparent else Color.LightGray,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isPossible && strength > 0) {
+                            Text(
+                                text = strength.toString(),
+                                fontSize = 10.sp,
+                                color = Color.Black,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }
