@@ -29,11 +29,21 @@ class ProgressReportViewModel(
     private fun loadProgress() {
         viewModelScope.launch {
             val masteredFacts = factMasteryDao.getAllFactsForUser(1).associateBy { it.factId }
-            val levels = Curriculum.getAllLevels()
+            val allLevels = Curriculum.getAllLevels()
+
+            val levelsToDisplay = allLevels.filter { level ->
+                // A level should be displayed if it is not a proper subset of any other level of the same operation.
+                allLevels.none { otherLevel ->
+                    level != otherLevel &&
+                            level.operation == otherLevel.operation &&
+                            otherLevel.getAllPossibleFactIds().size > level.getAllPossibleFactIds().size &&
+                            otherLevel.getAllPossibleFactIds().toSet().containsAll(level.getAllPossibleFactIds().toSet())
+                }
+            }
 
             val progressMap = mutableMapOf<Level, List<FactProgress>>()
 
-            for (level in levels) {
+            for (level in levelsToDisplay) {
                 val allFactIdsForLevel = level.getAllPossibleFactIds()
                 val progressForLevel = allFactIdsForLevel.map { factId ->
                     FactProgress(factId, masteredFacts[factId])
