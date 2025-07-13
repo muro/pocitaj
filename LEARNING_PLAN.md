@@ -96,7 +96,7 @@ This document outlines the step-by-step plan to implement the adaptive learning 
     *   Create the `ProgressReportScreen` Composable to display the heatmap grid.
 *   **Testing:** Write a **UI test** for the screen, verifying that the grid cells are displayed with the correct color/status based on mocked mastery data.
 
-**Step 9: Build the Teacher/Parent History View**
+**Step 9: Build the Teacher/Parent History View [DONE]**
 *   **Purpose:** To display the detailed log of all attempts.
 *   **Action:**
     *   This could be a separate screen or a drill-down from the heatmap.
@@ -104,7 +104,7 @@ This document outlines the step-by-step plan to implement the adaptive learning 
     *   Display the results in a simple, scrollable list showing the date, exercise, result, and duration for each attempt.
 *   **Testing:** Write a **UI test** that verifies the list displays the correct data provided by a mocked ViewModel.
 
-**Step 10: Add Navigation**
+**Step 10: Add Navigation [DONE]**
 *   **Purpose:** To connect all the new screens.
 *   **Action:** Add buttons and update the navigation graph to link the setup screen to the progress report and history views.
 *   **Testing:** Update **UI tests** to confirm that clicking the navigation buttons takes the user to the correct screens.
