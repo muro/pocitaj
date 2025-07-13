@@ -21,10 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.codinglikeapirate.pocitaj.data.FactMastery
+import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import java.util.Locale
 
 @Composable
@@ -98,6 +100,42 @@ fun Heatmap(facts: List<FactMastery>) {
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProgressReportScreenPreview() {
+    AppTheme {
+        val facts = mapOf(
+            "addition" to listOf(
+                FactMastery("addition-1-1", 1, 5, 0),
+                FactMastery("addition-1-2", 1, 3, 0)
+            ),
+            "subtraction" to listOf(
+                FactMastery("subtraction-2-1", 1, 1, 0),
+                FactMastery("subtraction-2-2", 1, 4, 0)
+            )
+        )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            items(facts.entries.toList()) { (operation, facts) ->
+                Text(
+                    text = operation.replaceFirstChar {
+                        if (it.isLowerCase()) it.titlecase(
+                            Locale.getDefault()
+                        ) else it.toString()
+                    },
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Heatmap(facts)
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
