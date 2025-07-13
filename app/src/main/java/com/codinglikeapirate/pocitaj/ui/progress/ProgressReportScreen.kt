@@ -18,8 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,19 +26,17 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.codinglikeapirate.pocitaj.data.FactMastery
 import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.data.toSymbol
 import com.codinglikeapirate.pocitaj.logic.Curriculum
+import com.codinglikeapirate.pocitaj.logic.Level
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 
 @Composable
 fun ProgressReportScreen(
-    viewModel: ProgressReportViewModel = viewModel(factory = ProgressReportViewModelFactory)
+    progressByLevel: Map<Level, List<FactProgress>> = emptyMap()
 ) {
-    val progressByLevel by viewModel.progressByLevel.collectAsState()
-
     if (progressByLevel.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -243,14 +239,27 @@ fun ProgressReportScreenPreview() {
 
         // Create some fake mastery data for a more realistic preview
         val fakeMasteredFacts = mapOf(
-            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 5, 0),
-            "ADDITION_2_3" to FactMastery("ADDITION_2_3", 1, 3, 0),
-            "ADDITION_8_8" to FactMastery("ADDITION_8_8", 1, 6, 0),
-            "SUBTRACTION_5_2" to FactMastery("SUBTRACTION_5_2", 1, 1, 0),
-            "SUBTRACTION_3_3" to FactMastery("SUBTRACTION_3_3", 1, 4, 0),
-            "MULTIPLICATION_2_5" to FactMastery("MULTIPLICATION_2_5", 1, 5, 0),
-            "MULTIPLICATION_5_2" to FactMastery("MULTIPLICATION_5_2", 1, 2, 0),
-            "MULTIPLICATION_10_1" to FactMastery("MULTIPLICATION_10_1", 1, 7, 0)
+            // Addition
+            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 5, 0), // Mastered
+            "ADDITION_2_3" to FactMastery("ADDITION_2_3", 1, 3, 0), // Learning
+            "ADDITION_3_4" to FactMastery("ADDITION_3_4", 1, 1, 0), // Struggling
+            "ADDITION_8_8" to FactMastery("ADDITION_8_8", 1, 6, 0), // Mastered
+            "ADDITION_9_1" to FactMastery("ADDITION_9_1", 1, 2, 0), // Struggling
+
+            // Subtraction
+            "SUBTRACTION_5_2" to FactMastery("SUBTRACTION_5_2", 1, 5, 0), // Mastered
+            "SUBTRACTION_4_1" to FactMastery("SUBTRACTION_4_1", 1, 4, 0), // Learning
+            "SUBTRACTION_3_3" to FactMastery("SUBTRACTION_3_3", 1, 1, 0), // Struggling
+
+            // Multiplication
+            "MULTIPLICATION_2_5" to FactMastery("MULTIPLICATION_2_5", 1, 5, 0), // Mastered
+            "MULTIPLICATION_5_2" to FactMastery("MULTIPLICATION_5_2", 1, 3, 0), // Learning
+            "MULTIPLICATION_10_1" to FactMastery("MULTIPLICATION_10_1", 1, 7, 0), // Mastered
+            "MULTIPLICATION_3_7" to FactMastery("MULTIPLICATION_3_7", 1, 1, 0), // Struggling
+
+            // Division
+            "DIVISION_10_2" to FactMastery("DIVISION_10_2", 1, 5, 0), // Mastered
+            "DIVISION_25_5" to FactMastery("DIVISION_25_5", 1, 4, 0)  // Learning
         )
 
         val progressByLevel = levelsToDisplay.associateWith { level ->
@@ -259,21 +268,6 @@ fun ProgressReportScreenPreview() {
             }
         }
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .testTag("progress_report_list")
-        ) {
-            items(progressByLevel.entries.toList()) { (level, facts) ->
-                Text(
-                    text = level.id,
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                FactGrid(facts, level.operation)
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
+        ProgressReportScreen(progressByLevel = progressByLevel)
     }
 }

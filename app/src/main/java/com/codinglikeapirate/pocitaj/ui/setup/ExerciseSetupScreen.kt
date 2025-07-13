@@ -10,12 +10,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
@@ -33,25 +35,22 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.codinglikeapirate.pocitaj.data.ExerciseType
+import com.codinglikeapirate.pocitaj.data.Operation
+import com.codinglikeapirate.pocitaj.ui.progress.OperationProgress
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import com.codinglikeapirate.pocitaj.ui.theme.customColors
 
 @Composable
 fun ExerciseSetupScreen(
-    onStartClicked: (exerciseType: ExerciseType, count: Int, difficulty: Int) -> Unit,
-    onProgressClicked: () -> Unit
+    onStartClicked: (operation: Operation, count: Int, difficulty: Int) -> Unit,
+    onProgressClicked: () -> Unit,
+    operationProgress: Map<Operation, OperationProgress> = emptyMap()
 ) {
     // The Slider component works with a Float value, which we convert to an Int when needed.
     var questionCount by remember { mutableFloatStateOf(2f) }
     var difficulty by remember { mutableIntStateOf(10) }
 
-    val exerciseTypes = listOf(
-        ExerciseType.ADDITION,
-        ExerciseType.SUBTRACTION,
-        ExerciseType.MULTIPLICATION,
-        ExerciseType.DIVISION
-    )
+    val operations = Operation.entries.toList()
 
     val gradients = listOf(
         Brush.linearGradient(
@@ -102,12 +101,16 @@ fun ExerciseSetupScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(exerciseTypes.size) { index ->
+            items(operations.size) { index ->
+                val operation = operations[index]
+                val progress = operationProgress[operation]
                 ExerciseCard(
-                    exerciseType = exerciseTypes[index],
+                    operation = operation,
                     gradient = gradients[index % gradients.size],
+                    progress = progress?.progress ?: 0f,
+                    isMastered = progress?.isMastered ?: false,
                     onClick = {
-                        onStartClicked(exerciseTypes[index], questionCount.toInt(), difficulty)
+                        onStartClicked(operation, questionCount.toInt(), difficulty)
                     }
                 )
             }
@@ -144,33 +147,49 @@ fun ExerciseSetupScreen(
 }
 
 @Composable
-fun ExerciseCard(exerciseType: ExerciseType, gradient: Brush, onClick: (ExerciseType) -> Unit) {
+fun ExerciseCard(
+    operation: Operation,
+    gradient: Brush,
+    progress: Float,
+    isMastered: Boolean,
+    onClick: (Operation) -> Unit
+) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(24.dp))
             .background(gradient)
-            .clickable { onClick(exerciseType) }
+            .clickable { onClick(operation) }
             .aspectRatio(1f),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = when (exerciseType) {
-                    ExerciseType.ADDITION -> "+"
-                    ExerciseType.SUBTRACTION -> "-"
-                    ExerciseType.MULTIPLICATION -> "×"
-                    ExerciseType.DIVISION -> "÷"
+                text = when (operation) {
+                    Operation.ADDITION -> "+"
+                    Operation.SUBTRACTION -> "-"
+                    Operation.MULTIPLICATION -> "×"
+                    Operation.DIVISION -> "÷"
                 },
                 fontSize = 48.sp,
                 color = MaterialTheme.colorScheme.onPrimary
             )
             Text(
-                exerciseType.id.replace("_", " ").replaceFirstChar { it.uppercase() },
+                operation.name.replace("_", " ").replaceFirstChar { it.uppercase() },
                 color = MaterialTheme.colorScheme.onPrimary
             )
+            Spacer(modifier = Modifier.height(8.dp))
+            if (isMastered) {
+                Text("Mastered!", color = MaterialTheme.colorScheme.onPrimary)
+            } else {
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
@@ -188,6 +207,12 @@ fun ExerciseCard(exerciseType: ExerciseType, gradient: Brush, onClick: (Exercise
 @Composable
 fun PreviewExerciseSetupScreen() {
     AppTheme {
-        ExerciseSetupScreen(onStartClicked = { _, _, _ -> }, onProgressClicked = {})
+        val fakeProgressMap = mapOf(
+            Operation.ADDITION to OperationProgress(0.75f, false),
+            Operation.SUBTRACTION to OperationProgress(1.0f, true),
+            Operation.MULTIPLICATION to OperationProgress(0.2f, false),
+            Operation.DIVISION to OperationProgress(0.0f, false)
+        )
+        ExerciseSetupScreen(onStartClicked = { _, _, _ -> }, onProgressClicked = {}, operationProgress = fakeProgressMap)
     }
 }

@@ -4,23 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,6 +21,8 @@ import com.codinglikeapirate.pocitaj.ui.exercise.NavigationEvent
 import com.codinglikeapirate.pocitaj.ui.exercise.ResultsScreen
 import com.codinglikeapirate.pocitaj.ui.exercise.UiState
 import com.codinglikeapirate.pocitaj.ui.progress.ProgressReportScreen
+import com.codinglikeapirate.pocitaj.ui.progress.ProgressReportViewModel
+import com.codinglikeapirate.pocitaj.ui.progress.ProgressReportViewModelFactory
 import com.codinglikeapirate.pocitaj.ui.setup.ExerciseSetupScreen
 import com.codinglikeapirate.pocitaj.ui.setup.StartupScreen
 import com.codinglikeapirate.pocitaj.ui.setup.StartupViewModel
@@ -77,6 +66,7 @@ object Destinations {
 fun AppNavigation() {
     val navController = rememberNavController()
     val exerciseViewModel: ExerciseBookViewModel = viewModel(factory = ExerciseBookViewModelFactory)
+    val progressReportViewModel: ProgressReportViewModel = viewModel(factory = ProgressReportViewModelFactory)
 
     LaunchedEffect(Unit) {
         exerciseViewModel.navigationEvents.collect { event ->
@@ -103,14 +93,16 @@ fun AppNavigation() {
         startDestination = Destinations.HOME_ROUTE
     ) {
         composable(route = Destinations.HOME_ROUTE) {
+            val operationProgress by progressReportViewModel.operationProgress.collectAsState()
             ExerciseSetupScreen(
-                onStartClicked = { exerciseType, count, difficulty ->
-                    val config = ExerciseConfig(exerciseType.id, difficulty, count)
+                onStartClicked = { operation, count, difficulty ->
+                    val config = ExerciseConfig(operation.name, difficulty, count)
                     exerciseViewModel.startExercises(config)
                 },
                 onProgressClicked = {
                     navController.navigate(Destinations.PROGRESS_ROUTE)
-                }
+                },
+                operationProgress = operationProgress
             )
         }
         composable(route = Destinations.EXERCISE_ROUTE) {
@@ -133,7 +125,8 @@ fun AppNavigation() {
             }
         }
         composable(route = Destinations.PROGRESS_ROUTE) {
-            ProgressReportScreen()
+            val progressByLevel by progressReportViewModel.progressByLevel.collectAsState()
+            ProgressReportScreen(progressByLevel = progressByLevel)
         }
     }
 }

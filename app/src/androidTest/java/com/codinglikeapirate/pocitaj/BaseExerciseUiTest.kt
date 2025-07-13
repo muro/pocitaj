@@ -41,9 +41,9 @@ abstract class BaseExerciseUiTest {
         }
     }
 
-    fun navigateToExerciseType(exerciseTypeButtonText: String) {
+    fun navigateToOperation(operationSymbol: String) {
         // Click on the card to start the specific exercise type
-        composeTestRule.onNodeWithText(exerciseTypeButtonText).performClick()
+        composeTestRule.onNodeWithText(operationSymbol).performClick()
 
         // Wait for the ExerciseScreen to be loaded by checking for a unique element.
         // The InkCanvas is a good unique identifier for the ExerciseScreen.

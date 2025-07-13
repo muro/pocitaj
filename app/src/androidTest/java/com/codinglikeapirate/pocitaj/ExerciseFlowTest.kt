@@ -37,7 +37,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         setExercises(listOf(Exercise(Addition(5, 3)))) // 5 + 3 = 8
 
         // 2. Navigate to "Start Addition"
-        navigateToExerciseType("Addition")
+        navigateToOperation("+")
 
         // 3. Wait for the UI to settle
         composeTestRule.waitForIdle()
@@ -52,7 +52,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     @Test
     fun whenTwoQuestionsAnswered_thenUIAdvancesAndShowsFeedback() {
         setExercises(listOf(Exercise(Addition(1, 1)), Exercise(Addition(2, 2))))
-        navigateToExerciseType("Addition")
+        navigateToOperation("+")
 
         // First Question
         drawAnswer("1")
@@ -73,7 +73,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         setExercises(listOf(Exercise(Addition(1, 1)), Exercise(Addition(2, 2))))
 
         // 2. Navigate to "Addition"
-        navigateToExerciseType("Addition")
+        navigateToOperation("+")
 
         // 3. Wait for the UI to settle
         composeTestRule.waitForIdle()
@@ -110,7 +110,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         setExercises(listOf(Exercise(Addition(1, 1))))
 
         // Navigate to the Exercise Screen
-        navigateToExerciseType("Addition")
+        navigateToOperation("+")
 
         // Verify that an element unique to the Exercise Screen is present
         // Using onNodeWithTag for the canvas is a good unique identifier
@@ -131,7 +131,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     @Test
     fun whenUnrecognizedAnswerDrawn_thenUnrecognizedFeedbackIsShown() {
         setExercises(listOf(Exercise(Addition(1, 1))))
-        navigateToExerciseType("Addition")
+        navigateToOperation("+")
 
         composeTestRule.waitForIdle()
 
@@ -159,7 +159,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         setExercises(listOf(Exercise(Addition(100, 23)))) // Answer is 123
 
         // 2. Navigate
-        navigateToExerciseType("Addition")
+        navigateToOperation("+")
         composeTestRule.waitForIdle()
 
         // 3. Draw the digits with delays, updating the fake result each time
