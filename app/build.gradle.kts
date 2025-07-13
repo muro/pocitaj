@@ -48,6 +48,12 @@ android {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
+    packaging {
+        resources {
+            excludes.add("META-INF/LICENSE.md")
+            excludes.add("META-INF/LICENSE-notice.md")
+        }
+    }
 }
 
 allprojects {
@@ -85,6 +91,7 @@ dependencies {
     androidTestImplementation(libs.espresso.contrib)
     androidTestImplementation(libs.test.rules)
     androidTestImplementation(libs.compose.ui.test.junit4)
+    androidTestImplementation(libs.mockk.android)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
 
