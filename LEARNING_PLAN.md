@@ -89,7 +89,7 @@ This document outlines the step-by-step plan to implement the adaptive learning 
     *   Implement the progress bar and "Mastered!" badge UI.
 *   **Testing:** Write a **UI test** to verify the progress bar and badge display correctly based on mocked data from the ViewModel.
 
-**Step 8: Build the Progress Report Screen (Heatmap)**
+**Step 8: Build the Progress Report Screen (Heatmap) [DONE]**
 *   **Purpose:** To create the detailed heatmap view.
 *   **Action:**
     *   Create a `ProgressReportViewModel` that queries the `FactMastery` DAO.
