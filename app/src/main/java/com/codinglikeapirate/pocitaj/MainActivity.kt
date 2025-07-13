@@ -20,6 +20,7 @@ import com.codinglikeapirate.pocitaj.ui.exercise.ExerciseScreen
 import com.codinglikeapirate.pocitaj.ui.exercise.NavigationEvent
 import com.codinglikeapirate.pocitaj.ui.exercise.ResultsScreen
 import com.codinglikeapirate.pocitaj.ui.exercise.UiState
+import com.codinglikeapirate.pocitaj.ui.history.HistoryScreen
 import com.codinglikeapirate.pocitaj.ui.progress.ProgressReportScreen
 import com.codinglikeapirate.pocitaj.ui.progress.ProgressReportViewModel
 import com.codinglikeapirate.pocitaj.ui.progress.ProgressReportViewModelFactory
@@ -59,6 +60,7 @@ object Destinations {
     const val EXERCISE_ROUTE = "exercise/{type}"
     const val SUMMARY_ROUTE = "summary"
     const val PROGRESS_ROUTE = "progress"
+    const val HISTORY_ROUTE = "history"
     fun exerciseDetailRoute(type: String) = "exercise/$type"
 }
 
@@ -126,7 +128,15 @@ fun AppNavigation() {
         }
         composable(route = Destinations.PROGRESS_ROUTE) {
             val progressByLevel by progressReportViewModel.progressByLevel.collectAsState()
-            ProgressReportScreen(progressByLevel = progressByLevel)
+            ProgressReportScreen(
+                progressByLevel = progressByLevel,
+                onHistoryClicked = {
+                    navController.navigate(Destinations.HISTORY_ROUTE)
+                }
+            )
+        }
+        composable(route = Destinations.HISTORY_ROUTE) {
+            HistoryScreen()
         }
     }
 }

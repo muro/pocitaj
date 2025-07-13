@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,7 +37,8 @@ import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 
 @Composable
 fun ProgressReportScreen(
-    progressByLevel: Map<Level, List<FactProgress>> = emptyMap()
+    progressByLevel: Map<Level, List<FactProgress>> = emptyMap(),
+    onHistoryClicked: () -> Unit
 ) {
     if (progressByLevel.isEmpty()) {
         Box(
@@ -46,22 +48,27 @@ fun ProgressReportScreen(
             Text("No progress data yet.")
         }
     } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .testTag("progress_report_list"),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(progressByLevel.entries.toList()) { (level, facts) ->
-                Card(modifier = Modifier.testTag("level_card_${level.id}")) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = getLevelTitle(level),
-                            style = MaterialTheme.typography.headlineMedium,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                        FactGrid(facts, level.operation)
+        Column(modifier = Modifier.fillMaxSize()) {
+            Button(onClick = onHistoryClicked, modifier = Modifier.padding(16.dp)) {
+                Text("View History")
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .testTag("progress_report_list"),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(progressByLevel.entries.toList()) { (level, facts) ->
+                    Card(modifier = Modifier.testTag("level_card_${level.id}")) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = getLevelTitle(level),
+                                style = MaterialTheme.typography.headlineMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            FactGrid(facts, level.operation)
+                        }
                     }
                 }
             }
@@ -285,6 +292,6 @@ fun ProgressReportScreenPreview() {
             }
         }
 
-        ProgressReportScreen(progressByLevel = progressByLevel)
+        ProgressReportScreen(progressByLevel = progressByLevel, onHistoryClicked = {})
     }
 }
