@@ -8,6 +8,8 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.codinglikeapirate.pocitaj.App
 import com.codinglikeapirate.pocitaj.data.FactMastery
 import com.codinglikeapirate.pocitaj.data.FactMasteryDao
+import com.codinglikeapirate.pocitaj.logic.Curriculum
+import com.codinglikeapirate.pocitaj.logic.Level
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,24 +19,35 @@ class ProgressReportViewModel(
     private val factMasteryDao: FactMasteryDao
 ) : ViewModel() {
 
-    private val _groupedFacts = MutableStateFlow<Map<String, List<FactMastery>>>(emptyMap())
-    val groupedFacts: StateFlow<Map<String, List<FactMastery>>> = _groupedFacts.asStateFlow()
+    private val _progressByLevel = MutableStateFlow<Map<Level, List<FactProgress>>>(emptyMap())
+    val progressByLevel: StateFlow<Map<Level, List<FactProgress>>> = _progressByLevel.asStateFlow()
 
     init {
-        loadFactMastery()
+        loadProgress()
     }
 
-    private fun loadFactMastery() {
+    private fun loadProgress() {
         viewModelScope.launch {
-            // Assuming userId is 1 for now, as there's only one user.
-            val facts = factMasteryDao.getAllFactsForUser(1)
-            _groupedFacts.value = facts.groupBy {
-                // Extract operation from factId (e.g., "add-1-2" -> "add")
-                it.factId.substringBefore('-')
+            val masteredFacts = factMasteryDao.getAllFactsForUser(1).associateBy { it.factId }
+            val levels = Curriculum.getAllLevels()
+
+            val progressMap = mutableMapOf<Level, List<FactProgress>>()
+
+            for (level in levels) {
+                val allFactIdsForLevel = level.getAllPossibleFactIds()
+                val progressForLevel = allFactIdsForLevel.map { factId ->
+                    FactProgress(factId, masteredFacts[factId])
+                }
+                if (progressForLevel.isNotEmpty()) {
+                    progressMap[level] = progressForLevel
+                }
             }
+            _progressByLevel.value = progressMap
         }
     }
 }
+
+data class FactProgress(val factId: String, val mastery: FactMastery?)
 
 object ProgressReportViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")

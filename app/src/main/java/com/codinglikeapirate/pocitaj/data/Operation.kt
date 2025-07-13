@@ -15,3 +15,12 @@ enum class Operation {
         }
     }
 }
+
+fun Operation.toSymbol(): String {
+    return when (this) {
+        Operation.ADDITION -> "+"
+        Operation.SUBTRACTION -> "-"
+        Operation.MULTIPLICATION -> "×"
+        Operation.DIVISION -> "÷"
+    }
+}

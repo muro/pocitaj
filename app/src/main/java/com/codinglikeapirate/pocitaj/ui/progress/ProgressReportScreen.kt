@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,17 +26,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.codinglikeapirate.pocitaj.data.FactMastery
+import com.codinglikeapirate.pocitaj.data.Operation
+import com.codinglikeapirate.pocitaj.data.toSymbol
+import com.codinglikeapirate.pocitaj.logic.Curriculum
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
-import java.util.Locale
 
 @Composable
 fun ProgressReportScreen(
     viewModel: ProgressReportViewModel = viewModel(factory = ProgressReportViewModelFactory)
 ) {
-    val groupedFacts by viewModel.groupedFacts.collectAsState()
+    val progressByLevel by viewModel.progressByLevel.collectAsState()
 
-    if (groupedFacts.isEmpty()) {
+    if (progressByLevel.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -48,17 +50,13 @@ fun ProgressReportScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            items(groupedFacts.entries.toList()) { (operation, facts) ->
+            items(progressByLevel.entries.toList()) { (level, facts) ->
                 Text(
-                    text = operation.replaceFirstChar {
-                        if (it.isLowerCase()) it.titlecase(
-                            Locale.getDefault()
-                        ) else it.toString()
-                    },
+                    text = level.id,
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                Heatmap(facts)
+                FactGrid(facts, level.operation)
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
@@ -66,38 +64,104 @@ fun ProgressReportScreen(
 }
 
 @Composable
-fun Heatmap(facts: List<FactMastery>) {
-    val factsByFirstNum = facts.groupBy { it.factId.split("-")[1].toInt() }
-    val maxSecondNum = facts.maxOfOrNull { it.factId.split("-")[2].toInt() } ?: 0
+fun FactGrid(facts: List<FactProgress>, operation: Operation) {
+    val factsWithCoords = facts.mapNotNull { factProgress ->
+        val parts = factProgress.factId.split('_')
+        if (parts.size == 3) {
+            val op1 = parts[1].toIntOrNull()
+            val op2 = parts[2].toIntOrNull()
+            if (op1 != null && op2 != null) {
+                Triple(op1, op2, factProgress)
+            } else {
+                null
+            }
+        } else {
+            null
+        }
+    }
+
+    if (factsWithCoords.isEmpty()) {
+        Text("No facts to display for this level.")
+        return
+    }
+
+    val op1Values = factsWithCoords.map { it.first }.distinct().sorted()
+    val op2Values = factsWithCoords.map { it.second }.distinct().sorted()
+
+    val factsMap = factsWithCoords.associateBy { Pair(it.first, it.second) }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        for (i in 0..factsByFirstNum.keys.maxOrNull()!!) {
+        // Header row for op2
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            // Top-left corner box for operation symbol
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .padding(4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = operation.toSymbol(), style = MaterialTheme.typography.bodySmall)
+            }
+            op2Values.forEach { op2 ->
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .padding(4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = op2.toString(), style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+
+        op1Values.forEach { op1 ->
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                for (j in 0..maxSecondNum) {
-                    val fact = factsByFirstNum[i]?.find { it.factId.split("-")[2].toInt() == j }
-                    val strength = fact?.strength ?: 0
-                    val color = when {
-                        strength > 4 -> Color.Green
-                        strength > 2 -> Color.Yellow
-                        strength > 0 -> Color.Red
-                        else -> Color.LightGray
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .background(color),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = strength.toString(),
-                            fontSize = 10.sp,
-                            color = Color.Black,
-                            textAlign = TextAlign.Center
-                        )
+                // Header cell for op1
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .padding(4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = op1.toString(), style = MaterialTheme.typography.bodySmall)
+                }
+
+                op2Values.forEach { op2 ->
+                    val factProgress = factsMap[Pair(op1, op2)]?.third
+                    val isPossible = factProgress != null
+
+                    if (isPossible) {
+                        val strength = factProgress?.mastery?.strength ?: 0
+                        val color = when {
+                            strength >= 5 -> Color(0xFF4CAF50) // Green
+                            strength >= 3 -> Color(0xFFFFEB3B) // Yellow
+                            strength > 0 -> Color(0xFFF44336)  // Red
+                            else -> Color(0xFFE0E0E0)         // LightGray
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .background(color, shape = RoundedCornerShape(4.dp))
+                                .padding(4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (strength > 0) {
+                                Text(
+                                    text = strength.toString(),
+                                    fontSize = 10.sp,
+                                    color = Color.Black,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.size(28.dp))
                     }
                 }
             }
@@ -109,32 +173,25 @@ fun Heatmap(facts: List<FactMastery>) {
 @Composable
 fun ProgressReportScreenPreview() {
     AppTheme {
-        val facts = mapOf(
-            "addition" to listOf(
-                FactMastery("addition-1-1", 1, 5, 0),
-                FactMastery("addition-1-2", 1, 3, 0)
-            ),
-            "subtraction" to listOf(
-                FactMastery("subtraction-2-1", 1, 1, 0),
-                FactMastery("subtraction-2-2", 1, 4, 0)
-            )
-        )
+        val levels = Curriculum.getAllLevels()
+        val progressByLevel = levels.associateWith { level ->
+            level.getAllPossibleFactIds().map { factId ->
+                FactProgress(factId, null)
+            }
+        }
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            items(facts.entries.toList()) { (operation, facts) ->
+            items(progressByLevel.entries.toList()) { (level, facts) ->
                 Text(
-                    text = operation.replaceFirstChar {
-                        if (it.isLowerCase()) it.titlecase(
-                            Locale.getDefault()
-                        ) else it.toString()
-                    },
+                    text = level.id,
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                Heatmap(facts)
+                FactGrid(facts, level.operation)
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }

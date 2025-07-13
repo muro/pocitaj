@@ -15,15 +15,15 @@ import org.junit.runner.RunWith
 class ProgressReportScreenTest : BaseExerciseUiTest() {
 
     @Test
-    fun progressReportScreen_displaysHeatmaps() {
+    fun progressReportScreen_displaysLevelProgress() {
         // GIVEN: A set of facts in the database
         val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
         val factMasteryDao = application.database.factMasteryDao()
         runBlocking {
-            factMasteryDao.upsert(FactMastery("addition-1-1", 1, 5, 0))
-            factMasteryDao.upsert(FactMastery("addition-1-2", 1, 3, 0))
-            factMasteryDao.upsert(FactMastery("subtraction-2-1", 1, 1, 0))
-            factMasteryDao.upsert(FactMastery("subtraction-2-2", 1, 4, 0))
+            factMasteryDao.upsert(FactMastery("ADDITION_1_1", 1, 5, 0))
+            factMasteryDao.upsert(FactMastery("ADDITION_1_2", 1, 3, 0))
+            factMasteryDao.upsert(FactMastery("SUBTRACTION_2_1", 1, 1, 0))
+            factMasteryDao.upsert(FactMastery("SUBTRACTION_2_2", 1, 4, 0))
         }
 
         // WHEN: The user navigates to the progress report screen
@@ -31,8 +31,8 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
         composeTestRule.onNodeWithText("Progress").performClick()
         composeTestRule.waitForIdle()
 
-        // THEN: The heatmaps should be displayed
-        composeTestRule.onNodeWithText("Addition").assertExists()
-        composeTestRule.onNodeWithText("Subtraction").assertExists()
+        // THEN: The progress grids for the levels should be displayed
+        composeTestRule.onNodeWithText("ADD_SUM_5").assertExists()
+        composeTestRule.onNodeWithText("SUB_FROM_5").assertExists()
     }
 }
