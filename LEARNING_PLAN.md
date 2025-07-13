@@ -82,7 +82,7 @@ This document outlines the step-by-step plan to implement the adaptive learning 
 
 ### Phase 3: The Progress Report & UI
 
-**Step 7: Display Progress on Exercise Setup Screen**
+**Step 7: Display Progress on Exercise Setup Screen [DONE]**
 *   **Purpose:** To give the user a quick visual of their progress.
 *   **Action:**
     *   Update the setup screen's ViewModel to query the `FactMastery` DAO and calculate the overall mastery percentage.
