@@ -28,7 +28,11 @@ open class App : Application() {
         ).build()
         Log.e("App", "onCreate - Created database: $database")
         CoroutineScope(Dispatchers.IO).launch {
-            database.userDao().insert(com.codinglikeapirate.pocitaj.data.User(id = 1, name = "Default User"))
+            if (database.userDao().getUser(1) == null) {
+                Log.e("App", "default user doesn't exist in the DB, creating.")
+                database.userDao()
+                    .insert(com.codinglikeapirate.pocitaj.data.User(id = 1, name = "Default User"))
+            }
         }
     }
 }

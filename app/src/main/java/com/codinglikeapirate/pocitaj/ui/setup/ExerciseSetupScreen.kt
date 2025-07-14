@@ -86,6 +86,7 @@ fun ExerciseSetupScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
+        Spacer(modifier = Modifier.height(32.dp))
         Row {
             // Title
             Text("Choose Your Challenge", style = MaterialTheme.typography.headlineMedium)
