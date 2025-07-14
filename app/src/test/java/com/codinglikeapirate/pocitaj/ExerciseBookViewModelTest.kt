@@ -4,12 +4,10 @@ import com.codinglikeapirate.pocitaj.data.ExerciseConfig
 import com.codinglikeapirate.pocitaj.data.ExerciseSource
 import com.codinglikeapirate.pocitaj.logic.Addition
 import com.codinglikeapirate.pocitaj.logic.Exercise
-import com.codinglikeapirate.pocitaj.logic.Subtraction
 import com.codinglikeapirate.pocitaj.ui.exercise.AnswerResult
 import com.codinglikeapirate.pocitaj.ui.exercise.ExerciseBookViewModel
 import com.codinglikeapirate.pocitaj.ui.exercise.ResultStatus
 import com.codinglikeapirate.pocitaj.ui.exercise.UiState
-import com.google.mlkit.vision.digitalink.Ink
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

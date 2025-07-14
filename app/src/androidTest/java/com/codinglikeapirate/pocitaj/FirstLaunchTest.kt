@@ -1,9 +1,7 @@
 package com.codinglikeapirate.pocitaj
 
-import androidx.test.platform.app.InstrumentationRegistry
 import com.codinglikeapirate.pocitaj.logic.Addition
 import com.codinglikeapirate.pocitaj.logic.Exercise
-import org.junit.After
 import org.junit.Test
 
 class FirstLaunchTest : BaseExerciseUiTest() {

@@ -13,10 +13,8 @@ import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.data.User
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.runBlocking
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 
 class HistoryScreenTest : BaseExerciseUiTest() {
 
@@ -39,7 +37,7 @@ class HistoryScreenTest : BaseExerciseUiTest() {
 
         runBlocking {
             if (application.database.userDao().getUser(1) == null) {
-                assertTrue(false);
+                assertTrue(false)
                 Log.e("HistoryScreenTest", "User with ID 1 not found in the database.")
             }
         }
@@ -103,7 +101,7 @@ class HistoryScreenTest : BaseExerciseUiTest() {
         val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
         runBlocking {
             if (application.database.userDao().getUser(1) == null) {
-                assertTrue(false);
+                assertTrue(false)
                 Log.e("HistoryScreenTest", "User with ID 1 not found in the database.")
             }
         }
