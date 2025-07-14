@@ -1,5 +1,6 @@
 package com.codinglikeapirate.pocitaj.ui.history
 
+import android.content.res.Configuration
 import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -44,7 +45,10 @@ fun HistoryScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(stringResource(id = R.string.no_history_yet))
+            Text(
+                stringResource(id = R.string.no_history_yet),
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     } else {
         HistoryList(history = history)
@@ -64,6 +68,7 @@ fun HistoryList(history: Map<String, List<ExerciseAttempt>>) {
                 Text(
                     text = date,
                     style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.surface)
@@ -96,33 +101,89 @@ fun HistoryItem(attempt: ExerciseAttempt) {
                 tint = if (attempt.wasCorrect) Color.Green else Color.Red
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "${attempt.problemText} = ${attempt.submittedAnswer}")
+            Text(
+                text = "${attempt.problemText} = ${attempt.submittedAnswer}",
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
         Column(horizontalAlignment = Alignment.End) {
-            Text(text = "%.1fs".format(durationInSeconds), style = MaterialTheme.typography.bodySmall)
-            Text(text = time, style = MaterialTheme.typography.bodySmall)
+            Text(
+                text = "%.1fs".format(durationInSeconds),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = time,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
 @Composable
 fun HistoryScreenPreview() {
     AppTheme {
         val history = mapOf(
             "Jul 13, 2025" to listOf(
-                ExerciseAttempt(problemText = "2 + 2", submittedAnswer = 4, wasCorrect = true, correctAnswer = 4, durationMs = 1000, timestamp = System.currentTimeMillis(), userId = 1, logicalOperation = Operation.ADDITION),
-                ExerciseAttempt(problemText = "3 + 3", submittedAnswer = 5, wasCorrect = false, correctAnswer = 6, durationMs = 2100, timestamp = System.currentTimeMillis() - 1000 * 60 * 5, userId = 1, logicalOperation = Operation.ADDITION),
+                ExerciseAttempt(
+                    problemText = "2 + 2",
+                    submittedAnswer = 4,
+                    wasCorrect = true,
+                    correctAnswer = 4,
+                    durationMs = 1000,
+                    timestamp = System.currentTimeMillis(),
+                    userId = 1,
+                    logicalOperation = Operation.ADDITION
+                ),
+                ExerciseAttempt(
+                    problemText = "3 + 3",
+                    submittedAnswer = 5,
+                    wasCorrect = false,
+                    correctAnswer = 6,
+                    durationMs = 2100,
+                    timestamp = System.currentTimeMillis() - 1000 * 60 * 5,
+                    userId = 1,
+                    logicalOperation = Operation.ADDITION
+                ),
             ),
             "Jul 12, 2025" to listOf(
-                ExerciseAttempt(problemText = "4 + 4", submittedAnswer = 8, wasCorrect = true, correctAnswer = 8, durationMs = 1500, timestamp = System.currentTimeMillis() - 1000 * 60 * 60 * 24, userId = 1, logicalOperation = Operation.ADDITION)
+                ExerciseAttempt(
+                    problemText = "4 + 4",
+                    submittedAnswer = 8,
+                    wasCorrect = true,
+                    correctAnswer = 8,
+                    durationMs = 1500,
+                    timestamp = System.currentTimeMillis() - 1000 * 60 * 60 * 24,
+                    userId = 1,
+                    logicalOperation = Operation.ADDITION
+                )
             )
         )
         HistoryScreen(history = history)
     }
 }
 
-@Preview(showBackground = true)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
 @Composable
 fun HistoryScreenEmptyPreview() {
     AppTheme {

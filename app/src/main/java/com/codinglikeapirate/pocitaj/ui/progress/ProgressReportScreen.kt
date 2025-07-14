@@ -1,5 +1,6 @@
 package com.codinglikeapirate.pocitaj.ui.progress
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -248,7 +249,16 @@ fun FactCell(factProgress: FactProgress?, result: Int, size: androidx.compose.ui
     }
 }
 
-@Preview(showBackground = true)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
 @Composable
 fun ProgressReportScreenPreview() {
     AppTheme {
