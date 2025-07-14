@@ -3,6 +3,7 @@ package com.codinglikeapirate.pocitaj.ui.history
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,9 +26,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.codinglikeapirate.pocitaj.R
 import com.codinglikeapirate.pocitaj.data.ExerciseAttempt
 import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
@@ -37,11 +40,18 @@ import java.util.Locale
 
 @Composable
 fun HistoryScreen(
-    viewModel: HistoryViewModel = viewModel(factory = HistoryViewModelFactory)
+    history: Map<String, List<ExerciseAttempt>>
 ) {
-    val history by viewModel.historyByDate.collectAsState()
-
-    HistoryList(history = history)
+    if (history.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(stringResource(id = R.string.no_history_yet))
+        }
+    } else {
+        HistoryList(history = history)
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -111,6 +121,14 @@ fun HistoryScreenPreview() {
                 ExerciseAttempt(problemText = "4 + 4", submittedAnswer = 8, wasCorrect = true, correctAnswer = 8, durationMs = 1500, timestamp = System.currentTimeMillis() - 1000 * 60 * 60 * 24, userId = 1, logicalOperation = Operation.ADDITION)
             )
         )
-        HistoryList(history = history)
+        HistoryScreen(history = history)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HistoryScreenEmptyPreview() {
+    AppTheme {
+        HistoryScreen(history = emptyMap())
     }
 }

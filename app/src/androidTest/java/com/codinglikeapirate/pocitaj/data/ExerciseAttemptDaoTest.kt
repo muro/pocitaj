@@ -4,7 +4,10 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -14,44 +17,44 @@ import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
 class ExerciseAttemptDaoTest {
+
+    private lateinit var database: AppDatabase
     private lateinit var exerciseAttemptDao: ExerciseAttemptDao
     private lateinit var userDao: UserDao
-    private lateinit var db: AppDatabase
 
     @Before
     fun createDb() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        db = Room.inMemoryDatabaseBuilder(
-            context, AppDatabase::class.java).build()
-        exerciseAttemptDao = db.exerciseAttemptDao()
-        userDao = db.userDao()
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        database = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
+        exerciseAttemptDao = database.exerciseAttemptDao()
+        userDao = database.userDao()
+        runBlocking {
+            userDao.insert(User(id = 1, name = "Default User"))
+        }
     }
 
     @After
-    @Throws(IOException::class)
     fun closeDb() {
-        db.close()
+        database.close()
     }
 
     @Test
-    @Throws(Exception::class)
-    fun insertAndGetAttempt() = runBlocking {
-        val user = User(name = "test_user")
-        val userId = userDao.insert(user)
-
+    fun insertAndGetAttempt() = runTest {
         val attempt = ExerciseAttempt(
-            userId = userId,
+            id = 1,
+            userId = 1,
             timestamp = System.currentTimeMillis(),
-            problemText = "5 + 3",
+            problemText = "2+2",
             logicalOperation = Operation.ADDITION,
-            correctAnswer = 8,
-            submittedAnswer = 8,
+            correctAnswer = 4,
+            submittedAnswer = 4,
             wasCorrect = true,
             durationMs = 1000
         )
         exerciseAttemptDao.insert(attempt)
-        val retrievedAttempts = exerciseAttemptDao.getAttemptsForUser(userId)
-        assertEquals(1, retrievedAttempts.size)
-        assertEquals(attempt.problemText, retrievedAttempts[0].problemText)
+
+        val attempts = exerciseAttemptDao.getAttemptsForUser(1).first()
+        assertEquals(1, attempts.size)
+        assertEquals(attempt, attempts[0])
     }
 }

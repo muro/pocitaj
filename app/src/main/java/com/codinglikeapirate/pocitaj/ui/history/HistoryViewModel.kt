@@ -24,15 +24,12 @@ class HistoryViewModel(
     val historyByDate: StateFlow<Map<String, List<ExerciseAttempt>>> = _historyByDate.asStateFlow()
 
     init {
-        loadHistory()
-    }
-
-    private fun loadHistory() {
         viewModelScope.launch {
-            val history = exerciseAttemptDao.getAttemptsForUser(1) // Assuming user 1
-            _historyByDate.value = history.groupBy {
-                val sdf = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
-                sdf.format(Date(it.timestamp))
+            exerciseAttemptDao.getAttemptsForUser(1).collect { history ->
+                _historyByDate.value = history.groupBy {
+                    val sdf = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+                    sdf.format(Date(it.timestamp))
+                }
             }
         }
     }

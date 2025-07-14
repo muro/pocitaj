@@ -4,6 +4,7 @@ import com.codinglikeapirate.pocitaj.logic.Curriculum
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.codinglikeapirate.pocitaj.logic.ExerciseProvider
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
@@ -26,7 +27,7 @@ class AdaptiveExerciseSource internal constructor(
             Curriculum.getAllLevels()
         }
         val userMastery = runBlocking {
-            factMasteryDao.getAllFactsForUser(userId).associateBy { it.factId }
+            factMasteryDao.getAllFactsForUser(userId).first().associateBy { it.factId }
         }
         exerciseProvider = ExerciseProvider(filteredCurriculum, userMastery)
     }
@@ -39,7 +40,7 @@ class AdaptiveExerciseSource internal constructor(
             userId: Long = 1L
         ): AdaptiveExerciseSource {
             val userMastery = withContext(Dispatchers.IO) {
-                factMasteryDao.getAllFactsForUser(userId).associateBy { it.factId }
+                factMasteryDao.getAllFactsForUser(userId).first().associateBy { it.factId }
             }
             val exerciseProvider = ExerciseProvider(Curriculum.getAllLevels(), userMastery)
             return AdaptiveExerciseSource(factMasteryDao, exerciseAttemptDao, userDao, userId, exerciseProvider)

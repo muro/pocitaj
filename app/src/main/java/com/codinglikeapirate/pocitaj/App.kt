@@ -3,10 +3,11 @@ package com.codinglikeapirate.pocitaj
 import android.app.Application
 import android.util.Log
 import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.codinglikeapirate.pocitaj.data.AppDatabase
 import com.codinglikeapirate.pocitaj.data.ExerciseSource
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 open class App : Application() {
     lateinit var inkModelManager: InkModelManager
@@ -17,19 +18,17 @@ open class App : Application() {
     val isExerciseSourceInitialized: Boolean
         get() = ::exerciseSource.isInitialized
 
-    val database: AppDatabase by lazy {
-        Log.e("PocitajApplication", "database - lazy")
-        Room.databaseBuilder(
+    lateinit var database: AppDatabase
+
+    override fun onCreate() {
+        super.onCreate()
+        database = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java, "pocitaj-db"
-        ).addCallback(object : RoomDatabase.Callback() {
-            override fun onCreate(db: SupportSQLiteDatabase) {
-                super.onCreate(db)
-                // Pre-populate the database with a default user using raw SQL
-                // to avoid the circular dependency on the 'database' lazy property.
-                db.execSQL("INSERT INTO user (id, name) VALUES (1, 'Default User')")
-            }
-        })
-            .build()
+        ).build()
+        Log.e("App", "onCreate - Created database: $database")
+        CoroutineScope(Dispatchers.IO).launch {
+            database.userDao().insert(com.codinglikeapirate.pocitaj.data.User(id = 1, name = "Default User"))
+        }
     }
 }

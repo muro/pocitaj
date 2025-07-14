@@ -27,54 +27,52 @@ class ProgressReportViewModel(
     val operationProgress: StateFlow<Map<Operation, OperationProgress>> = _operationProgress.asStateFlow()
 
     init {
-        loadProgress()
-    }
-
-    private fun loadProgress() {
         viewModelScope.launch {
-            val masteredFacts = factMasteryDao.getAllFactsForUser(1).associateBy { it.factId }
-            val allLevels = Curriculum.getAllLevels()
+            factMasteryDao.getAllFactsForUser(1).collect { masteredFactsList ->
+                val masteredFacts = masteredFactsList.associateBy { it.factId }
+                val allLevels = Curriculum.getAllLevels()
 
-            // Calculate level-specific progress
-            val levelsToDisplay = allLevels.filter { level ->
-                allLevels.none { otherLevel ->
-                    level != otherLevel &&
-                            level.operation == otherLevel.operation &&
-                            otherLevel.getAllPossibleFactIds().size > level.getAllPossibleFactIds().size &&
-                            otherLevel.getAllPossibleFactIds().toSet().containsAll(level.getAllPossibleFactIds().toSet())
+                // Calculate level-specific progress
+                val levelsToDisplay = allLevels.filter { level ->
+                    allLevels.none { otherLevel ->
+                        level != otherLevel &&
+                                level.operation == otherLevel.operation &&
+                                otherLevel.getAllPossibleFactIds().size > level.getAllPossibleFactIds().size &&
+                                otherLevel.getAllPossibleFactIds().toSet().containsAll(level.getAllPossibleFactIds().toSet())
+                    }
                 }
+                val progressByLevelMap = mutableMapOf<Level, List<FactProgress>>()
+                for (level in levelsToDisplay) {
+                    val allFactIdsForLevel = level.getAllPossibleFactIds()
+                    val progressForLevel = allFactIdsForLevel.map { factId ->
+                        FactProgress(factId, masteredFacts[factId])
+                    }
+                    if (progressForLevel.isNotEmpty()) {
+                        progressByLevelMap[level] = progressForLevel
+                    }
+                }
+                _progressByLevel.value = progressByLevelMap
+
+                // Calculate operation-specific progress
+                val operationProgressMap = mutableMapOf<Operation, OperationProgress>()
+                for (operation in Operation.entries) {
+                    val levelsForOperation = allLevels.filter { it.operation == operation }
+                    if (levelsForOperation.isEmpty()) continue
+
+                    val allFactsForOperation = levelsForOperation.flatMap { it.getAllPossibleFactIds() }.toSet()
+                    val masteredFactsForOperation = masteredFacts.values.filter { it.factId.startsWith(operation.name) }.count { it.strength >= 5 }
+
+                    val progress = if (allFactsForOperation.isNotEmpty()) {
+                        masteredFactsForOperation.toFloat() / allFactsForOperation.size
+                    } else {
+                        0f
+                    }
+                    val isMastered = progress >= 1.0f
+
+                    operationProgressMap[operation] = OperationProgress(progress, isMastered)
+                }
+                _operationProgress.value = operationProgressMap
             }
-            val progressByLevelMap = mutableMapOf<Level, List<FactProgress>>()
-            for (level in levelsToDisplay) {
-                val allFactIdsForLevel = level.getAllPossibleFactIds()
-                val progressForLevel = allFactIdsForLevel.map { factId ->
-                    FactProgress(factId, masteredFacts[factId])
-                }
-                if (progressForLevel.isNotEmpty()) {
-                    progressByLevelMap[level] = progressForLevel
-                }
-            }
-            _progressByLevel.value = progressByLevelMap
-
-            // Calculate operation-specific progress
-            val operationProgressMap = mutableMapOf<Operation, OperationProgress>()
-            for (operation in Operation.entries) {
-                val levelsForOperation = allLevels.filter { it.operation == operation }
-                if (levelsForOperation.isEmpty()) continue
-
-                val allFactsForOperation = levelsForOperation.flatMap { it.getAllPossibleFactIds() }.toSet()
-                val masteredFactsForOperation = masteredFacts.values.filter { it.factId.startsWith(operation.name) }.count { it.strength >= 5 }
-
-                val progress = if (allFactsForOperation.isNotEmpty()) {
-                    masteredFactsForOperation.toFloat() / allFactsForOperation.size
-                } else {
-                    0f
-                }
-                val isMastered = progress >= 1.0f
-
-                operationProgressMap[operation] = OperationProgress(progress, isMastered)
-            }
-            _operationProgress.value = operationProgressMap
         }
     }
 }

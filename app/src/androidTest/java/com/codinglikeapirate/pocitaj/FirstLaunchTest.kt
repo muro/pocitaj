@@ -8,12 +8,6 @@ import org.junit.Test
 
 class FirstLaunchTest : BaseExerciseUiTest() {
 
-    @After
-    fun tearDown() {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        context.deleteDatabase("pocitaj-db")
-    }
-
     @Test
     fun whenNoUserExists_completingExercise_doesNotCrash() {
         // 1. Set a dummy exercise

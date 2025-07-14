@@ -35,7 +35,7 @@ class FactMasteryDaoTest {
 
     @Test
     @Throws(Exception::class)
-    fun upsertAndGetFactMastery() = runBlocking {
+    fun upsertAndGetFactMasteryMastery() = runBlocking {
         val user = User(name = "test_user")
         val userId = userDao.insert(user)
 

@@ -21,6 +21,8 @@ import com.codinglikeapirate.pocitaj.ui.exercise.NavigationEvent
 import com.codinglikeapirate.pocitaj.ui.exercise.ResultsScreen
 import com.codinglikeapirate.pocitaj.ui.exercise.UiState
 import com.codinglikeapirate.pocitaj.ui.history.HistoryScreen
+import com.codinglikeapirate.pocitaj.ui.history.HistoryViewModel
+import com.codinglikeapirate.pocitaj.ui.history.HistoryViewModelFactory
 import com.codinglikeapirate.pocitaj.ui.progress.ProgressReportScreen
 import com.codinglikeapirate.pocitaj.ui.progress.ProgressReportViewModel
 import com.codinglikeapirate.pocitaj.ui.progress.ProgressReportViewModelFactory
@@ -69,6 +71,7 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val exerciseViewModel: ExerciseBookViewModel = viewModel(factory = ExerciseBookViewModelFactory)
     val progressReportViewModel: ProgressReportViewModel = viewModel(factory = ProgressReportViewModelFactory)
+    val historyViewModel: HistoryViewModel = viewModel(factory = HistoryViewModelFactory)
 
     LaunchedEffect(Unit) {
         exerciseViewModel.navigationEvents.collect { event ->
@@ -136,7 +139,8 @@ fun AppNavigation() {
             )
         }
         composable(route = Destinations.HISTORY_ROUTE) {
-            HistoryScreen()
+            val history by historyViewModel.historyByDate.collectAsState()
+            HistoryScreen(history = history)
         }
     }
 }

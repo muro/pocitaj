@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import com.codinglikeapirate.pocitaj.logic.Exercise
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 
@@ -39,6 +40,12 @@ abstract class BaseExerciseUiTest {
                 .onAllNodesWithText("Choose Your Challenge")
                 .fetchSemanticsNodes().size == 1
         }
+    }
+
+    @After
+    fun tearDown() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        // context.deleteDatabase("pocitaj-db")
     }
 
     fun navigateToOperation(operationSymbol: String) {
