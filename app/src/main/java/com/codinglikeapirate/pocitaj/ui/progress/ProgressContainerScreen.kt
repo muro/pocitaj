@@ -1,5 +1,6 @@
 package com.codinglikeapirate.pocitaj.ui.progress
 
+import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,20 +15,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.codinglikeapirate.pocitaj.R
 import com.codinglikeapirate.pocitaj.data.ExerciseAttempt
 import com.codinglikeapirate.pocitaj.logic.Level
 import com.codinglikeapirate.pocitaj.ui.history.HistoryScreen
+import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ProgressContainerScreen(
     progressByLevel: Map<Level, List<FactProgress>>,
-    history: Map<String, List<ExerciseAttempt>>
+    history: Map<String, List<ExerciseAttempt>>,
+    initialPage: Int = 0
 ) {
-    val pagerState = rememberPagerState(pageCount = { 2 })
+    val pagerState = rememberPagerState(pageCount = { 2 }, initialPage = initialPage)
     val coroutineScope = rememberCoroutineScope()
 
     Column {
@@ -54,12 +58,52 @@ fun ProgressContainerScreen(
         }
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.weight(1f).testTag("swipeableTabsPager")
+            modifier = Modifier
+                .weight(1f)
+                .testTag("swipeableTabsPager")
         ) { page ->
             when (page) {
                 0 -> ProgressReportScreen(progressByLevel = progressByLevel, onHistoryClicked = {})
                 1 -> HistoryScreen(history = history)
             }
         }
+    }
+}
+
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
+@Composable
+fun ProgressContainerScreenPreview() {
+    AppTheme {
+        val progressByLevel = mapOf<Level, List<FactProgress>>()
+        val history = mapOf<String, List<ExerciseAttempt>>()
+        ProgressContainerScreen(progressByLevel = progressByLevel, history = history)
+    }
+}
+
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
+@Composable
+fun ProgressContainerScreenHistoryPreview() {
+    AppTheme {
+        val progressByLevel = mapOf<Level, List<FactProgress>>()
+        val history = mapOf<String, List<ExerciseAttempt>>()
+        ProgressContainerScreen(progressByLevel = progressByLevel, history = history, initialPage = 1)
     }
 }

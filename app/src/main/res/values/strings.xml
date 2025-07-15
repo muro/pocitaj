@@ -10,4 +10,5 @@
     <string name="no_history_yet">No history yet.</string>
     <string name="progress_tab">Progress</string>
     <string name="history_tab">History</string>
+    <string name="no_progress_yet">No progress data yet.</string>
 </resources>

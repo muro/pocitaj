@@ -48,7 +48,9 @@ fun ProgressReportScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text("No progress data yet.")
+            Text(
+                stringResource(id = R.string.no_progress_yet),
+                color = MaterialTheme.colorScheme.onSurface)
         }
     } else {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -305,6 +307,24 @@ fun ProgressReportScreenPreview() {
             }
         }
 
+        ProgressReportScreen(progressByLevel = progressByLevel, onHistoryClicked = {})
+    }
+}
+
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
+@Composable
+fun EmptyProgressReportScreenPreview() {
+    AppTheme {
+        val progressByLevel = mapOf<Level, List<FactProgress>>()
         ProgressReportScreen(progressByLevel = progressByLevel, onHistoryClicked = {})
     }
 }
