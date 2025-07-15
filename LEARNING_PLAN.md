@@ -1,8 +1,115 @@
-# Adaptive Learning Implementation Plan
+# Project Plan: Arithmetic App Overhaul
 
-This document outlines the step-by-step plan to implement the adaptive learning features described in `LEARNING_MODEL.md`.
+**Goal:** Transform the arithmetic app from a simple random quiz generator into a structured, engaging, and effective learning tool that teaches both accuracy and speed.
 
 ---
+
+## Phase 1: Foundational Rework (Core Logic & UI)
+
+*This phase replaces the old random system with a structured, level-based approach and implements the new single-screen user interface.*
+
+### ### Step 1.1: Define the Learning Structure [DONE]
+
+* **Action:** Create a data structure to define all learning levels.
+* **Details:**
+    * For **Addition** & **Subtraction**: Define concept-based levels like `ADDITION_UP_TO_10`, `ADDITION_UP_TO_20`, `ADDITION_WITH_CARRYING`.
+    * For **Multiplication** & **Division**: Define number-based levels for each table from 1 to 12 (e.g., `MULTIPLICATION_TABLE_8`).
+
+### ### Step 1.2: Add Mixed Review & Dependency Logic
+
+* **Action:** Enhance the learning structure with review levels and a prerequisite system.
+* **Details:**
+    * **Mixed Review:** After a user masters a set number of levels (e.g., 3 multiplication tables), automatically create a "Mixed Review" level that combines problems from all of them to ensure long-term retention.
+    * **Level Dependencies:** Define prerequisites for levels (e.g., `ADDITION_UP_TO_20` requires `ADDITION_UP_TO_10`). The UI should show locked levels as grayed out or with a lock icon (🔒) until the prerequisite is met.
+
+### ### Step 1.3: Build the Smart Problem Generator
+
+* **Action:** Update the exercise generation logic to support the new level types.
+* **Details:**
+    * The function should accept a level ID (e.g., `ADDITION_UP_TO_10`, `MIXED_REVIEW_1`) and generate a valid random problem for that level.
+
+### ### Step 1.4: Implement the Expandable Card UI
+
+* **Action:** Build the new main menu using a single-screen layout.
+* **Details:**
+    * Create a list of expandable cards, one for each operation (`+`, `-`, `×`, `÷`).
+    * **Collapsed State:** The card shows the operation name and a summary of progress (e.g., "Multiplication: 3 of 12 tables mastered").
+    * **Expanded State:** Tapping a card expands it to show buttons for all its available levels, including locked and mixed review levels.
+
+### ### Step 1.5: Implement Progress Tracking & Mastery
+
+* **Action:** Create a system to save user progress for each level.
+* **Details:**
+    * Store which levels have been mastered for accuracy.
+    * Define "mastery" as a set condition (e.g., "15 correct answers with no more than 2 mistakes").
+    * When a level is mastered, display a star icon (🌟) next to its button and unlock any dependent levels.
+
+### ### Step 1.6: Connect UI to the Game Logic
+
+* **Action:** Link the new UI to the problem generator.
+* **Details:**
+    * Tapping a level button (e.g., the "8" in the Multiplication card) should start a quiz session using the smart problem generator for that specific level (`MULTIPLICATION_TABLE_8`).
+
+---
+
+## Phase 2: Enhancing Engagement (Speed & Rewards)
+
+*This phase builds on the new foundation by adding time-based challenges to promote memorization and quick recall.*
+
+### ### Step 2.1: Develop the "Speed Challenge" Mode
+
+* **Action:** Create the logic for timed drills.
+* **Details:**
+    * Choose a primary mode:
+        * **Option A (60-Second Dash):** User answers as many questions as possible in 60 seconds. The score is the number of correct answers.
+        * **Option B (Beat the Clock):** User answers a fixed set of questions (e.g., 20). The score is the total time taken.
+    * The challenge should pull questions from a previously mastered level.
+
+### ### Step 2.2: Integrate Speed Challenges into the UI
+
+* **Action:** Add entry points for the new mode.
+* **Details:**
+    * In the expanded card view, for any level that has been mastered (has a 🌟), display a new icon next to it: a stopwatch (⏱️).
+    * Tapping the stopwatch icon starts the "Speed Challenge" for that level.
+
+### ### Step 2.3: Implement a High Score & Reward System
+
+* **Action:** Create a system to track and reward speed.
+* **Details:**
+    * For each level's speed challenge, save the user's best score (their "High Score").
+    * Define performance tiers and reward them with medals (e.g., 🥇 Gold, 🥈 Silver, 🥉 Bronze).
+    * Display the best medal earned next to the stopwatch icon (e.g., ⏱️🥇).
+
+---
+
+## Phase 3: Polishing and Refinement
+
+*This phase adds smaller features that improve the overall learning experience and make the app more delightful to use.*
+
+### ### Step 3.1: Implement "Smart Repetition"
+
+* **Action:** Make the practice sessions more adaptive.
+* **Details:**
+    * When a user gets a problem wrong (e.g., fails $7 \times 8$), add related problems to the current session's queue.
+    * Examples: The commutative problem ($8 \times 7 = ?$), a related easier problem ($7 \times 7 = ?$), or the inverse ($56 \div 7 = ?$).
+
+### ### Step 3.2: Add Problem Variety
+
+* **Action:** Introduce different ways of asking questions.
+* **Details:**
+    * Instead of just `$a + b = ?` format, add:
+        * Fill-in-the-blank problems: `$a + ? = c`
+        * Simple word problems: "You have 5 apples and get 3 more. How many apples in total?"
+
+### ### Step 3.3: Add Audio-Visual Feedback
+
+* **Action:** Make the app more responsive and fun.
+* **Details:**
+    * Add simple, satisfying sound effects for correct and incorrect answers.
+    * Create a special animation or "celebration" screen for when a user masters a level for the first time or achieves a new high score.
+
+---
+# Completed Work
 
 ### Phase 1: The Core Data Layer
 
@@ -108,15 +215,3 @@ This document outlines the step-by-step plan to implement the adaptive learning 
 *   **Purpose:** To connect all the new screens.
 *   **Action:** Add buttons and update the navigation graph to link the setup screen to the progress report and history views.
 *   **Testing:** Update **UI tests** to confirm that clicking the navigation buttons takes the user to the correct screens.
-
----
-
-### Phase 4: Algorithm Tuning & Evaluation
-
-**Step 11: Build a Learning Simulator**
-*   **Purpose:** To rapidly test and evaluate changes to the learning algorithm without needing real user data.
-*   **Action:**
-    *   Create a simulation environment that models a virtual student's learning process.
-    *   The simulator will interact with the `ExerciseProvider` and have configurable parameters (e.g., probability of making a mistake on a new vs. known fact, learning speed).
-    *   Develop scripts or a simple dashboard to visualize the simulated learning progress, identify how the algorithm adapts, and analyze the effectiveness of the "Working Set" and "Spaced Repetition" logic under different conditions.
-*   **Testing:** N/A (internal development tool).

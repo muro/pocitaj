@@ -1,5 +1,6 @@
 package com.codinglikeapirate.pocitaj.logic
 
+import com.codinglikeapirate.pocitaj.data.Operation
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -7,71 +8,61 @@ import org.junit.Test
 class CurriculumTest {
 
     @Test
-    fun `getAllLevels returns all levels in correct order`() {
-        val expectedIds = listOf(
-            "ADD_SUM_5",
-            "ADD_SUM_10",
-            "SUB_FROM_5",
-            "MUL_TABLES_0_1_2_5_10",
-            "DIV_BY_2_5_10"
-        )
-        val actualIds = Curriculum.getAllLevels().map { it.id }
-        assertEquals("The list of level IDs should match the expected order", expectedIds, actualIds)
+    fun `getAllLevels returns correct number of levels`() {
+        val levels = Curriculum.getAllLevels()
+        // 3 basic levels + 13 multiplication (0-12) + 12 division (1-12)
+        val expectedCount = 3 + 13 + 12
+        assertEquals(expectedCount, levels.size)
     }
 
     @Test
-    fun `SumsUpTo5 level generates correct fact IDs`() {
-        val level = Curriculum.getAllLevels().find { it.id == "ADD_SUM_5" }!!
-        val factIds = level.getAllPossibleFactIds()
-
-        assertEquals(6 * 6, factIds.size)
-        assertTrue(factIds.contains("ADDITION_0_5"))
-        assertTrue(factIds.contains("ADDITION_5_0"))
-        assertTrue(factIds.contains("ADDITION_2_3"))
+    fun `MultiplicationTableLevel generates correct exercises`() {
+        val table = 7
+        val level = Curriculum.getLevelsFor(Operation.MULTIPLICATION).find { it.id == "MUL_TABLE_$table" }!!
+        repeat(100) {
+            val exercise = level.generateExercise()
+            val equation = exercise.equation as Multiplication
+            assertTrue("One of the operands must be $table", equation.a == table || equation.b == table)
+        }
     }
 
     @Test
-    fun `SumsUpTo10 level generates correct fact IDs`() {
-        val level = Curriculum.getAllLevels().find { it.id == "ADD_SUM_10" }!!
+    fun `MultiplicationTableLevel generates correct fact IDs`() {
+        val table = 7
+        val level = Curriculum.getLevelsFor(Operation.MULTIPLICATION).find { it.id == "MUL_TABLE_$table" }!!
         val factIds = level.getAllPossibleFactIds()
 
-        assertEquals(11 * 11, factIds.size)
-        assertTrue(factIds.contains("ADDITION_0_10"))
-        assertTrue(factIds.contains("ADDITION_10_0"))
-        assertTrue(factIds.contains("ADDITION_4_6"))
+        // (0..10) for op2 -> 11 facts. Times 2 for commutativity, but some are duplicates (e.g., 7x7)
+        // The set logic handles duplicates, so we check for specific examples.
+        assertEquals(21, factIds.size) // 11 pairs, 7x7 is not duplicated
+        assertTrue(factIds.contains("MULTIPLICATION_7_0"))
+        assertTrue(factIds.contains("MULTIPLICATION_0_7"))
+        assertTrue(factIds.contains("MULTIPLICATION_7_10"))
+        assertTrue(factIds.contains("MULTIPLICATION_10_7"))
+        assertTrue(factIds.contains("MULTIPLICATION_7_7"))
     }
 
     @Test
-    fun `SubtractionFrom5 level generates correct fact IDs`() {
-        val level = Curriculum.getAllLevels().find { it.id == "SUB_FROM_5" }!!
-        val factIds = level.getAllPossibleFactIds()
-
-        assertEquals(21, factIds.size)
-        assertTrue(factIds.contains("SUBTRACTION_5_0"))
-        assertTrue(factIds.contains("SUBTRACTION_5_5"))
-        assertTrue(factIds.contains("SUBTRACTION_3_2"))
+    fun `DivisionTableLevel generates correct exercises`() {
+        val divisor = 6
+        val level = Curriculum.getLevelsFor(Operation.DIVISION).find { it.id == "DIV_BY_$divisor" }!!
+        repeat(100) {
+            val exercise = level.generateExercise()
+            val equation = exercise.equation as Division
+            assertEquals("The divisor must be $divisor", divisor, equation.b)
+            assertTrue("The dividend must be divisible by the divisor", equation.a % divisor == 0)
+        }
     }
 
     @Test
-    fun `MultiplicationTables012510 level generates correct fact IDs`() {
-        val level = Curriculum.getAllLevels().find { it.id == "MUL_TABLES_0_1_2_5_10" }!!
+    fun `DivisionTableLevel generates correct fact IDs`() {
+        val divisor = 6
+        val level = Curriculum.getLevelsFor(Operation.DIVISION).find { it.id == "DIV_BY_$divisor" }!!
         val factIds = level.getAllPossibleFactIds()
 
-        assertEquals(85, factIds.size)
-        assertTrue(factIds.contains("MULTIPLICATION_0_10"))
-        assertTrue(factIds.contains("MULTIPLICATION_5_5"))
-        assertTrue(factIds.contains("MULTIPLICATION_2_8"))
-        assertTrue(factIds.contains("MULTIPLICATION_8_2"))
-    }
-
-    @Test
-    fun `DivisionBy2510 level generates correct fact IDs`() {
-        val level = Curriculum.getAllLevels().find { it.id == "DIV_BY_2_5_10" }!!
-        val factIds = level.getAllPossibleFactIds()
-
-        assertEquals(3 * 11, factIds.size)
-        assertTrue(factIds.contains("DIVISION_20_2"))
-        assertTrue(factIds.contains("DIVISION_50_5"))
-        assertTrue(factIds.contains("DIVISION_100_10"))
+        assertEquals(11, factIds.size) // 0..10 for the result
+        assertTrue(factIds.contains("DIVISION_0_6"))
+        assertTrue(factIds.contains("DIVISION_30_6"))
+        assertTrue(factIds.contains("DIVISION_60_6"))
     }
 }

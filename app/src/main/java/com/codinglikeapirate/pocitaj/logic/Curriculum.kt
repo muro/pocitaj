@@ -71,13 +71,12 @@ object Curriculum {
         }
     }
 
-    private object MultiplicationTables012510 : Level {
-        override val id = "MUL_TABLES_0_1_2_5_10"
+    private class MultiplicationTableLevel(private val table: Int) : Level {
+        override val id = "MUL_TABLE_$table"
         override val operation = Operation.MULTIPLICATION
-        private val tables = listOf(0, 1, 2, 5, 10)
 
         override fun generateExercise(): Exercise {
-            var op1 = tables.random()
+            var op1 = table
             var op2 = Random.nextInt(0, 11)
             if (Random.nextBoolean()) {
                 val temp = op1
@@ -89,34 +88,28 @@ object Curriculum {
 
         override fun getAllPossibleFactIds(): List<String> {
             val facts = mutableSetOf<String>()
-            tables.forEach { op1 ->
-                (0..10).forEach { op2 ->
-                    facts.add("${operation.name}_${op1}_${op2}")
-                    facts.add("${operation.name}_${op2}_${op1}")
-                }
+            (0..10).forEach { op2 ->
+                facts.add("${operation.name}_${table}_${op2}")
+                facts.add("${operation.name}_${op2}_${table}")
             }
             return facts.toList()
         }
     }
 
-    private object DivisionBy2510 : Level {
-        override val id = "DIV_BY_2_5_10"
+    private class DivisionTableLevel(private val divisor: Int) : Level {
+        override val id = "DIV_BY_$divisor"
         override val operation = Operation.DIVISION
-        private val divisors = listOf(2, 5, 10)
 
         override fun generateExercise(): Exercise {
-            val op2 = divisors.random()
             val result = Random.nextInt(0, 11)
-            val op1 = op2 * result
-            return Exercise(Division(op1, op2))
+            val op1 = divisor * result
+            return Exercise(Division(op1, divisor))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return divisors.flatMap { op2 ->
-                (0..10).map { result ->
-                    val op1 = op2 * result
-                    "${operation.name}_${op1}_${op2}"
-                }
+            return (0..10).map { result ->
+                val op1 = divisor * result
+                "${operation.name}_${op1}_${divisor}"
             }
         }
     }
@@ -124,13 +117,14 @@ object Curriculum {
     // --- Public API ---
 
     fun getAllLevels(): List<Level> {
+        val multiplicationLevels = (0..12).map { MultiplicationTableLevel(it) }
+        val divisionLevels = (1..12).map { DivisionTableLevel(it) }
+
         return listOf(
             SumsUpTo5,
             SumsUpTo10,
             SubtractionFrom5,
-            MultiplicationTables012510,
-            DivisionBy2510
-        )
+        ) + multiplicationLevels + divisionLevels
     }
 
     fun getLevelForExercise(exercise: Exercise): Level? {

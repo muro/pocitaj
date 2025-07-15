@@ -42,7 +42,10 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
             .performScrollToNode(hasTestTag("level_card_SUB_FROM_5"))
         composeTestRule.onNodeWithTag("level_card_SUB_FROM_5").assertIsDisplayed()
         composeTestRule.onNodeWithTag("progress_report_list")
-            .performScrollToNode(hasTestTag("level_card_MUL_TABLES_0_1_2_5_10"))
-        composeTestRule.onNodeWithTag("level_card_MUL_TABLES_0_1_2_5_10").assertIsDisplayed()
+            .performScrollToNode(hasTestTag("level_card_MUL_TABLE_6"))
+        composeTestRule.onNodeWithTag("level_card_MUL_TABLE_6").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("progress_report_list")
+            .performScrollToNode(hasTestTag("level_card_DIV_BY_8"))
+        composeTestRule.onNodeWithTag("level_card_DIV_BY_8").assertIsDisplayed()
     }
 }

@@ -137,7 +137,7 @@ class ExerciseProviderTest {
         val exercise = provider.getNextExercise()
 
         val exerciseLevel = Curriculum.getLevelForExercise(exercise)
-        assertEquals("DIV_BY_2_5_10", exerciseLevel?.id)
+        assertEquals("DIV_BY_1", exerciseLevel?.id)
         assertTrue(exercise.equation is Division)
     }
 
