@@ -72,7 +72,8 @@ class HistoryScreenTest : BaseExerciseUiTest() {
 
         // WHEN: The user navigates to the history screen
         composeTestRule.onNodeWithText("Progress").performClick()
-        composeTestRule.onNodeWithText("View History").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText("History").performClick()
         composeTestRule.waitForIdle()
 
         // THEN: The history should be displayed with date headers
@@ -109,7 +110,9 @@ class HistoryScreenTest : BaseExerciseUiTest() {
 
         // WHEN: The user navigates to the history screen
         composeTestRule.onNodeWithText("Progress").performClick()
-        composeTestRule.onNodeWithText("View History").performClick()
+        composeTestRule.waitForIdle()
+        // Can't make the swipes to work in a test
+        composeTestRule.onNodeWithText("History").performClick()
         composeTestRule.waitForIdle()
 
         // THEN: The empty state message should be displayed

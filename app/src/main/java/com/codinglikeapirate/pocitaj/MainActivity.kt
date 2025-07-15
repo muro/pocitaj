@@ -23,7 +23,7 @@ import com.codinglikeapirate.pocitaj.ui.exercise.UiState
 import com.codinglikeapirate.pocitaj.ui.history.HistoryScreen
 import com.codinglikeapirate.pocitaj.ui.history.HistoryViewModel
 import com.codinglikeapirate.pocitaj.ui.history.HistoryViewModelFactory
-import com.codinglikeapirate.pocitaj.ui.progress.ProgressReportScreen
+import com.codinglikeapirate.pocitaj.ui.progress.ProgressContainerScreen
 import com.codinglikeapirate.pocitaj.ui.progress.ProgressReportViewModel
 import com.codinglikeapirate.pocitaj.ui.progress.ProgressReportViewModelFactory
 import com.codinglikeapirate.pocitaj.ui.setup.ExerciseSetupScreen
@@ -131,11 +131,10 @@ fun AppNavigation() {
         }
         composable(route = Destinations.PROGRESS_ROUTE) {
             val progressByLevel by progressReportViewModel.progressByLevel.collectAsState()
-            ProgressReportScreen(
+            val history by historyViewModel.historyByDate.collectAsState()
+            ProgressContainerScreen(
                 progressByLevel = progressByLevel,
-                onHistoryClicked = {
-                    navController.navigate(Destinations.HISTORY_ROUTE)
-                }
+                history = history
             )
         }
         composable(route = Destinations.HISTORY_ROUTE) {
