@@ -132,6 +132,7 @@ fun StandardGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>, operatio
     val opValues = (0..maxOperand).toList()
     val factsMap = factsWithCoords.associateBy { Pair(it.first, it.second) }
 
+    @Suppress("UnusedBoxWithConstraintsScope")
     BoxWithConstraints {
         val spacing = 4.dp
         val totalSpacing = spacing * opValues.size
@@ -172,6 +173,7 @@ fun DivisionGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>) {
     val multipliers = (0..10).toList()
     val factsMap = factsWithCoords.associateBy { Pair(it.first, it.second) }
 
+    @Suppress("UnusedBoxWithConstraintsScope")
     BoxWithConstraints {
         val spacing = 4.dp
         val totalSpacing = spacing * divisors.size
