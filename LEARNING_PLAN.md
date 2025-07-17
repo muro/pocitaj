@@ -86,25 +86,28 @@
 
 *This phase adds smaller features that improve the overall learning experience and make the app more delightful to use.*
 
-### ### Step 3.1: Implement "Smart Repetition"
+### ### Step 3.1 (New): Implement Graceful Error Handling for Review Questions
+*   **Action:** Refine the `ExerciseProvider` logic.
+*   **Details:** If a user makes a mistake on a review question from a *past* level, the system will log the mistake for future review but will **not** force the user to leave their currently selected level.
 
-* **Action:** Make the practice sessions more adaptive.
-* **Details:**
-    * When a user gets a problem wrong (e.g., fails $7 \times 8$), add related problems to the current session's queue.
-    * Examples: The commutative problem ($8 \times 7 = ?$), a related easier problem ($7 \times 7 = ?$), or the inverse ($56 \div 7 = ?$).
+### ### Step 3.2 (New): Implement Proactive Confidence Boosters
+*   **Action:** Further refine the `ExerciseProvider` logic.
+*   **Details:** Implement the intra-level 80/20 split. When practicing a level, occasionally show an easy, already-mastered question from that same level to build confidence.
 
-### ### Step 3.2: Add Problem Variety
+### ### Step 3.3 (New): Implement Reactive Repetition (Smart Repetition)
+*   **Action:** Add stateful logic to the exercise session.
+*   **Details:** When a user gets a problem wrong (e.g., fails $7 \times 8$), add related problems (e.g., $8 \times 7$, $56 \div 7$) to a temporary queue to be shown within the current session.
 
-* **Action:** Introduce different ways of asking questions.
-* **Details:**
+### ### Step 3.4 (Previously 3.2): Add Problem Variety
+*   **Action:** Introduce different ways of asking questions.
+*   **Details:**
     * Instead of just `$a + b = ?` format, add:
         * Fill-in-the-blank problems: `$a + ? = c`
         * Simple word problems: "You have 5 apples and get 3 more. How many apples in total?"
 
-### ### Step 3.3: Add Audio-Visual Feedback
-
-* **Action:** Make the app more responsive and fun.
-* **Details:**
+### ### Step 3.5 (Previously 3.3): Add Audio-Visual Feedback
+*   **Action:** Make the app more responsive and fun.
+*   **Details:**
     * Add simple, satisfying sound effects for correct and incorrect answers.
     * Create a special animation or "celebration" screen for when a user masters a level for the first time or achieves a new high score.
 
