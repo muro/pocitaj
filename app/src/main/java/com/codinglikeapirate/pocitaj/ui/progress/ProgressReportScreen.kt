@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,29 +34,23 @@ import com.codinglikeapirate.pocitaj.data.FactMastery
 import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.data.toSymbol
 import com.codinglikeapirate.pocitaj.logic.Curriculum
-import com.codinglikeapirate.pocitaj.logic.Level
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 
 @Composable
-fun ProgressReportScreen(
-    progressByLevel: Map<Level, List<FactProgress>> = emptyMap(),
-    onHistoryClicked: () -> Unit
-) {
-    if (progressByLevel.isEmpty()) {
+fun ProgressReportScreen(progressByOperation: Map<Operation, List<FactProgress>>) {
+    if (progressByOperation.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 stringResource(id = R.string.no_progress_yet),
-                color = MaterialTheme.colorScheme.onSurface)
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     } else {
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(modifier = Modifier.height(32.dp))
-            Button(onClick = onHistoryClicked, modifier = Modifier.padding(16.dp)) {
-                Text("View History")
-            }
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -65,15 +58,15 @@ fun ProgressReportScreen(
                     .testTag("progress_report_list"),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(progressByLevel.entries.toList()) { (level, facts) ->
-                    Card(modifier = Modifier.testTag("level_card_${level.id}")) {
+                items(progressByOperation.entries.toList()) { (operation, facts) ->
+                    Card(modifier = Modifier.testTag("operation_card_${operation.name}")) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = getLevelTitle(level),
+                                text = getOperationTitle(operation),
                                 style = MaterialTheme.typography.headlineMedium,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
-                            FactGrid(facts, level.operation)
+                            FactGrid(facts, operation)
                         }
                     }
                 }
@@ -83,14 +76,12 @@ fun ProgressReportScreen(
 }
 
 @Composable
-private fun getLevelTitle(level: Level): String {
-    return when (level.id) {
-        "ADD_SUM_5" -> stringResource(R.string.level_sums_up_to_5)
-        "ADD_SUM_10" -> stringResource(R.string.level_sums_up_to_10)
-        "SUB_FROM_5" -> stringResource(R.string.level_subtraction_from_5)
-        "MUL_TABLES_0_1_2_5_10" -> stringResource(R.string.level_multiplication_tables_0_1_2_5_10)
-        "DIV_BY_2_5_10" -> stringResource(R.string.level_division_by_2_5_10)
-        else -> level.id // Fallback to the raw ID
+private fun getOperationTitle(operation: Operation): String {
+    return when (operation) {
+        Operation.ADDITION -> stringResource(R.string.operation_addition)
+        Operation.SUBTRACTION -> stringResource(R.string.operation_subtraction)
+        Operation.MULTIPLICATION -> stringResource(R.string.operation_multiplication)
+        Operation.DIVISION -> stringResource(R.string.operation_division)
     }
 }
 
@@ -268,16 +259,6 @@ fun ProgressReportScreenPreview() {
     AppTheme {
         val allLevels = Curriculum.getAllLevels()
 
-        // Replicate the filtering logic from the ViewModel for an accurate preview
-        val levelsToDisplay = allLevels.filter { level ->
-            allLevels.none { otherLevel ->
-                level != otherLevel &&
-                        level.operation == otherLevel.operation &&
-                        otherLevel.getAllPossibleFactIds().size > level.getAllPossibleFactIds().size &&
-                        otherLevel.getAllPossibleFactIds().toSet().containsAll(level.getAllPossibleFactIds())
-            }
-        }
-
         // Create some fake mastery data for a more realistic preview
         val fakeMasteredFacts = mapOf(
             // Addition
@@ -303,13 +284,15 @@ fun ProgressReportScreenPreview() {
             "DIVISION_25_5" to FactMastery("DIVISION_25_5", 1, 4, 0)  // Learning
         )
 
-        val progressByLevel = levelsToDisplay.associateWith { level ->
-            level.getAllPossibleFactIds().map { factId ->
-                FactProgress(factId, fakeMasteredFacts[factId])
+        val progressByOperation = allLevels
+            .groupBy { it.operation }
+            .mapValues { (_, levels) ->
+                levels.flatMap { it.getAllPossibleFactIds() }.distinct().map { factId ->
+                    FactProgress(factId, fakeMasteredFacts[factId])
+                }
             }
-        }
 
-        ProgressReportScreen(progressByLevel = progressByLevel, onHistoryClicked = {})
+        ProgressReportScreen(progressByOperation = progressByOperation)
     }
 }
 
@@ -326,7 +309,7 @@ fun ProgressReportScreenPreview() {
 @Composable
 fun EmptyProgressReportScreenPreview() {
     AppTheme {
-        val progressByLevel = mapOf<Level, List<FactProgress>>()
-        ProgressReportScreen(progressByLevel = progressByLevel, onHistoryClicked = {})
+        val progressByOperation = mapOf<Operation, List<FactProgress>>()
+        ProgressReportScreen(progressByOperation = progressByOperation)
     }
 }

@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.codinglikeapirate.pocitaj.R
 import com.codinglikeapirate.pocitaj.data.ExerciseAttempt
-import com.codinglikeapirate.pocitaj.logic.Level
+import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.ui.history.HistoryScreen
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import kotlinx.coroutines.launch
@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ProgressContainerScreen(
-    progressByLevel: Map<Level, List<FactProgress>>,
+    progressByOperation: Map<Operation, List<FactProgress>>,
     history: Map<String, List<ExerciseAttempt>>,
     initialPage: Int = 0
 ) {
@@ -63,7 +63,7 @@ fun ProgressContainerScreen(
                 .testTag("swipeableTabsPager")
         ) { page ->
             when (page) {
-                0 -> ProgressReportScreen(progressByLevel = progressByLevel, onHistoryClicked = {})
+                0 -> ProgressReportScreen(progressByOperation = progressByOperation)
                 1 -> HistoryScreen(history = history)
             }
         }
@@ -83,9 +83,7 @@ fun ProgressContainerScreen(
 @Composable
 fun ProgressContainerScreenPreview() {
     AppTheme {
-        val progressByLevel = mapOf<Level, List<FactProgress>>()
-        val history = mapOf<String, List<ExerciseAttempt>>()
-        ProgressContainerScreen(progressByLevel = progressByLevel, history = history)
+        ProgressContainerScreen(progressByOperation = emptyMap(), history = emptyMap())
     }
 }
 
@@ -102,8 +100,6 @@ fun ProgressContainerScreenPreview() {
 @Composable
 fun ProgressContainerScreenHistoryPreview() {
     AppTheme {
-        val progressByLevel = mapOf<Level, List<FactProgress>>()
-        val history = mapOf<String, List<ExerciseAttempt>>()
-        ProgressContainerScreen(progressByLevel = progressByLevel, history = history, initialPage = 1)
+        ProgressContainerScreen(progressByOperation = emptyMap(), history = emptyMap(), initialPage = 1)
     }
 }

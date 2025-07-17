@@ -130,10 +130,10 @@ fun AppNavigation() {
             }
         }
         composable(route = Destinations.PROGRESS_ROUTE) {
-            val progressByLevel by progressReportViewModel.progressByLevel.collectAsState()
+            val progressByOperation by progressReportViewModel.progressByOperation.collectAsState()
             val history by historyViewModel.historyByDate.collectAsState()
             ProgressContainerScreen(
-                progressByLevel = progressByLevel,
+                progressByOperation = progressByOperation,
                 history = history
             )
         }

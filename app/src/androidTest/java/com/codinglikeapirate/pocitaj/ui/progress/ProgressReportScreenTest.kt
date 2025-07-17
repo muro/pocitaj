@@ -4,8 +4,10 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.printToLog
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.codinglikeapirate.pocitaj.BaseExerciseUiTest
@@ -36,16 +38,18 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
         composeTestRule.onNodeWithText("Progress").performClick()
         composeTestRule.waitForIdle()
 
+        composeTestRule.onRoot().printToLog("ProgressReportScreenTest")
+
         // THEN: The progress grids for the levels should be displayed
-        composeTestRule.onNodeWithTag("level_card_ADD_SUM_10").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("operation_card_ADDITION").assertIsDisplayed()
         composeTestRule.onNodeWithTag("progress_report_list")
-            .performScrollToNode(hasTestTag("level_card_SUB_FROM_5"))
-        composeTestRule.onNodeWithTag("level_card_SUB_FROM_5").assertIsDisplayed()
+            .performScrollToNode(hasTestTag("operation_card_SUBTRACTION"))
+        composeTestRule.onNodeWithTag("operation_card_SUBTRACTION").assertIsDisplayed()
         composeTestRule.onNodeWithTag("progress_report_list")
-            .performScrollToNode(hasTestTag("level_card_MUL_TABLE_6"))
-        composeTestRule.onNodeWithTag("level_card_MUL_TABLE_6").assertIsDisplayed()
+            .performScrollToNode(hasTestTag("operation_card_MULTIPLICATION"))
+        composeTestRule.onNodeWithTag("operation_card_MULTIPLICATION").assertIsDisplayed()
         composeTestRule.onNodeWithTag("progress_report_list")
-            .performScrollToNode(hasTestTag("level_card_DIV_BY_8"))
-        composeTestRule.onNodeWithTag("level_card_DIV_BY_8").assertIsDisplayed()
+            .performScrollToNode(hasTestTag("operation_card_DIVISION"))
+        composeTestRule.onNodeWithTag("operation_card_DIVISION").assertIsDisplayed()
     }
 }
