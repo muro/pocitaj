@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,8 +39,11 @@ import com.codinglikeapirate.pocitaj.logic.Curriculum
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 
 @Composable
-fun ProgressReportScreen(progressByOperation: Map<Operation, List<FactProgress>>) {
-    if (progressByOperation.isEmpty()) {
+fun ProgressReportScreen(
+    factProgressByOperation: Map<Operation, List<FactProgress>>,
+    levelProgressByOperation: Map<Operation, Map<String, LevelProgress>>
+) {
+    if (factProgressByOperation.isEmpty() && levelProgressByOperation.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -58,7 +63,7 @@ fun ProgressReportScreen(progressByOperation: Map<Operation, List<FactProgress>>
                     .testTag("progress_report_list"),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(progressByOperation.entries.toList()) { (operation, facts) ->
+                items(Operation.entries.toList()) { operation ->
                     Card(modifier = Modifier.testTag("operation_card_${operation.name}")) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
@@ -66,7 +71,11 @@ fun ProgressReportScreen(progressByOperation: Map<Operation, List<FactProgress>>
                                 style = MaterialTheme.typography.headlineMedium,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
-                            FactGrid(facts, operation)
+                            OperationProgress(
+                                operation = operation,
+                                factProgress = factProgressByOperation[operation] ?: emptyList(),
+                                levelProgress = levelProgressByOperation[operation] ?: emptyMap()
+                            )
                         }
                     }
                 }
@@ -86,8 +95,58 @@ private fun getOperationTitle(operation: Operation): String {
 }
 
 @Composable
-fun FactGrid(facts: List<FactProgress>, operation: Operation) {
-    val factsWithCoords = facts.mapNotNull { factProgress ->
+fun OperationProgress(
+    operation: Operation,
+    factProgress: List<FactProgress>,
+    levelProgress: Map<String, LevelProgress>
+) {
+    when (operation) {
+        Operation.ADDITION, Operation.SUBTRACTION -> {
+            LevelProgressList(levelProgress = levelProgress)
+        }
+        Operation.MULTIPLICATION -> {
+            val factsWithCoords = mapFactsToCoords(factProgress)
+                .filter { (op1, op2, _) -> op1 <= 12 && op2 <= 12 }
+            if (factsWithCoords.isNotEmpty()) {
+                StandardGrid(factsWithCoords, operation)
+            } else {
+                Text("No facts to display for this level.")
+            }
+        }
+        Operation.DIVISION -> {
+            val factsWithCoords = mapFactsToCoords(factProgress)
+                .filter { (_, op2, _) -> op2 != 0 && op2 <= 12 }
+            if (factsWithCoords.isNotEmpty()) {
+                DivisionGrid(factsWithCoords)
+            } else {
+                Text("No facts to display for this level.")
+            }
+        }
+    }
+}
+
+@Composable
+fun LevelProgressList(levelProgress: Map<String, LevelProgress>) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        levelProgress.forEach { (levelId, progress) ->
+            Column {
+                Text(
+                    text = levelId, // You might want to map this to a more user-friendly name
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                LinearProgressIndicator(
+                    progress = { progress.progress },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+
+private fun mapFactsToCoords(facts: List<FactProgress>): List<Triple<Int, Int, FactProgress>> {
+    return facts.mapNotNull { factProgress ->
         val parts = factProgress.factId.split('_')
         if (parts.size == 3) {
             val op1 = parts[1].toIntOrNull()
@@ -101,24 +160,13 @@ fun FactGrid(facts: List<FactProgress>, operation: Operation) {
             null
         }
     }
-
-    if (factsWithCoords.isEmpty()) {
-        Text("No facts to display for this level.")
-        return
-    }
-
-    if (operation == Operation.DIVISION) {
-        DivisionGrid(factsWithCoords)
-    } else {
-        StandardGrid(factsWithCoords, operation)
-    }
 }
 
 @Composable
 fun StandardGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>, operation: Operation) {
     val maxOp1 = factsWithCoords.maxOfOrNull { it.first } ?: 0
     val maxOp2 = factsWithCoords.maxOfOrNull { it.second } ?: 0
-    val maxOperand = maxOf(maxOp1, maxOp2)
+    val maxOperand = maxOf(maxOp1, maxOp2, 10) // Ensure grid is at least 10x10
 
     val opValues = (0..maxOperand).toList()
     val factsMap = factsWithCoords.associateBy { Pair(it.first, it.second) }
@@ -284,7 +332,7 @@ fun ProgressReportScreenPreview() {
             "DIVISION_25_5" to FactMastery("DIVISION_25_5", 1, 4, 0)  // Learning
         )
 
-        val progressByOperation = allLevels
+        val factProgressByOperation = allLevels
             .groupBy { it.operation }
             .mapValues { (_, levels) ->
                 levels.flatMap { it.getAllPossibleFactIds() }.distinct().map { factId ->
@@ -292,7 +340,27 @@ fun ProgressReportScreenPreview() {
                 }
             }
 
-        ProgressReportScreen(progressByOperation = progressByOperation)
+        val levelProgressByOperation = allLevels
+            .groupBy { it.operation }
+            .mapValues { (_, levels) ->
+                levels.associate { level ->
+                    val levelFacts = level.getAllPossibleFactIds()
+                    val masteredCount = levelFacts.count { factId ->
+                        (fakeMasteredFacts[factId]?.strength ?: 0) >= 5
+                    }
+                    val progress = if (levelFacts.isNotEmpty()) {
+                        masteredCount.toFloat() / levelFacts.size
+                    } else {
+                        0f
+                    }
+                    level.id to LevelProgress(progress, progress >= 1.0f)
+                }
+            }
+
+        ProgressReportScreen(
+            factProgressByOperation = factProgressByOperation,
+            levelProgressByOperation = levelProgressByOperation
+        )
     }
 }
 
@@ -309,7 +377,9 @@ fun ProgressReportScreenPreview() {
 @Composable
 fun EmptyProgressReportScreenPreview() {
     AppTheme {
-        val progressByOperation = mapOf<Operation, List<FactProgress>>()
-        ProgressReportScreen(progressByOperation = progressByOperation)
+        ProgressReportScreen(
+            factProgressByOperation = emptyMap(),
+            levelProgressByOperation = emptyMap()
+        )
     }
 }

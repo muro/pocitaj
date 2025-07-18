@@ -10,8 +10,8 @@ class CurriculumTest {
     @Test
     fun `getAllLevels returns correct number of levels`() {
         val levels = Curriculum.getAllLevels()
-        // 3 basic levels + 13 multiplication (0-12) + 12 division (1-12)
-        val expectedCount = 3 + 13 + 12
+        // 6 Addition + 6 Subtraction + 13 multiplication (0-12) + 10 division (1-10)
+        val expectedCount = 6 + 6 + 13 + 10
         assertEquals(expectedCount, levels.size)
     }
 
@@ -34,11 +34,11 @@ class CurriculumTest {
 
         // (0..10) for op2 -> 11 facts. Times 2 for commutativity, but some are duplicates (e.g., 7x7)
         // The set logic handles duplicates, so we check for specific examples.
-        assertEquals(21, factIds.size) // 11 pairs, 7x7 is not duplicated
+        assertEquals(25, factIds.size) // 12 pairs, 7x7 is not duplicated
         assertTrue(factIds.contains("MULTIPLICATION_7_0"))
         assertTrue(factIds.contains("MULTIPLICATION_0_7"))
-        assertTrue(factIds.contains("MULTIPLICATION_7_10"))
-        assertTrue(factIds.contains("MULTIPLICATION_10_7"))
+        assertTrue(factIds.contains("MULTIPLICATION_7_12"))
+        assertTrue(factIds.contains("MULTIPLICATION_12_7"))
         assertTrue(factIds.contains("MULTIPLICATION_7_7"))
     }
 

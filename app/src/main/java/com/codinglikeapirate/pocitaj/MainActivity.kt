@@ -98,7 +98,6 @@ fun AppNavigation() {
         startDestination = Destinations.HOME_ROUTE
     ) {
         composable(route = Destinations.HOME_ROUTE) {
-            val operationProgress by progressReportViewModel.operationProgress.collectAsState()
             ExerciseSetupScreen(
                 onStartClicked = { operation, count, difficulty ->
                     val config = ExerciseConfig(operation.name, difficulty, count)
@@ -106,8 +105,7 @@ fun AppNavigation() {
                 },
                 onProgressClicked = {
                     navController.navigate(Destinations.PROGRESS_ROUTE)
-                },
-                operationProgress = operationProgress
+                }
             )
         }
         composable(route = Destinations.EXERCISE_ROUTE) {
@@ -130,10 +128,12 @@ fun AppNavigation() {
             }
         }
         composable(route = Destinations.PROGRESS_ROUTE) {
-            val progressByOperation by progressReportViewModel.progressByOperation.collectAsState()
+            val factProgressByOperation by progressReportViewModel.factProgressByOperation.collectAsState()
+            val levelProgressByOperation by progressReportViewModel.levelProgressByOperation.collectAsState()
             val history by historyViewModel.historyByDate.collectAsState()
             ProgressContainerScreen(
-                progressByOperation = progressByOperation,
+                factProgressByOperation = factProgressByOperation,
+                levelProgressByOperation = levelProgressByOperation,
                 history = history
             )
         }

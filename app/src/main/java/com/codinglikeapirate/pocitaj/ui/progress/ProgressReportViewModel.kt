@@ -9,37 +9,41 @@ import com.codinglikeapirate.pocitaj.data.FactMastery
 import com.codinglikeapirate.pocitaj.data.FactMasteryDao
 import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.logic.Curriculum
+import com.codinglikeapirate.pocitaj.logic.Level
+import com.codinglikeapirate.pocitaj.ui.progress.OperationProgress
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-// TODO: this class is not useful, it duplicates the factId
 data class FactProgress(
     val factId: String,
     val mastery: FactMastery?
 )
 
-data class OperationProgress(val progress: Float, val isMastered: Boolean)
+data class LevelProgress(
+    val progress: Float,
+    val isMastered: Boolean
+)
 
 class ProgressReportViewModel(
     factMasteryDao: FactMasteryDao
 ) : ViewModel() {
 
-    val progressByOperation: StateFlow<Map<Operation, List<FactProgress>>> =
+    private val allFactsByOperation = Curriculum.getAllLevels()
+        .flatMap { level ->
+            level.getAllPossibleFactIds().map { factId ->
+                level.operation to factId
+            }
+        }
+        .groupBy({ it.first }) { it.second }
+        .mapValues { (_, factIds) -> factIds.distinct() }
+
+    val factProgressByOperation: StateFlow<Map<Operation, List<FactProgress>>> =
         factMasteryDao.getAllFactsForUser(1) // Assuming user ID 1
             .map { masteryList ->
                 val masteryMap = masteryList.associateBy { it.factId }
-                val allFactsByOperation = Curriculum.getAllLevels()
-                    .flatMap { level ->
-                        level.getAllPossibleFactIds().map { factId ->
-                            level.operation to factId
-                        }
-                    }
-                    .groupBy({ it.first }) { it.second }
-                    .mapValues { (_, factIds) -> factIds.distinct() }
-
-                allFactsByOperation.mapValues { (_, factIds) ->
+                allFactsByOperation.mapValues { (operation, factIds) ->
                     factIds.map { factId ->
                         FactProgress(factId, masteryMap[factId])
                     }
@@ -48,22 +52,34 @@ class ProgressReportViewModel(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyMap()
+                initialValue = Operation.entries.associateWith { emptyList() }
             )
 
-    val operationProgress: StateFlow<Map<Operation, OperationProgress>> =
-        progressByOperation.map { progressMap ->
-            progressMap.mapValues { (_, facts) ->
-                val masteredCount = facts.count { (it.mastery?.strength ?: 0) >= 5 }
-                val progress = if (facts.isNotEmpty()) masteredCount.toFloat() / facts.size else 0f
-                OperationProgress(progress, progress >= 1.0f)
+    val levelProgressByOperation: StateFlow<Map<Operation, Map<String, LevelProgress>>> =
+        factMasteryDao.getAllFactsForUser(1) // Assuming user ID 1
+            .map { masteryList ->
+                val masteryMap = masteryList.associateBy { it.factId }
+                Curriculum.getAllLevels().groupBy { it.operation }
+                    .mapValues { (_, levels) ->
+                        levels.associate { level ->
+                            val levelFacts = level.getAllPossibleFactIds()
+                            val masteredCount = levelFacts.count { factId ->
+                                (masteryMap[factId]?.strength ?: 0) >= 5
+                            }
+                            val progress = if (levelFacts.isNotEmpty()) {
+                                masteredCount.toFloat() / levelFacts.size
+                            } else {
+                                0f
+                            }
+                            level.id to LevelProgress(progress, progress >= 1.0f)
+                        }
+                    }
             }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyMap()
-        )
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyMap()
+            )
 }
 
 object ProgressReportViewModelFactory : ViewModelProvider.Factory {

@@ -27,7 +27,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ProgressContainerScreen(
-    progressByOperation: Map<Operation, List<FactProgress>>,
+    factProgressByOperation: Map<Operation, List<FactProgress>>,
+    levelProgressByOperation: Map<Operation, Map<String, LevelProgress>>,
     history: Map<String, List<ExerciseAttempt>>,
     initialPage: Int = 0
 ) {
@@ -63,7 +64,10 @@ fun ProgressContainerScreen(
                 .testTag("swipeableTabsPager")
         ) { page ->
             when (page) {
-                0 -> ProgressReportScreen(progressByOperation = progressByOperation)
+                0 -> ProgressReportScreen(
+                    factProgressByOperation = factProgressByOperation,
+                    levelProgressByOperation = levelProgressByOperation
+                )
                 1 -> HistoryScreen(history = history)
             }
         }
@@ -83,7 +87,11 @@ fun ProgressContainerScreen(
 @Composable
 fun ProgressContainerScreenPreview() {
     AppTheme {
-        ProgressContainerScreen(progressByOperation = emptyMap(), history = emptyMap())
+        ProgressContainerScreen(
+            factProgressByOperation = emptyMap(),
+            levelProgressByOperation = emptyMap(),
+            history = emptyMap()
+        )
     }
 }
 
@@ -100,6 +108,11 @@ fun ProgressContainerScreenPreview() {
 @Composable
 fun ProgressContainerScreenHistoryPreview() {
     AppTheme {
-        ProgressContainerScreen(progressByOperation = emptyMap(), history = emptyMap(), initialPage = 1)
+        ProgressContainerScreen(
+            factProgressByOperation = emptyMap(),
+            levelProgressByOperation = emptyMap(),
+            history = emptyMap(),
+            initialPage = 1
+        )
     }
 }

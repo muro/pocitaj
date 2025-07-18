@@ -1,23 +1,26 @@
 package com.codinglikeapirate.pocitaj.ui.progress
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.*
-import org.junit.rules.TestWatcher
-import org.junit.runner.Description
 import app.cash.turbine.test
 import com.codinglikeapirate.pocitaj.data.FactMastery
 import com.codinglikeapirate.pocitaj.data.FactMasteryDao
 import com.codinglikeapirate.pocitaj.data.Operation
+import com.codinglikeapirate.pocitaj.logic.Curriculum.SumsUpTo5
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
-
+import org.junit.rules.TestWatcher
+import org.junit.runner.Description
 
 // This rule replaces the main dispatcher with a test dispatcher
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -62,49 +65,93 @@ class ProgressReportViewModelTest {
     }
 
     @Test
-    fun `itemCount correctly reflects number of items from dao`() = runTest {
+    fun `flows emit correct progress data`() = runTest {
         // ARRANGE
         val fakeDao = FakeFactMasteryDao()
         val viewModel = ProgressReportViewModel(fakeDao)
+        val facts = listOf(
+            FactMastery("ADDITION_1_1", 1, 5, 5), // Mastered
+            FactMastery("MULTIPLICATION_2_3", 1, 3, 4) // Learning
+        )
 
-        // ACT & ASSERT using Turbine
-        viewModel.operationProgress.test {
-            // StateFlow<Map<Operation, List<FactProgress>>>
-            // Check the initial state
-            assertEquals(0, awaitItem().size)
+        // ACT & ASSERT for factProgressByOperation
+        viewModel.factProgressByOperation.test {
+            // Initial state check
+            val initialFactProgress = awaitItem()
+            assertEquals(4, initialFactProgress.size)
+            assertTrue(initialFactProgress.values.all { it.isEmpty() })
 
-            // Push a new list from the fake DAO
-            // List<FactMastery>
-            fakeDao.emit(listOf(
-                FactMastery("ADDITION_1_1", 1, 5, 5),
-                FactMastery("ADDITION_1_2", 1, 5, 5),
-                FactMastery("ADDITION_1_3", 1, 5, 5),
-                FactMastery("ADDITION_1_4", 1, 5, 5),
-                FactMastery("ADDITION_1_5", 1, 5, 5),
-                FactMastery("ADDITION_1_6", 1, 5, 5),
-                FactMastery("ADDITION_1_7", 1, 5, 5),
-                FactMastery("ADDITION_1_8", 1, 5, 5),
-                FactMastery("ADDITION_1_9", 1, 5, 5),
-                FactMastery("ADDITION_1_10", 1, 5, 5),
-                FactMastery("ADDITION_1_11", 1, 5, 5),
+            // State after emitting facts
+            fakeDao.emit(facts)
 
-                FactMastery("MULTIPLICATION_1_1", 1, 5, 3),
-                FactMastery("MULTIPLICATION_1_2", 1, 5, 3),
-                FactMastery("MULTIPLICATION_1_3", 1, 5, 3),
-                FactMastery("MULTIPLICATION_1_4", 1, 5, 3),
-                FactMastery("MULTIPLICATION_1_5", 1, 5, 3),
-                FactMastery("MULTIPLICATION_1_6", 1, 5, 3),
-                FactMastery("MULTIPLICATION_1_3", 1, 5, 3)))
-            val operationProgress = awaitItem()
-            assertEquals(4, operationProgress.size)
-            val additionProgress = operationProgress[Operation.ADDITION]!!.progress
-            assertTrue("Expected 0.08 <= $additionProgress <= 0.09",
-                additionProgress >= 0.08 && additionProgress <= 0.09)
-            assertFalse(operationProgress[Operation.ADDITION]!!.isMastered)
-            val multiplicationProgress = operationProgress[Operation.MULTIPLICATION]!!.progress
-            assertTrue("Expected 0.03 <= $multiplicationProgress <= 0.04",
-                multiplicationProgress >= 0.03 && multiplicationProgress <= 0.04)
-            assertFalse(operationProgress[Operation.MULTIPLICATION]!!.isMastered)
+            val updatedFactProgress = awaitItem()
+            assertEquals(4, updatedFactProgress.size)
+
+            val additionFacts = updatedFactProgress[Operation.MULTIPLICATION]
+            assertNotNull(additionFacts)
+            for (f in additionFacts!!) {
+                println(f)
+            }
+            assertEquals(169, additionFacts!!.size)
+            val masteredFact = additionFacts.find { it.factId == "MULTIPLICATION_2_3" }
+            assertNotNull(masteredFact)
+            assertEquals(3, masteredFact!!.mastery!!.strength)
+        }
+
+        // ACT & ASSERT for levelProgressByOperation
+        viewModel.levelProgressByOperation.test {
+            // Initial state check
+            val initialLevelProgress = awaitItem()
+            assertEquals(0, initialLevelProgress.size)
+
+            // State after emitting facts
+            fakeDao.emit(facts)
+
+            val updatedLevelProgress = awaitItem()
+            assertEquals(4, updatedLevelProgress.size)
+
+            val additionLevels = updatedLevelProgress[Operation.ADDITION]
+            assertNotNull(additionLevels)
+            val sumsUpTo5Progress = additionLevels!![SumsUpTo5.id]
+            assertNotNull(sumsUpTo5Progress)
+            assertTrue(sumsUpTo5Progress!!.progress > 0)
+        }
+    }
+
+    @Test
+    fun `level progress`() = runTest {
+        // ARRANGE
+        val fakeDao = FakeFactMasteryDao()
+        val viewModel = ProgressReportViewModel(fakeDao)
+        val facts = listOf(
+            FactMastery("ADDITION_1_1", 1, 5, 5), // Mastered
+            FactMastery("ADDITION_1_3", 1, 5, 5), // Mastered
+            FactMastery("ADDITION_3_1", 1, 5, 5), // Mastered
+        )
+
+        // ACT & ASSERT for levelProgressByOperation
+        viewModel.levelProgressByOperation.test {
+            // Initial state check
+            val initialLevelProgress = awaitItem()
+            assertEquals(0, initialLevelProgress.size)
+
+            // State after emitting facts
+            fakeDao.emit(facts)
+
+            val updatedLevelProgress = awaitItem()
+            assertEquals(4, updatedLevelProgress.size)
+
+            val additionLevels = updatedLevelProgress[Operation.ADDITION]!!
+            assertNotNull(additionLevels)
+
+            assertTrue(additionLevels.containsKey("ADD_SUM_5"))
+            val s5 = additionLevels["ADD_SUM_5"]!!
+            assertTrue(3/25 <= s5.progress)
+            assertTrue(additionLevels.containsKey("ADD_SUM_10"))
+            val s10 = additionLevels["ADD_SUM_10"]!!
+            assertTrue(0.03 <= s10.progress)
+            assertTrue(additionLevels.containsKey("ADD_TWO_DIGIT_CARRY"))
+            assertEquals(0.0f, additionLevels["ADD_TWO_DIGIT_CARRY"]!!.progress)
         }
     }
 }
