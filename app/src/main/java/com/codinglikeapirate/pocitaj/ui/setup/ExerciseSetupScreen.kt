@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -94,6 +95,7 @@ fun OperationCard(
     ) {
         Column(
             modifier = Modifier
+                .fillMaxWidth()
                 .background(gradient)
                 .clickable { expanded = !expanded }
                 .padding(16.dp)
@@ -119,15 +121,18 @@ fun OperationCard(
 
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(top = 16.dp)) {
-                    Button(
+                    StyledLevelButton(
+                        text = "Practice (Smart)",
                         onClick = { onStartClicked(null) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Practice (Smart)")
-                    }
+                        isUnlocked = true
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
                     operationLevels.levels.forEach { levelState ->
-                        LevelButton(levelStatus = levelState, onClick = { onStartClicked(levelState.level.id) })
+                        StyledLevelButton(
+                            text = "${levelState.level.id} ${"🌟".repeat(levelState.starRating)}",
+                            onClick = { onStartClicked(levelState.level.id) },
+                            isUnlocked = levelState.isUnlocked
+                        )
                     }
                 }
             }
@@ -136,17 +141,22 @@ fun OperationCard(
 }
 
 @Composable
-fun LevelButton(levelStatus: LevelStatus, onClick: () -> Unit) {
+fun StyledLevelButton(text: String, onClick: () -> Unit, isUnlocked: Boolean) {
     Button(
         onClick = onClick,
-        enabled = levelStatus.isUnlocked,
+        enabled = isUnlocked,
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f),
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
     ) {
-        Text(
-            text = "${levelStatus.level.id} ${"🌟".repeat(levelStatus.starRating)}"
-        )
+        Text(text = text)
     }
 }
 
