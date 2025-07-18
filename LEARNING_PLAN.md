@@ -22,7 +22,7 @@
     * **Mixed Review:** After a user masters a set number of levels (e.g., 3 multiplication tables), automatically create a "Mixed Review" level that combines problems from all of them to ensure long-term retention.
     * **Level Dependencies:** Define prerequisites for levels (e.g., `ADDITION_UP_TO_20` requires `ADDITION_UP_TO_10`). The UI should show locked levels as grayed out or with a lock icon (🔒) until the prerequisite is met.
 
-### ### Step 1.3: Build the Smart Problem Generator
+### ### Step 1.3: Build the Smart Problem Generator [DONE]
 
 * **Action:** Update the exercise generation logic to support the new level types.
 * **Details:**
