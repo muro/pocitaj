@@ -61,16 +61,15 @@ class ExerciseSetupViewModelTest {
     }
 
     @Test
-    fun `uiState correctly reflects mastery and unlocked status`() = runTest {
-        viewModel.uiState.test {
+    fun `operationLevels correctly reflects mastery and unlocked status`() = runTest {
+        viewModel.operationLevels.test {
             // 1. Initial state: Should eventually contain the full curriculum
             // The flow initializes with an empty list, so we skip that first emission.
             skipItems(1)
 
             val initialState = awaitItem()
-            val initialAddLevels = initialState.operations.find { it.operation == Operation.ADDITION }?.levels
-            assertTrue(initialAddLevels != null)
-            assertTrue(initialAddLevels!!.find { it.level.id == "ADD_SUM_5" }!!.isUnlocked)
+            val initialAddLevels = initialState.find { it.operation == Operation.ADDITION }!!.levels
+            assertTrue(initialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.isUnlocked)
             assertFalse(initialAddLevels.find { it.level.id == "ADD_SUM_10" }!!.isUnlocked)
             assertFalse(initialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.isMastered)
 
@@ -82,7 +81,7 @@ class ExerciseSetupViewModelTest {
 
             // 3. New state: First level is mastered, second is unlocked
             val updatedState = awaitItem()
-            val updatedAddLevels = updatedState.operations.find { it.operation == Operation.ADDITION }!!.levels
+            val updatedAddLevels = updatedState.find { it.operation == Operation.ADDITION }!!.levels
             assertTrue(updatedAddLevels.find { it.level.id == "ADD_SUM_5" }!!.isMastered)
             assertTrue(updatedAddLevels.find { it.level.id == "ADD_SUM_10" }!!.isUnlocked)
             assertFalse(updatedAddLevels.find { it.level.id == "ADD_SUM_20" }!!.isUnlocked)

@@ -14,23 +14,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-data class LevelUiState(
+data class LevelStatus(
     val level: Level,
     val isUnlocked: Boolean,
     val isMastered: Boolean
 )
 
-data class OperationUiState(
+data class OperationLevels(
     val operation: Operation,
-    val levels: List<LevelUiState>
+    val levels: List<LevelStatus>
 )
 
-data class ExerciseSetupUiState(
-    val operations: List<OperationUiState>
-)
-
-// TODO: make it no longer an open class - it's only here to make a preview work
-open class ExerciseSetupViewModel(
+class ExerciseSetupViewModel(
     factMasteryDao: FactMasteryDao
 ) : ViewModel() {
 
@@ -38,8 +33,7 @@ open class ExerciseSetupViewModel(
         private const val MASTERY_STRENGTH = 5
     }
 
-    // TODO: make it no longer open - it's only here to make a preview work
-    open val uiState: StateFlow<ExerciseSetupUiState> =
+    val operationLevels: StateFlow<List<OperationLevels>> =
         factMasteryDao.getAllFactsForUser(1) // Assuming user ID 1
             .map { masteryList ->
                 val masteredFacts = masteryList.filter { it.strength >= MASTERY_STRENGTH }.map { it.factId }.toSet()
@@ -48,20 +42,19 @@ open class ExerciseSetupViewModel(
                     level.getAllPossibleFactIds().all { it in masteredFacts }
                 }.map { it.id }.toSet()
 
-                val operations = allLevels.groupBy { it.operation }.map { (op, levels) ->
+                allLevels.groupBy { it.operation }.map { (op, levels) ->
                     val levelStates = levels.map { level ->
                         val isMastered = level.id in masteredLevelIds
                         val isUnlocked = level.prerequisites.all { it in masteredLevelIds }
-                        LevelUiState(level, isUnlocked, isMastered)
+                        LevelStatus(level, isUnlocked, isMastered)
                     }
-                    OperationUiState(op, levelStates)
+                    OperationLevels(op, levelStates)
                 }
-                ExerciseSetupUiState(operations)
             }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue = ExerciseSetupUiState(emptyList())
+                initialValue = emptyList()
             )
 }
 

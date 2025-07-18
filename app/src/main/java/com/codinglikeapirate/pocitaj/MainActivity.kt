@@ -72,6 +72,7 @@ fun AppNavigation() {
     val exerciseViewModel: ExerciseViewModel = viewModel(factory = ExerciseViewModelFactory)
     val progressReportViewModel: ProgressReportViewModel = viewModel(factory = ProgressReportViewModelFactory)
     val historyViewModel: HistoryViewModel = viewModel(factory = HistoryViewModelFactory)
+    val exerciseSetupViewModel: com.codinglikeapirate.pocitaj.ui.setup.ExerciseSetupViewModel = viewModel(factory = com.codinglikeapirate.pocitaj.ui.setup.ExerciseSetupViewModelFactory)
 
     LaunchedEffect(Unit) {
         exerciseViewModel.navigationEvents.collect { event ->
@@ -98,7 +99,9 @@ fun AppNavigation() {
         startDestination = Destinations.HOME_ROUTE
     ) {
         composable(route = Destinations.HOME_ROUTE) {
+            val operationLevels by exerciseSetupViewModel.operationLevels.collectAsState()
             ExerciseSetupScreen(
+                operationLevels = operationLevels,
                 onStartClicked = { operation, count, difficulty, levelId ->
                     val config = ExerciseConfig(operation, difficulty, count, levelId)
                     exerciseViewModel.startExercises(config)
