@@ -9,7 +9,12 @@ import com.codinglikeapirate.pocitaj.logic.Exercise
  * @param difficulty A parameter to control the complexity of exercises (e.g., numbers up to 10).
  * @param count The total number of exercises in the set.
  */
-data class ExerciseConfig(val type: String, val difficulty: Int, val count: Int)
+data class ExerciseConfig(
+    val operation: Operation,
+    val difficulty: Int,
+    val count: Int,
+    val levelId: String? = null
+)
 
 enum class ExerciseType(val id: String) {
     ADDITION("addition"),

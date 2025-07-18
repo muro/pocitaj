@@ -75,7 +75,7 @@ class ExerciseBookViewModel(
             exercisesRemaining = exerciseConfig.count
             advanceToNextExercise()
             if (currentExercise != null) {
-                _navigationEvents.emit(NavigationEvent.NavigateToExercise(exerciseConfig.type))
+                _navigationEvents.emit(NavigationEvent.NavigateToExercise(exerciseConfig.operation.name))
             }
         }
     }

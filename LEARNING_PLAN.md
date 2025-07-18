@@ -15,7 +15,7 @@
     * For **Addition** & **Subtraction**: Define concept-based levels like `ADDITION_UP_TO_10`, `ADDITION_UP_TO_20`, `ADDITION_WITH_CARRYING`.
     * For **Multiplication** & **Division**: Define number-based levels for each table from 1 to 12 (e.g., `MULTIPLICATION_TABLE_8`).
 
-### ### Step 1.2: Add Mixed Review & Dependency Logic
+### ### Step 1.2: Add Mixed Review & Dependency Logic [DONE]
 
 * **Action:** Enhance the learning structure with review levels and a prerequisite system.
 * **Details:**

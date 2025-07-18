@@ -1,5 +1,6 @@
 package com.codinglikeapirate.pocitaj.ui.exercise
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -54,11 +55,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.codinglikeapirate.pocitaj.R
 import com.codinglikeapirate.pocitaj.data.ExerciseConfig
+import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.logic.Equation
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.codinglikeapirate.pocitaj.logic.Subtraction
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import com.codinglikeapirate.pocitaj.ui.theme.motion
+import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
 import com.google.mlkit.vision.digitalink.Ink.Stroke
@@ -354,6 +357,7 @@ fun ExerciseScreen(exercise: Exercise,
     }
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_NO,
     showBackground = true,
@@ -368,8 +372,19 @@ fun ExerciseScreen(exercise: Exercise,
 fun PreviewExerciseScreen() {
     val equation: Equation = Subtraction(14, 2)
     val exercise = Exercise(equation, equation.getExpectedResult())
-    val viewModel : ExerciseBookViewModel = viewModel()
-    viewModel.startExercises(ExerciseConfig("subtraction", 12, 10))
+    val mockInkModelManager = object : com.codinglikeapirate.pocitaj.InkModelManager {
+        override fun setModel(languageTag: String): String = "Model set"
+        override fun deleteActiveModel(): com.google.android.gms.tasks.Task<String?> = Tasks.forResult(null)
+        override fun download(): com.google.android.gms.tasks.Task<String?> = Tasks.forResult(null)
+        override suspend fun recognizeInk(ink: Ink, hint: String): String = "12"
+    }
+    val mockExerciseSource = object : com.codinglikeapirate.pocitaj.data.ExerciseSource {
+        override fun initialize(config: ExerciseConfig) {}
+        override suspend fun getNextExercise(): Exercise? = null
+        override suspend fun recordAttempt(exercise: Exercise, submittedAnswer: Int, durationMs: Long) {}
+    }
+    val viewModel = ExerciseBookViewModel(mockInkModelManager, mockExerciseSource)
+    viewModel.startExercises(ExerciseConfig(Operation.SUBTRACTION, 12, 10))
 
     AppTheme {
         ExerciseScreen(exercise, viewModel) {_: String, _: Int -> }
