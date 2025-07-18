@@ -14,9 +14,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.codinglikeapirate.pocitaj.data.ExerciseConfig
 import com.codinglikeapirate.pocitaj.logic.Exercise
+import com.codinglikeapirate.pocitaj.ui.exercise.ExerciseScreen
 import com.codinglikeapirate.pocitaj.ui.exercise.ExerciseViewModel
 import com.codinglikeapirate.pocitaj.ui.exercise.ExerciseViewModelFactory
-import com.codinglikeapirate.pocitaj.ui.exercise.ExerciseScreen
 import com.codinglikeapirate.pocitaj.ui.exercise.NavigationEvent
 import com.codinglikeapirate.pocitaj.ui.exercise.ResultsScreen
 import com.codinglikeapirate.pocitaj.ui.exercise.UiState

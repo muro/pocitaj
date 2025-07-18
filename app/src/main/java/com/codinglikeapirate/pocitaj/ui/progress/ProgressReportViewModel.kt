@@ -9,8 +9,6 @@ import com.codinglikeapirate.pocitaj.data.FactMastery
 import com.codinglikeapirate.pocitaj.data.FactMasteryDao
 import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.logic.Curriculum
-import com.codinglikeapirate.pocitaj.logic.Level
-import com.codinglikeapirate.pocitaj.ui.progress.OperationProgress
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
