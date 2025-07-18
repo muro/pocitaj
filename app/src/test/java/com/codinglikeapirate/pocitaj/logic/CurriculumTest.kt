@@ -2,6 +2,7 @@ package com.codinglikeapirate.pocitaj.logic
 
 import com.codinglikeapirate.pocitaj.data.Operation
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -10,8 +11,8 @@ class CurriculumTest {
     @Test
     fun `getAllLevels returns correct number of levels`() {
         val levels = Curriculum.getAllLevels()
-        // 6 Addition + 6 Subtraction + 13 multiplication (0-12) + 10 division (1-10)
-        val expectedCount = 6 + 6 + 13 + 10
+        // 6 Addition + 6 Subtraction + 13 multiplication (0-12) + 10 division (1-10) + 8 mixed review
+        val expectedCount = 6 + 6 + 13 + 10 + 8
         assertEquals(expectedCount, levels.size)
     }
 
@@ -64,5 +65,37 @@ class CurriculumTest {
         assertTrue(factIds.contains("DIVISION_0_6"))
         assertTrue(factIds.contains("DIVISION_30_6"))
         assertTrue(factIds.contains("DIVISION_60_6"))
+    }
+
+    @Test
+    fun `MixedReviewLevel combines facts and prerequisites correctly`() {
+        // ARRANGE: Use existing levels from the Curriculum
+        val level1 = Curriculum.SumsUpTo5
+        val level2 = Curriculum.SumsUpTo10
+        val mixedLevel = MixedReviewLevel("MIXED_TEST", Operation.ADDITION, listOf(level1, level2))
+
+        // ACT & ASSERT
+
+        // 1. Check prerequisites
+        val expectedPrerequisites = setOf(level1.id, level2.id)
+        assertEquals(expectedPrerequisites, mixedLevel.prerequisites)
+
+        // 2. Check combined fact IDs
+        val expectedFactIds = level1.getAllPossibleFactIds() + level2.getAllPossibleFactIds()
+        assertEquals(expectedFactIds.toSet(), mixedLevel.getAllPossibleFactIds().toSet())
+
+        // 3. Check exercise generation to ensure both levels are represented
+        val generatedLevelIds = mutableSetOf<String>()
+        repeat(200) { // Generate enough exercises to reasonably expect a mix
+            val exercise = mixedLevel.generateExercise()
+            val level = Curriculum.getLevelForExercise(exercise)
+            assertNotNull("Generated exercise must belong to a level", level)
+            generatedLevelIds.add(level!!.id)
+        }
+        assertEquals(
+            "Generated exercises should come from both source levels",
+            expectedPrerequisites,
+            generatedLevelIds
+        )
     }
 }

@@ -292,7 +292,7 @@ object Curriculum {
 
 
     // --- Multiplication ---
-    class MultiplicationTableLevel(private val table: Int) : Level {
+    class MultiplicationTableLevel(val table: Int) : Level {
         override val id = "MUL_TABLE_$table"
         override val operation = Operation.MULTIPLICATION
         override val prerequisites: Set<String> = emptySet()
@@ -319,7 +319,7 @@ object Curriculum {
     }
 
     // --- Division ---
-    class DivisionTableLevel(private val divisor: Int) : Level {
+    class DivisionTableLevel(val divisor: Int) : Level {
         override val id = "DIV_BY_$divisor"
         override val operation = Operation.DIVISION
         override val prerequisites: Set<String> = emptySet()
@@ -341,25 +341,76 @@ object Curriculum {
     // --- Public API ---
 
     fun getAllLevels(): List<Level> {
-        val multiplicationLevels = (0..12).map { MultiplicationTableLevel(it) }
-        val divisionLevels = (1..10).map { DivisionTableLevel(it) }
-
-        return listOf(
-            // Addition
+        val additionLevels = listOf(
             SumsUpTo5,
             SumsUpTo10,
             SumsUpTo20,
             AddingTens,
             TwoDigitAdditionNoCarry,
-            TwoDigitAdditionWithCarry,
-            // Subtraction
+            TwoDigitAdditionWithCarry
+        )
+
+        val subtractionLevels = listOf(
             SubtractionFrom5,
             SubtractionFrom10,
             SubtractionFrom20,
             SubtractingTens,
             TwoDigitSubtractionNoBorrow,
-            TwoDigitSubtractionWithBorrow,
-        ) + multiplicationLevels + divisionLevels
+            TwoDigitSubtractionWithBorrow
+        )
+
+        val multiplicationLevels = (0..12).map { MultiplicationTableLevel(it) }
+        val divisionLevels = (1..10).map { DivisionTableLevel(it) }
+
+        val mulTableMap = multiplicationLevels.associateBy { it.table }
+        val divTableMap = divisionLevels.associateBy { it.divisor }
+
+        val mixedReviewLevels = listOf(
+            MixedReviewLevel(
+                "ADD_REVIEW_1",
+                Operation.ADDITION,
+                listOf(SumsUpTo5, SumsUpTo10)
+            ),
+            MixedReviewLevel(
+                "SUB_REVIEW_1",
+                Operation.SUBTRACTION,
+                listOf(SubtractionFrom5, SubtractionFrom10)
+            ),
+            // Multiplication Reviews
+            MixedReviewLevel(
+                "MUL_REVIEW_2_5_10",
+                Operation.MULTIPLICATION,
+                listOfNotNull(mulTableMap[2], mulTableMap[5], mulTableMap[10])
+            ),
+            MixedReviewLevel(
+                "MUL_REVIEW_2_4_8",
+                Operation.MULTIPLICATION,
+                listOfNotNull(mulTableMap[2], mulTableMap[4], mulTableMap[8])
+            ),
+            MixedReviewLevel(
+                "MUL_REVIEW_2_3_6_9",
+                Operation.MULTIPLICATION,
+                listOfNotNull(mulTableMap[2], mulTableMap[3], mulTableMap[6], mulTableMap[9])
+            ),
+            // Division Reviews
+            MixedReviewLevel(
+                "DIV_REVIEW_2_5_10",
+                Operation.DIVISION,
+                listOfNotNull(divTableMap[2], divTableMap[5], divTableMap[10])
+            ),
+            MixedReviewLevel(
+                "DIV_REVIEW_2_4_8",
+                Operation.DIVISION,
+                listOfNotNull(divTableMap[2], divTableMap[4], divTableMap[8])
+            ),
+            MixedReviewLevel(
+                "DIV_REVIEW_2_3_6_9",
+                Operation.DIVISION,
+                listOfNotNull(divTableMap[2], divTableMap[3], divTableMap[6], divTableMap[9])
+            )
+        )
+
+        return additionLevels + subtractionLevels + multiplicationLevels + divisionLevels + mixedReviewLevels
     }
 
     fun getLevelForExercise(exercise: Exercise): Level? {
