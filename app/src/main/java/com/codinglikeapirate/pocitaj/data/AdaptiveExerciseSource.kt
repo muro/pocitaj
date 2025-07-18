@@ -21,10 +21,10 @@ class AdaptiveExerciseSource internal constructor(
     override fun initialize(config: ExerciseConfig) {
         currentOperation = config.operation
         // Re-create the exercise provider with a filtered curriculum
-        val filteredCurriculum = if (currentOperation != null) {
-            Curriculum.getAllLevels().filter { it.operation == currentOperation }
+        val filteredCurriculum = if (config.levelId != null) {
+            Curriculum.getAllLevels().filter { it.id == config.levelId }
         } else {
-            Curriculum.getAllLevels()
+            Curriculum.getAllLevels().filter { it.operation == currentOperation }
         }
         val userMastery = runBlocking {
             factMasteryDao.getAllFactsForUser(userId).first().associateBy { it.factId }
