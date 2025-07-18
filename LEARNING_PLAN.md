@@ -28,7 +28,7 @@
 * **Details:**
     * The function should accept a level ID (e.g., `ADDITION_UP_TO_10`, `MIXED_REVIEW_1`) and generate a valid random problem for that level.
 
-### ### Step 1.4: Implement the Expandable Card UI
+### ### Step 1.4: Implement the Expandable Card UI [DONE]
 
 * **Action:** Build the new main menu using a single-screen layout.
 * **Details:**
