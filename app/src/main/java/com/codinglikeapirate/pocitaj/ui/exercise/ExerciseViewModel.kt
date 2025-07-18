@@ -40,7 +40,7 @@ sealed class NavigationEvent {
     data object NavigateBackToHome : NavigationEvent()
 }
 
-class ExerciseBookViewModel(
+class ExerciseViewModel(
     private val inkModelManager: InkModelManager,
     private val exerciseSource: ExerciseSource
 ) : ViewModel() {
@@ -174,11 +174,11 @@ class ExerciseBookViewModel(
     }
 }
 
-object ExerciseBookViewModelFactory : ViewModelProvider.Factory {
+object ExerciseViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
         val application = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as App
-        return ExerciseBookViewModel(
+        return ExerciseViewModel(
             inkModelManager = application.inkModelManager,
             exerciseSource = application.exerciseSource
         ) as T

@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.codinglikeapirate.pocitaj.R
 import com.codinglikeapirate.pocitaj.data.ExerciseConfig
 import com.codinglikeapirate.pocitaj.data.Operation
@@ -72,7 +71,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun InkRecognitionBox(
     modifier: Modifier = Modifier,
-    viewModel: ExerciseBookViewModel,
+    viewModel: ExerciseViewModel,
     hint: String
 ) {
     val recognitionDelayMillis = 1_000L
@@ -178,7 +177,7 @@ fun InkRecognitionBox(
 
 @Composable
 fun ExerciseScreen(exercise: Exercise,
-                   viewModel: ExerciseBookViewModel,
+                   viewModel: ExerciseViewModel,
                    onAnswerSubmit: (String, Int) -> Unit) {
 
     val backgroundAll: ImageBitmap = ImageBitmap.imageResource(id = R.drawable.paper_top)
@@ -383,7 +382,7 @@ fun PreviewExerciseScreen() {
         override suspend fun getNextExercise(): Exercise? = null
         override suspend fun recordAttempt(exercise: Exercise, submittedAnswer: Int, durationMs: Long) {}
     }
-    val viewModel = ExerciseBookViewModel(mockInkModelManager, mockExerciseSource)
+    val viewModel = ExerciseViewModel(mockInkModelManager, mockExerciseSource)
     viewModel.startExercises(ExerciseConfig(Operation.SUBTRACTION, 12, 10))
 
     AppTheme {

@@ -6,7 +6,7 @@ import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.logic.Addition
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.codinglikeapirate.pocitaj.ui.exercise.AnswerResult
-import com.codinglikeapirate.pocitaj.ui.exercise.ExerciseBookViewModel
+import com.codinglikeapirate.pocitaj.ui.exercise.ExerciseViewModel
 import com.codinglikeapirate.pocitaj.ui.exercise.ResultStatus
 import com.codinglikeapirate.pocitaj.ui.exercise.UiState
 import io.mockk.coEvery
@@ -25,9 +25,9 @@ import org.junit.Before
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
-class ExerciseBookViewModelTest {
+class ExerciseViewModelTest {
 
-    private lateinit var viewModel: ExerciseBookViewModel
+    private lateinit var viewModel: ExerciseViewModel
     private lateinit var inkModelManager: InkModelManager
     private lateinit var exerciseSource: ExerciseSource
 
@@ -38,7 +38,7 @@ class ExerciseBookViewModelTest {
         Dispatchers.setMain(testDispatcher)
         inkModelManager = mockk(relaxed = true)
         exerciseSource = mockk(relaxed = true)
-        viewModel = ExerciseBookViewModel(inkModelManager, exerciseSource)
+        viewModel = ExerciseViewModel(inkModelManager, exerciseSource)
     }
 
     @After

@@ -14,8 +14,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.codinglikeapirate.pocitaj.data.ExerciseConfig
 import com.codinglikeapirate.pocitaj.logic.Exercise
-import com.codinglikeapirate.pocitaj.ui.exercise.ExerciseBookViewModel
-import com.codinglikeapirate.pocitaj.ui.exercise.ExerciseBookViewModelFactory
+import com.codinglikeapirate.pocitaj.ui.exercise.ExerciseViewModel
+import com.codinglikeapirate.pocitaj.ui.exercise.ExerciseViewModelFactory
 import com.codinglikeapirate.pocitaj.ui.exercise.ExerciseScreen
 import com.codinglikeapirate.pocitaj.ui.exercise.NavigationEvent
 import com.codinglikeapirate.pocitaj.ui.exercise.ResultsScreen
@@ -69,7 +69,7 @@ object Destinations {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val exerciseViewModel: ExerciseBookViewModel = viewModel(factory = ExerciseBookViewModelFactory)
+    val exerciseViewModel: ExerciseViewModel = viewModel(factory = ExerciseViewModelFactory)
     val progressReportViewModel: ProgressReportViewModel = viewModel(factory = ProgressReportViewModelFactory)
     val historyViewModel: HistoryViewModel = viewModel(factory = HistoryViewModelFactory)
 
