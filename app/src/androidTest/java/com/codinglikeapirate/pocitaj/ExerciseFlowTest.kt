@@ -173,5 +173,10 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         // 5. Verify that the correct feedback is shown
         verifyFeedback(FeedbackType.CORRECT)
     }
+
+    // TODO: Create a new test file (e.g., "LevelSelectionTest.kt") that does not rely on the
+    //       ExerciseBook test double. This new test should verify that clicking a specific
+    //       level button on the ExerciseSetupScreen correctly starts a session with exercises
+    //       only from that level.
 }
 

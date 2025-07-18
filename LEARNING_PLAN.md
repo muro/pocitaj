@@ -46,7 +46,7 @@
     * **3 Stars:** Awarded for 100% mastery.
     * The `LevelButton` in the UI will be updated to display the 0-3 stars.
 
-### ### Step 1.6: Connect UI to the Game Logic
+### ### Step 1.6: Connect UI to the Game Logic [DONE]
 
 * **Action:** Link the new UI to the problem generator.
 * **Details:**
