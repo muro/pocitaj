@@ -36,13 +36,15 @@
     * **Collapsed State:** The card shows the operation name and a summary of progress (e.g., "Multiplication: 3 of 12 tables mastered").
     * **Expanded State:** Tapping a card expands it to show buttons for all its available levels, including locked and mixed review levels.
 
-### ### Step 1.5: Implement Progress Tracking & Mastery
+### ### Step 1.5: Implement 0-3 Star Progress System [DONE]
 
-* **Action:** Create a system to save user progress for each level.
+* **Action:** Create a clear, motivating 0-3 star rating system for each level.
 * **Details:**
-    * Store which levels have been mastered for accuracy.
-    * Define "mastery" as a set condition (e.g., "15 correct answers with no more than 2 mistakes").
-    * When a level is mastered, display a star icon (🌟) next to its button and unlock any dependent levels.
+    * The star rating is a direct reflection of the level's mastery progress bar.
+    * **1 Star:** Awarded for >60% mastery.
+    * **2 Stars:** Awarded for >90% mastery.
+    * **3 Stars:** Awarded for 100% mastery.
+    * The `LevelButton` in the UI will be updated to display the 0-3 stars.
 
 ### ### Step 1.6: Connect UI to the Game Logic
 
@@ -110,6 +112,12 @@
 *   **Details:**
     * Add simple, satisfying sound effects for correct and incorrect answers.
     * Create a special animation or "celebration" screen for when a user masters a level for the first time or achieves a new high score.
+
+### ### Step 3.6 (New): Add "New Star" Celebration
+*   **Action:** Add a celebration animation to the Results Screen when a user earns a new star.
+*   **Details:**
+    * The `ExerciseViewModel` will be updated to track the star rating before and after a session.
+    * The `ResultsScreen` will display a special animation if a new star is earned.
 
 ---
 # Completed Work

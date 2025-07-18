@@ -145,7 +145,7 @@ fun LevelButton(levelStatus: LevelStatus, onClick: () -> Unit) {
             .padding(vertical = 4.dp)
     ) {
         Text(
-            text = "${levelStatus.level.id} ${if (levelStatus.isMastered) "🌟" else ""}"
+            text = "${levelStatus.level.id} ${"🌟".repeat(levelStatus.starRating)}"
         )
     }
 }
@@ -165,9 +165,9 @@ fun PreviewExpandedOperationCard() {
     val operationLevels = OperationLevels(
         operation = Operation.ADDITION,
         levels = listOf(
-            LevelStatus(Curriculum.SumsUpTo5, isUnlocked = true, isMastered = true),
-            LevelStatus(Curriculum.SumsUpTo10, isUnlocked = true, isMastered = false),
-            LevelStatus(Curriculum.SumsUpTo20, isUnlocked = false, isMastered = false)
+            LevelStatus(Curriculum.SumsUpTo5, isUnlocked = true, starRating = 3),
+            LevelStatus(Curriculum.SumsUpTo10, isUnlocked = true, starRating = 1),
+            LevelStatus(Curriculum.SumsUpTo20, isUnlocked = false, starRating = 0)
         )
     )
     AppTheme {
@@ -225,9 +225,9 @@ fun PreviewExerciseSetupScreen() {
         OperationLevels(
             operation = op,
             levels = listOf(
-                LevelStatus(Curriculum.SumsUpTo5, isUnlocked = true, isMastered = true),
-                LevelStatus(Curriculum.SumsUpTo10, isUnlocked = true, isMastered = false),
-                LevelStatus(Curriculum.SumsUpTo20, isUnlocked = false, isMastered = false)
+                LevelStatus(Curriculum.SumsUpTo5, isUnlocked = true, starRating = 3),
+                LevelStatus(Curriculum.SumsUpTo10, isUnlocked = true, starRating = 1),
+                LevelStatus(Curriculum.SumsUpTo20, isUnlocked = false, starRating = 0)
             )
         )
     }

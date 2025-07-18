@@ -69,9 +69,9 @@ class ExerciseSetupViewModelTest {
 
             val initialState = awaitItem()
             val initialAddLevels = initialState.find { it.operation == Operation.ADDITION }!!.levels
+            assertEquals(0, initialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.starRating)
             assertTrue(initialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.isUnlocked)
             assertFalse(initialAddLevels.find { it.level.id == "ADD_SUM_10" }!!.isUnlocked)
-            assertFalse(initialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.isMastered)
 
             // 2. Simulate mastering the first level
             val masteredFacts = Curriculum.SumsUpTo5.getAllPossibleFactIds().map {
@@ -82,7 +82,7 @@ class ExerciseSetupViewModelTest {
             // 3. New state: First level is mastered, second is unlocked
             val updatedState = awaitItem()
             val updatedAddLevels = updatedState.find { it.operation == Operation.ADDITION }!!.levels
-            assertTrue(updatedAddLevels.find { it.level.id == "ADD_SUM_5" }!!.isMastered)
+            assertEquals(3, updatedAddLevels.find { it.level.id == "ADD_SUM_5" }!!.starRating)
             assertTrue(updatedAddLevels.find { it.level.id == "ADD_SUM_10" }!!.isUnlocked)
             assertFalse(updatedAddLevels.find { it.level.id == "ADD_SUM_20" }!!.isUnlocked)
         }

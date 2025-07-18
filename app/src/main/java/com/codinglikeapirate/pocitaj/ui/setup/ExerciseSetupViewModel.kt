@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.stateIn
 data class LevelStatus(
     val level: Level,
     val isUnlocked: Boolean,
-    val isMastered: Boolean
+    val starRating: Int
 )
 
 data class OperationLevels(
@@ -44,9 +44,17 @@ class ExerciseSetupViewModel(
 
                 allLevels.groupBy { it.operation }.map { (op, levels) ->
                     val levelStates = levels.map { level ->
-                        val isMastered = level.id in masteredLevelIds
+                        val progress = level.getAllPossibleFactIds().let { facts ->
+                            if (facts.isEmpty()) 0f else facts.count { it in masteredFacts }.toFloat() / facts.size
+                        }
+                        val starRating = when {
+                            progress >= 1.0f -> 3
+                            progress > 0.9f -> 2
+                            progress > 0.6f -> 1
+                            else -> 0
+                        }
                         val isUnlocked = level.prerequisites.all { it in masteredLevelIds }
-                        LevelStatus(level, isUnlocked, isMastered)
+                        LevelStatus(level, isUnlocked, starRating)
                     }
                     OperationLevels(op, levelStates)
                 }
