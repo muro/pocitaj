@@ -192,21 +192,16 @@
 
 ### Phase 3: The Progress Report & UI
 
-**Step 7: Display Progress on Exercise Setup Screen [DONE]**
-*   **Purpose:** To give the user a quick visual of their progress.
+**Step 7: Build the Consolidated Progress Report Screen [DONE]**
+*   **Purpose:** To create a single, detailed view where users can see their progress across all operations.
 *   **Action:**
-    *   Update the setup screen's ViewModel to query the `FactMastery` DAO and calculate the overall mastery percentage.
-    *   Implement the progress bar and "Mastered!" badge UI.
-*   **Testing:** Write a **UI test** to verify the progress bar and badge display correctly based on mocked data from the ViewModel.
+    *   Created a `ProgressReportViewModel` that provides two specialized data flows: one for per-fact progress and another for per-level progress.
+    *   The `ProgressReportScreen` now displays progress differently based on the operation type:
+        *   **Addition/Subtraction:** A list of all curriculum levels with a progress bar for each.
+        *   **Multiplication/Division:** A classic grid/matrix view showing the mastery of core facts.
+*   **Testing:** Unit tests for the ViewModel were updated to verify both data flows. UI tests were updated to verify the new consolidated screen.
 
-**Step 8: Build the Progress Report Screen (Heatmap) [DONE]**
-*   **Purpose:** To create the detailed heatmap view.
-*   **Action:**
-    *   Create a `ProgressReportViewModel` that queries the `FactMastery` DAO.
-    *   Create the `ProgressReportScreen` Composable to display the heatmap grid.
-*   **Testing:** Write a **UI test** for the screen, verifying that the grid cells are displayed with the correct color/status based on mocked mastery data.
-
-**Step 9: Build the Teacher/Parent History View [DONE]**
+**Step 8: Build the Teacher/Parent History View [DONE]**
 *   **Purpose:** To display the detailed log of all attempts.
 *   **Action:**
     *   This could be a separate screen or a drill-down from the heatmap.
@@ -214,7 +209,7 @@
     *   Display the results in a simple, scrollable list showing the date, exercise, result, and duration for each attempt.
 *   **Testing:** Write a **UI test** that verifies the list displays the correct data provided by a mocked ViewModel.
 
-**Step 10: Add Navigation [DONE]**
+**Step 9: Add Navigation [DONE]**
 *   **Purpose:** To connect all the new screens.
 *   **Action:** Add buttons and update the navigation graph to link the setup screen to the progress report and history views.
 *   **Testing:** Update **UI tests** to confirm that clicking the navigation buttons takes the user to the correct screens.
