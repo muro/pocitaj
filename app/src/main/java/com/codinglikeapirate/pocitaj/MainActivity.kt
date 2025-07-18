@@ -99,8 +99,8 @@ fun AppNavigation() {
     ) {
         composable(route = Destinations.HOME_ROUTE) {
             ExerciseSetupScreen(
-                onStartClicked = { operation, count, difficulty ->
-                    val config = ExerciseConfig(operation, difficulty, count)
+                onStartClicked = { operation, count, difficulty, levelId ->
+                    val config = ExerciseConfig(operation, difficulty, count, levelId)
                     exerciseViewModel.startExercises(config)
                 },
                 onProgressClicked = {

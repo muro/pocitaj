@@ -52,6 +52,9 @@ abstract class BaseExerciseUiTest {
         // Click on the card to start the specific exercise type
         composeTestRule.onNodeWithText(operationSymbol).performClick()
 
+        // Click on the "Practice (Smart)" button
+        composeTestRule.onNodeWithText("Practice (Smart)").performClick()
+
         // Wait for the ExerciseScreen to be loaded by checking for a unique element.
         // The InkCanvas is a good unique identifier for the ExerciseScreen.
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
