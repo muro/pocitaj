@@ -91,7 +91,7 @@ class ExerciseProvider(
      * that is not yet fully mastered.
      */
     private fun findCurrentLevel(): Level {
-        return curriculum.firstOrNull { !isLevelMastered(it) }
+        return curriculum.firstOrNull { isLevelUnlocked(it) && !isLevelMastered(it) }
             ?: curriculum.last() // If all levels are mastered, default to the last one for practice.
     }
 
@@ -100,7 +100,11 @@ class ExerciseProvider(
      */
     private fun getMasteredLevels(currentLevel: Level): List<Level> {
         val currentIndex = curriculum.indexOf(currentLevel)
-        return if (currentIndex > 0) curriculum.subList(0, currentIndex) else emptyList()
+        return if (currentIndex > 0) {
+            curriculum.subList(0, currentIndex).filter { isLevelMastered(it) }
+        } else {
+            emptyList()
+        }
     }
 
     /**
@@ -113,6 +117,17 @@ class ExerciseProvider(
 
         return allFactsInLevel.all { factId ->
             (userMastery[factId]?.strength ?: 0) >= MASTERY_STRENGTH
+        }
+    }
+
+    /**
+     * Checks if a given level is unlocked. A level is unlocked if all of its
+     * prerequisites have been mastered.
+     */
+    private fun isLevelUnlocked(level: Level): Boolean {
+        return level.prerequisites.all { prerequisiteId ->
+            val prerequisiteLevel = curriculum.find { it.id == prerequisiteId }
+            prerequisiteLevel?.let { isLevelMastered(it) } ?: false
         }
     }
 }

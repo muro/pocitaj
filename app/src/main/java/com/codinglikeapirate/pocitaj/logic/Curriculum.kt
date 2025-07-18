@@ -14,6 +14,7 @@ object Curriculum {
     object SumsUpTo5 : Level {
         override val id = "ADD_SUM_5"
         override val operation = Operation.ADDITION
+        override val prerequisites: Set<String> = emptySet()
         private const val max_sum = 5
 
         override fun generateExercise(): Exercise {
@@ -31,9 +32,10 @@ object Curriculum {
         }
     }
 
-    private object SumsUpTo10 : Level {
+    object SumsUpTo10 : Level {
         override val id = "ADD_SUM_10"
         override val operation = Operation.ADDITION
+        override val prerequisites: Set<String> = setOf(SumsUpTo5.id)
         private const val max_sum = 10
 
         override fun generateExercise(): Exercise {
@@ -51,9 +53,10 @@ object Curriculum {
         }
     }
 
-    private object SumsUpTo20 : Level {
+    object SumsUpTo20 : Level {
         override val id = "ADD_SUM_20"
         override val operation = Operation.ADDITION
+        override val prerequisites: Set<String> = setOf(SumsUpTo10.id)
         private const val max_sum = 20
 
         override fun generateExercise(): Exercise {
@@ -71,9 +74,10 @@ object Curriculum {
         }
     }
 
-    private object AddingTens : Level {
+    object AddingTens : Level {
         override val id = "ADD_TENS"
         override val operation = Operation.ADDITION
+        override val prerequisites: Set<String> = setOf(SumsUpTo20.id)
 
         override fun generateExercise(): Exercise {
             val op1 = Random.nextInt(1, 10) * 10
@@ -90,9 +94,10 @@ object Curriculum {
         }
     }
 
-    private object TwoDigitAdditionNoCarry : Level {
+    object TwoDigitAdditionNoCarry : Level {
         override val id = "ADD_TWO_DIGIT_NO_CARRY"
         override val operation = Operation.ADDITION
+        override val prerequisites: Set<String> = setOf(AddingTens.id)
 
         override fun generateExercise(): Exercise {
             var op1: Int
@@ -117,9 +122,10 @@ object Curriculum {
         }
     }
 
-    private object TwoDigitAdditionWithCarry : Level {
+    object TwoDigitAdditionWithCarry : Level {
         override val id = "ADD_TWO_DIGIT_CARRY"
         override val operation = Operation.ADDITION
+        override val prerequisites: Set<String> = setOf(TwoDigitAdditionNoCarry.id)
 
         override fun generateExercise(): Exercise {
             var op1: Int
@@ -145,9 +151,10 @@ object Curriculum {
     }
 
     // --- Subtraction ---
-    private object SubtractionFrom5 : Level {
+    object SubtractionFrom5 : Level {
         override val id = "SUB_FROM_5"
         override val operation = Operation.SUBTRACTION
+        override val prerequisites: Set<String> = emptySet()
         private const val max_minuend = 5
 
         override fun generateExercise(): Exercise {
@@ -165,9 +172,10 @@ object Curriculum {
         }
     }
 
-    private object SubtractionFrom10 : Level {
+    object SubtractionFrom10 : Level {
         override val id = "SUB_FROM_10"
         override val operation = Operation.SUBTRACTION
+        override val prerequisites: Set<String> = setOf(SubtractionFrom5.id)
         private const val max_minuend = 10
 
         override fun generateExercise(): Exercise {
@@ -185,9 +193,10 @@ object Curriculum {
         }
     }
 
-    private object SubtractionFrom20 : Level {
+    object SubtractionFrom20 : Level {
         override val id = "SUB_FROM_20"
         override val operation = Operation.SUBTRACTION
+        override val prerequisites: Set<String> = setOf(SubtractionFrom10.id)
         private const val max_minuend = 20
 
         override fun generateExercise(): Exercise {
@@ -205,9 +214,10 @@ object Curriculum {
         }
     }
 
-    private object SubtractingTens : Level {
+    object SubtractingTens : Level {
         override val id = "SUB_TENS"
         override val operation = Operation.SUBTRACTION
+        override val prerequisites: Set<String> = setOf(SubtractionFrom20.id)
 
         override fun generateExercise(): Exercise {
             val op1 = Random.nextInt(2, 10) * 10
@@ -224,9 +234,10 @@ object Curriculum {
         }
     }
 
-    private object TwoDigitSubtractionNoBorrow : Level {
+    object TwoDigitSubtractionNoBorrow : Level {
         override val id = "SUB_TWO_DIGIT_NO_BORROW"
         override val operation = Operation.SUBTRACTION
+        override val prerequisites: Set<String> = setOf(SubtractingTens.id)
 
         override fun generateExercise(): Exercise {
             var op1: Int
@@ -251,9 +262,10 @@ object Curriculum {
         }
     }
 
-    private object TwoDigitSubtractionWithBorrow : Level {
+    object TwoDigitSubtractionWithBorrow : Level {
         override val id = "SUB_TWO_DIGIT_BORROW"
         override val operation = Operation.SUBTRACTION
+        override val prerequisites: Set<String> = setOf(TwoDigitSubtractionNoBorrow.id)
 
         override fun generateExercise(): Exercise {
             var op1: Int
@@ -280,9 +292,10 @@ object Curriculum {
 
 
     // --- Multiplication ---
-    private class MultiplicationTableLevel(private val table: Int) : Level {
+    class MultiplicationTableLevel(private val table: Int) : Level {
         override val id = "MUL_TABLE_$table"
         override val operation = Operation.MULTIPLICATION
+        override val prerequisites: Set<String> = emptySet()
 
         override fun generateExercise(): Exercise {
             var op1 = table
@@ -306,9 +319,10 @@ object Curriculum {
     }
 
     // --- Division ---
-    private class DivisionTableLevel(private val divisor: Int) : Level {
+    class DivisionTableLevel(private val divisor: Int) : Level {
         override val id = "DIV_BY_$divisor"
         override val operation = Operation.DIVISION
+        override val prerequisites: Set<String> = emptySet()
 
         override fun generateExercise(): Exercise {
             val result = Random.nextInt(0, 11)

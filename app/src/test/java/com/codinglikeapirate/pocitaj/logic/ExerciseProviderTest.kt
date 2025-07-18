@@ -162,4 +162,35 @@ class ExerciseProviderTest {
         // Check that the mastered fact is not in the working set
         assert(!workingSet.contains("ADDITION_1_4"))
     }
+
+    @Test
+    fun `unlocked level is the next one after mastered`() {
+        val curriculum = Curriculum.getAllLevels()
+        val userMastery = mutableMapOf<String, FactMastery>()
+
+        // Master the first level
+        val level1Facts = curriculum[0].getAllPossibleFactIds()
+        level1Facts.forEach { factId ->
+            userMastery[factId] = FactMastery(factId, 1, 5, 0)
+        }
+
+        val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
+        val exercise = provider.getNextExercise()
+
+        val exerciseLevel = Curriculum.getLevelForExercise(exercise)
+        assertEquals(curriculum[1].id, exerciseLevel?.id)
+    }
+
+    @Test
+    fun `level with unmastered prerequisites is locked`() {
+        val curriculum = Curriculum.getAllLevels()
+        val userMastery = emptyMap<String, FactMastery>() // No mastery at all
+
+        val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
+        val exercise = provider.getNextExercise()
+
+        // The provider should not be able to select a level with prerequisites
+        val exerciseLevel = Curriculum.getLevelForExercise(exercise)
+        assertEquals(curriculum[0].id, exerciseLevel?.id)
+    }
 }
