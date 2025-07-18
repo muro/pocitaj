@@ -17,6 +17,7 @@ class AdaptiveExerciseSource internal constructor(
 ) : ExerciseSource {
 
     private var currentOperation: Operation? = null
+    private val EWMA_ALPHA = 0.2
 
     override fun initialize(config: ExerciseConfig) {
         currentOperation = config.operation
@@ -70,17 +71,31 @@ class AdaptiveExerciseSource internal constructor(
 
             val factId = exercise.getFactId()
             val currentMastery = factMasteryDao.getFactMastery(userId, factId)
+            val currentStrength = currentMastery?.strength ?: 0
+            val currentAvgDuration = currentMastery?.avgDurationMs ?: 0L
+
             val newStrength = if (wasCorrect) {
-                (currentMastery?.strength ?: 0) + 1
+                currentStrength + 1
             } else {
-                1
+                0 // Reset to 0 on incorrect
+            }
+
+            val newAvgDuration = if (wasCorrect) {
+                if (currentAvgDuration == 0L) {
+                    durationMs // This is the first correct answer
+                } else {
+                    (EWMA_ALPHA * durationMs + (1 - EWMA_ALPHA) * currentAvgDuration).toLong()
+                }
+            } else {
+                currentAvgDuration // No change on incorrect
             }
 
             val newMastery = FactMastery(
                 factId = factId,
                 userId = userId,
-                strength = newStrength.coerceIn(1, 5),
-                lastTestedTimestamp = System.currentTimeMillis()
+                strength = newStrength.coerceAtMost(5), // Cap at 5 (mastered)
+                lastTestedTimestamp = System.currentTimeMillis(),
+                avgDurationMs = newAvgDuration
             )
             factMasteryDao.upsert(newMastery)
         }

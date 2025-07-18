@@ -134,15 +134,16 @@
 *   **Testing:** Write a Room migration test to add the new `ExerciseAttempt` table to the database.
 
 **Step 2: Define the `FactMastery` Data Table [DONE]**
-*   **Purpose:** To efficiently store the current learning state (strength) of every unique fact. This table will power the `ExerciseProvider`.
+*   **Purpose:** To efficiently store the current learning state (strength and speed) of every unique fact. This table will power the `ExerciseProvider`.
 *   **Action:**
     *   Create a new data class `FactMastery`.
     *   This will also be a Room entity.
     *   **Columns:**
         *   `factId` (a unique text primary key, e.g., "ADD_2_3")
         *   `userId` (long, foreign key to User)
-        *   `strength` (integer from 1 to 5)
+        *   `strength` (integer from 0 to 5)
         *   `lastTestedTimestamp`
+        *   `avgDurationMs` (a rolling average of correct response times)
 *   **Testing:** Write a Room migration test to add the new `FactMastery` table.
 
 **Step 3: Implement the Database Access Objects (DAOs) [DONE]**

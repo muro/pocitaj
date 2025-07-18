@@ -25,9 +25,9 @@ class ExerciseProviderTest {
     fun `provider picks from weakest facts`() {
         val curriculum = Curriculum.getAllLevels()
         val userMastery = mapOf(
-            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 4, 0),
-            "ADDITION_1_2" to FactMastery("ADDITION_1_2", 1, 2, 0), // Weakest
-            "ADDITION_1_3" to FactMastery("ADDITION_1_3", 1, 5, 0)
+            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 3, 0),
+            "ADDITION_1_2" to FactMastery("ADDITION_1_2", 1, 1, 0), // Weakest
+            "ADDITION_1_3" to FactMastery("ADDITION_1_3", 1, 4, 0)
         )
 
         val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
@@ -42,9 +42,9 @@ class ExerciseProviderTest {
     fun `provider uses lastTestedTimestamp as a tie-breaker`() {
         val curriculum = Curriculum.getAllLevels()
         val userMastery = mapOf(
-            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 2, 1000L),
-            "ADDITION_1_2" to FactMastery("ADDITION_1_2", 1, 2, 500L), // Weakest (same strength, older timestamp)
-            "ADDITION_1_3" to FactMastery("ADDITION_1_3", 1, 3, 1500L)
+            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 1, 1000L),
+            "ADDITION_1_2" to FactMastery("ADDITION_1_2", 1, 1, 500L), // Weakest (same strength, older timestamp)
+            "ADDITION_1_3" to FactMastery("ADDITION_1_3", 1, 2, 1500L)
         )
 
         val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
@@ -111,7 +111,7 @@ class ExerciseProviderTest {
         val userMastery = mutableMapOf<String, FactMastery>()
         // Create 7 unmastered facts
         for (i in 0..6) {
-            userMastery["ADDITION_1_$i"] = FactMastery("ADDITION_1_$i", 1, i + 1, 0)
+            userMastery["ADDITION_1_$i"] = FactMastery("ADDITION_1_$i", 1, i % 5, 0)
         }
 
         val provider = ExerciseProvider(curriculum, userMastery, random = Random(123))
@@ -124,7 +124,7 @@ class ExerciseProviderTest {
         // Check that the working set contains only weak facts
         for (factId in workingSet) {
             val strength = userMastery[factId]?.strength ?: 0
-            assert(strength <= 5)
+            assert(strength < 5)
         }
     }
 
@@ -147,7 +147,7 @@ class ExerciseProviderTest {
         val userMastery = mutableMapOf<String, FactMastery>()
         // Create 4 unmastered facts
         for (i in 0..3) {
-            userMastery["ADDITION_1_$i"] = FactMastery("ADDITION_1_$i", 1, 1, 0)
+            userMastery["ADDITION_1_$i"] = FactMastery("ADDITION_1_$i", 1, 0, 0)
         }
         // Create 1 mastered fact
         userMastery["ADDITION_1_4"] = FactMastery("ADDITION_1_4", 1, 5, 0)

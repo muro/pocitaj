@@ -20,6 +20,11 @@ import androidx.room.Index
 data class FactMastery(
     val factId: String,
     val userId: Long,
-    val strength: Int,
-    val lastTestedTimestamp: Long
-)
+    val strength: Int = 0,
+    val lastTestedTimestamp: Long,
+    val avgDurationMs: Long = 0
+) {
+    init {
+        require(strength in 0..5) { "Strength must be between 0 and 5, but was $strength" }
+    }
+}

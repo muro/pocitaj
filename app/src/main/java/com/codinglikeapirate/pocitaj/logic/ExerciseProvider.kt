@@ -73,7 +73,7 @@ class ExerciseProvider(
         } else {
             unmasteredFacts.sortedWith(compareBy(
                 { userMastery[it]?.strength ?: 0 },
-                { userMastery[it]?.lastTestedTimestamp ?: 0 },
+                { userMastery[it]?.lastTestedTimestamp ?: 0L },
                 { it.split("_")[1].toInt() },
                 { it.split("_")[2].toInt() }
             )).take(WORKING_SET_SIZE)

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f197204a596a5db0361dbaba5916a785",
+    "identityHash": "7810a693a653d1863344a18849c7b9e5",
     "entities": [
       {
         "tableName": "user",
@@ -23,8 +23,7 @@
           {
             "fieldPath": "avatar",
             "columnName": "avatar",
-            "affinity": "TEXT",
-            "notNull": false
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -32,9 +31,7 @@
           "columnNames": [
             "id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "exercise_attempt",
@@ -128,7 +125,7 @@
       },
       {
         "tableName": "fact_mastery",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`factId` TEXT NOT NULL, `userId` INTEGER NOT NULL, `strength` INTEGER NOT NULL, `lastTestedTimestamp` INTEGER NOT NULL, PRIMARY KEY(`factId`, `userId`), FOREIGN KEY(`userId`) REFERENCES `user`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`factId` TEXT NOT NULL, `userId` INTEGER NOT NULL, `strength` INTEGER NOT NULL, `lastTestedTimestamp` INTEGER NOT NULL, `avgDurationMs` INTEGER NOT NULL, PRIMARY KEY(`factId`, `userId`), FOREIGN KEY(`userId`) REFERENCES `user`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "factId",
@@ -151,6 +148,12 @@
           {
             "fieldPath": "lastTestedTimestamp",
             "columnName": "lastTestedTimestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "avgDurationMs",
+            "columnName": "avgDurationMs",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -190,10 +193,9 @@
         ]
       }
     ],
-    "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f197204a596a5db0361dbaba5916a785')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7810a693a653d1863344a18849c7b9e5')"
     ]
   }
 }

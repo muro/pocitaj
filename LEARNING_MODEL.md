@@ -43,11 +43,14 @@ The app follows a structured curriculum for each of the four main arithmetic ope
 ## The Learning Algorithm
 
 ### Fact Strength
-Each fact has a strength from 1 to 5.
-- **1 (Weakest):** A new or recently failed fact.
-- **5 (Strongest):** A mastered fact.
+Each fact has a strength from 0 to 4. A fact is considered **mastered** when its strength reaches 5.
+- **0 (Weakest):** A new or recently failed fact.
+- **4 (Strongest):** A fact that is close to being mastered.
 
-When a student answers correctly, the strength increases by 1. An incorrect answer resets the strength to 1.
+When a student answers correctly, the strength increases by 1. An incorrect answer resets the strength to 0.
+
+### Speed Tracking (Rolling Average)
+To track a user's speed for a given fact, the system stores a rolling average of their correct response times (`avgDurationMs`). This is calculated using an Exponentially Weighted Moving Average (EWMA), which naturally gives more weight to recent answers. This allows the system to adapt as the user gets faster without being unfairly penalized by old, slow answers. Incorrect answers do not affect the speed calculation.
 
 ### Question Selection (The "Working Set" Method)
 To avoid boring, repetitive drills, the app uses a "Working Set" method to select questions. This ensures a student is focused on a small, manageable group of facts while still getting enough variety.
