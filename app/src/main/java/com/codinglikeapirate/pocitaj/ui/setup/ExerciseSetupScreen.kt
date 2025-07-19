@@ -31,9 +31,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.codinglikeapirate.pocitaj.R
 import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.logic.Curriculum
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
@@ -59,9 +61,9 @@ fun ExerciseSetupScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Choose Your Challenge", style = MaterialTheme.typography.headlineMedium)
+            Text(stringResource(id = R.string.choose_your_challenge), style = MaterialTheme.typography.headlineMedium)
             Button(onClick = onProgressClicked) {
-                Text("Progress")
+                Text(stringResource(id = R.string.progress_button))
             }
         }
 
@@ -122,7 +124,7 @@ fun OperationCard(
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(top = 16.dp)) {
                     StyledLevelButton(
-                        text = "Practice (Smart)",
+                        text = stringResource(id = R.string.practice_smart),
                         onClick = { onStartClicked(null) },
                         isUnlocked = true
                     )

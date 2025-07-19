@@ -18,4 +18,8 @@
     <string name="progress_tab">Progress</string>
     <string name="history_tab">History</string>
     <string name="no_progress_yet">No progress data yet.</string>
+    <string name="choose_your_challenge">Choose Your Challenge</string>
+    <string name="progress_button">Progress</string>
+    <string name="practice_smart">Practice (Smart)</string>
+    <string name="no_facts_to_display">No facts to display for this level.</string>
 </resources>

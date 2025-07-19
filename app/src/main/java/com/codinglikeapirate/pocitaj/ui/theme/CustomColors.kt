@@ -11,6 +11,13 @@ data class CustomColors(
     val multiplicationGradientEnd: Color,
     val divisionGradientStart: Color,
     val divisionGradientEnd: Color,
+    val factMastered: Color,
+    val factLearning: Color,
+    val factWeak: Color,
+    val factNotAttempted: Color,
+    val speedBadgeBronze: Color,
+    val speedBadgeSilver: Color,
+    val speedBadgeGold: Color
 )
 
 val lightCustomColors = CustomColors(
@@ -22,6 +29,13 @@ val lightCustomColors = CustomColors(
     multiplicationGradientEnd = multiplicationGradientEndLight,
     divisionGradientStart = divisionGradientStartLight,
     divisionGradientEnd = divisionGradientEndLight,
+    factMastered = factMasteredLight,
+    factLearning = factLearningLight,
+    factWeak = factWeakLight,
+    factNotAttempted = factNotAttemptedLight,
+    speedBadgeBronze = speedBadgeBronzeLight,
+    speedBadgeSilver = speedBadgeSilverLight,
+    speedBadgeGold = speedBadgeGoldLight
 )
 
 val darkCustomColors = CustomColors(
@@ -33,4 +47,11 @@ val darkCustomColors = CustomColors(
     multiplicationGradientEnd = multiplicationGradientEndDark,
     divisionGradientStart = divisionGradientStartDark,
     divisionGradientEnd = divisionGradientEndDark,
+    factMastered = factMasteredDark,
+    factLearning = factLearningDark,
+    factWeak = factWeakDark,
+    factNotAttempted = factNotAttemptedDark,
+    speedBadgeBronze = speedBadgeBronzeDark,
+    speedBadgeSilver = speedBadgeSilverDark,
+    speedBadgeGold = speedBadgeGoldDark
 )

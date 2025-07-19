@@ -41,6 +41,7 @@ import com.codinglikeapirate.pocitaj.logic.Curriculum
 import com.codinglikeapirate.pocitaj.logic.SpeedBadge
 import com.codinglikeapirate.pocitaj.logic.getSpeedBadge
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
+import com.codinglikeapirate.pocitaj.ui.theme.customColors
 
 @Composable
 fun ProgressReportScreen(
@@ -264,17 +265,17 @@ fun FactCell(factProgress: FactProgress?, result: Int, cellSize: androidx.compos
     val speedBadge = factProgress?.speedBadge ?: SpeedBadge.NONE
 
     val color = when {
-        strength >= 5 -> Color(0xFF4CAF50) // Green (Mastered)
-        strength >= 3 -> Color(0xFFFFEB3B) // Yellow
-        strength > 0 -> Color(0xFFF44336)  // Red
-        else -> Color(0xFFE0E0E0)         // LightGray for not attempted
+        strength >= 5 -> MaterialTheme.customColors.factMastered
+        strength >= 3 -> MaterialTheme.customColors.factLearning
+        strength > 0 -> MaterialTheme.customColors.factWeak
+        else -> MaterialTheme.customColors.factNotAttempted
     }
 
     val badgeColor = if (strength >= 5) {
         when (speedBadge) {
-            SpeedBadge.BRONZE -> Color(0xFFCD7F32)
-            SpeedBadge.SILVER -> Color(0xFFC0C0C0)
-            SpeedBadge.GOLD -> Color(0xFFFFD700)
+            SpeedBadge.BRONZE -> MaterialTheme.customColors.speedBadgeBronze
+            SpeedBadge.SILVER -> MaterialTheme.customColors.speedBadgeSilver
+            SpeedBadge.GOLD -> MaterialTheme.customColors.speedBadgeGold
             else -> null
         }
     } else {
