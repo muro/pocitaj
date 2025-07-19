@@ -56,31 +56,18 @@
 
 ## Phase 2: Enhancing Engagement (Speed & Rewards)
 
-*This phase builds on the new foundation by adding time-based challenges to promote memorization and quick recall.*
+*This phase builds on the foundation by making speed a visible and rewarding part of the core learning experience.*
 
-### ### Step 2.1: Develop the "Speed Challenge" Mode
+### ### Step 2.1: Implement "Corner Badge" Speed Tiers
 
-* **Action:** Create the logic for timed drills.
+* **Action:** Add a visual indicator to the progress grid to show speed mastery.
 * **Details:**
-    * Choose a primary mode:
-        * **Option A (60-Second Dash):** User answers as many questions as possible in 60 seconds. The score is the number of correct answers.
-        * **Option B (Beat the Clock):** User answers a fixed set of questions (e.g., 20). The score is the total time taken.
-    * The challenge should pull questions from a previously mastered level.
-
-### ### Step 2.2: Integrate Speed Challenges into the UI
-
-* **Action:** Add entry points for the new mode.
-* **Details:**
-    * In the expanded card view, for any level that has been mastered (has a 🌟), display a new icon next to it: a stopwatch (⏱️).
-    * Tapping the stopwatch icon starts the "Speed Challenge" for that level.
-
-### ### Step 2.3: Implement a High Score & Reward System
-
-* **Action:** Create a system to track and reward speed.
-* **Details:**
-    * For each level's speed challenge, save the user's best score (their "High Score").
-    * Define performance tiers and reward them with medals (e.g., 🥇 Gold, 🥈 Silver, 🥉 Bronze).
-    * Display the best medal earned next to the stopwatch icon (e.g., ⏱️🥇).
+    * **Speed Tiers:** A 0-3 tier speed badge will be calculated for each fact based on the user's average response time compared to a dynamic, complexity-based threshold.
+    * **"Corner Badge" UI:** Once a fact is mastered (green), a small, colored "corner badge" or "dog-ear" will appear in the cell.
+        * **Bronze:** Tier 1 Speed
+        * **Silver:** Tier 2 Speed
+        * **Gold:** Tier 3 Speed
+    * This creates a clear, two-stage goal for each fact: first accuracy (green), then speed (gold).
 
 ---
 

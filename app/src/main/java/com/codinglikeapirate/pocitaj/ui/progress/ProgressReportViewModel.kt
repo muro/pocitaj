@@ -9,6 +9,8 @@ import com.codinglikeapirate.pocitaj.data.FactMastery
 import com.codinglikeapirate.pocitaj.data.FactMasteryDao
 import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.logic.Curriculum
+import com.codinglikeapirate.pocitaj.logic.SpeedBadge
+import com.codinglikeapirate.pocitaj.logic.getSpeedBadge
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -16,7 +18,8 @@ import kotlinx.coroutines.flow.stateIn
 
 data class FactProgress(
     val factId: String,
-    val mastery: FactMastery?
+    val mastery: FactMastery?,
+    val speedBadge: SpeedBadge
 )
 
 data class LevelProgress(
@@ -43,7 +46,12 @@ class ProgressReportViewModel(
                 val masteryMap = masteryList.associateBy { it.factId }
                 allFactsByOperation.mapValues { (operation, factIds) ->
                     factIds.map { factId ->
-                        FactProgress(factId, masteryMap[factId])
+                        val mastery = masteryMap[factId]
+                        val parts = factId.split('_')
+                        val op1 = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                        val op2 = parts.getOrNull(2)?.toIntOrNull() ?: 0
+                        val speedBadge = getSpeedBadge(operation, op1, op2, mastery?.avgDurationMs ?: 0L)
+                        FactProgress(factId, mastery, speedBadge)
                     }
                 }
             }

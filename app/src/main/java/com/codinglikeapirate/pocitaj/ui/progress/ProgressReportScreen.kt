@@ -1,6 +1,7 @@
 package com.codinglikeapirate.pocitaj.ui.progress
 
 import android.content.res.Configuration
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -36,6 +38,8 @@ import com.codinglikeapirate.pocitaj.data.FactMastery
 import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.data.toSymbol
 import com.codinglikeapirate.pocitaj.logic.Curriculum
+import com.codinglikeapirate.pocitaj.logic.SpeedBadge
+import com.codinglikeapirate.pocitaj.logic.getSpeedBadge
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 
 @Composable
@@ -198,7 +202,7 @@ fun StandardGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>, operatio
                             Operation.MULTIPLICATION -> op1 * op2
                             Operation.DIVISION -> if (op2 != 0) op1 / op2 else 0
                         }
-                        FactCell(factProgress = factProgress, result = result, size = cellSize)
+                        FactCell(factProgress = factProgress, result = result, cellSize)
                     }
                 }
             }
@@ -234,7 +238,7 @@ fun DivisionGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>) {
                     divisors.forEach { divisor ->
                         val dividend = multiplier * divisor
                         val factProgress = factsMap[Pair(dividend, divisor)]?.third
-                        FactCell(factProgress = factProgress, result = dividend, size = cellSize)
+                        FactCell(factProgress = factProgress, result = dividend, cellSize)
                     }
                 }
             }
@@ -255,39 +259,61 @@ fun GridCell(text: String, size: androidx.compose.ui.unit.Dp) {
 }
 
 @Composable
-fun FactCell(factProgress: FactProgress?, result: Int, size: androidx.compose.ui.unit.Dp) {
-    val isPossible = factProgress != null
+fun FactCell(factProgress: FactProgress?, result: Int, cellSize: androidx.compose.ui.unit.Dp) {
     val strength = factProgress?.mastery?.strength ?: 0
-    val color = if (isPossible) {
-        when {
-            strength >= 5 -> Color(0xFF4CAF50) // Green
-            strength >= 3 -> Color(0xFFFFEB3B) // Yellow
-            strength > 0 -> Color(0xFFF44336)  // Red
-            else -> Color(0xFFE0E0E0)         // LightGray for possible but not attempted
+    val speedBadge = factProgress?.speedBadge ?: SpeedBadge.NONE
+
+    val color = when {
+        strength >= 5 -> Color(0xFF4CAF50) // Green (Mastered)
+        strength >= 3 -> Color(0xFFFFEB3B) // Yellow
+        strength > 0 -> Color(0xFFF44336)  // Red
+        else -> Color(0xFFE0E0E0)         // LightGray for not attempted
+    }
+
+    val badgeColor = if (strength >= 5) {
+        when (speedBadge) {
+            SpeedBadge.BRONZE -> Color(0xFFCD7F32)
+            SpeedBadge.SILVER -> Color(0xFFC0C0C0)
+            SpeedBadge.GOLD -> Color(0xFFFFD700)
+            else -> null
         }
     } else {
-        Color.Transparent // Not in the level
+        null
     }
 
     Box(
         modifier = Modifier
-            .size(size)
+            .size(cellSize)
             .background(color, shape = RoundedCornerShape(4.dp))
             .border(
                 1.dp,
-                if (isPossible) Color.Transparent else Color.LightGray,
+                Color.LightGray,
                 shape = RoundedCornerShape(4.dp)
-            )
-            .padding(4.dp),
+            ),
         contentAlignment = Alignment.Center
     ) {
-        if (isPossible) {
-            Text(
-                text = result.toString(),
-                fontSize = with(LocalDensity.current) { (size / 3).toSp() },
-                color = Color.Black,
-                textAlign = TextAlign.Center
-            )
+        Text(
+            text = result.toString(),
+            fontSize = with(LocalDensity.current) { (cellSize / 3).toSp() },
+            color = Color.Black,
+            style = MaterialTheme.typography.bodySmall.copy(
+                textAlign = TextAlign.Center,
+                platformStyle = androidx.compose.ui.text.PlatformTextStyle(
+                    includeFontPadding = false
+                )
+            ),
+            modifier = Modifier.padding(4.dp)
+        )
+        if (badgeColor != null) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val path = Path().apply {
+                    moveTo(size.width, 0f)
+                    lineTo(size.width, size.height * 0.4f)
+                    lineTo(size.width * 0.6f, 0f)
+                    close()
+                }
+                drawPath(path, color = badgeColor)
+            }
         }
     }
 }
@@ -310,33 +336,29 @@ fun ProgressReportScreenPreview() {
         // Create some fake mastery data for a more realistic preview
         val fakeMasteredFacts = mapOf(
             // Addition
-            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 5, 0), // Mastered
-            "ADDITION_2_3" to FactMastery("ADDITION_2_3", 1, 3, 0), // Learning
-            "ADDITION_3_4" to FactMastery("ADDITION_3_4", 1, 1, 0), // Struggling
-            "ADDITION_8_8" to FactMastery("ADDITION_8_8", 1, 6, 0), // Mastered
-            "ADDITION_9_1" to FactMastery("ADDITION_9_1", 1, 2, 0), // Struggling
-
-            // Subtraction
-            "SUBTRACTION_5_2" to FactMastery("SUBTRACTION_5_2", 1, 5, 0), // Mastered
-            "SUBTRACTION_4_1" to FactMastery("SUBTRACTION_4_1", 1, 4, 0), // Learning
-            "SUBTRACTION_3_3" to FactMastery("SUBTRACTION_3_3", 1, 1, 0), // Struggling
+            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 5, 0, 1000), // Mastered, Gold
+            "ADDITION_2_3" to FactMastery("ADDITION_2_3", 1, 3, 0, 3000), // Learning
+            "ADDITION_3_4" to FactMastery("ADDITION_3_4", 1, 1, 0, 5000), // Struggling
+            "ADDITION_8_8" to FactMastery("ADDITION_8_8", 1, 5, 0, 4000), // Mastered, Bronze
+            "ADDITION_9_1" to FactMastery("ADDITION_9_1", 1, 2, 0, 6000), // Struggling
 
             // Multiplication
-            "MULTIPLICATION_2_5" to FactMastery("MULTIPLICATION_2_5", 1, 5, 0), // Mastered
-            "MULTIPLICATION_5_2" to FactMastery("MULTIPLICATION_5_2", 1, 3, 0), // Learning
-            "MULTIPLICATION_10_1" to FactMastery("MULTIPLICATION_10_1", 1, 7, 0), // Mastered
-            "MULTIPLICATION_3_7" to FactMastery("MULTIPLICATION_3_7", 1, 1, 0), // Struggling
-
-            // Division
-            "DIVISION_10_2" to FactMastery("DIVISION_10_2", 1, 5, 0), // Mastered
-            "DIVISION_25_5" to FactMastery("DIVISION_25_5", 1, 4, 0)  // Learning
+            "MULTIPLICATION_2_5" to FactMastery("MULTIPLICATION_2_5", 1, 5, 0, 500),  // Mastered, Gold
+            "MULTIPLICATION_5_2" to FactMastery("MULTIPLICATION_5_2", 1, 3, 0, 2000), // Learning
+            "MULTIPLICATION_10_1" to FactMastery("MULTIPLICATION_10_1", 1, 5, 0, 2500),// Mastered, Silver
+            "MULTIPLICATION_3_7" to FactMastery("MULTIPLICATION_3_7", 1, 1, 0, 4000), // Struggling
         )
 
         val factProgressByOperation = allLevels
             .groupBy { it.operation }
-            .mapValues { (_, levels) ->
+            .mapValues { (op, levels) ->
                 levels.flatMap { it.getAllPossibleFactIds() }.distinct().map { factId ->
-                    FactProgress(factId, fakeMasteredFacts[factId])
+                    val mastery = fakeMasteredFacts[factId]
+                    val parts = factId.split('_')
+                    val op1 = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                    val op2 = parts.getOrNull(2)?.toIntOrNull() ?: 0
+                    val speedBadge = getSpeedBadge(op, op1, op2, mastery?.avgDurationMs ?: 0L)
+                    FactProgress(factId, mastery, speedBadge)
                 }
             }
 
@@ -380,6 +402,49 @@ fun EmptyProgressReportScreenPreview() {
         ProgressReportScreen(
             factProgressByOperation = emptyMap(),
             levelProgressByOperation = emptyMap()
+        )
+    }
+}
+
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
+@Composable
+fun MultiplicationReportPreview() {
+    AppTheme {
+        val fakeMasteredFacts = mapOf(
+            "MULTIPLICATION_2_2" to FactMastery("MULTIPLICATION_2_2", 1, 5, 0, 500),  // Mastered, Gold
+            "MULTIPLICATION_2_3" to FactMastery("MULTIPLICATION_2_3", 1, 5, 0, 2000), // Mastered, Silver
+            "MULTIPLICATION_3_2" to FactMastery("MULTIPLICATION_3_2", 1, 5, 0, 2800), // Mastered, Bronze
+            "MULTIPLICATION_3_3" to FactMastery("MULTIPLICATION_3_3", 1, 5, 0, 4000), // Mastered, Slow
+            "MULTIPLICATION_4_4" to FactMastery("MULTIPLICATION_4_4", 1, 3, 0, 0),    // Learning
+            "MULTIPLICATION_5_5" to FactMastery("MULTIPLICATION_5_5", 1, 1, 0, 0),    // Weak
+        )
+
+        val multiplicationLevels = Curriculum.getLevelsFor(Operation.MULTIPLICATION)
+        val factProgress = multiplicationLevels
+            .flatMap { it.getAllPossibleFactIds() }
+            .distinct()
+            .map { factId ->
+                val mastery = fakeMasteredFacts[factId]
+                val parts = factId.split('_')
+                val op1 = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                val op2 = parts.getOrNull(2)?.toIntOrNull() ?: 0
+                val speedBadge = getSpeedBadge(Operation.MULTIPLICATION, op1, op2, mastery?.avgDurationMs ?: 0L)
+                FactProgress(factId, mastery, speedBadge)
+            }
+
+        OperationProgress(
+            operation = Operation.MULTIPLICATION,
+            factProgress = factProgress,
+            levelProgress = emptyMap()
         )
     }
 }
