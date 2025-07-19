@@ -14,8 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.codinglikeapirate.pocitaj.R
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 
 @Composable
@@ -32,14 +34,14 @@ fun StartupScreen(error: String?, onRetry: () -> Unit) {
         if (error == null) {
             CircularProgressIndicator()
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Loading...")
+            Text(stringResource(id = R.string.loading))
         } else {
-            Text("Error:", color = MaterialTheme.colorScheme.error)
+            Text(stringResource(id = R.string.error), color = MaterialTheme.colorScheme.error)
             Spacer(modifier = Modifier.height(8.dp))
             Text(error)
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onRetry) {
-                Text("Retry")
+                Text(stringResource(id = R.string.retry))
             }
         }
     }

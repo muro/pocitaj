@@ -115,7 +115,7 @@ fun OperationProgress(
             if (factsWithCoords.isNotEmpty()) {
                 StandardGrid(factsWithCoords, operation)
             } else {
-                Text("No facts to display for this level.")
+                Text(stringResource(id = R.string.no_facts_to_display))
             }
         }
         Operation.DIVISION -> {
@@ -124,7 +124,7 @@ fun OperationProgress(
             if (factsWithCoords.isNotEmpty()) {
                 DivisionGrid(factsWithCoords)
             } else {
-                Text("No facts to display for this level.")
+                Text(stringResource(id = R.string.no_facts_to_display))
             }
         }
     }

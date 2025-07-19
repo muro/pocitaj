@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,7 +64,7 @@ fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit) {
             bottom = 72.dp, // Add padding at the bottom to make space for the button
             start = 16.dp, end = 16.dp, top = 16.dp))
         Button(onClick = onDone, modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 32.dp)) {
-            Text("Done")
+            Text(stringResource(id = R.string.done))
         }
     }
 }
