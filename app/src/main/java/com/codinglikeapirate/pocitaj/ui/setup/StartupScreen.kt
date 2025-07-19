@@ -34,7 +34,7 @@ fun StartupScreen(error: String?, onRetry: () -> Unit) {
         if (error == null) {
             CircularProgressIndicator()
             Spacer(modifier = Modifier.height(16.dp))
-            Text(stringResource(id = R.string.loading))
+            Text(stringResource(id = R.string.loading), color = MaterialTheme.colorScheme.onBackground)
         } else {
             Text(stringResource(id = R.string.error), color = MaterialTheme.colorScheme.error)
             Spacer(modifier = Modifier.height(8.dp))

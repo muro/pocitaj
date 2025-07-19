@@ -53,23 +53,19 @@ fun ExerciseSetupScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .padding(top = 32.dp), // Add top padding to avoid camera cutout
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(stringResource(id = R.string.choose_your_challenge), style = MaterialTheme.typography.headlineMedium)
-            Button(onClick = onProgressClicked) {
-                Text(stringResource(id = R.string.progress_button))
-            }
-        }
+        Text(stringResource(id = R.string.choose_your_challenge), style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onSurface)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             items(operationLevels) { operationState ->
                 OperationCard(
                     operationLevels = operationState,
@@ -79,6 +75,14 @@ fun ExerciseSetupScreen(
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        StyledLevelButton(
+            onClick = onProgressClicked,
+            text = stringResource(id = R.string.progress_button),
+            isUnlocked = true
+        )
     }
 }
 
