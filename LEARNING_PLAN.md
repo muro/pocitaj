@@ -58,7 +58,7 @@
 
 *This phase builds on the foundation by making speed a visible and rewarding part of the core learning experience.*
 
-### ### Step 2.1: Implement "Corner Badge" Speed Tiers
+### ### Step 2.1: Implement "Corner Badge" Speed Tiers [DONE]
 
 * **Action:** Add a visual indicator to the progress grid to show speed mastery.
 * **Details:**
