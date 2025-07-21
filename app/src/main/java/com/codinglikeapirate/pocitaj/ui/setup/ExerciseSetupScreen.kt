@@ -122,13 +122,13 @@ fun OperationCard(
                         Operation.MULTIPLICATION -> "×"
                         Operation.DIVISION -> "÷"
                     },
-                    fontSize = 48.sp,
+                    style = MaterialTheme.typography.displayLarge,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     operationLevels.operation.name.replaceFirstChar { it.uppercase() },
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }
