@@ -74,6 +74,76 @@ object Curriculum {
         }
     }
 
+    object Doubles : Level {
+        override val id = "ADD_DOUBLES"
+        override val operation = Operation.ADDITION
+        override val prerequisites: Set<String> = setOf(SumsUpTo10.id)
+
+        override fun generateExercise(): Exercise {
+            val op1 = Random.nextInt(1, 11)
+            return Exercise(Addition(op1, op1))
+        }
+
+        override fun getAllPossibleFactIds(): List<String> {
+            return (1..10).map { "${operation.name}_${it}_${it}" }
+        }
+    }
+
+    object NearDoubles : Level {
+        override val id = "ADD_NEAR_DOUBLES"
+        override val operation = Operation.ADDITION
+        override val prerequisites: Set<String> = setOf(Doubles.id)
+
+        override fun generateExercise(): Exercise {
+            val op1 = Random.nextInt(1, 10) // e.g. 4
+            val op2 = op1 + 1 // e.g. 5
+            return if (Random.nextBoolean()) {
+                Exercise(Addition(op1, op2))
+            } else {
+                Exercise(Addition(op2, op1))
+            }
+        }
+
+        override fun getAllPossibleFactIds(): List<String> {
+            return (1..9).flatMap { op1 ->
+                val op2 = op1 + 1
+                listOf(
+                    "${operation.name}_${op1}_${op2}",
+                    "${operation.name}_${op2}_${op1}"
+                )
+            }
+        }
+    }
+
+    object Making10s : Level {
+        override val id = "ADD_MAKING_10S"
+        override val operation = Operation.ADDITION
+        override val prerequisites: Set<String> = setOf(SumsUpTo10.id)
+
+        override fun generateExercise(): Exercise {
+            // e.g. 9+x, 8+x, 7+x, 6+x
+            val op1 = Random.nextInt(6, 10)
+            // We want the sum to cross 10
+            val op2 = Random.nextInt(10 - op1 + 1, 10)
+            return if (Random.nextBoolean()) {
+                Exercise(Addition(op1, op2))
+            } else {
+                Exercise(Addition(op2, op1))
+            }
+        }
+
+        override fun getAllPossibleFactIds(): List<String> {
+            return (6..9).flatMap { op1 ->
+                (10 - op1 + 1 until 10).flatMap { op2 ->
+                    listOf(
+                        "${operation.name}_${op1}_${op2}",
+                        "${operation.name}_${op2}_${op1}"
+                    )
+                }
+            }
+        }
+    }
+
     object AddingTens : Level {
         override val id = "ADD_TENS"
         override val operation = Operation.ADDITION
@@ -345,6 +415,9 @@ object Curriculum {
             SumsUpTo5,
             SumsUpTo10,
             SumsUpTo20,
+            Doubles,
+            NearDoubles,
+            Making10s,
             AddingTens,
             TwoDigitAdditionNoCarry,
             TwoDigitAdditionWithCarry

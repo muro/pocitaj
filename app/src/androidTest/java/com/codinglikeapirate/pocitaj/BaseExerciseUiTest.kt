@@ -53,7 +53,7 @@ abstract class BaseExerciseUiTest {
         composeTestRule.onNodeWithText(operationSymbol).performClick()
 
         // Click on the "Practice (Smart)" button
-        composeTestRule.onNodeWithText("Practice (Smart)").performClick()
+        composeTestRule.onNodeWithText("Smart Practice").performClick()
 
         // Wait for the ExerciseScreen to be loaded by checking for a unique element.
         // The InkCanvas is a good unique identifier for the ExerciseScreen.

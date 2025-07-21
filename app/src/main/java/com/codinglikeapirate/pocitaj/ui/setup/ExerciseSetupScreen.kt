@@ -19,8 +19,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import com.codinglikeapirate.pocitaj.logic.formatLevel
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -78,11 +85,12 @@ fun ExerciseSetupScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        StyledLevelButton(
+        Button(
             onClick = onProgressClicked,
-            text = stringResource(id = R.string.progress_button),
-            isUnlocked = true
-        )
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(id = R.string.progress_button))
+        }
     }
 }
 
@@ -127,18 +135,30 @@ fun OperationCard(
 
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(top = 16.dp)) {
-                    StyledLevelButton(
-                        text = stringResource(id = R.string.practice_smart),
+                    // "Practice (Smart)" Button
+                    Button(
                         onClick = { onStartClicked(null) },
-                        isUnlocked = true
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    operationLevels.levels.forEach { levelState ->
-                        StyledLevelButton(
-                            text = "${levelState.level.id} ${"🌟".repeat(levelState.starRating)}",
-                            onClick = { onStartClicked(levelState.level.id) },
-                            isUnlocked = levelState.isUnlocked
-                        )
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(id = R.string.practice_smart))
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Grid of Level Tiles
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.height(200.dp) // Adjust height as needed
+                    ) {
+                        items(operationLevels.levels) { levelState ->
+                            LevelTile(levelStatus = levelState, onClick = { onStartClicked(levelState.level.id) })
+                        }
                     }
                 }
             }
@@ -147,22 +167,32 @@ fun OperationCard(
 }
 
 @Composable
-fun StyledLevelButton(text: String, onClick: () -> Unit, isUnlocked: Boolean) {
-    Button(
-        onClick = onClick,
-        enabled = isUnlocked,
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f),
-            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-        ),
+fun LevelTile(levelStatus: LevelStatus, onClick: () -> Unit) {
+    Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .aspectRatio(1f)
+            .clickable(enabled = levelStatus.isUnlocked, onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = if (levelStatus.isUnlocked) 0.8f else 0.3f),
+            contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (levelStatus.isUnlocked) 1f else 0.5f)
+        )
     ) {
-        Text(text = text)
+        Column(
+            modifier = Modifier.fillMaxSize().padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = formatLevel(levelStatus.level).shortLabel,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "🌟".repeat(levelStatus.starRating),
+                fontSize = 20.sp
+            )
+        }
     }
 }
 

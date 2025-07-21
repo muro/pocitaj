@@ -35,7 +35,7 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
 
         // WHEN: The user navigates to the progress report screen
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("Progress").performClick()
+        composeTestRule.onNodeWithText("My Progress").performClick()
         composeTestRule.waitForIdle()
 
         composeTestRule.onRoot().printToLog("ProgressReportScreenTest")
