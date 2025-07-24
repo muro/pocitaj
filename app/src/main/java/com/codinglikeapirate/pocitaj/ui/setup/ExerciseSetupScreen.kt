@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import com.codinglikeapirate.pocitaj.logic.formatLevel
+import com.codinglikeapirate.pocitaj.ui.components.AutoSizeText
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -183,7 +184,7 @@ fun LevelTile(levelStatus: LevelStatus, onClick: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
+            AutoSizeText(
                 text = formatLevel(levelStatus.level).shortLabel,
                 style = MaterialTheme.typography.titleMedium
             )

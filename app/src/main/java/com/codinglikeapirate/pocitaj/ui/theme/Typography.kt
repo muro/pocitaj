@@ -4,6 +4,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 
 /**
@@ -11,6 +12,12 @@ import androidx.compose.ui.unit.sp
  * These styles are mapped to the MaterialTheme typography scale in Theme.kt.
  */
 object PocitajTypography {
+    val exerciseLabelStyle = TextStyle(
+        fontFamily = AppFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 96.sp,
+        textAlign = TextAlign.Center
+    )
     val screenTitle = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Bold,
@@ -36,8 +43,8 @@ object PocitajTypography {
     )
 
     val levelButtonLabel = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Bold,
+        fontFamily = AppFontFamily,
+        fontWeight = FontWeight.Normal,
         fontSize = 48.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.5.sp

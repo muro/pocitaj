@@ -58,7 +58,9 @@ import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.logic.Equation
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.codinglikeapirate.pocitaj.logic.Subtraction
+import com.codinglikeapirate.pocitaj.ui.components.AutoSizeText
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
+import com.codinglikeapirate.pocitaj.ui.theme.PocitajTypography
 import com.codinglikeapirate.pocitaj.ui.theme.motion
 import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.digitalink.Ink
@@ -283,15 +285,14 @@ fun ExerciseScreen(exercise: Exercise,
                     fadeIn(animationSpec = tween(fadeDuration)) togetherWith fadeOut(animationSpec = tween(fadeDuration))
                 }
             ) { targetText -> // The target state (new exercise question)
-                Text(
+                AutoSizeText(
                     text = targetText,
+                    style = PocitajTypography.operationSymbol,
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(312.dp)
                         .wrapContentHeight(align = Alignment.CenterVertically),
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 96.sp,
                 )
             }
 
