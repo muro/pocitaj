@@ -189,7 +189,7 @@ fun LevelTile(levelStatus: LevelStatus, onClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "🌟".repeat(levelStatus.starRating),
+                text = "🌟".repeat(levelStatus.starRating) + "☆".repeat(3 - levelStatus.starRating),
                 fontSize = 20.sp
             )
         }

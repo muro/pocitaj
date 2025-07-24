@@ -12,7 +12,7 @@ fun formatLevel(level: Level): LevelRepresentation {
         "ADD_SUM_10" -> LevelRepresentation("7+2")
         "ADD_SUM_20" -> LevelRepresentation("8+9")
         "ADD_DOUBLES" -> LevelRepresentation("🐾+🐾")
-        "ADD_NEAR_DOUBLES" -> LevelRepresentation("🐾+🐾+1")
+        "ADD_NEAR_DOUBLES" -> LevelRepresentation("🐾🐾.")
         "ADD_MAKING_10S" -> LevelRepresentation("7❤️3")
         "ADD_TENS" -> LevelRepresentation("20+30")
         "ADD_TWO_DIGIT_NO_CARRY" -> LevelRepresentation("23+45")
@@ -26,17 +26,22 @@ fun formatLevel(level: Level): LevelRepresentation {
         "SUB_TWO_DIGIT_NO_BORROW" -> LevelRepresentation("75-23")
         "SUB_TWO_DIGIT_BORROW" -> LevelRepresentation("72-28")
 
-        // Multiplication
-        else -> if (level.id.startsWith("MUL_TABLE_")) {
-            val table = level.id.removePrefix("MUL_TABLE_")
-            LevelRepresentation("x$table")
-        } else if (level.id.startsWith("DIV_BY_")) {
-            val divisor = level.id.removePrefix("DIV_BY_")
-            LevelRepresentation("÷$divisor")
-        } else if (level.id.contains("REVIEW")) {
-            LevelRepresentation("🧶")
-        } else {
-            LevelRepresentation(level.id) // Fallback
+        // Dynamic and Review Levels
+        else -> when {
+            level.id.contains("REVIEW") -> when {
+                level.id.endsWith("_HARD") -> LevelRepresentation("🧶🧶🧶")
+                level.id.endsWith("_MEDIUM") -> LevelRepresentation("🧶🧶")
+                else -> LevelRepresentation("🧶")
+            }
+            level.id.startsWith("MUL_TABLE_") -> {
+                val table = level.id.removePrefix("MUL_TABLE_")
+                LevelRepresentation("x$table")
+            }
+            level.id.startsWith("DIV_BY_") -> {
+                val divisor = level.id.removePrefix("DIV_BY_")
+                LevelRepresentation("÷$divisor")
+            }
+            else -> LevelRepresentation(level.id) // Fallback
         }
     }
 }

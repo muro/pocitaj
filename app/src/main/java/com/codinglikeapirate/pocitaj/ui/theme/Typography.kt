@@ -38,7 +38,7 @@ object PocitajTypography {
     val levelButtonLabel = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Bold,
-        fontSize = 22.sp,
+        fontSize = 48.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.5.sp
     )
