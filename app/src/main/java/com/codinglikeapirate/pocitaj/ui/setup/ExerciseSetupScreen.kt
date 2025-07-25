@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import com.codinglikeapirate.pocitaj.R
 import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.logic.Curriculum
+import com.codinglikeapirate.pocitaj.ui.components.PocitajScreen
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import com.codinglikeapirate.pocitaj.ui.theme.customColors
 
@@ -55,42 +56,46 @@ fun ExerciseSetupScreen(
     onStartClicked: (operation: Operation, count: Int, difficulty: Int, levelId: String?) -> Unit,
     onProgressClicked: () -> Unit
 ) {
-    var questionCount by remember { mutableFloatStateOf(10f) }
-    var difficulty by remember { mutableIntStateOf(10) }
+    PocitajScreen {
+        var questionCount by remember { mutableFloatStateOf(10f) }
+        var difficulty by remember { mutableIntStateOf(10) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .padding(top = 32.dp), // Add top padding to avoid camera cutout
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(stringResource(id = R.string.choose_your_challenge), style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .padding(top = 32.dp), // Add top padding to avoid camera cutout
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            items(operationLevels) { operationState ->
-                OperationCard(
-                    operationLevels = operationState,
-                    onStartClicked = { levelId ->
-                        onStartClicked(operationState.operation, questionCount.toInt(), difficulty, levelId)
-                    }
-                )
+            Text(
+                stringResource(id = R.string.choose_your_challenge), style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(operationLevels) { operationState ->
+                    OperationCard(
+                        operationLevels = operationState,
+                        onStartClicked = { levelId ->
+                            onStartClicked(operationState.operation, questionCount.toInt(), difficulty, levelId)
+                        }
+                    )
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = onProgressClicked,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(id = R.string.progress_button))
+            Button(
+                onClick = onProgressClicked,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(id = R.string.progress_button))
+            }
         }
     }
 }

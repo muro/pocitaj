@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.codinglikeapirate.pocitaj.R
 import com.codinglikeapirate.pocitaj.data.ExerciseAttempt
 import com.codinglikeapirate.pocitaj.data.Operation
+import com.codinglikeapirate.pocitaj.ui.components.PocitajScreen
 import com.codinglikeapirate.pocitaj.ui.history.HistoryScreen
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import kotlinx.coroutines.launch
@@ -32,43 +33,45 @@ fun ProgressContainerScreen(
     history: Map<String, List<ExerciseAttempt>>,
     initialPage: Int = 0
 ) {
-    val pagerState = rememberPagerState(pageCount = { 2 }, initialPage = initialPage)
-    val coroutineScope = rememberCoroutineScope()
+    PocitajScreen {
+        val pagerState = rememberPagerState(pageCount = { 2 }, initialPage = initialPage)
+        val coroutineScope = rememberCoroutineScope()
 
-    Column {
-        Spacer(modifier = Modifier.height(32.dp))
-        TabRow(selectedTabIndex = pagerState.currentPage) {
-            Tab(
-                text = { Text(stringResource(id = R.string.progress_tab)) },
-                selected = pagerState.currentPage == 0,
-                onClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(0)
+        Column {
+            Spacer(modifier = Modifier.height(32.dp))
+            TabRow(selectedTabIndex = pagerState.currentPage) {
+                Tab(
+                    text = { Text(stringResource(id = R.string.progress_tab)) },
+                    selected = pagerState.currentPage == 0,
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(0)
+                        }
                     }
-                }
-            )
-            Tab(
-                text = { Text(stringResource(id = R.string.history_tab)) },
-                selected = pagerState.currentPage == 1,
-                onClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(1)
-                    }
-                }
-            )
-        }
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .weight(1f)
-                .testTag("swipeableTabsPager")
-        ) { page ->
-            when (page) {
-                0 -> ProgressReportScreen(
-                    factProgressByOperation = factProgressByOperation,
-                    levelProgressByOperation = levelProgressByOperation
                 )
-                1 -> HistoryScreen(history = history)
+                Tab(
+                    text = { Text(stringResource(id = R.string.history_tab)) },
+                    selected = pagerState.currentPage == 1,
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(1)
+                        }
+                    }
+                )
+            }
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag("swipeableTabsPager")
+            ) { page ->
+                when (page) {
+                    0 -> ProgressReportScreen(
+                        factProgressByOperation = factProgressByOperation,
+                        levelProgressByOperation = levelProgressByOperation
+                    )
+                    1 -> HistoryScreen(history = history)
+                }
             }
         }
     }

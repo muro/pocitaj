@@ -15,7 +15,7 @@ object PocitajTypography {
     val exerciseLabelStyle = TextStyle(
         fontFamily = AppFontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 96.sp,
+        fontSize = 66.sp,
         textAlign = TextAlign.Center
     )
     val screenTitle = TextStyle(
@@ -57,6 +57,7 @@ val AppTypography = Typography(
     displayLarge = PocitajTypography.operationSymbol,
     headlineSmall = PocitajTypography.operationTitle,
     titleMedium = PocitajTypography.levelButtonLabel,
+    titleLarge = PocitajTypography.exerciseLabelStyle,
 
     // Default text style if none is specified
     bodyLarge = TextStyle(

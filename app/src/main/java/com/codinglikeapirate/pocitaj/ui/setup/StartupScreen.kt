@@ -18,30 +18,33 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.codinglikeapirate.pocitaj.R
+import com.codinglikeapirate.pocitaj.ui.components.PocitajScreen
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 
 @Composable
 fun StartupScreen(error: String?, onRetry: () -> Unit) {
-    LaunchedEffect(Unit) {
-        onRetry()
-    }
+    PocitajScreen {
+        LaunchedEffect(Unit) {
+            onRetry()
+        }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        if (error == null) {
-            CircularProgressIndicator()
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(stringResource(id = R.string.loading), color = MaterialTheme.colorScheme.onBackground)
-        } else {
-            Text(stringResource(id = R.string.error), color = MaterialTheme.colorScheme.error)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(error)
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onRetry) {
-                Text(stringResource(id = R.string.retry))
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (error == null) {
+                CircularProgressIndicator()
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(stringResource(id = R.string.loading), color = MaterialTheme.colorScheme.onBackground)
+            } else {
+                Text(stringResource(id = R.string.error), color = MaterialTheme.colorScheme.error)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(error)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onRetry) {
+                    Text(stringResource(id = R.string.retry))
+                }
             }
         }
     }

@@ -59,8 +59,8 @@ import com.codinglikeapirate.pocitaj.logic.Equation
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.codinglikeapirate.pocitaj.logic.Subtraction
 import com.codinglikeapirate.pocitaj.ui.components.AutoSizeText
+import com.codinglikeapirate.pocitaj.ui.components.PocitajScreen
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
-import com.codinglikeapirate.pocitaj.ui.theme.PocitajTypography
 import com.codinglikeapirate.pocitaj.ui.theme.motion
 import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.digitalink.Ink
@@ -181,177 +181,171 @@ fun InkRecognitionBox(
 fun ExerciseScreen(exercise: Exercise,
                    viewModel: ExerciseViewModel,
                    onAnswerSubmit: (String, Int) -> Unit) {
+    PocitajScreen {
+        // Observe the answer result state
+        val answerResult by viewModel.answerResult.collectAsState()
+        val recognizedText by viewModel.recognizedText.collectAsState()
+        var showResultImage by remember { mutableStateOf(false) }
+        var resultImageRes by remember { mutableStateOf<Int?>(null) }
+        val debug by viewModel.showDebug.collectAsState()
 
-    val backgroundAll: ImageBitmap = ImageBitmap.imageResource(id = R.drawable.paper_top)
+        var elapsedTimeMillis by remember { mutableIntStateOf(0) }
 
-    // Observe the answer result state
-    val answerResult by viewModel.answerResult.collectAsState()
-    val recognizedText by viewModel.recognizedText.collectAsState()
-    var showResultImage by remember { mutableStateOf(false) }
-    var resultImageRes by remember { mutableStateOf<Int?>(null) }
-    val debug by viewModel.showDebug.collectAsState()
-
-    var elapsedTimeMillis by remember { mutableIntStateOf(0) }
-
-    val catDuration = if (debug) {
-        MaterialTheme.motion.debug
-    } else {
-        MaterialTheme.motion.long
-    }
-
-    val fadeDuration = if (debug) {
-        MaterialTheme.motion.debug
-    } else {
-        MaterialTheme.motion.medium
-    }
-
-
-    val imageScale by animateFloatAsState(
-        targetValue = if (showResultImage) 1.2f else 1f,
-        label = "imageScale")
-    val alphaScale by animateFloatAsState(
-        targetValue = if (showResultImage) 1f else 0f,
-        label = "alphaScale")
-
-    // LaunchedEffect to start the timer when the screen is visible
-    LaunchedEffect(exercise) {
-        val startTime = System.currentTimeMillis()
-        while (true) {
-            elapsedTimeMillis = (System.currentTimeMillis() - startTime).toInt()
-            delay(100) // Update every 100 milliseconds
+        val catDuration = if (debug) {
+            MaterialTheme.motion.debug
+        } else {
+            MaterialTheme.motion.long
         }
-    }
 
-    LaunchedEffect(recognizedText) {
-        recognizedText?.let {
-            val finalElapsedTime = elapsedTimeMillis
-            onAnswerSubmit(it, finalElapsedTime)
+        val fadeDuration = if (debug) {
+            MaterialTheme.motion.debug
+        } else {
+            MaterialTheme.motion.medium
         }
-    }
 
-    LaunchedEffect(answerResult) {
-        when (answerResult) {
-            is AnswerResult.Correct -> {
-                resultImageRes = R.drawable.cat_heart // Replace with your correct image resource
-                showResultImage = true
-                delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
-                showResultImage = false
-                // Call ViewModel function to signal animation is finished
-                viewModel.onResultAnimationFinished()
-            }
-            is AnswerResult.Incorrect -> {
-                resultImageRes = R.drawable.cat_cry // Replace with your incorrect image resource
-                showResultImage = true
-                delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
-                showResultImage = false
-                // Call ViewModel function to signal animation is finished
-                viewModel.onResultAnimationFinished()
-            }
-            is AnswerResult.Unrecognized -> {
-                resultImageRes = R.drawable.cat_big_eyes // Replace with your incorrect image resource
-                showResultImage = true
-                delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
-                showResultImage = false
-                // Call ViewModel function to signal animation is finished
-                viewModel.onResultAnimationFinished()
-            }
-            is AnswerResult.None -> {
-                resultImageRes = null
-                showResultImage = false
+
+        val imageScale by animateFloatAsState(
+            targetValue = if (showResultImage) 1.2f else 1f,
+            label = "imageScale")
+        val alphaScale by animateFloatAsState(
+            targetValue = if (showResultImage) 1f else 0f,
+            label = "alphaScale")
+
+        // LaunchedEffect to start the timer when the screen is visible
+        LaunchedEffect(exercise) {
+            val startTime = System.currentTimeMillis()
+            while (true) {
+                elapsedTimeMillis = (System.currentTimeMillis() - startTime).toInt()
+                delay(100) // Update every 100 milliseconds
             }
         }
-    }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .drawBehind {
-                drawImage(
-                    image = backgroundAll,
-                    dstOffset = IntOffset(0, 0),
-                    dstSize = IntSize(size.width.toInt(), size.height.toInt())
-                )
+        LaunchedEffect(recognizedText) {
+            recognizedText?.let {
+                val finalElapsedTime = elapsedTimeMillis
+                onAnswerSubmit(it, finalElapsedTime)
             }
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Animated content for the exercise question text
-            AnimatedContent(
-                targetState = exercise.equation.question(), // Animate when the exercise question changes
-                transitionSpec = {
-                    // Fade in the new text and fade out the old text
-                    fadeIn(animationSpec = tween(fadeDuration)) togetherWith fadeOut(animationSpec = tween(fadeDuration))
+        }
+
+        LaunchedEffect(answerResult) {
+            when (answerResult) {
+                is AnswerResult.Correct -> {
+                    resultImageRes = R.drawable.cat_heart // Replace with your correct image resource
+                    showResultImage = true
+                    delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
+                    showResultImage = false
+                    // Call ViewModel function to signal animation is finished
+                    viewModel.onResultAnimationFinished()
                 }
-            ) { targetText -> // The target state (new exercise question)
-                AutoSizeText(
-                    text = targetText,
-                    style = PocitajTypography.operationSymbol,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(312.dp)
-                        .wrapContentHeight(align = Alignment.CenterVertically),
-                )
+                is AnswerResult.Incorrect -> {
+                    resultImageRes = R.drawable.cat_cry // Replace with your incorrect image resource
+                    showResultImage = true
+                    delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
+                    showResultImage = false
+                    // Call ViewModel function to signal animation is finished
+                    viewModel.onResultAnimationFinished()
+                }
+                is AnswerResult.Unrecognized -> {
+                    resultImageRes = R.drawable.cat_big_eyes // Replace with your incorrect image resource
+                    showResultImage = true
+                    delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
+                    showResultImage = false
+                    // Call ViewModel function to signal animation is finished
+                    viewModel.onResultAnimationFinished()
+                }
+                is AnswerResult.None -> {
+                    resultImageRes = null
+                    showResultImage = false
+                }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // box for input here
-            InkRecognitionBox(
-                Modifier,
-                viewModel,
-                exercise.equation.getExpectedResult().toString()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Recognized Text: ${recognizedText ?: "..."}",
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                fontSize = 18.sp
-            )
-
-            Text(
-                text = "Time: ${elapsedTimeMillis / 1000}s ${elapsedTimeMillis % 1000}ms",
-                modifier = Modifier
-                    // .align(Alignment.TopEnd) // Align to top-right
-                    .padding(8.dp), // Add some padding
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onBackground
-            )
         }
-        // Animated visibility for the result image
-        AnimatedVisibility(
-            visible = showResultImage && resultImageRes != null,
-            enter = fadeIn(), // Fade in the image
-            exit = fadeOut(), // Fade out the image
-            modifier = Modifier.align(Alignment.Center)
-        ) {
-            // Load the image resource
-            val imageBitmap = resultImageRes?.let { ImageBitmap.imageResource(id = it) }
 
-            val contentDesc = when (answerResult) {
-                is AnswerResult.Correct -> "Correct Answer Image"
-                is AnswerResult.Incorrect -> "Incorrect Answer Image"
-                is AnswerResult.Unrecognized -> "Unrecognized Answer Image"
-                else -> null
-            }
-            if (imageBitmap != null && contentDesc != null) {
-                Image(
-                    bitmap = imageBitmap,
-                    contentDescription = contentDesc,
-                    modifier = Modifier
-                        .size(200.dp) // Set the size of the image
-                        .graphicsLayer {
-                            // Animate scale and alpha for zoom and fade
-                            scaleX = imageScale
-                            scaleY = imageScale
-                            alpha = alphaScale
-                        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Animated content for the exercise question text
+                AnimatedContent(
+                    targetState = exercise.equation.question(), // Animate when the exercise question changes
+                    transitionSpec = {
+                        // Fade in the new text and fade out the old text
+                        fadeIn(animationSpec = tween(fadeDuration)) togetherWith fadeOut(animationSpec = tween(fadeDuration))
+                    }
+                ) { targetText -> // The target state (new exercise question)
+                    AutoSizeText(
+                        text = targetText,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(312.dp)
+                            .wrapContentHeight(align = Alignment.CenterVertically),
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // box for input here
+                InkRecognitionBox(
+                    Modifier,
+                    viewModel,
+                    exercise.equation.getExpectedResult().toString()
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Recognized Text: ${recognizedText ?: "..."}",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
+                Text(
+                    text = "Time: ${elapsedTimeMillis / 1000}s ${elapsedTimeMillis % 1000}ms",
+                    modifier = Modifier
+                        // .align(Alignment.TopEnd) // Align to top-right
+                        .padding(8.dp), // Add some padding
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            // Animated visibility for the result image
+            AnimatedVisibility(
+                visible = showResultImage && resultImageRes != null,
+                enter = fadeIn(), // Fade in the image
+                exit = fadeOut(), // Fade out the image
+                modifier = Modifier.align(Alignment.Center)
+            ) {
+                // Load the image resource
+                val imageBitmap = resultImageRes?.let { ImageBitmap.imageResource(id = it) }
+
+                val contentDesc = when (answerResult) {
+                    is AnswerResult.Correct -> "Correct Answer Image"
+                    is AnswerResult.Incorrect -> "Incorrect Answer Image"
+                    is AnswerResult.Unrecognized -> "Unrecognized Answer Image"
+                    else -> null
+                }
+                if (imageBitmap != null && contentDesc != null) {
+                    Image(
+                        bitmap = imageBitmap,
+                        contentDescription = contentDesc,
+                        modifier = Modifier
+                            .size(200.dp) // Set the size of the image
+                            .graphicsLayer {
+                                // Animate scale and alpha for zoom and fade
+                                scaleX = imageScale
+                                scaleY = imageScale
+                                alpha = alphaScale
+                            }
+                    )
+                }
             }
         }
     }

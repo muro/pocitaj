@@ -37,6 +37,9 @@ val surfaceContainerLight = Color(0xFFF4EDDF)
 val surfaceContainerHighLight = Color(0xFFEEE8DA)
 val surfaceContainerHighestLight = Color(0xFFE8E2D4)
 
+val backgroundGradientStartLight = Color(0xFFFFF9EE)
+val backgroundGradientEndLight = Color(0xFFFDFCF5)
+
 val additionGradientStartLight = Color(0xFFF9A825)
 val additionGradientEndLight = Color(0xFFFDD835)
 val subtractionGradientStartLight = Color(0xFF29B6F6)
@@ -88,6 +91,9 @@ val surfaceContainerLowDark = Color(0xFF1E1B13)
 val surfaceContainerDark = Color(0xFF222017)
 val surfaceContainerHighDark = Color(0xFF2D2A21)
 val surfaceContainerHighestDark = Color(0xFF38352B)
+
+val backgroundGradientStartDark = Color(0xFF1E1B13)
+val backgroundGradientEndDark = Color(0xFF222017)
 
 val additionGradientStartDark = Color(0xFFF9A825)
 val additionGradientEndDark = Color(0xFFFDD835)

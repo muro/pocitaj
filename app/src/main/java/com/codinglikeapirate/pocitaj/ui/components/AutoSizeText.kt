@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 
 /**
  * A Composable that adjusts its font size to fit its content within the available width.
@@ -24,7 +25,8 @@ fun AutoSizeText(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
-    style: TextStyle = LocalTextStyle.current
+    style: TextStyle = LocalTextStyle.current,
+    textAlign: TextAlign = TextAlign.Start
 ) {
     var scaledTextStyle by remember { mutableStateOf(style) }
     var readyToDraw by remember { mutableStateOf(false) }
@@ -38,6 +40,7 @@ fun AutoSizeText(
         },
         color = color,
         style = scaledTextStyle,
+        textAlign = textAlign,
         softWrap = false, // This is crucial to prevent wrapping and trigger overflow
         onTextLayout = { textLayoutResult ->
             // When the text overflows, scale it down and redraw

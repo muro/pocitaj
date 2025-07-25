@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.codinglikeapirate.pocitaj.R
+import com.codinglikeapirate.pocitaj.ui.components.PocitajScreen
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import java.util.Locale
 
@@ -54,17 +55,26 @@ data class ResultDescription(val equation: String, val status: ResultStatus, val
 
 @Composable
 fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.safeDrawing)
-            .padding(vertical = 16.dp)
-    ) {
-        ResultsList(results, modifier = Modifier.fillMaxSize().padding(
-            bottom = 72.dp, // Add padding at the bottom to make space for the button
-            start = 16.dp, end = 16.dp, top = 16.dp))
-        Button(onClick = onDone, modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 32.dp)) {
-            Text(stringResource(id = R.string.done))
+    PocitajScreen {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(vertical = 16.dp)
+        ) {
+            ResultsList(
+                results, modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        bottom = 72.dp, // Add padding at the bottom to make space for the button
+                        start = 16.dp, end = 16.dp, top = 16.dp
+                    )
+            )
+            Button(onClick = onDone, modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 32.dp)) {
+                Text(stringResource(id = R.string.done))
+            }
         }
     }
 }

@@ -137,7 +137,7 @@ fun LevelProgressList(levelProgress: Map<String, LevelProgress>) {
             Column {
                 Text(
                     text = levelId, // You might want to map this to a more user-friendly name
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 LinearProgressIndicator(
