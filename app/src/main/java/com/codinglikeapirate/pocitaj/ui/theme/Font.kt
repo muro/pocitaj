@@ -6,5 +6,5 @@ import androidx.compose.ui.text.font.FontWeight
 import com.codinglikeapirate.pocitaj.R
 
 val AppFontFamily = FontFamily (
-    Font(R.font.marck_script_regular, FontWeight.Normal),
+    Font(R.font.baloo2_variable, FontWeight.Normal),
 )

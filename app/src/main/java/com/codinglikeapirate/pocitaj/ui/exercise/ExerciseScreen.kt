@@ -279,7 +279,7 @@ fun ExerciseScreen(exercise: Exercise,
                     AutoSizeText(
                         text = targetText,
                         color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.displayLarge,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()

@@ -15,14 +15,15 @@ object PocitajTypography {
     val exerciseLabelStyle = TextStyle(
         fontFamily = AppFontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 66.sp,
+        fontSize = 64.sp,
+        lineHeight = 72.sp,
         textAlign = TextAlign.Center
     )
     val screenTitle = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Bold,
-        fontSize = 28.sp,
-        lineHeight = 36.sp,
+        fontSize = 32.sp,
+        lineHeight = 40.sp,
         letterSpacing = 0.sp
     )
 
@@ -30,7 +31,7 @@ object PocitajTypography {
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
         fontSize = 48.sp,
-        lineHeight = 52.sp,
+        lineHeight = 56.sp,
         letterSpacing = 0.sp
     )
 
@@ -46,18 +47,18 @@ object PocitajTypography {
         fontFamily = AppFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 48.sp,
-        lineHeight = 28.sp,
+        lineHeight = 56.sp,
         letterSpacing = 0.5.sp
     )
 }
 
 // Default Material 3 typography, customized with our styles
 val AppTypography = Typography(
-    headlineMedium = PocitajTypography.screenTitle,
-    displayLarge = PocitajTypography.operationSymbol,
+    displayLarge = PocitajTypography.exerciseLabelStyle,
+    displayMedium = PocitajTypography.operationSymbol,
+    headlineLarge = PocitajTypography.screenTitle,
+    headlineMedium = PocitajTypography.levelButtonLabel,
     headlineSmall = PocitajTypography.operationTitle,
-    titleMedium = PocitajTypography.levelButtonLabel,
-    titleLarge = PocitajTypography.exerciseLabelStyle,
 
     // Default text style if none is specified
     bodyLarge = TextStyle(
