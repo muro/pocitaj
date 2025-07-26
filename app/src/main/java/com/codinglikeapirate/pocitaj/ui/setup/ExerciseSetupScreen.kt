@@ -4,6 +4,8 @@ import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -67,7 +70,7 @@ fun ExerciseSetupScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                stringResource(id = R.string.choose_your_challenge), style = MaterialTheme.typography.headlineMedium,
+                stringResource(id = R.string.choose_your_challenge), style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
 
@@ -107,16 +110,25 @@ fun OperationCard(
 ) {
     var expanded by remember { mutableStateOf(initialExpanded) }
     val gradient = getGradientForOperation(operationLevels.operation)
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale = if (isPressed) 0.98f else 1f
+
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .scale(scale)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) { expanded = !expanded },
         shape = RoundedCornerShape(24.dp),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(gradient)
-                .clickable { expanded = !expanded }
                 .padding(16.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -127,7 +139,7 @@ fun OperationCard(
                         Operation.MULTIPLICATION -> "×"
                         Operation.DIVISION -> "÷"
                     },
-                    style = MaterialTheme.typography.displayLarge,
+                    style = MaterialTheme.typography.displayMedium,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
@@ -159,7 +171,6 @@ fun OperationCard(
                         columns = GridCells.Fixed(2),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.height(200.dp) // Adjust height as needed
                     ) {
                         items(operationLevels.levels) { levelState ->
                             LevelTile(levelStatus = levelState, onClick = { onStartClicked(levelState.level.id) })
@@ -184,13 +195,15 @@ fun LevelTile(levelStatus: LevelStatus, onClick: () -> Unit) {
         )
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(8.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             AutoSizeText(
                 text = formatLevel(levelStatus.level).shortLabel,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.headlineMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -261,4 +274,5 @@ fun PreviewExerciseSetupScreen() {
         )
     }
 }
+
 
