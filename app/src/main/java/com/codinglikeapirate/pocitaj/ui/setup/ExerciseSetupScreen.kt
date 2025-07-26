@@ -38,7 +38,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,7 +47,7 @@ import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.logic.Curriculum
 import com.codinglikeapirate.pocitaj.ui.components.PocitajScreen
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
-import com.codinglikeapirate.pocitaj.ui.theme.customColors
+import com.codinglikeapirate.pocitaj.ui.theme.getGradientForOperation
 
 @Composable
 fun ExerciseSetupScreen(
@@ -231,36 +230,6 @@ fun PreviewExpandedOperationCard() {
     }
 }
 
-@Composable
-private fun getGradientForOperation(operation: Operation): Brush {
-    return when (operation) {
-        Operation.ADDITION -> Brush.linearGradient(
-            listOf(
-                MaterialTheme.customColors.additionGradientStart,
-                MaterialTheme.customColors.additionGradientEnd
-            )
-        )
-        Operation.SUBTRACTION -> Brush.linearGradient(
-            listOf(
-                MaterialTheme.customColors.subtractionGradientStart,
-                MaterialTheme.customColors.subtractionGradientEnd
-            )
-        )
-        Operation.MULTIPLICATION -> Brush.linearGradient(
-            listOf(
-                MaterialTheme.customColors.multiplicationGradientStart,
-                MaterialTheme.customColors.multiplicationGradientEnd
-            )
-        )
-        Operation.DIVISION -> Brush.linearGradient(
-            listOf(
-                MaterialTheme.customColors.divisionGradientStart,
-                MaterialTheme.customColors.divisionGradientEnd
-            )
-        )
-    }
-}
-
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_NO,
     showBackground = true,
@@ -292,3 +261,4 @@ fun PreviewExerciseSetupScreen() {
         )
     }
 }
+

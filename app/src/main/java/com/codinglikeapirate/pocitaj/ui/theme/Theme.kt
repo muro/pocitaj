@@ -11,7 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
+import com.codinglikeapirate.pocitaj.data.Operation
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -146,3 +148,33 @@ val MaterialTheme.motion: Motion
     @Composable
     @ReadOnlyComposable
     get() = LocalMotion.current
+
+@Composable
+fun getGradientForOperation(operation: Operation): Brush {
+    return when (operation) {
+        Operation.ADDITION -> Brush.linearGradient(
+            listOf(
+                MaterialTheme.customColors.additionGradientStart,
+                MaterialTheme.customColors.additionGradientEnd
+            )
+        )
+        Operation.SUBTRACTION -> Brush.linearGradient(
+            listOf(
+                MaterialTheme.customColors.subtractionGradientStart,
+                MaterialTheme.customColors.subtractionGradientEnd
+            )
+        )
+        Operation.MULTIPLICATION -> Brush.linearGradient(
+            listOf(
+                MaterialTheme.customColors.multiplicationGradientStart,
+                MaterialTheme.customColors.multiplicationGradientEnd
+            )
+        )
+        Operation.DIVISION -> Brush.linearGradient(
+            listOf(
+                MaterialTheme.customColors.divisionGradientStart,
+                MaterialTheme.customColors.divisionGradientEnd
+            )
+        )
+    }
+}
