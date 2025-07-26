@@ -25,9 +25,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import com.codinglikeapirate.pocitaj.logic.formatLevel
 import com.codinglikeapirate.pocitaj.ui.components.AutoSizeText
 
@@ -167,13 +164,24 @@ fun OperationCard(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Grid of Level Tiles
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
+                    Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        items(operationLevels.levels) { levelState ->
-                            LevelTile(levelStatus = levelState, onClick = { onStartClicked(levelState.level.id) })
+                        for (row in operationLevels.levels.chunked(2)) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                for (level in row) {
+                                    LevelTile(
+                                        levelStatus = level,
+                                        onClick = { onStartClicked(level.level.id) },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                                if (row.size == 1) {
+                                    Spacer(Modifier.weight(1f))
+                                }
+                            }
                         }
                     }
                 }
@@ -183,9 +191,9 @@ fun OperationCard(
 }
 
 @Composable
-fun LevelTile(levelStatus: LevelStatus, onClick: () -> Unit) {
+fun LevelTile(levelStatus: LevelStatus, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .aspectRatio(1f)
             .clickable(enabled = levelStatus.isUnlocked, onClick = onClick),
         shape = RoundedCornerShape(12.dp),
@@ -274,5 +282,3 @@ fun PreviewExerciseSetupScreen() {
         )
     }
 }
-
-
