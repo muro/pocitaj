@@ -5,6 +5,8 @@ import androidx.compose.ui.graphics.Color
 data class CustomColors(
     val backgroundGradientStart: Color,
     val backgroundGradientEnd: Color,
+    val paperGradientStart: Color,
+    val paperGradientEnd: Color,
     val additionGradientStart: Color = Color(0xFFF9A825),
     val additionGradientEnd: Color = Color(0xFFFDD835),
     val subtractionGradientStart: Color = Color(0xFF29B6F6),
@@ -24,10 +26,14 @@ data class CustomColors(
 
 val lightCustomColors = CustomColors(
     backgroundGradientStart = Color(0xFFFFF9EE),
-    backgroundGradientEnd = Color(0xFFFDFCF5)
+    backgroundGradientEnd = Color(0xFFFDFCF5),
+    paperGradientStart = Color(0xFFFFFFFF),
+    paperGradientEnd = Color(0xFFF0F0F0)
 )
 
 val darkCustomColors = CustomColors(
     backgroundGradientStart = Color(0xFF1E1B13),
-    backgroundGradientEnd = Color(0xFF222017)
+    backgroundGradientEnd = Color(0xFF222017),
+    paperGradientStart = Color(0xFF282828),
+    paperGradientEnd = Color(0xFF202020)
 )

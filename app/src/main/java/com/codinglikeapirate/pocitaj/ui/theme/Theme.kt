@@ -137,7 +137,6 @@ fun AppTheme(
     }
 }
 
-@Suppress("UnusedReceiverParameter")
 val MaterialTheme.customColors: CustomColors
     @Composable
     @ReadOnlyComposable

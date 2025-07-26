@@ -11,6 +11,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,8 +39,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -48,8 +51,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.codinglikeapirate.pocitaj.R
@@ -62,6 +63,7 @@ import com.codinglikeapirate.pocitaj.ui.components.AutoSizeText
 import com.codinglikeapirate.pocitaj.ui.components.PocitajScreen
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import com.codinglikeapirate.pocitaj.ui.theme.motion
+import com.codinglikeapirate.pocitaj.ui.theme.customColors
 import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
@@ -87,23 +89,23 @@ fun InkRecognitionBox(
     val scope = rememberCoroutineScope()
     var recognitionJob by remember { mutableStateOf<Job?>(null) }
 
-    val backgroundAnswer: ImageBitmap = ImageBitmap.imageResource(id = R.drawable.paper_answer)
-
     val strokeColor = MaterialTheme.colorScheme.errorContainer
     val activeStrokeColor = MaterialTheme.colorScheme.error
     val strokeWidth = 5.dp
+
+    val backgroundBrush = Brush.verticalGradient(
+        colors = listOf(
+            MaterialTheme.customColors.paperGradientStart,
+            MaterialTheme.customColors.paperGradientEnd
+        )
+    )
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .testTag("InkCanvas")
-            .drawBehind {
-                drawImage(
-                    image = backgroundAnswer,
-                    dstOffset = IntOffset(0, 0),
-                    dstSize = IntSize(size.width.toInt(), size.height.toInt())
-                )
-            }
+            .background(backgroundBrush, RoundedCornerShape(12.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset ->
@@ -384,4 +386,3 @@ fun PreviewExerciseScreen() {
         ExerciseScreen(exercise, viewModel) {_: String, _: Int -> }
     }
 }
-
