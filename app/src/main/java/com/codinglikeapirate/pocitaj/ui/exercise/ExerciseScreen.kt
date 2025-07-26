@@ -3,14 +3,11 @@ package com.codinglikeapirate.pocitaj.ui.exercise
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -21,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -41,19 +37,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.codinglikeapirate.pocitaj.R
 import com.codinglikeapirate.pocitaj.data.ExerciseConfig
 import com.codinglikeapirate.pocitaj.data.Operation
 import com.codinglikeapirate.pocitaj.logic.Equation
@@ -62,8 +54,8 @@ import com.codinglikeapirate.pocitaj.logic.Subtraction
 import com.codinglikeapirate.pocitaj.ui.components.AutoSizeText
 import com.codinglikeapirate.pocitaj.ui.components.PocitajScreen
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
-import com.codinglikeapirate.pocitaj.ui.theme.motion
 import com.codinglikeapirate.pocitaj.ui.theme.customColors
+import com.codinglikeapirate.pocitaj.ui.theme.motion
 import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
@@ -180,15 +172,15 @@ fun InkRecognitionBox(
 }
 
 @Composable
-fun ExerciseScreen(exercise: Exercise,
-                   viewModel: ExerciseViewModel,
-                   onAnswerSubmit: (String, Int) -> Unit) {
+fun ExerciseScreen(
+    exercise: Exercise,
+    viewModel: ExerciseViewModel,
+    onAnswerSubmit: (String, Int) -> Unit
+) {
     PocitajScreen {
-        // Observe the answer result state
         val answerResult by viewModel.answerResult.collectAsState()
         val recognizedText by viewModel.recognizedText.collectAsState()
         var showResultImage by remember { mutableStateOf(false) }
-        var resultImageRes by remember { mutableStateOf<Int?>(null) }
         val debug by viewModel.showDebug.collectAsState()
 
         var elapsedTimeMillis by remember { mutableIntStateOf(0) }
@@ -204,14 +196,6 @@ fun ExerciseScreen(exercise: Exercise,
         } else {
             MaterialTheme.motion.medium
         }
-
-
-        val imageScale by animateFloatAsState(
-            targetValue = if (showResultImage) 1.2f else 1f,
-            label = "imageScale")
-        val alphaScale by animateFloatAsState(
-            targetValue = if (showResultImage) 1f else 0f,
-            label = "alphaScale")
 
         // LaunchedEffect to start the timer when the screen is visible
         LaunchedEffect(exercise) {
@@ -230,35 +214,11 @@ fun ExerciseScreen(exercise: Exercise,
         }
 
         LaunchedEffect(answerResult) {
-            when (answerResult) {
-                is AnswerResult.Correct -> {
-                    resultImageRes = R.drawable.cat_heart // Replace with your correct image resource
-                    showResultImage = true
-                    delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
-                    showResultImage = false
-                    // Call ViewModel function to signal animation is finished
-                    viewModel.onResultAnimationFinished()
-                }
-                is AnswerResult.Incorrect -> {
-                    resultImageRes = R.drawable.cat_cry // Replace with your incorrect image resource
-                    showResultImage = true
-                    delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
-                    showResultImage = false
-                    // Call ViewModel function to signal animation is finished
-                    viewModel.onResultAnimationFinished()
-                }
-                is AnswerResult.Unrecognized -> {
-                    resultImageRes = R.drawable.cat_big_eyes // Replace with your incorrect image resource
-                    showResultImage = true
-                    delay(timeMillis = catDuration.toLong()) // Display for 500 milliseconds
-                    showResultImage = false
-                    // Call ViewModel function to signal animation is finished
-                    viewModel.onResultAnimationFinished()
-                }
-                is AnswerResult.None -> {
-                    resultImageRes = null
-                    showResultImage = false
-                }
+            if (answerResult !is AnswerResult.None) {
+                showResultImage = true
+                delay(timeMillis = catDuration.toLong())
+                showResultImage = false
+                viewModel.onResultAnimationFinished()
             }
         }
 
@@ -318,37 +278,13 @@ fun ExerciseScreen(exercise: Exercise,
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
-            // Animated visibility for the result image
-            AnimatedVisibility(
-                visible = showResultImage && resultImageRes != null,
-                enter = fadeIn(), // Fade in the image
-                exit = fadeOut(), // Fade out the image
+            ResultDisplay(
+                answerResult = answerResult,
+                showResultImage = showResultImage,
+                correctAnswer = exercise.equation.getExpectedResult().toString(),
+                isTrainingMode = true, // This will be dynamic in the future
                 modifier = Modifier.align(Alignment.Center)
-            ) {
-                // Load the image resource
-                val imageBitmap = resultImageRes?.let { ImageBitmap.imageResource(id = it) }
-
-                val contentDesc = when (answerResult) {
-                    is AnswerResult.Correct -> "Correct Answer Image"
-                    is AnswerResult.Incorrect -> "Incorrect Answer Image"
-                    is AnswerResult.Unrecognized -> "Unrecognized Answer Image"
-                    else -> null
-                }
-                if (imageBitmap != null && contentDesc != null) {
-                    Image(
-                        bitmap = imageBitmap,
-                        contentDescription = contentDesc,
-                        modifier = Modifier
-                            .size(200.dp) // Set the size of the image
-                            .graphicsLayer {
-                                // Animate scale and alpha for zoom and fade
-                                scaleX = imageScale
-                                scaleY = imageScale
-                                alpha = alphaScale
-                            }
-                    )
-                }
-            }
+            )
         }
     }
 }
