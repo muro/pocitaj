@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -176,17 +175,14 @@ fun InkRecognitionBox(
 @Composable
 fun ExerciseScreen(
     exercise: Exercise,
-    viewModel: ExerciseViewModel,
-    onAnswerSubmit: (String, Int) -> Unit
+    viewModel: ExerciseViewModel
 ) {
     PocitajScreen {
         val answerResult by viewModel.answerResult.collectAsState()
         val recognizedText by viewModel.recognizedText.collectAsState()
         var showResultImage by remember { mutableStateOf(false) }
         val debug by viewModel.showDebug.collectAsState()
-
-        var elapsedTimeMillis by remember { mutableIntStateOf(0) }
-        var finalElapsedTimeMillis by remember { mutableIntStateOf(0) }
+        val elapsedTimeMillis by viewModel.elapsedTimeMillis.collectAsState()
 
         val catDuration = if (debug) {
             MaterialTheme.motion.debug
@@ -198,22 +194,6 @@ fun ExerciseScreen(
             MaterialTheme.motion.debug
         } else {
             MaterialTheme.motion.medium
-        }
-
-        // LaunchedEffect to start the timer when the screen is visible
-        LaunchedEffect(exercise) {
-            finalElapsedTimeMillis = 0
-            val startTime = System.currentTimeMillis()
-            while (true) {
-                elapsedTimeMillis = (System.currentTimeMillis() - startTime).toInt()
-                delay(100) // Update every 100 milliseconds
-            }
-        }
-
-        LaunchedEffect(recognizedText) {
-            recognizedText?.let {
-                onAnswerSubmit(it, finalElapsedTimeMillis)
-            }
         }
 
         LaunchedEffect(answerResult) {
@@ -261,9 +241,7 @@ fun ExerciseScreen(
                     viewModel,
                     exercise.equation.getExpectedResult().toString()
                 ) {
-                    if (finalElapsedTimeMillis == 0) {
-                        finalElapsedTimeMillis = elapsedTimeMillis
-                    }
+                    viewModel.onDrawingStarted()
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -326,6 +304,6 @@ fun PreviewExerciseScreen() {
     viewModel.startExercises(ExerciseConfig(Operation.SUBTRACTION, 12, 10))
 
     AppTheme {
-        ExerciseScreen(exercise, viewModel) {_: String, _: Int -> }
+        ExerciseScreen(exercise, viewModel)
     }
 }
