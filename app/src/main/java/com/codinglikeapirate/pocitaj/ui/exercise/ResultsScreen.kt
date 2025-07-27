@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
@@ -34,10 +36,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
@@ -55,7 +61,6 @@ import java.util.Locale
 
 enum class ResultStatus {
     CORRECT, INCORRECT, NOT_RECOGNIZED;
-
     companion object {
         fun fromBooleanPair(recognized: Boolean, correct: Boolean): ResultStatus {
             return if (!recognized) {
@@ -66,14 +71,12 @@ enum class ResultStatus {
         }
     }
 }
-
 data class ResultDescription(
     val equation: String,
     val status: ResultStatus,
     val elapsedMs: Int,
     val speedBadge: SpeedBadge
 )
-
 @Composable
 fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit) {
     PocitajScreen {
@@ -113,30 +116,69 @@ fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit) {
 @Composable
 fun ResultsList(results: List<ResultDescription>, modifier: Modifier = Modifier) {
     val isPreview = LocalInspectionMode.current
-    val visible = remember { mutableStateOf(isPreview) } // In preview, visible is true from the start
+    val visible = remember { mutableStateOf(isPreview) }
+    val lazyListState = rememberLazyListState()
+
+    val showTopFade by remember { derivedStateOf { lazyListState.canScrollBackward } }
+    val showBottomFade by remember { derivedStateOf { lazyListState.canScrollForward } }
 
     if (!isPreview) {
         LaunchedEffect(Unit) {
-            delay(100) // Small delay to ensure the screen is composed
+            delay(100)
             visible.value = true
         }
     }
 
-    LazyColumn(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        itemsIndexed(results) { index, result ->
-            AnimatedVisibility(
-                visible = visible.value,
-                enter = fadeIn(animationSpec = tween(durationMillis = 500, delayMillis = index * 100)) +
-                        slideInVertically(
-                            initialOffsetY = { it / 2 },
-                            animationSpec = tween(durationMillis = 500, delayMillis = index * 100)
-                        )
-            ) {
-                ResultCard(result, modifier = Modifier.fillMaxWidth())
+    Box(modifier = modifier) {
+        LazyColumn(
+            state = lazyListState,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            itemsIndexed(results) { index, result ->
+                AnimatedVisibility(
+                    visible = visible.value,
+                    enter = fadeIn(animationSpec = tween(durationMillis = 500, delayMillis = index * 100)) +
+                            slideInVertically(
+                                initialOffsetY = { it / 2 },
+                                animationSpec = tween(durationMillis = 500, delayMillis = index * 100)
+                            )
+                ) {
+                    ResultCard(result, modifier = Modifier.fillMaxWidth())
+                }
             }
+        }
+
+        val fadeColor = MaterialTheme.customColors.backgroundGradientStart
+        AnimatedVisibility(
+            visible = showTopFade || isPreview,
+            modifier = Modifier.align(Alignment.TopCenter)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(32.dp)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(fadeColor, Color.Transparent)
+                        )
+                    )
+            )
+        }
+
+        AnimatedVisibility(
+            visible = showBottomFade || isPreview,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(32.dp)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, fadeColor)
+                        )
+                    )
+            )
         }
     }
 }
