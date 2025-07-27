@@ -8,6 +8,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -19,16 +21,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,9 +58,6 @@ fun ExerciseSetupScreen(
     onProgressClicked: () -> Unit
 ) {
     PocitajScreen {
-        var questionCount by remember { mutableFloatStateOf(10f) }
-        var difficulty by remember { mutableIntStateOf(10) }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -65,10 +65,24 @@ fun ExerciseSetupScreen(
                 .padding(top = 32.dp), // Add top padding to avoid camera cutout
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                stringResource(id = R.string.choose_your_challenge), style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    stringResource(id = R.string.choose_your_challenge),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(onClick = onProgressClicked) {
+                    Icon(
+                        imageVector = Icons.Default.BarChart,
+                        contentDescription = stringResource(id = R.string.progress_button),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -80,24 +94,16 @@ fun ExerciseSetupScreen(
                     OperationCard(
                         operationLevels = operationState,
                         onStartClicked = { levelId ->
-                            onStartClicked(operationState.operation, questionCount.toInt(), difficulty, levelId)
+                            onStartClicked(operationState.operation, 10, 10, levelId)
                         }
                     )
                 }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = onProgressClicked,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(id = R.string.progress_button))
             }
         }
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun OperationCard(
     operationLevels: OperationLevels,
@@ -148,8 +154,7 @@ fun OperationCard(
 
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(top = 16.dp)) {
-                    // "Practice (Smart)" Button
-                    Button(
+                    androidx.compose.material3.Button(
                         onClick = { onStartClicked(null) },
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -162,25 +167,17 @@ fun OperationCard(
                     }
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Grid of Level Tiles
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        for (row in operationLevels.levels.chunked(2)) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                for (level in row) {
-                                    LevelTile(
-                                        levelStatus = level,
-                                        onClick = { onStartClicked(level.level.id) },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
-                                if (row.size == 1) {
-                                    Spacer(Modifier.weight(1f))
-                                }
-                            }
+                        operationLevels.levels.forEach { level ->
+                            LevelTile(
+                                levelStatus = level,
+                                onClick = { onStartClicked(level.level.id) },
+                                modifier = Modifier.weight(1f)
+                            )
                         }
                     }
                 }
