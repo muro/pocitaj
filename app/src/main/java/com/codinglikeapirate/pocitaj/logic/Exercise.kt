@@ -1,7 +1,5 @@
 package com.codinglikeapirate.pocitaj.logic
 
-import com.codinglikeapirate.pocitaj.data.Operation
-
 data class Exercise(
     val equation: Equation,
     var submittedSolution: Int? = null,

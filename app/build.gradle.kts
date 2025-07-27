@@ -1,3 +1,5 @@
+import java.time.Duration
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
@@ -42,6 +44,9 @@ android {
         unitTests.all {
             it.jvmArgs("-XX:+EnableDynamicAgentLoading")
         }
+    }
+    tasks.withType<Test> {
+        timeout.set(Duration.ofSeconds(10))
     }
     kotlin {
         compilerOptions {

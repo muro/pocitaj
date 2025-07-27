@@ -30,11 +30,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.codinglikeapirate.pocitaj.R
+import com.codinglikeapirate.pocitaj.logic.SpeedBadge
 import com.codinglikeapirate.pocitaj.ui.components.PocitajScreen
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
-import java.util.Locale
-import com.codinglikeapirate.pocitaj.logic.SpeedBadge
 import com.codinglikeapirate.pocitaj.ui.theme.customColors
+import java.util.Locale
 
 enum class ResultStatus {
     CORRECT, INCORRECT, NOT_RECOGNIZED;
