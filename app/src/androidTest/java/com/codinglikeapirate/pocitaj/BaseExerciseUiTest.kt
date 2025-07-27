@@ -64,6 +64,22 @@ abstract class BaseExerciseUiTest {
         }
     }
 
+    fun navigateToReviewOperation(operationSymbol: String) {
+        // Click on the card to start the specific exercise type
+        composeTestRule.onNodeWithText(operationSymbol).performClick()
+
+        // Click on the first "Review" button found
+        composeTestRule.onAllNodesWithText("🧶")[0].performClick()
+
+        // Wait for the ExerciseScreen to be loaded by checking for a unique element.
+        // The InkCanvas is a good unique identifier for the ExerciseScreen.
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
+            composeTestRule
+                .onAllNodesWithTag("InkCanvas")
+                .fetchSemanticsNodes().size == 1
+        }
+    }
+
     /**
      * A helper function to set a specific list of exercises for a test run.
      * This is the primary way to create a predictable state for UI tests.

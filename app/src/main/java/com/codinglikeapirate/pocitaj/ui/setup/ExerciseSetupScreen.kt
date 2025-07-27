@@ -154,7 +154,7 @@ fun OperationCard(
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(top = 16.dp)) {
                     androidx.compose.material3.Button(
-                        onClick = { onStartClicked(null) },
+                        onClick = { onStartClicked("Smart Practice") },
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.surface,

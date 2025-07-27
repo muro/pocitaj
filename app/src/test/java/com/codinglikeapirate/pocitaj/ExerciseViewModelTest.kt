@@ -75,7 +75,7 @@ class ExerciseViewModelTest {
     }
 
     @Test
-    fun `onResultAnimationFinished transitions to summary screen with correct results`() = runTest {
+    fun `onFeedbackAnimationFinished transitions to summary screen with correct results`() = runTest {
         // GIVEN: A set of two exercises
         val exercise1 = Exercise(Addition(2, 2))
         val exercise2 = Exercise(Addition(3, 3))
@@ -87,13 +87,15 @@ class ExerciseViewModelTest {
         // WHEN: The first answer is correct
         viewModel.checkAnswer("4", 1000)
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.onResultAnimationFinished()
+        viewModel.onFeedbackAnimationFinished()
         testDispatcher.scheduler.advanceUntilIdle()
 
         // WHEN: The second answer is incorrect
         viewModel.checkAnswer("5", 1500)
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.onResultAnimationFinished()
+        viewModel.onFeedbackAnimationFinished() // This will now go to ShowCorrection
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.onFeedbackAnimationFinished() // This will advance to the next exercise (which is null)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // THEN: The UI state should be SummaryScreen
@@ -145,11 +147,12 @@ class ExerciseViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
         assertEquals(AnswerResult.Unrecognized, viewModel.answerResult.value)
 
-        viewModel.onResultAnimationFinished()
+        viewModel.onFeedbackAnimationFinished()
         testDispatcher.scheduler.advanceUntilIdle()
 
         // THEN: The view model should NOT have advanced to the next exercise
         val finalState = viewModel.uiState.value
+        assertTrue(finalState is UiState.ExerciseScreen)
         assertTrue(finalState is UiState.ExerciseScreen && finalState.currentExercise == exercise1)
     }
 

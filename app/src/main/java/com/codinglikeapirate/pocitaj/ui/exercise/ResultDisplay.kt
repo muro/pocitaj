@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -13,9 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.codinglikeapirate.pocitaj.R
 
@@ -23,8 +24,6 @@ import com.codinglikeapirate.pocitaj.R
 fun ResultDisplay(
     answerResult: AnswerResult,
     showResultImage: Boolean,
-    correctAnswer: String,
-    isTrainingMode: Boolean,
     modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
@@ -34,9 +33,10 @@ fun ResultDisplay(
         modifier = modifier
     ) {
         val resultImageRes = when (answerResult) {
-            is AnswerResult.Correct -> R.drawable.cat_heart
-            is AnswerResult.Incorrect -> R.drawable.cat_cry
-            is AnswerResult.Unrecognized -> R.drawable.cat_big_eyes
+            is AnswerResult.Correct -> R.drawable.excited
+            is AnswerResult.Incorrect -> R.drawable.sad
+            is AnswerResult.Unrecognized -> R.drawable.confused
+            is AnswerResult.ShowCorrection -> R.drawable.teacher
             else -> null
         }
 
@@ -44,6 +44,7 @@ fun ResultDisplay(
             is AnswerResult.Correct -> "Correct Answer Image"
             is AnswerResult.Incorrect -> "Incorrect Answer Image"
             is AnswerResult.Unrecognized -> "Unrecognized Answer Image"
+            is AnswerResult.ShowCorrection -> "Teacher Image"
             else -> null
         }
 
@@ -52,29 +53,22 @@ fun ResultDisplay(
                 targetValue = if (showResultImage) 1.2f else 1f,
                 label = "imageScale"
             )
-            val alphaScale by animateFloatAsState(
-                targetValue = if (showResultImage) 1f else 0f,
-                label = "alphaScale"
-            )
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                val baseSize = 200.dp
                 Image(
-                    bitmap = ImageBitmap.imageResource(id = resultImageRes),
+                    painter = painterResource(id = resultImageRes),
                     contentDescription = contentDesc,
-                    modifier = Modifier
-                        .size(200.dp)
-                        .graphicsLayer {
-                            scaleX = imageScale
-                            scaleY = imageScale
-                            alpha = alphaScale
-                        }
-                )
-                if (isTrainingMode && answerResult is AnswerResult.Incorrect) {
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(baseSize * imageScale))
+                if (answerResult is AnswerResult.ShowCorrection) {
                     Text(
-                        text = "Correct answer: $correctAnswer",
+                        text = answerResult.equation,
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
+                } else {
+                    Spacer(modifier = Modifier.height(MaterialTheme.typography.headlineMedium.fontSize.value.dp))
                 }
             }
         }

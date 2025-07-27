@@ -25,11 +25,11 @@ sealed class UiState {
     data class SummaryScreen(val results: List<ResultDescription>) : UiState()
 }
 
-// Are we animating a result ack
 sealed class AnswerResult {
     data object Correct : AnswerResult()
     data object Incorrect : AnswerResult()
     data object Unrecognized : AnswerResult()
+    data class ShowCorrection(val equation: String) : AnswerResult()
     data object None : AnswerResult() // Initial state
 }
 
@@ -51,6 +51,7 @@ class ExerciseViewModel(
     private var currentExercise: Exercise? = null
     private var exercisesRemaining: Int = 0
     private val exerciseHistory = mutableListOf<Exercise>()
+    private var currentLevelId: String? = null
 
     private val _uiState = MutableStateFlow<UiState>(UiState.ExerciseSetup)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -70,6 +71,7 @@ class ExerciseViewModel(
 
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
         viewModelScope.launch {
+            currentLevelId = exerciseConfig.levelId
             exerciseSource.initialize(exerciseConfig)
             exerciseHistory.clear()
             exercisesRemaining = exerciseConfig.count
@@ -135,14 +137,30 @@ class ExerciseViewModel(
         }
     }
 
-    fun onResultAnimationFinished() {
+    fun onFeedbackAnimationFinished() {
         viewModelScope.launch {
-            // If the answer was unrecognized, don't advance to the next question.
-            // Just reset the state and let the user try again.
-            if (_answerResult.value != AnswerResult.Unrecognized) {
-                advanceToNextExercise()
+            val isReview = currentLevelId?.contains("REVIEW", ignoreCase = true) == true
+
+            when (_answerResult.value) {
+                is AnswerResult.Incorrect -> {
+                    if (!isReview) {
+                        val equation = currentExercise?.equation?.getQuestionAsSolved(
+                            currentExercise?.equation?.getExpectedResult()
+                        ) ?: ""
+                        _answerResult.value = AnswerResult.ShowCorrection(equation)
+                    } else {
+                        advanceToNextExercise()
+                        _answerResult.value = AnswerResult.None
+                    }
+                }
+                is AnswerResult.ShowCorrection, is AnswerResult.Correct -> {
+                    advanceToNextExercise()
+                    _answerResult.value = AnswerResult.None
+                }
+                else -> {
+                    _answerResult.value = AnswerResult.None
+                }
             }
-            _answerResult.value = AnswerResult.None // Reset answer result state
             _recognizedText.value = null // Reset recognition state
         }
     }

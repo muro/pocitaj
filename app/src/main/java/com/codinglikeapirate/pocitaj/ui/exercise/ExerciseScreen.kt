@@ -219,9 +219,13 @@ fun ExerciseScreen(
         LaunchedEffect(answerResult) {
             if (answerResult !is AnswerResult.None) {
                 showResultImage = true
-                delay(timeMillis = catDuration.toLong())
+                val delayMillis = when (answerResult) {
+                    is AnswerResult.ShowCorrection -> catDuration * 2
+                    else -> catDuration
+                }
+                delay(timeMillis = delayMillis.toLong())
                 showResultImage = false
-                viewModel.onResultAnimationFinished()
+                viewModel.onFeedbackAnimationFinished()
             }
         }
 
@@ -238,7 +242,9 @@ fun ExerciseScreen(
                     targetState = exercise.equation.question(), // Animate when the exercise question changes
                     transitionSpec = {
                         // Fade in the new text and fade out the old text
-                        fadeIn(animationSpec = tween(fadeDuration)) togetherWith fadeOut(animationSpec = tween(fadeDuration))
+                        fadeIn(animationSpec = tween(fadeDuration)) togetherWith fadeOut(
+                            animationSpec = tween(fadeDuration)
+                        )
                     }
                 ) { targetText -> // The target state (new exercise question)
                     AutoSizeText(
@@ -285,11 +291,10 @@ fun ExerciseScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
+
             ResultDisplay(
                 answerResult = answerResult,
                 showResultImage = showResultImage,
-                correctAnswer = exercise.equation.getExpectedResult().toString(),
-                isTrainingMode = true, // This will be dynamic in the future
                 modifier = Modifier.align(Alignment.Center)
             )
         }

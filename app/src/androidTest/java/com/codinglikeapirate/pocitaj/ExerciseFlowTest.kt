@@ -2,14 +2,20 @@ package com.codinglikeapirate.pocitaj
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
+import androidx.test.platform.app.InstrumentationRegistry
 import com.codinglikeapirate.pocitaj.logic.Addition
+import com.codinglikeapirate.pocitaj.logic.Curriculum
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
+
+private const val RESULT_ANIMATION_PROGRESS_TIME : Long = 600
 
 class ExerciseFlowTest : BaseExerciseUiTest() {
 
@@ -50,10 +56,9 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         drawAnswer("1")
         verifyFeedback(FeedbackType.INCORRECT)
 
-
         // Second Question
         composeTestRule.waitForIdle() // Wait for UI to settle (e.g., next question loaded)
-        composeTestRule.mainClock.advanceTimeBy(2000)
+        composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME)
 
         drawAnswer("1") // Assuming "1" is also the answer for the second question
         verifyFeedback(FeedbackType.INCORRECT)
@@ -74,12 +79,12 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         drawAnswer("1")
         verifyFeedback(FeedbackType.INCORRECT) // This is incorrect, but the test is about flow
         composeTestRule.waitForIdle()
-        composeTestRule.mainClock.advanceTimeBy(2000)
+        composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME)
 
         drawAnswer("1")
         verifyFeedback(FeedbackType.INCORRECT)
         composeTestRule.waitForIdle()
-        composeTestRule.mainClock.advanceTimeBy(2000)
+        composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME)
 
         // 5. Verify Navigation to Summary Screen (ResultsScreen)
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
@@ -173,6 +178,66 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         verifyFeedback(FeedbackType.CORRECT)
     }
 
+    @Test
+    fun whenIncorrectAnswerInTraining_thenShowsCorrection() {
+        // 1. Set up exercises
+        setExercises(listOf(Exercise(Addition(2, 2)), Exercise(Addition(3, 3))))
+
+        // 2. Navigate to a non-review level
+        navigateToOperation("+") // "Smart Practice" is a training level
+
+        // 3. Answer incorrectly
+        drawAnswer("5")
+
+        // 4. Verify sad icon is shown
+        verifyFeedback(FeedbackType.INCORRECT)
+        composeTestRule.waitForIdle()
+        composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME) // Wait for sad animation
+
+        // 5. Verify teacher icon and correct answer are shown
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithContentDescription("Teacher Image").assertIsDisplayed()
+        composeTestRule.onNodeWithText("2 + 2 = 4").assertIsDisplayed()
+        composeTestRule.mainClock.advanceTimeBy(4000) // Wait for teacher animation
+
+        // 6. Verify it moves to the next question
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText("3 + 3 = ?").assertIsDisplayed()
+    }
+
+    @Test
+    fun whenIncorrectAnswerInReview_thenSkipsCorrection() {
+        // 1. Master prerequisite levels
+        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        val factMasteryDao = application.database.factMasteryDao()
+        runBlocking {
+            Curriculum.SubtractionFrom5.getAllPossibleFactIds().forEach { factId ->
+                factMasteryDao.upsert(com.codinglikeapirate.pocitaj.data.FactMastery(factId, 1, 5, 0))
+            }
+            Curriculum.SubtractionFrom10.getAllPossibleFactIds().forEach { factId ->
+                factMasteryDao.upsert(com.codinglikeapirate.pocitaj.data.FactMastery(factId, 1, 5, 0))
+            }
+        }
+
+        // 2. Set up exercises for a review level
+        setExercises(listOf(Exercise(Addition(1, 1)), Exercise(Addition(4, 4))))
+
+        // 3. Navigate to a review level
+        navigateToReviewOperation("-")
+
+        // 4. Answer incorrectly
+        drawAnswer("3")
+
+        // 5. Verify sad icon is shown
+        verifyFeedback(FeedbackType.INCORRECT)
+        composeTestRule.waitForIdle()
+        composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME) // Wait for sad animation
+
+        // 6. Verify it moves directly to the next question without showing the teacher
+        composeTestRule.onNodeWithContentDescription("Teacher Image").assertDoesNotExist()
+        composeTestRule.onNodeWithText("4 + 4 = ?").assertIsDisplayed()
+    }
+    
     // TODO: Create a new test file (e.g., "LevelSelectionTest.kt") that does not rely on the
     //       ExerciseBook test double. This new test should verify that clicking a specific
     //       level button on the ExerciseSetupScreen correctly starts a session with exercises
