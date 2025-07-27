@@ -4,6 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,13 +53,21 @@ class MainActivity : ComponentActivity() {
                 val isInitialized by startupViewModel.isInitialized.collectAsState()
                 val error by startupViewModel.error.collectAsState()
 
-                if (isInitialized) {
-                    AppNavigation()
-                } else {
-                    StartupScreen(
-                        error = error,
-                        onRetry = { startupViewModel.initializeApp() }
-                    )
+                AnimatedContent(
+                    targetState = isInitialized,
+                    label = "app_navigation",
+                    transitionSpec = {
+                        fadeIn() togetherWith fadeOut()
+                    }
+                ) { targetState ->
+                    if (targetState) {
+                        AppNavigation()
+                    } else {
+                        StartupScreen(
+                            error = error,
+                            onRetry = { startupViewModel.initializeApp() }
+                        )
+                    }
                 }
             }
         }
@@ -98,7 +113,11 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Destinations.HOME_ROUTE
+        startDestination = Destinations.HOME_ROUTE,
+        enterTransition = { slideInHorizontally(initialOffsetX = { 1000 }) },
+        exitTransition = { slideOutHorizontally(targetOffsetX = { -1000 }) },
+        popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) },
+        popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) }
     ) {
         composable(route = Destinations.HOME_ROUTE) {
             val operationLevels by exerciseSetupViewModel.operationLevels.collectAsState()
@@ -113,7 +132,9 @@ fun AppNavigation() {
                 }
             )
         }
-        composable(route = Destinations.EXERCISE_ROUTE) {
+        composable(
+            route = Destinations.EXERCISE_ROUTE,
+        ) {
             val uiState by exerciseViewModel.uiState.collectAsState()
             val exerciseState = uiState as? UiState.ExerciseScreen
             if (exerciseState != null) {

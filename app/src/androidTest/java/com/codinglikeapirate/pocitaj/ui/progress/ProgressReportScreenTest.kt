@@ -2,6 +2,7 @@ package com.codinglikeapirate.pocitaj.ui.progress
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -35,7 +36,7 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
 
         // WHEN: The user navigates to the progress report screen
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("My Progress").performClick()
+        composeTestRule.onNodeWithContentDescription("My Progress").performClick()
         composeTestRule.waitForIdle()
 
         composeTestRule.onRoot().printToLog("ProgressReportScreenTest")

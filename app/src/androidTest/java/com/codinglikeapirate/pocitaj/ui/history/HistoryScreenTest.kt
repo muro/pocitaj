@@ -71,7 +71,7 @@ class HistoryScreenTest : BaseExerciseUiTest() {
         }
 
         // WHEN: The user navigates to the history screen
-        composeTestRule.onNodeWithText("My Progress").performClick()
+        composeTestRule.onNodeWithContentDescription("My Progress").performClick()
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText("History").performClick()
         composeTestRule.waitForIdle()
@@ -109,7 +109,7 @@ class HistoryScreenTest : BaseExerciseUiTest() {
 
 
         // WHEN: The user navigates to the history screen
-        composeTestRule.onNodeWithText("My Progress").performClick()
+        composeTestRule.onNodeWithContentDescription("My Progress").performClick()
         composeTestRule.waitForIdle()
         // Can't make the swipes to work in a test
         composeTestRule.onNodeWithText("History").performClick()
