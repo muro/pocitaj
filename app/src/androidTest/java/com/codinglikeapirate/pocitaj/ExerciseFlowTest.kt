@@ -2,6 +2,7 @@ package com.codinglikeapirate.pocitaj
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -84,11 +85,11 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // 5. Verify Navigation to Summary Screen (ResultsScreen)
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onAllNodesWithText("Done").fetchSemanticsNodes().isNotEmpty()
+            composeTestRule.onAllNodesWithText("Results").fetchSemanticsNodes().isNotEmpty()
         }
 
         // 6. Navigate Back to Setup Screen
-        composeTestRule.onNodeWithText("Done").performClick()
+        composeTestRule.onNodeWithTag("Back").performClick()
         composeTestRule.waitForIdle()
 
         // 7. Verify Navigation to Exercise Setup Screen

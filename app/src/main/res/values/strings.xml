@@ -26,4 +26,6 @@
     <string name="error">Error:</string>
     <string name="done">Done</string>
     <string name="retry">Retry</string>
+    <string name="results_title">Results</string>
+    <string name="navigate_back">Back</string>
 </resources>

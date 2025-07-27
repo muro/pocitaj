@@ -19,13 +19,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -72,25 +77,35 @@ data class ResultDescription(
 @Composable
 fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit) {
     PocitajScreen {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.safeDrawing)
-                .padding(vertical = 16.dp)
+                .padding(vertical = 16.dp, horizontal = 16.dp)
         ) {
-            ResultsList(
-                results, modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        bottom = 72.dp, // Add padding at the bottom to make space for the button
-                        start = 16.dp, end = 16.dp, top = 16.dp
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                IconButton(onClick = onDone, Modifier.testTag("Back")) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        contentDescription = stringResource(id = R.string.navigate_back)
                     )
-            )
-            Button(onClick = onDone, modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(horizontal = 32.dp)) {
-                Text(stringResource(id = R.string.done))
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.results_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            ResultsList(
+                results,
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }
@@ -197,7 +212,9 @@ fun SpeedBadgeIndicator(badge: SpeedBadge, modifier: Modifier = Modifier) {
     }
 
     if (badgeColor != null) {
-        Canvas(modifier = modifier.width(36.dp).height(36.dp)) {
+        Canvas(modifier = modifier
+            .width(36.dp)
+            .height(36.dp)) {
             val path = Path().apply {
                 moveTo(size.width, 0f)
                 lineTo(size.width, size.height)
