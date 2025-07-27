@@ -167,17 +167,24 @@ fun OperationCard(
                     }
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        operationLevels.levels.forEach { level ->
-                            LevelTile(
-                                levelStatus = level,
-                                onClick = { onStartClicked(level.level.id) },
-                                modifier = Modifier.weight(1f)
-                            )
+                        for (row in operationLevels.levels.chunked(2)) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                for (level in row) {
+                                    LevelTile(
+                                        levelStatus = level,
+                                        onClick = { onStartClicked(level.level.id) },
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                                if (row.size == 1) {
+                                    Spacer(Modifier.weight(1f))
+                                }
+                            }
                         }
                     }
                 }
