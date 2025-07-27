@@ -2,6 +2,7 @@ package com.codinglikeapirate.pocitaj.ui.progress
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,10 +55,18 @@ fun ProgressReportScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                stringResource(id = R.string.no_progress_yet),
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(
+                    painter = painterResource(id = R.drawable.sleepy),
+                    contentDescription = null,
+                    modifier = Modifier.size(128.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    stringResource(id = R.string.no_progress_yet),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
     } else {
         Column(modifier = Modifier.fillMaxSize()) {
