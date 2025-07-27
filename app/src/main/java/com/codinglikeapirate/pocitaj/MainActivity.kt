@@ -116,7 +116,9 @@ fun AppNavigation() {
             val exerciseState = uiState as? UiState.ExerciseScreen
             if (exerciseState != null) {
                 val exercise: Exercise = exerciseState.currentExercise
-                ExerciseScreen(exercise, exerciseViewModel)
+                ExerciseScreen(exercise, exerciseViewModel) { answer: String, elapsedMs: Int ->
+                    exerciseViewModel.checkAnswer(answer, elapsedMs)
+                }
             }
         }
         composable(route = Destinations.SUMMARY_ROUTE) {

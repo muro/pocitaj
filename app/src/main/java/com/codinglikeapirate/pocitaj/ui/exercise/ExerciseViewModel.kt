@@ -9,9 +9,8 @@ import com.codinglikeapirate.pocitaj.InkModelManager
 import com.codinglikeapirate.pocitaj.data.ExerciseConfig
 import com.codinglikeapirate.pocitaj.data.ExerciseSource
 import com.codinglikeapirate.pocitaj.logic.Exercise
+import com.codinglikeapirate.pocitaj.logic.SpeedBadge
 import com.google.mlkit.vision.digitalink.Ink
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -53,9 +52,6 @@ class ExerciseViewModel(
     private var currentExercise: Exercise? = null
     private var exercisesRemaining: Int = 0
     private val exerciseHistory = mutableListOf<Exercise>()
-    private var startTime: Long = 0
-    private var finalElapsedTimeMillis: Int = 0
-    private var timerJob: Job? = null
 
     private val _uiState = MutableStateFlow<UiState>(UiState.ExerciseSetup)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -73,9 +69,6 @@ class ExerciseViewModel(
     private val _recognizedText = MutableStateFlow<String?>(null)
     val recognizedText: StateFlow<String?> = _recognizedText.asStateFlow()
 
-    private val _elapsedTimeMillis = MutableStateFlow(0)
-    val elapsedTimeMillis: StateFlow<Int> = _elapsedTimeMillis.asStateFlow()
-
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
         viewModelScope.launch {
             exerciseSource.initialize(exerciseConfig)
@@ -88,37 +81,22 @@ class ExerciseViewModel(
         }
     }
 
-    fun onDrawingStarted() {
-        if (finalElapsedTimeMillis == 0) {
-            finalElapsedTimeMillis = (System.currentTimeMillis() - startTime).toInt()
-        }
-    }
-
     fun recognizeInk(ink: Ink, hint: String) {
         viewModelScope.launch {
             _recognizedText.value = null
             try {
                 val result = inkModelManager.recognizeInk(ink, hint)
-                checkAnswer(result, finalElapsedTimeMillis)
+                _recognizedText.value = result
             } finally {
             }
         }
     }
 
     private suspend fun advanceToNextExercise() {
-        timerJob?.cancel()
         if (exercisesRemaining > 0) {
             currentExercise = exerciseSource.getNextExercise()
             if (currentExercise != null) {
                 exercisesRemaining--
-                startTime = System.currentTimeMillis()
-                finalElapsedTimeMillis = 0
-                timerJob = viewModelScope.launch {
-                    while (true) {
-                        _elapsedTimeMillis.value = (System.currentTimeMillis() - startTime).toInt()
-                        delay(100)
-                    }
-                }
             }
         } else {
             currentExercise = null
@@ -136,7 +114,7 @@ class ExerciseViewModel(
 
 
 
-    internal fun checkAnswer(answer: String, elapsedMs: Int) {
+    fun checkAnswer(answer: String, elapsedMs: Int) {
         viewModelScope.launch {
             currentExercise?.let { exercise ->
                 val intAnswer = answer.toIntOrNull()
