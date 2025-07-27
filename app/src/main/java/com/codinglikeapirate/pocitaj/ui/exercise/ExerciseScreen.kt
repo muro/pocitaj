@@ -68,7 +68,8 @@ import kotlinx.coroutines.launch
 fun InkRecognitionBox(
     modifier: Modifier = Modifier,
     viewModel: ExerciseViewModel,
-    hint: String
+    hint: String,
+    onDragStart: () -> Unit
 ) {
     val recognitionDelayMillis = 1_000L
 
@@ -101,6 +102,7 @@ fun InkRecognitionBox(
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset ->
+                        onDragStart()
                         recognitionJob?.cancel() // Cancel any pending recognition
                         currentPath.value.moveTo(offset.x, offset.y)
                         currentStrokeBuilder.addPoint(Point.create(offset.x, offset.y))
@@ -184,6 +186,7 @@ fun ExerciseScreen(
         val debug by viewModel.showDebug.collectAsState()
 
         var elapsedTimeMillis by remember { mutableIntStateOf(0) }
+        var finalElapsedTimeMillis by remember { mutableIntStateOf(0) }
 
         val catDuration = if (debug) {
             MaterialTheme.motion.debug
@@ -199,6 +202,7 @@ fun ExerciseScreen(
 
         // LaunchedEffect to start the timer when the screen is visible
         LaunchedEffect(exercise) {
+            finalElapsedTimeMillis = 0
             val startTime = System.currentTimeMillis()
             while (true) {
                 elapsedTimeMillis = (System.currentTimeMillis() - startTime).toInt()
@@ -208,8 +212,7 @@ fun ExerciseScreen(
 
         LaunchedEffect(recognizedText) {
             recognizedText?.let {
-                val finalElapsedTime = elapsedTimeMillis
-                onAnswerSubmit(it, finalElapsedTime)
+                onAnswerSubmit(it, finalElapsedTimeMillis)
             }
         }
 
@@ -257,7 +260,11 @@ fun ExerciseScreen(
                     Modifier,
                     viewModel,
                     exercise.equation.getExpectedResult().toString()
-                )
+                ) {
+                    if (finalElapsedTimeMillis == 0) {
+                        finalElapsedTimeMillis = elapsedTimeMillis
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
