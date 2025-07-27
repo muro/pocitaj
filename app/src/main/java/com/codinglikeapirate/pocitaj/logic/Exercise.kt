@@ -6,7 +6,8 @@ data class Exercise(
     val equation: Equation,
     var submittedSolution: Int? = null,
     var solved: Boolean = false,
-    var timeTakenMillis: Int? = null
+    var timeTakenMillis: Int? = null,
+    var speedBadge: SpeedBadge = SpeedBadge.NONE
 ) {
     companion object {
         const val NOT_RECOGNIZED = -1000
@@ -26,6 +27,10 @@ data class Exercise(
         }
         this.solved = true
         this.timeTakenMillis = timeMillis
+        timeMillis?.let {
+            val (op, op1, op2) = equation.getFact()
+            this.speedBadge = getSpeedBadge(op, op1, op2, it.toLong())
+        }
         return correct()
     }
 
@@ -40,24 +45,7 @@ data class Exercise(
     }
 
     fun getFactId(): String {
-        val op = when(equation) {
-            is Addition -> Operation.ADDITION
-            is Subtraction -> Operation.SUBTRACTION
-            is Multiplication -> Operation.MULTIPLICATION
-            is Division -> Operation.DIVISION
-            is MissingAddend -> Operation.ADDITION // Or a new operation type
-            is MissingSubtrahend -> Operation.SUBTRACTION // Or a new operation type
-            else -> throw IllegalStateException("Unknown equation type")
-        }
-        val (op1, op2) = when(equation) {
-            is Addition -> Pair(equation.a, equation.b)
-            is Subtraction -> Pair(equation.a, equation.b)
-            is Multiplication -> Pair(equation.a, equation.b)
-            is Division -> Pair(equation.a, equation.b)
-            is MissingAddend -> Pair(equation.a, equation.getExpectedResult())
-            is MissingSubtrahend -> Pair(equation.a, equation.getExpectedResult())
-            else -> throw IllegalStateException("Unknown equation type")
-        }
+        val (op, op1, op2) = equation.getFact()
         return "${op.name}_${op1}_${op2}"
     }
 }

@@ -9,6 +9,7 @@ import com.codinglikeapirate.pocitaj.InkModelManager
 import com.codinglikeapirate.pocitaj.data.ExerciseConfig
 import com.codinglikeapirate.pocitaj.data.ExerciseSource
 import com.codinglikeapirate.pocitaj.logic.Exercise
+import com.codinglikeapirate.pocitaj.logic.SpeedBadge
 import com.google.mlkit.vision.digitalink.Ink
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -155,7 +156,8 @@ class ExerciseViewModel(
                     exercise.solved,
                     exercise.correct()
                 ),
-                exercise.timeTakenMillis ?: 0
+                exercise.timeTakenMillis ?: 0,
+                exercise.speedBadge
             )
         }
     }

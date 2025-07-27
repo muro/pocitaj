@@ -27,15 +27,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.codinglikeapirate.pocitaj.R
 import com.codinglikeapirate.pocitaj.ui.components.PocitajScreen
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import java.util.Locale
+import com.codinglikeapirate.pocitaj.logic.SpeedBadge
+import com.codinglikeapirate.pocitaj.ui.theme.customColors
 
 enum class ResultStatus {
     CORRECT, INCORRECT, NOT_RECOGNIZED;
@@ -51,7 +50,12 @@ enum class ResultStatus {
     }
 }
 
-data class ResultDescription(val equation: String, val status: ResultStatus, val elapsedMs: Int)
+data class ResultDescription(
+    val equation: String,
+    val status: ResultStatus,
+    val elapsedMs: Int,
+    val speedBadge: SpeedBadge
+)
 
 @Composable
 fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit) {
@@ -92,9 +96,9 @@ fun ResultsList(results: List<ResultDescription>, modifier: Modifier = Modifier)
 @Composable
 fun PreviewResultsList() {
     val results = ArrayList<ResultDescription>()
-    results.add(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT, 1000))
-    results.add(ResultDescription("3 + 3 ≠ 5", ResultStatus.INCORRECT, 2100))
-    results.add(ResultDescription("3 + 3 = ?", ResultStatus.NOT_RECOGNIZED, 3511))
+    results.add(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT, 1000, SpeedBadge.GOLD))
+    results.add(ResultDescription("3 + 3 ≠ 5", ResultStatus.INCORRECT, 2100, SpeedBadge.SILVER))
+    results.add(ResultDescription("3 + 3 = ?", ResultStatus.NOT_RECOGNIZED, 3511, SpeedBadge.BRONZE))
 
     AppTheme {
         ResultsList(results)
@@ -103,12 +107,21 @@ fun PreviewResultsList() {
 
 @Composable
 fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
-    Surface(color = if (result.elapsedMs < 5000) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
-    {
+    val backgroundColor = when (result.speedBadge) {
+        SpeedBadge.GOLD -> MaterialTheme.customColors.speedBadgeGold
+        SpeedBadge.SILVER -> MaterialTheme.customColors.speedBadgeSilver
+        SpeedBadge.BRONZE -> MaterialTheme.customColors.speedBadgeBronze
+        else -> MaterialTheme.colorScheme.surfaceVariant
+    }
+    val textColor = MaterialTheme.colorScheme.onSurface
+
+    Surface(
+        color = backgroundColor,
+        modifier = modifier.fillMaxWidth()
+    ) {
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .padding(8.dp)
-                .fillMaxWidth()
                 .height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -120,34 +133,26 @@ fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
                         ResultStatus.NOT_RECOGNIZED -> R.drawable.cat_big_eyes
                     }
                 ),
-                contentDescription = "Heart",
+                contentDescription = "Result Status",
                 modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 0.dp)
+                    .padding(horizontal = 8.dp)
                     .fillMaxHeight()
                     .aspectRatio(1f)
-                    .align(Alignment.CenterVertically)
             )
             Spacer(modifier = Modifier.width(12.dp))
 
-                Text(
-                    text = result.equation,
-                    //color = MaterialTheme.colorScheme.primary,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Light,// , textAlign = TextAlign.Center,
-                    fontFamily = FontFamily.SansSerif,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        //.fillMaxWidth()
-                )
-                Text(
-                    text = String.format(Locale.US, "%.1fs", result.elapsedMs / 1000.0),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Light,// , textAlign = TextAlign.Center,
-                    fontFamily = FontFamily.SansSerif,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                )
+            Text(
+                text = result.equation,
+                style = MaterialTheme.typography.headlineMedium,
+                color = textColor,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = String.format(Locale.US, "%.1fs", result.elapsedMs / 1000.0),
+                style = MaterialTheme.typography.bodyMedium,
+                color = textColor,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
         }
     }
 }
@@ -165,7 +170,7 @@ fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
 @Composable
 fun PreviewResultCard() {
     AppTheme {
-        ResultCard(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT, 123))
+        ResultCard(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT, 123, SpeedBadge.SILVER))
     }
 }
 
@@ -182,7 +187,7 @@ fun PreviewResultCard() {
 @Composable
 fun PreviewResultCardSlow() {
     AppTheme {
-        ResultCard(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT, 5123))
+        ResultCard(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT, 5123, SpeedBadge.NONE))
     }
 }
 
@@ -201,8 +206,8 @@ fun PreviewResultCardSlow() {
 fun PreviewResultsScreen() {
     val results = ArrayList<ResultDescription>()
     for (i in 1..5) {
-        results.add(ResultDescription("$i + ${i + 2} = ${2 * i + 2}", ResultStatus.CORRECT, 1234))
-        results.add(ResultDescription("$i + ${i + 1} ≠ $i", ResultStatus.CORRECT, 1))
+        results.add(ResultDescription("$i + ${i + 2} = ${2 * i + 2}", ResultStatus.CORRECT, 1234, SpeedBadge.GOLD))
+        results.add(ResultDescription("$i + ${i + 1} ≠ $i", ResultStatus.CORRECT, 1, SpeedBadge.BRONZE))
     }
     AppTheme {
         ResultsScreen(results) {}

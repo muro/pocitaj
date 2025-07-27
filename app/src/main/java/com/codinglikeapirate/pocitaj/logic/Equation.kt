@@ -1,5 +1,6 @@
 package com.codinglikeapirate.pocitaj.logic
 
+import com.codinglikeapirate.pocitaj.data.Operation
 import java.util.Locale
 
 interface Equation {
@@ -10,6 +11,8 @@ interface Equation {
 
     // New helper function to get the basic equation string based on submitted solution
     fun getQuestionAsSolved(submittedSolution: Int?): String
+
+    fun getFact(): Triple<Operation, Int, Int>
 }
 
 data class Addition(val a: Int, val b: Int) : Equation {
@@ -22,6 +25,7 @@ data class Addition(val a: Int, val b: Int) : Equation {
             question() // If no solution, just show the question
         }
     }
+    override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.ADDITION, a, b)
 }
 
 data class Subtraction(val a: Int, val b: Int) : Equation {
@@ -34,6 +38,7 @@ data class Subtraction(val a: Int, val b: Int) : Equation {
             question() // If no solution, just show the question
         }
     }
+    override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.SUBTRACTION, a, b)
 }
 
 data class Multiplication(val a: Int, val b: Int) : Equation {
@@ -46,6 +51,7 @@ data class Multiplication(val a: Int, val b: Int) : Equation {
             question() // If no solution, just show the question
         }
     }
+    override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.MULTIPLICATION, a, b)
 }
 
 data class MissingAddend(val a: Int, val result: Int) : Equation {
@@ -60,6 +66,7 @@ data class MissingAddend(val a: Int, val result: Int) : Equation {
             question() // If no solution, just show the question
         }
     }
+    override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.ADDITION, a, b)
 }
 
 data class MissingSubtrahend(val a: Int, val result: Int) : Equation {
@@ -74,6 +81,7 @@ data class MissingSubtrahend(val a: Int, val result: Int) : Equation {
             question() // If no solution, just show the question
         }
     }
+    override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.SUBTRACTION, a, b)
 }
 
 data class Division(val a: Int, val b: Int) : Equation {
@@ -86,4 +94,5 @@ data class Division(val a: Int, val b: Int) : Equation {
             question()
         }
     }
+    override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.DIVISION, a, b)
 }
