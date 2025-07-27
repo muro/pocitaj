@@ -27,6 +27,8 @@ import com.codinglikeapirate.pocitaj.ui.progress.ProgressContainerScreen
 import com.codinglikeapirate.pocitaj.ui.progress.ProgressReportViewModel
 import com.codinglikeapirate.pocitaj.ui.progress.ProgressReportViewModelFactory
 import com.codinglikeapirate.pocitaj.ui.setup.ExerciseSetupScreen
+import com.codinglikeapirate.pocitaj.ui.setup.ExerciseSetupViewModel
+import com.codinglikeapirate.pocitaj.ui.setup.ExerciseSetupViewModelFactory
 import com.codinglikeapirate.pocitaj.ui.setup.StartupScreen
 import com.codinglikeapirate.pocitaj.ui.setup.StartupViewModel
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
@@ -72,7 +74,7 @@ fun AppNavigation() {
     val exerciseViewModel: ExerciseViewModel = viewModel(factory = ExerciseViewModelFactory)
     val progressReportViewModel: ProgressReportViewModel = viewModel(factory = ProgressReportViewModelFactory)
     val historyViewModel: HistoryViewModel = viewModel(factory = HistoryViewModelFactory)
-    val exerciseSetupViewModel: com.codinglikeapirate.pocitaj.ui.setup.ExerciseSetupViewModel = viewModel(factory = com.codinglikeapirate.pocitaj.ui.setup.ExerciseSetupViewModelFactory)
+    val exerciseSetupViewModel: ExerciseSetupViewModel = viewModel(factory = ExerciseSetupViewModelFactory)
 
     LaunchedEffect(Unit) {
         exerciseViewModel.navigationEvents.collect { event ->
