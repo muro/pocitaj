@@ -1,7 +1,13 @@
 package com.codinglikeapirate.pocitaj.ui.exercise
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -17,14 +23,19 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +45,7 @@ import com.codinglikeapirate.pocitaj.logic.SpeedBadge
 import com.codinglikeapirate.pocitaj.ui.components.PocitajScreen
 import com.codinglikeapirate.pocitaj.ui.theme.AppTheme
 import com.codinglikeapirate.pocitaj.ui.theme.customColors
+import kotlinx.coroutines.delay
 import java.util.Locale
 
 enum class ResultStatus {
@@ -85,9 +97,31 @@ fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit) {
 
 @Composable
 fun ResultsList(results: List<ResultDescription>, modifier: Modifier = Modifier) {
-    LazyColumn(modifier) {
-        items(results) { result ->
-            ResultCard(result, modifier = Modifier.fillMaxWidth())
+    val isPreview = LocalInspectionMode.current
+    val visible = remember { mutableStateOf(isPreview) } // In preview, visible is true from the start
+
+    if (!isPreview) {
+        LaunchedEffect(Unit) {
+            delay(100) // Small delay to ensure the screen is composed
+            visible.value = true
+        }
+    }
+
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        itemsIndexed(results) { index, result ->
+            AnimatedVisibility(
+                visible = visible.value,
+                enter = fadeIn(animationSpec = tween(durationMillis = 500, delayMillis = index * 100)) +
+                        slideInVertically(
+                            initialOffsetY = { it / 2 },
+                            animationSpec = tween(durationMillis = 500, delayMillis = index * 100)
+                        )
+            ) {
+                ResultCard(result, modifier = Modifier.fillMaxWidth())
+            }
         }
     }
 }
@@ -107,52 +141,70 @@ fun PreviewResultsList() {
 
 @Composable
 fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
-    val backgroundColor = when (result.speedBadge) {
+    val textColor = MaterialTheme.colorScheme.onSurfaceVariant
+
+    Card(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Box {
+            Row(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .height(IntrinsicSize.Min),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Image(
+                    painter = painterResource(
+                        when (result.status) {
+                            ResultStatus.CORRECT -> R.drawable.cat_heart
+                            ResultStatus.INCORRECT -> R.drawable.cat_cry
+                            ResultStatus.NOT_RECOGNIZED -> R.drawable.cat_big_eyes
+                        }
+                    ),
+                    contentDescription = "Result Status",
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .fillMaxHeight()
+                        .aspectRatio(1f)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(
+                    text = result.equation,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = textColor,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = String.format(Locale.US, "%.1fs", result.elapsedMs / 1000.0),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = textColor,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+            }
+            SpeedBadgeIndicator(badge = result.speedBadge, modifier = Modifier.align(Alignment.TopEnd))
+        }
+    }
+}
+
+@Composable
+fun SpeedBadgeIndicator(badge: SpeedBadge, modifier: Modifier = Modifier) {
+    val badgeColor = when (badge) {
         SpeedBadge.GOLD -> MaterialTheme.customColors.speedBadgeGold
         SpeedBadge.SILVER -> MaterialTheme.customColors.speedBadgeSilver
         SpeedBadge.BRONZE -> MaterialTheme.customColors.speedBadgeBronze
-        else -> MaterialTheme.colorScheme.surfaceVariant
+        SpeedBadge.NONE -> null
     }
-    val textColor = MaterialTheme.colorScheme.onSurface
 
-    Surface(
-        color = backgroundColor,
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(8.dp)
-                .height(IntrinsicSize.Min),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Image(
-                painter = painterResource(
-                    when (result.status) {
-                        ResultStatus.CORRECT -> R.drawable.cat_heart
-                        ResultStatus.INCORRECT -> R.drawable.cat_cry
-                        ResultStatus.NOT_RECOGNIZED -> R.drawable.cat_big_eyes
-                    }
-                ),
-                contentDescription = "Result Status",
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .fillMaxHeight()
-                    .aspectRatio(1f)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Text(
-                text = result.equation,
-                style = MaterialTheme.typography.headlineMedium,
-                color = textColor,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = String.format(Locale.US, "%.1fs", result.elapsedMs / 1000.0),
-                style = MaterialTheme.typography.bodyMedium,
-                color = textColor,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+    if (badgeColor != null) {
+        Canvas(modifier = modifier.width(36.dp).height(36.dp)) {
+            val path = Path().apply {
+                moveTo(size.width, 0f)
+                lineTo(size.width, size.height)
+                lineTo(0f, 0f)
+                close()
+            }
+            drawPath(path, color = badgeColor)
         }
     }
 }
