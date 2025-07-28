@@ -26,11 +26,11 @@ class AdaptiveExerciseSource(
         val level = config.levelId?.let { Curriculum.getAllLevels().find { level -> level.id == it } }
 
         exerciseProvider = when {
-            level != null && level.strategy == ExerciseStrategy.REVIEW -> ReviewStrategy(level, userMastery)
-            level != null -> DrillStrategy(level, userMastery)
+            level != null && level.strategy == ExerciseStrategy.REVIEW -> ReviewStrategy(level, userMastery.toMutableMap())
+            level != null -> DrillStrategy(level, userMastery.toMutableMap())
             else -> {
                 val filteredCurriculum = Curriculum.getAllLevels().filter { it.operation == config.operation }
-                SmartPracticeStrategy(filteredCurriculum, userMastery)
+                SmartPracticeStrategy(filteredCurriculum, userMastery.toMutableMap())
             }
         }
     }

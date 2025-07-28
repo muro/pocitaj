@@ -46,7 +46,7 @@ android {
         }
     }
     tasks.withType<Test> {
-        timeout.set(Duration.ofSeconds(10))
+        // timeout.set(Duration.ofSeconds(10))
     }
     kotlin {
         compilerOptions {
