@@ -1,57 +1,42 @@
 package com.codinglikeapirate.pocitaj.data
 
 import com.codinglikeapirate.pocitaj.logic.Curriculum
+import com.codinglikeapirate.pocitaj.logic.DrillStrategy
 import com.codinglikeapirate.pocitaj.logic.Exercise
 import com.codinglikeapirate.pocitaj.logic.ExerciseProvider
+import com.codinglikeapirate.pocitaj.logic.ExerciseStrategy
+import com.codinglikeapirate.pocitaj.logic.ReviewStrategy
+import com.codinglikeapirate.pocitaj.logic.SmartPracticeStrategy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
-class AdaptiveExerciseSource internal constructor(
+class AdaptiveExerciseSource(
     private val factMasteryDao: FactMasteryDao,
     private val exerciseAttemptDao: ExerciseAttemptDao,
     private val userDao: UserDao,
-    private val userId: Long,
-    private var exerciseProvider: ExerciseProvider
+    private val userId: Long
 ) : ExerciseSource {
 
-    private var currentOperation: Operation? = null
+    private var exerciseProvider: ExerciseProvider? = null
     private val EWMA_ALPHA = 0.2
 
-    override fun initialize(config: ExerciseConfig) {
-        currentOperation = config.operation
-        // Re-create the exercise provider with a filtered curriculum
-        val filteredCurriculum = if (config.levelId != null) {
-            Curriculum.getAllLevels().filter { it.id == config.levelId }
-        } else {
-            Curriculum.getAllLevels().filter { it.operation == currentOperation }
-        }
-        val userMastery = runBlocking {
-            factMasteryDao.getAllFactsForUser(userId).first().associateBy { it.factId }
-        }
-        exerciseProvider = ExerciseProvider(filteredCurriculum, userMastery)
-    }
+    override suspend fun initialize(config: ExerciseConfig) {
+        val userMastery = factMasteryDao.getAllFactsForUser(userId).first().associateBy { it.factId }
+        val level = config.levelId?.let { Curriculum.getAllLevels().find { level -> level.id == it } }
 
-    companion object {
-        suspend fun create(
-            factMasteryDao: FactMasteryDao,
-            exerciseAttemptDao: ExerciseAttemptDao,
-            userDao: UserDao,
-            userId: Long = 1L
-        ): AdaptiveExerciseSource {
-            val userMastery = withContext(Dispatchers.IO) {
-                factMasteryDao.getAllFactsForUser(userId).first().associateBy { it.factId }
+        exerciseProvider = when {
+            level != null && level.strategy == ExerciseStrategy.REVIEW -> ReviewStrategy(level, userMastery)
+            level != null -> DrillStrategy(level, userMastery)
+            else -> {
+                val filteredCurriculum = Curriculum.getAllLevels().filter { it.operation == config.operation }
+                SmartPracticeStrategy(filteredCurriculum, userMastery)
             }
-            val exerciseProvider = ExerciseProvider(Curriculum.getAllLevels(), userMastery)
-            return AdaptiveExerciseSource(factMasteryDao, exerciseAttemptDao, userDao, userId, exerciseProvider)
         }
     }
 
-    override suspend fun getNextExercise(): Exercise? {
-        return withContext(Dispatchers.IO) {
-            exerciseProvider.getNextExercise()
-        }
+    override fun getNextExercise(): Exercise? {
+        return exerciseProvider?.getNextExercise()
     }
 
     override suspend fun recordAttempt(exercise: Exercise, submittedAnswer: Int, durationMs: Long) {

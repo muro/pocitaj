@@ -70,10 +70,11 @@ class StartupViewModel(
 
     private suspend fun createExerciseSource() {
         val app = getApplication<App>()
-        app.exerciseSource = AdaptiveExerciseSource.create(
+        app.exerciseSource = AdaptiveExerciseSource(
             app.database.factMasteryDao(),
             app.database.exerciseAttemptDao(),
-            app.database.userDao()
+            app.database.userDao(),
+            1L
         )
     }
 }

@@ -323,8 +323,8 @@ fun PreviewExerciseScreen() {
         override suspend fun recognizeInk(ink: Ink, hint: String): String = "12"
     }
     val mockExerciseSource = object : com.codinglikeapirate.pocitaj.data.ExerciseSource {
-        override fun initialize(config: ExerciseConfig) {}
-        override suspend fun getNextExercise(): Exercise? = null
+        override suspend fun initialize(config: ExerciseConfig) {}
+        override fun getNextExercise(): Exercise? = null
         override suspend fun recordAttempt(exercise: Exercise, submittedAnswer: Int, durationMs: Long) {}
     }
     val viewModel = ExerciseViewModel(mockInkModelManager, mockExerciseSource)

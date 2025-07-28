@@ -54,14 +54,11 @@ class AdaptiveExerciseSourceTest {
         exerciseAttemptDao = FakeExerciseAttemptDao()
         userDao = FakeUserDao()
 
-        // The initial ExerciseProvider is created with the full curriculum
-        val initialProvider = ExerciseProvider(Curriculum.getAllLevels(), emptyMap())
         exerciseSource = AdaptiveExerciseSource(
             factMasteryDao,
             exerciseAttemptDao,
             userDao,
-            1L,
-            initialProvider
+            1L
         )
     }
 

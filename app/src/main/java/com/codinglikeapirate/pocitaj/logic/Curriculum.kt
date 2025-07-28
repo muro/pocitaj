@@ -15,6 +15,7 @@ object Curriculum {
         override val id = "ADD_SUM_5"
         override val operation = Operation.ADDITION
         override val prerequisites: Set<String> = emptySet()
+        override val strategy = ExerciseStrategy.DRILL
         private const val max_sum = 5
 
         override fun generateExercise(): Exercise {
@@ -36,6 +37,7 @@ object Curriculum {
         override val id = "ADD_SUM_10"
         override val operation = Operation.ADDITION
         override val prerequisites: Set<String> = setOf(SumsUpTo5.id)
+        override val strategy = ExerciseStrategy.DRILL
         private const val max_sum = 10
 
         override fun generateExercise(): Exercise {
@@ -57,6 +59,7 @@ object Curriculum {
         override val id = "ADD_SUM_20"
         override val operation = Operation.ADDITION
         override val prerequisites: Set<String> = setOf(SumsUpTo10.id)
+        override val strategy = ExerciseStrategy.DRILL
         private const val max_sum = 20
 
         override fun generateExercise(): Exercise {
@@ -78,6 +81,7 @@ object Curriculum {
         override val id = "ADD_DOUBLES"
         override val operation = Operation.ADDITION
         override val prerequisites: Set<String> = setOf(SumsUpTo10.id)
+        override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
             val op1 = Random.nextInt(1, 11)
@@ -93,6 +97,7 @@ object Curriculum {
         override val id = "ADD_NEAR_DOUBLES"
         override val operation = Operation.ADDITION
         override val prerequisites: Set<String> = setOf(Doubles.id)
+        override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
             val op1 = Random.nextInt(1, 10) // e.g. 4
@@ -119,6 +124,7 @@ object Curriculum {
         override val id = "ADD_MAKING_10S"
         override val operation = Operation.ADDITION
         override val prerequisites: Set<String> = setOf(SumsUpTo10.id)
+        override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
             // e.g. 9+x, 8+x, 7+x, 6+x
@@ -148,6 +154,7 @@ object Curriculum {
         override val id = "ADD_TENS"
         override val operation = Operation.ADDITION
         override val prerequisites: Set<String> = setOf(SumsUpTo20.id)
+        override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
             val op1 = Random.nextInt(1, 10) * 10
@@ -168,6 +175,7 @@ object Curriculum {
         override val id = "ADD_TWO_DIGIT_NO_CARRY"
         override val operation = Operation.ADDITION
         override val prerequisites: Set<String> = setOf(AddingTens.id)
+        override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
             var op1: Int
@@ -196,6 +204,7 @@ object Curriculum {
         override val id = "ADD_TWO_DIGIT_CARRY"
         override val operation = Operation.ADDITION
         override val prerequisites: Set<String> = setOf(TwoDigitAdditionNoCarry.id)
+        override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
             var op1: Int
@@ -225,6 +234,7 @@ object Curriculum {
         override val id = "SUB_FROM_5"
         override val operation = Operation.SUBTRACTION
         override val prerequisites: Set<String> = emptySet()
+        override val strategy = ExerciseStrategy.DRILL
         private const val max_minuend = 5
 
         override fun generateExercise(): Exercise {
@@ -246,6 +256,7 @@ object Curriculum {
         override val id = "SUB_FROM_10"
         override val operation = Operation.SUBTRACTION
         override val prerequisites: Set<String> = setOf(SubtractionFrom5.id)
+        override val strategy = ExerciseStrategy.DRILL
         private const val max_minuend = 10
 
         override fun generateExercise(): Exercise {
@@ -267,6 +278,7 @@ object Curriculum {
         override val id = "SUB_FROM_20"
         override val operation = Operation.SUBTRACTION
         override val prerequisites: Set<String> = setOf(SubtractionFrom10.id)
+        override val strategy = ExerciseStrategy.DRILL
         private const val max_minuend = 20
 
         override fun generateExercise(): Exercise {
@@ -288,6 +300,7 @@ object Curriculum {
         override val id = "SUB_TENS"
         override val operation = Operation.SUBTRACTION
         override val prerequisites: Set<String> = setOf(SubtractionFrom20.id)
+        override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
             val op1 = Random.nextInt(2, 10) * 10
@@ -308,6 +321,7 @@ object Curriculum {
         override val id = "SUB_TWO_DIGIT_NO_BORROW"
         override val operation = Operation.SUBTRACTION
         override val prerequisites: Set<String> = setOf(SubtractingTens.id)
+        override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
             var op1: Int
@@ -336,6 +350,7 @@ object Curriculum {
         override val id = "SUB_TWO_DIGIT_BORROW"
         override val operation = Operation.SUBTRACTION
         override val prerequisites: Set<String> = setOf(TwoDigitSubtractionNoBorrow.id)
+        override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
             var op1: Int
@@ -366,6 +381,7 @@ object Curriculum {
         override val id = "MUL_TABLE_$table"
         override val operation = Operation.MULTIPLICATION
         override val prerequisites: Set<String> = emptySet()
+        override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
             var op1 = table
@@ -393,6 +409,7 @@ object Curriculum {
         override val id = "DIV_BY_$divisor"
         override val operation = Operation.DIVISION
         override val prerequisites: Set<String> = emptySet()
+        override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
             val result = Random.nextInt(0, 11)

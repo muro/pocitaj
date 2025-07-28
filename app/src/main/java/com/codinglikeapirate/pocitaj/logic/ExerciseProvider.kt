@@ -5,61 +5,103 @@ import com.codinglikeapirate.pocitaj.data.Operation
 import kotlin.random.Random
 
 /**
- * The main decision-making engine for selecting exercises.
- *
- * This class is stateless; it receives the user's current progress and makes a
- * decision based on that data.
- *
- * @param curriculum The complete, ordered list of all defined Level objects.
- * @param userMastery A map representing the user's current knowledge. The key is a
- *                    unique factId (e.g., "ADDITION_2_3"), and the value is the
- *                    FactMastery object, which contains the strength and last-tested
- *                    timestamp for that fact. This map is the memory of the system.
- * @param random The random number generator to use for probabilistic selections.
+ * Defines the teaching strategy for a given level. This allows the app to use different
+ * learning methods (e.g., spaced repetition drills vs. random tests) for different types of content.
  */
-class ExerciseProvider(
+enum class ExerciseStrategy {
+    DRILL,
+    REVIEW,
+    SMART_PRACTICE
+}
+
+/**
+ * A stateful object that manages the logic for a single exercise session. It is responsible for
+ * selecting the next exercise and updating its internal state based on the user's performance.
+ */
+interface ExerciseProvider {
+    fun getNextExercise(): Exercise?
+}
+
+/**
+ * A helper function to create an Exercise object from a fact ID string. This is used by all
+ * strategies to convert the abstract fact ID into a concrete exercise.
+ */
+internal fun exerciseFromFactId(factId: String): Exercise {
+    val parts = factId.split("_")
+    val operation = Operation.valueOf(parts[0])
+    val op1 = parts[1].toInt()
+    val op2 = parts[2].toInt()
+
+    val equation = when (operation) {
+        Operation.ADDITION -> Addition(op1, op2)
+        Operation.SUBTRACTION -> Subtraction(op1, op2)
+        Operation.MULTIPLICATION -> Multiplication(op1, op2)
+        Operation.DIVISION -> Division(op1, op2)
+    }
+    return Exercise(equation)
+}
+
+/**
+ * A strategy for mastering a small, well-defined set of facts (e.g., a single multiplication table).
+ * It uses a spaced repetition approach, starting with a small working set of exercises and
+ * gradually adding more as the user demonstrates mastery.
+ */
+class DrillStrategy(
+    private val level: Level,
+    private val userMastery: Map<String, FactMastery>
+) : ExerciseProvider {
+    override fun getNextExercise(): Exercise? {
+        // TODO: Implement spaced repetition logic
+        return exerciseFromFactId(level.getAllPossibleFactIds().random()) // Placeholder
+    }
+}
+
+/**
+ * A strategy for testing the user's knowledge of a set of facts. It selects exercises randomly,
+ * without repetition, and gives a slightly higher weight to exercises the student has struggled
+ * with in the past.
+ */
+class ReviewStrategy(
+    private val level: Level,
+    private val userMastery: Map<String, FactMastery>
+) : ExerciseProvider {
+    override fun getNextExercise(): Exercise? {
+        // TODO: Implement weighted random logic
+        return exerciseFromFactId(level.getAllPossibleFactIds().random()) // Placeholder
+    }
+}
+
+/**
+ * A strategy for practicing a large, mixed set of exercises. It uses a combination of heuristics
+ * to balance the introduction of new material with the review of mastered concepts.
+ */
+class SmartPracticeStrategy(
     private val curriculum: List<Level>,
     private val userMastery: Map<String, FactMastery>,
     private val random: Random = Random.Default
-) {
+) : ExerciseProvider {
     companion object {
         private const val MASTERY_STRENGTH = 5
         private const val LEARNING_EXERCISE_PROBABILITY = 0.8f
         private const val WORKING_SET_SIZE = 5
     }
 
-    /**
-     * Intelligently selects and returns the next best exercise for the user.
-     */
-    fun getNextExercise(): Exercise {
+    override fun getNextExercise(): Exercise {
         val currentLevel = findCurrentLevel()
         val masteredLevels = getMasteredLevels(currentLevel)
 
-        // Decide whether to practice a new concept or review an old one.
+        // This is the core of the smart practice logic. It ensures that the user spends most of their
+        // time on new material, but also periodically reviews older concepts to prevent forgetting.
         val isLearningExercise = masteredLevels.isEmpty() || random.nextFloat() < LEARNING_EXERCISE_PROBABILITY
 
         val levelToPractice = if (isLearningExercise) {
-            // Focus on the current, unmastered level.
             currentLevel
         } else {
-            // Pick a random mastered level to review and prevent forgetting.
             masteredLevels.random(random)
         }
 
         val factId = findWeakestFactIn(levelToPractice)
-        // TODO: consider refactoring this in the future
-        val parts = factId.split("_")
-        val operation = Operation.valueOf(parts[0])
-        val op1 = parts[1].toInt()
-        val op2 = parts[2].toInt()
-
-        val equation = when (operation) {
-            Operation.ADDITION -> Addition(op1, op2)
-            Operation.SUBTRACTION -> Subtraction(op1, op2)
-            Operation.MULTIPLICATION -> Multiplication(op1, op2)
-            Operation.DIVISION -> Division(op1, op2)
-        }
-        return Exercise(equation)
+        return exerciseFromFactId(factId)
     }
 
     private fun findWeakestFactIn(level: Level): String {
@@ -92,7 +134,7 @@ class ExerciseProvider(
      */
     private fun findCurrentLevel(): Level {
         return curriculum.firstOrNull { isLevelUnlocked(it) && !isLevelMastered(it) }
-            ?: curriculum.last() // If all levels are mastered, default to the last one for practice.
+            ?: curriculum.last()
     }
 
     /**
@@ -113,7 +155,7 @@ class ExerciseProvider(
      */
     private fun isLevelMastered(level: Level): Boolean {
         val allFactsInLevel = level.getAllPossibleFactIds()
-        if (allFactsInLevel.isEmpty()) return true // An empty level is considered mastered.
+        if (allFactsInLevel.isEmpty()) return true
 
         return allFactsInLevel.all { factId ->
             (userMastery[factId]?.strength ?: 0) >= MASTERY_STRENGTH

@@ -10,6 +10,7 @@ interface Level {
     val id: String
     val operation: Operation
     val prerequisites: Set<String>
+    val strategy: ExerciseStrategy
     fun generateExercise(): Exercise
     fun getAllPossibleFactIds(): List<String>
 }
@@ -20,6 +21,7 @@ class MixedReviewLevel(
     private val levelsToReview: List<Level>
 ) : Level {
     override val prerequisites: Set<String> = levelsToReview.map { it.id }.toSet()
+    override val strategy = ExerciseStrategy.REVIEW
 
     override fun generateExercise(): Exercise {
         val randomLevel = levelsToReview.random()

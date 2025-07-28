@@ -10,11 +10,11 @@ class ExerciseBook : ExerciseSource {
     private val exercises = mutableListOf<Exercise>()
     private var currentIndex = -1
 
-    override fun initialize(config: com.codinglikeapirate.pocitaj.data.ExerciseConfig) {
+    override suspend fun initialize(config: com.codinglikeapirate.pocitaj.data.ExerciseConfig) {
         // No-op for the test implementation
     }
 
-    override suspend fun getNextExercise(): Exercise? {
+    override fun getNextExercise(): Exercise? {
         currentIndex++
         return if (currentIndex < exercises.size) {
             exercises[currentIndex]

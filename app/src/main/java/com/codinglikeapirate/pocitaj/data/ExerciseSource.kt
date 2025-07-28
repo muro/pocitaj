@@ -1,6 +1,7 @@
 package com.codinglikeapirate.pocitaj.data
 
 import com.codinglikeapirate.pocitaj.logic.Exercise
+import com.codinglikeapirate.pocitaj.logic.ExerciseStrategy
 
 /**
  * Defines the configuration for a set of exercises.
@@ -13,7 +14,8 @@ data class ExerciseConfig(
     val operation: Operation,
     val difficulty: Int,
     val count: Int,
-    val levelId: String? = null
+    val levelId: String? = null,
+    val strategy: ExerciseStrategy = ExerciseStrategy.SMART_PRACTICE
 )
 
 enum class ExerciseType(val id: String) {
@@ -24,8 +26,8 @@ enum class ExerciseType(val id: String) {
 }
 
 interface ExerciseSource {
-    fun initialize(config: ExerciseConfig)
-    suspend fun getNextExercise(): Exercise?
+    suspend fun initialize(config: ExerciseConfig)
+    fun getNextExercise(): Exercise?
     suspend fun recordAttempt(
         exercise: Exercise,
         submittedAnswer: Int,
