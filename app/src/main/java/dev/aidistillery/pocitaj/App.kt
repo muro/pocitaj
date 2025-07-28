@@ -1,0 +1,39 @@
+package dev.aidistillery.pocitaj
+
+import android.app.Application
+import android.util.Log
+import androidx.room.Room
+import dev.aidistillery.pocitaj.data.AppDatabase
+import dev.aidistillery.pocitaj.data.ExerciseSource
+import dev.aidistillery.pocitaj.data.User
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+open class App : Application() {
+    lateinit var inkModelManager: InkModelManager
+    val isInkModelManagerInitialized: Boolean
+        get() = ::inkModelManager.isInitialized
+
+    lateinit var exerciseSource: ExerciseSource
+    val isExerciseSourceInitialized: Boolean
+        get() = ::exerciseSource.isInitialized
+
+    lateinit var database: AppDatabase
+
+    override fun onCreate() {
+        super.onCreate()
+        database = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "pocitaj-db"
+        ).build()
+        Log.e("App", "onCreate - Created database: $database")
+        CoroutineScope(Dispatchers.IO).launch {
+            if (database.userDao().getUser(1) == null) {
+                Log.e("App", "default user doesn't exist in the DB, creating.")
+                database.userDao()
+                    .insert(User(id = 1, name = "Default User"))
+            }
+        }
+    }
+}

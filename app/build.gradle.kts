@@ -8,18 +8,18 @@ plugins {
 }
 
 android {
-    namespace = "com.codinglikeapirate.pocitaj"
+    namespace = "dev.aidistillery.pocitaj"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.codinglikeapirate.pocitaj"
+        applicationId = "dev.aidistillery.pocitaj"
         minSdk = 28
         //noinspection OldTargetApi
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "com.codinglikeapirate.pocitaj.PocitajTestRunner"
+        testInstrumentationRunner = "dev.aidistillery.pocitaj.PocitajTestRunner"
     }
 
     buildTypes {
@@ -46,7 +46,7 @@ android {
         }
     }
     tasks.withType<Test> {
-        // timeout.set(Duration.ofSeconds(10))
+        timeout.set(Duration.ofSeconds(10))
     }
     kotlin {
         compilerOptions {
