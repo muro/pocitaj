@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.codinglikeapirate.pocitaj.data.FactMastery
 import com.codinglikeapirate.pocitaj.data.FactMasteryDao
 import com.codinglikeapirate.pocitaj.data.Operation
+import com.codinglikeapirate.pocitaj.logic.Curriculum
 import com.codinglikeapirate.pocitaj.logic.Curriculum.SumsUpTo5
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -152,6 +153,36 @@ class ProgressReportViewModelTest {
             assertTrue(0.03 <= s10.progress)
             assertTrue(additionLevels.containsKey("ADD_TWO_DIGIT_CARRY"))
             assertEquals(0.0f, additionLevels["ADD_TWO_DIGIT_CARRY"]!!.progress)
+        }
+    }
+
+    @Test
+    fun `levelProgress_updatesForHalfAndFullMastery`() = runTest {
+        // ARRANGE
+        val fakeDao = FakeFactMasteryDao()
+        val viewModel = ProgressReportViewModel(fakeDao)
+        val masteredAdditionFacts = SumsUpTo5.getAllPossibleFactIds().map {
+            FactMastery(it, 1, 5, 0)
+        }
+        val subtractionFacts = Curriculum.SubtractionFrom5.getAllPossibleFactIds()
+        val masteredSubtractionFacts = subtractionFacts.take(subtractionFacts.size / 2).map {
+            FactMastery(it, 1, 5, 0)
+        }
+        val facts = masteredAdditionFacts + masteredSubtractionFacts
+
+        // ACT & ASSERT
+        viewModel.levelProgressByOperation.test {
+            skipItems(1) // Skip initial empty state
+
+            fakeDao.emit(facts)
+
+            val progress = awaitItem()
+            val additionProgress = progress[Operation.ADDITION]!![SumsUpTo5.id]!!
+            val subtractionProgress = progress[Operation.SUBTRACTION]!![Curriculum.SubtractionFrom5.id]!!
+
+            assertEquals(1.0f, additionProgress.progress)
+            assertTrue(additionProgress.isMastered)
+            assertEquals(0.5f, subtractionProgress.progress, 0.05f)
         }
     }
 }
