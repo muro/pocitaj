@@ -152,7 +152,9 @@ fun LevelProgressList(levelProgress: Map<String, LevelProgress>) {
                 Spacer(modifier = Modifier.height(4.dp))
                 LinearProgressIndicator(
                     progress = { progress.progress },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("progress_${levelId}_${"%.1f".format(progress.progress)}")
                 )
             }
         }

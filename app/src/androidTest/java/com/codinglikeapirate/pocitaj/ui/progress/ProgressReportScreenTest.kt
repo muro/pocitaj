@@ -13,6 +13,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.codinglikeapirate.pocitaj.BaseExerciseUiTest
 import com.codinglikeapirate.pocitaj.TestApp
 import com.codinglikeapirate.pocitaj.data.FactMastery
+import com.codinglikeapirate.pocitaj.logic.Curriculum
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,5 +52,35 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
         composeTestRule.onNodeWithTag("progress_report_list")
             .performScrollToNode(hasTestTag("operation_card_DIVISION"))
         composeTestRule.onNodeWithTag("operation_card_DIVISION").assertIsDisplayed()
+    }
+
+    @Test
+    fun progressReportScreen_showsCorrectProgress() {
+        // GIVEN: A user with partial and full mastery of some levels
+        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        val factMasteryDao = application.database.factMasteryDao()
+        runBlocking {
+            // Master all of SumsUpTo5
+            Curriculum.SumsUpTo5.getAllPossibleFactIds().forEach { factId ->
+                factMasteryDao.upsert(FactMastery(factId, 1, 5, 0))
+            }
+            // Master half of SubtractionFrom5
+            val subtractionFacts = Curriculum.SubtractionFrom5.getAllPossibleFactIds()
+            subtractionFacts.take(subtractionFacts.size / 2).forEach { factId ->
+                factMasteryDao.upsert(FactMastery(factId, 1, 5, 0))
+            }
+        }
+
+        // WHEN: The user navigates to the progress report screen
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithContentDescription("My Progress").performClick()
+        composeTestRule.waitForIdle()
+
+        // THEN: The progress bars should show the correct progress
+        composeTestRule.onNodeWithTag("progress_report_list").performScrollToNode(hasTestTag("operation_card_ADDITION"))
+        composeTestRule.onNodeWithTag("progress_ADD_SUM_5_1.0").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("progress_report_list").performScrollToNode(hasTestTag("operation_card_SUBTRACTION"))
+        composeTestRule.onRoot().printToLog("progress_report_list")
+        composeTestRule.onNodeWithTag("progress_SUB_FROM_5_0.5").assertIsDisplayed()
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import com.codinglikeapirate.pocitaj.logic.Exercise
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -32,6 +33,16 @@ abstract class BaseExerciseUiTest {
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Before
+    fun setup() {
+        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        runBlocking {
+            if (application.database.userDao().getUser(1) == null) {
+                application.database.userDao().insert(com.codinglikeapirate.pocitaj.data.User(id = 1, name = "Default User"))
+            }
+        }
+    }
+
+    @Before
     fun waitForAppToBeReady() {
         // Wait for the loading screen to disappear and the setup screen to be visible.
         // The "Choose Your Challenge" title uniquely identifies the ExerciseSetupScreen.
@@ -44,8 +55,10 @@ abstract class BaseExerciseUiTest {
 
     @After
     fun tearDown() {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        // context.deleteDatabase("pocitaj-db")
+        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        runBlocking {
+            application.database.clearAllTables()
+        }
     }
 
     fun navigateToOperation(operationSymbol: String) {

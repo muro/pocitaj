@@ -18,17 +18,6 @@ import org.junit.Test
 
 class HistoryScreenTest : BaseExerciseUiTest() {
 
-    @Before
-    fun setup() {
-        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
-        // TODO: Hack, clean up. Can't make it reliably work, no idea where the db gets cleaned up.
-        runBlocking {
-             if (application.database.userDao().getUser(1) == null) {
-                 application.database.userDao().insert(User(id = 1, name = "Default User"))
-             }
-        }
-    }
-
     @Test
     fun historyScreen_displaysHistory() {
         // GIVEN: A set of exercise attempts in the database
