@@ -89,7 +89,6 @@ class DrillStrategyTest {
             "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 4, 100L) // L2
         )
         val strategy = DrillStrategy(testLevel, userMastery)
-        val initialWorkingSet = strategy.getWorkingSet().toList()
 
         // ACT
         val exercise = exerciseFromFactId("ADDITION_1_1")
