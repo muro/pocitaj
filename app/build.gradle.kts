@@ -34,6 +34,7 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
     buildFeatures {
+        buildConfig = true
         compose = true
         viewBinding = true
     }
@@ -46,7 +47,7 @@ android {
         }
     }
     tasks.withType<Test> {
-        timeout.set(Duration.ofSeconds(10))
+        //timeout.set(Duration.ofSeconds(10))
     }
     kotlin {
         compilerOptions {

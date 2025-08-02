@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.mlkit.vision.digitalink.Ink
 import dev.aidistillery.pocitaj.App
+import dev.aidistillery.pocitaj.BuildConfig
 import dev.aidistillery.pocitaj.InkModelManager
+import dev.aidistillery.pocitaj.data.AdaptiveExerciseSource
 import dev.aidistillery.pocitaj.data.ExerciseConfig
 import dev.aidistillery.pocitaj.data.ExerciseSource
 import dev.aidistillery.pocitaj.logic.Exercise
@@ -69,12 +71,16 @@ class ExerciseViewModel(
     private val _recognizedText = MutableStateFlow<String?>(null)
     val recognizedText: StateFlow<String?> = _recognizedText.asStateFlow()
 
+    private val _workingSet = MutableStateFlow<List<String>>(emptyList())
+    val workingSet: StateFlow<List<String>> = _workingSet.asStateFlow()
+
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
         viewModelScope.launch {
             currentLevelId = exerciseConfig.levelId
             exerciseSource.initialize(exerciseConfig)
             exerciseHistory.clear()
             exercisesRemaining = exerciseConfig.count
+            updateWorkingSetForDebug()
             advanceToNextExercise()
             if (currentExercise != null) {
                 _navigationEvents.emit(NavigationEvent.NavigateToExercise(exerciseConfig.operation.name))
@@ -133,7 +139,17 @@ class ExerciseViewModel(
                     isCorrect -> AnswerResult.Correct
                     else -> AnswerResult.Incorrect
                 }
+                updateWorkingSetForDebug()
             }
+        }
+    }
+
+    private fun updateWorkingSetForDebug() {
+        if (!BuildConfig.DEBUG) {
+            return
+        }
+        (exerciseSource as? AdaptiveExerciseSource)?._getWorkingSetForDebug()?.let {
+            _workingSet.value = it
         }
     }
 

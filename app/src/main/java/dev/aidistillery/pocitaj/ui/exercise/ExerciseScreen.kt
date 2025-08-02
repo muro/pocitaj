@@ -50,6 +50,7 @@ import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
 import com.google.mlkit.vision.digitalink.Ink.Stroke
+import dev.aidistillery.pocitaj.BuildConfig
 import dev.aidistillery.pocitaj.InkModelManager
 import dev.aidistillery.pocitaj.data.ExerciseConfig
 import dev.aidistillery.pocitaj.data.ExerciseSource
@@ -292,6 +293,20 @@ fun ExerciseScreen(
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onBackground
                 )
+
+                if (BuildConfig.DEBUG) {
+                    val workingSet by viewModel.workingSet.collectAsState()
+                    if (workingSet.isNotEmpty()) {
+                        Text(
+                            text = "Working Set:\n${workingSet.joinToString("\n")}",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            fontSize = 12.sp,
+                            lineHeight = 16.sp,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                        )
+                    }
+                }
             }
 
             ResultDisplay(

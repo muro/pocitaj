@@ -10,6 +10,7 @@ import dev.aidistillery.pocitaj.logic.SmartPracticeStrategy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import java.lang.reflect.Field
 
 class AdaptiveExerciseSource(
     private val factMasteryDao: FactMasteryDao,
@@ -39,9 +40,42 @@ class AdaptiveExerciseSource(
         return exerciseProvider?.getNextExercise()
     }
 
+    /**
+     * A debug-only function to get the current working set from the DrillStrategy using reflection.
+     * This is not intended for production use.
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun _getWorkingSetForDebug(): List<String> {
+        if (exerciseProvider !is DrillStrategy) {
+            return emptyList()
+        }
+        return try {
+            // Get the workingSet list of fact IDs
+            val wsField: Field = DrillStrategy::class.java.getDeclaredField("workingSet")
+            wsField.isAccessible = true
+            val workingSetIds = wsField.get(exerciseProvider) as List<String>
+
+            // Get the userMastery map to look up strengths
+            val umField: Field = DrillStrategy::class.java.getDeclaredField("userMastery")
+            umField.isAccessible = true
+            val userMastery = umField.get(exerciseProvider) as Map<String, FactMastery>
+
+            // Map each fact ID to a formatted string with its strength
+            workingSetIds.map { factId ->
+                val strength = userMastery[factId]?.strength ?: 0
+                "$factId (strength: $strength)"
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
     override suspend fun recordAttempt(exercise: Exercise, submittedAnswer: Int, durationMs: Long) {
+        val wasCorrect = exercise.equation.getExpectedResult() == submittedAnswer
+        exerciseProvider?.recordAttempt(exercise, wasCorrect)
+
         withContext(Dispatchers.IO) {
-            val wasCorrect = exercise.equation.getExpectedResult() == submittedAnswer
             val attempt = ExerciseAttempt(
                 userId = userId,
                 timestamp = System.currentTimeMillis(),
