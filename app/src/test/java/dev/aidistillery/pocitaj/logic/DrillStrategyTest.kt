@@ -35,7 +35,7 @@ class DrillStrategyTest {
     // --- New Initialization Tests ---
 
     @Test
-    fun `initialWorkingSet_prioritizesL1Facts`() {
+    fun `initial working set prioritizes L1 facts`() {
         // ARRANGE: 5 L1 facts, more than the working set size of 4.
         val userMastery = mapOf(
             createMastery("ADDITION_1_1", 0, 100L),
@@ -57,7 +57,7 @@ class DrillStrategyTest {
     }
 
     @Test
-    fun `initialWorkingSet_fillsWithL2Facts_whenL1IsntEnough`() {
+    fun `initial working set fills with L2 facts when L1 isnt enough`() {
         // ARRANGE: 2 L1 facts and 3 L2 facts.
         val userMastery = mapOf(
             createMastery("ADDITION_1_1", 0, 100L), // L1
@@ -79,7 +79,7 @@ class DrillStrategyTest {
     }
 
     @Test
-    fun `initialWorkingSet_fillsWithUnseenFacts_whenL1AndL2ArentEnough`() {
+    fun `initial working set fills with unseen facts when L1 and L2 arent enough`() {
         // ARRANGE: 1 L1 fact and 1 L2 fact.
         val userMastery = mapOf(
             createMastery("ADDITION_1_1", 1, 100L), // L1
@@ -99,7 +99,7 @@ class DrillStrategyTest {
     }
 
     @Test
-    fun `initialWorkingSet_handlesFewerFactsThanSetSize_inEntireLevel`() {
+    fun `initial working set handles fewer facts than set size in entire level`() {
         // ARRANGE: A level that only has 3 facts in total.
         val smallLevel = object : Level by testLevel {
             override fun getAllPossibleFactIds() = listOf("A", "B", "C")
@@ -115,7 +115,7 @@ class DrillStrategyTest {
     }
 
     @Test
-    fun `initialWorkingSet_handlesFewerFactsThanSetSize_availableToDrill`() {
+    fun `initial working set handles fewer facts than set size available to drill`() {
         // ARRANGE: A level with 10 facts, but 8 are already mastered.
         val userMastery = (3..10).map {
             createMastery("ADDITION_1_$it", 5, 1000L) // Mastered
@@ -128,10 +128,12 @@ class DrillStrategyTest {
 
         // ACT
         val workingSet = strategy.getWorkingSet()
+        val masteredFactsInSet = workingSet.filter { (userMastery[it]?.strength ?: 0) >= 5 }
 
         // ASSERT
-        assertEquals("Working set should only contain the 2 unmastered facts", 2, workingSet.size)
-        assertTrue("Working set should contain the L1 and L2 facts", workingSet.containsAll(listOf("ADDITION_1_1", "ADDITION_1_2")))
+        assertEquals("Working set should be full (2 unmastered + 2 mastered)", 4, workingSet.size)
+        assertTrue("Working set must contain the L1 and L2 facts", workingSet.containsAll(listOf("ADDITION_1_1", "ADDITION_1_2")))
+        assertEquals("Working set should be filled with 2 mastered L3 facts", 2, masteredFactsInSet.size)
     }
 
 
@@ -177,16 +179,29 @@ class DrillStrategyTest {
     }
 
     @Test
-    fun `session completes when all facts are mastered`() {
+    fun `get next exercise serves random L3 facts when all facts are mastered`() {
+        // ARRANGE: A user who has mastered every fact in the level.
         val userMastery = testLevel.getAllPossibleFactIds().associateWith {
-            FactMastery(it, 1, 5, 0)
+            FactMastery(it, 1, 5, System.currentTimeMillis())
         }.toMutableMap()
-        userMastery["ADDITION_1_10"] = FactMastery("ADDITION_1_10", 1, 4, System.currentTimeMillis() - (5 * 60 * 1001))
         val strategy = setupStrategy(userMastery)
 
-        strategy.recordAttempt(exerciseFromFactId("ADDITION_1_10"), true)
+        val selectedFacts = mutableListOf<String>()
 
-        assertNull(strategy.getNextExercise())
+        // ACT & ASSERT: Run a long session to observe the selection pattern.
+        for (i in 1..50) {
+            val exercise = strategy.getNextExercise()
+            assertNotNull("Should always provide a review exercise, even when all facts are mastered (iteration $i)", exercise)
+            selectedFacts.add(exercise!!.getFactId())
+            strategy.recordAttempt(exercise, true)
+        }
+
+        // FINAL ASSERT: Check that the selection was varied and sampled from the whole level.
+        val uniqueSelectedFacts = selectedFacts.toSet()
+        assertTrue(
+            "The selection should be varied and not stuck on the initial working set. Unique count: ${uniqueSelectedFacts.size}",
+            uniqueSelectedFacts.size > 4
+        )
     }
 
     @Test

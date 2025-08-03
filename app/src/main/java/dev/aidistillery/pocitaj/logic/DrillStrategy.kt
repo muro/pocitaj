@@ -5,6 +5,7 @@ import kotlin.random.Random
 
 private const val L3_MASTERY = 5
 private const val L2_MASTERY = 3
+private const val REPLACEABLE_MASTERY = L3_MASTERY - 1 // Strength 4
 
 /**
  * Defines a learning algorithm to master a set of facts (e.g., a multiplication
@@ -31,23 +32,20 @@ private const val L2_MASTERY = 3
  *   1. All L1 facts (strength 0-2).
  *   2. The most overdue L2 facts (strength 3-4, oldest timestamp first).
  *   3. New, unseen facts to fill any remaining space.
- * - **Maintenance:** The set size is generally maintained via a "remove and replace"
- * mechanism. When a fact is promoted (L1->L2) or an L2 fact is successfully
- * reviewed, it is removed, and the next-weakest fact from the overall pool
- * is immediately added.
+ *   4. Mastered (L3) facts, sorted by oldest timestamp, to fill any remaining space.
+ * - **Maintenance:** When a fact is answered correctly and is considered "stable" (strength 4 or 5),
+ * it is removed from the working set. The empty slot is then filled by the next-weakest
+ * available fact from the entire level, ensuring a constant challenge.
  *
  * 3.  **Promotion Logic:**
- * a) **L1 -> L2 (Encoding):** A fact is promoted after 2-3 consecutive correct
- * answers within a single review session. This confirms initial learning.
+ * a) **L1 -> L2 (Encoding):** A fact is promoted after 2 consecutive correct
+ * answers within a single review session.
  * b) **L2 -> L3 (Consolidation):** A fact is promoted after being answered
- * correctly in at least two separate, spaced-out sessions (e.g., on
- * different days). This proves long-term recall.
+ * correctly in a separate, spaced-out session.
  *
  * 4.  **Error Handling & Demotion:**
- * If a fact at L2 or L3 is answered incorrectly, it is immediately demoted to L1
- * and **injected into the current working set.** This provides the fastest
- * possible feedback loop, and the working set may temporarily exceed its
- * target size to accommodate this high-priority item.
+ * If a fact is answered incorrectly, it is immediately demoted to strength 0
+ * and moved to the back of the working set for immediate repetition.
 */
 class DrillStrategy(
     private val level: Level,
@@ -80,7 +78,8 @@ class DrillStrategy(
         val (seenFactIds, unseenFactIds) = allFactsInLevel.partition { userMastery.containsKey(it) }
 
         // From the seen facts, get the ones that are not fully mastered.
-        val nonMasteredSeenFacts = seenFactIds.map { getMastery(it) }.filter { it.strength < L3_MASTERY }
+        val seenMastery = seenFactIds.map { getMastery(it) }
+        val (masteredFacts, nonMasteredSeenFacts) = seenMastery.partition { it.strength >= L3_MASTERY }
 
         // Separate the non-mastered facts into L1 (learning) and L2 (consolidating).
         val (l1Facts, l2Facts) = nonMasteredSeenFacts.partition { it.strength < L2_MASTERY }
@@ -92,7 +91,8 @@ class DrillStrategy(
         val potentialFactIds = (
             l1Facts.map { it.factId } +
             sortedL2Facts.map { it.factId } +
-            unseenFactIds
+            unseenFactIds +
+            masteredFacts.shuffled().map { it.factId }
         ).distinct()
 
         workingSet.clear()
@@ -100,10 +100,7 @@ class DrillStrategy(
     }
 
     override fun getNextExercise(): Exercise? {
-        if (workingSet.isEmpty()) {
-            updateWorkingSet()
-            if (workingSet.isEmpty()) return null
-        }
+        if (workingSet.isEmpty()) return null
 
         var selectedIndex = workingSet.lastIndex
         for (i in 0 until workingSet.lastIndex) {
@@ -126,21 +123,20 @@ class DrillStrategy(
             consecutiveCorrectAnswers[factId] = (consecutiveCorrectAnswers[factId] ?: 0) + 1
             var newStrength = mastery.strength
 
-            // Promotion L1 -> L2
             if (mastery.strength < L2_MASTERY) {
-                if ((consecutiveCorrectAnswers[factId] ?: 0) >= CONSECUTIVE_ANSWERS_FOR_PROMOTION) {
+                if (consecutiveCorrectAnswers[factId]!! >= CONSECUTIVE_ANSWERS_FOR_PROMOTION) {
                     newStrength = L2_MASTERY
                     consecutiveCorrectAnswers[factId] = 0
                 } else {
                     newStrength += 1
                 }
-            } else if (mastery.strength in L2_MASTERY..(L3_MASTERY - 1)) {
+            } else if (mastery.strength in L2_MASTERY until REPLACEABLE_MASTERY) {
+                newStrength += 1
+            } else if (mastery.strength == L3_MASTERY - 1) {
                 val lastTested = mastery.lastTestedTimestamp
                 val now = System.currentTimeMillis()
                 if (now - lastTested > MIN_SESSION_SPACING_MS) {
-                    newStrength = L3_MASTERY
-                } else {
-                    newStrength = (mastery.strength + 1).coerceAtMost(L3_MASTERY - 1)
+                    newStrength += 1
                 }
             }
 
@@ -150,7 +146,7 @@ class DrillStrategy(
             )
             userMastery[factId] = newMastery
 
-            if (newMastery.strength >= L3_MASTERY) {
+            if (newMastery.strength >= REPLACEABLE_MASTERY) {
                 workingSet.remove(factId)
                 addNextWeakestFact()
             }
@@ -159,9 +155,7 @@ class DrillStrategy(
             consecutiveCorrectAnswers[factId] = 0
             userMastery[factId] = mastery.copy(strength = 0, lastTestedTimestamp = System.currentTimeMillis())
 
-            if (!workingSet.contains(factId)) {
-                workingSet.add(factId)
-            }
+            // move to the end of the workingSet list
             workingSet.remove(factId)
             workingSet.add(factId)
         }
@@ -169,11 +163,21 @@ class DrillStrategy(
 
     private fun addNextWeakestFact() {
         if (workingSet.size < workingSetSize) {
-            val nextFactId = allFactsInLevel
-                .filter { it !in workingSet && getMastery(it).strength < L3_MASTERY }
-                .minWithOrNull(compareBy({ getMastery(it).strength }, { getMastery(it).lastTestedTimestamp }))
+            val candidates = allFactsInLevel
+                .filter { it !in workingSet }
+                .sortedWith(compareBy({ getMastery(it).strength }, { getMastery(it).lastTestedTimestamp }))
+                .take(workingSetSize)
 
-            nextFactId?.let { workingSet.add(it) }
+            if (candidates.isNotEmpty()) {
+                var selectedIndex = candidates.lastIndex
+                for (i in 0 until candidates.lastIndex) {
+                    if (Random.nextDouble() < 0.5) {
+                        selectedIndex = i
+                        break
+                    }
+                }
+                workingSet.add(candidates[selectedIndex])
+            }
         }
     }
 }
