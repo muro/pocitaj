@@ -42,6 +42,7 @@ import dev.aidistillery.pocitaj.data.toSymbol
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.SpeedBadge
 import dev.aidistillery.pocitaj.logic.getSpeedBadge
+import dev.aidistillery.pocitaj.logic.getLevelDisplayName
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import dev.aidistillery.pocitaj.ui.theme.customColors
 
@@ -146,7 +147,7 @@ fun LevelProgressList(levelProgress: Map<String, LevelProgress>) {
         levelProgress.forEach { (levelId, progress) ->
             Column {
                 Text(
-                    text = levelId, // You might want to map this to a more user-friendly name
+                    text = stringResource(id = getLevelDisplayName(levelId)),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(4.dp))

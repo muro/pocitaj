@@ -1,9 +1,41 @@
 package dev.aidistillery.pocitaj.logic
 
+import androidx.annotation.StringRes
+import dev.aidistillery.pocitaj.R
+
 data class LevelRepresentation(
     val shortLabel: String,
     val icon: Int? = null // Using Int for drawable resource ID
 )
+
+@StringRes
+fun getLevelDisplayName(levelId: String): Int {
+    return when (levelId) {
+        // Addition
+        "ADD_SUM_5" -> R.string.level_sums_up_to_5
+        "ADD_SUM_10" -> R.string.level_sums_up_to_10
+        "ADD_SUM_20" -> R.string.level_sums_up_to_20
+        "ADD_DOUBLES" -> R.string.level_doubles
+        "ADD_NEAR_DOUBLES" -> R.string.level_near_doubles
+        "ADD_MAKING_10S" -> R.string.level_making_10s
+        "ADD_TENS" -> R.string.level_adding_tens
+        "ADD_TWO_DIGIT_NO_CARRY" -> R.string.level_two_digit_addition_no_carry
+        "ADD_TWO_DIGIT_CARRY" -> R.string.level_two_digit_addition_with_carry
+        // Subtraction
+        "SUB_FROM_5" -> R.string.level_subtraction_from_5
+        "SUB_FROM_10" -> R.string.level_subtraction_from_10
+        "SUB_FROM_20" -> R.string.level_subtraction_from_20
+        "SUB_TENS" -> R.string.level_subtracting_tens
+        "SUB_TWO_DIGIT_NO_BORROW" -> R.string.level_two_digit_subtraction_no_borrow
+        "SUB_TWO_DIGIT_BORROW" -> R.string.level_two_digit_subtraction_with_borrow
+        // Reviews
+        else -> if (levelId.contains("REVIEW")) {
+            R.string.review_level
+        } else {
+            R.string.unknown_level
+        }
+    }
+}
 
 fun formatLevel(level: Level): LevelRepresentation {
     return when (level.id) {

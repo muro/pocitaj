@@ -4,9 +4,23 @@
     <!-- Level Titles -->
     <string name="level_sums_up_to_5">Sums up to 5</string>
     <string name="level_sums_up_to_10">Sums up to 10</string>
+    <string name="level_sums_up_to_20">Sums up to 20</string>
+    <string name="level_doubles">Doubles</string>
+    <string name="level_near_doubles">Near Doubles</string>
+    <string name="level_making_10s">Making 10s</string>
+    <string name="level_adding_tens">Adding Tens</string>
+    <string name="level_two_digit_addition_no_carry">2-Digit Addition (No Carry)</string>
+    <string name="level_two_digit_addition_with_carry">2-Digit Addition (With Carry)</string>
     <string name="level_subtraction_from_5">Subtraction from 5</string>
+    <string name="level_subtraction_from_10">Subtraction from 10</string>
+    <string name="level_subtraction_from_20">Subtraction from 20</string>
+    <string name="level_subtracting_tens">Subtracting Tens</string>
+    <string name="level_two_digit_subtraction_no_borrow">2-Digit Subtraction (No Borrow)</string>
+    <string name="level_two_digit_subtraction_with_borrow">2-Digit Subtraction (With Borrow)</string>
     <string name="level_multiplication_tables_0_1_2_5_10">Multiplication Tables (0, 1, 2, 5, 10)</string>
     <string name="level_division_by_2_5_10">Division by 2, 5, 10</string>
+    <string name="unknown_level">Unknown Level</string>
+    <string name="review_level">Review</string>
 
     <!-- Operation Titles -->
     <string name="operation_addition">Addition</string>
