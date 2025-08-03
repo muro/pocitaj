@@ -22,6 +22,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -54,7 +56,8 @@ import dev.aidistillery.pocitaj.ui.theme.getGradientForOperation
 fun ExerciseSetupScreen(
     operationLevels: List<OperationLevels>,
     onStartClicked: (operation: Operation, count: Int, difficulty: Int, levelId: String?) -> Unit,
-    onProgressClicked: () -> Unit
+    onProgressClicked: () -> Unit,
+    onCreditsClicked: () -> Unit
 ) {
     PocitajScreen {
         Column(
@@ -97,6 +100,14 @@ fun ExerciseSetupScreen(
                         }
                     )
                 }
+            }
+
+            IconButton(onClick = onCreditsClicked) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = "Credits",
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
             }
         }
     }
@@ -153,7 +164,7 @@ fun OperationCard(
 
             AnimatedVisibility(visible = expanded) {
                 Column(modifier = Modifier.padding(top = 16.dp)) {
-                    androidx.compose.material3.Button(
+                    Button(
                         onClick = { onStartClicked("Smart Practice") },
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -280,7 +291,8 @@ fun PreviewExerciseSetupScreen() {
         ExerciseSetupScreen(
             operationLevels = fakeOperationLevels,
             onStartClicked = { _, _, _, _ -> },
-            onProgressClicked = {}
+            onProgressClicked = { },
+            onCreditsClicked = { }
         )
     }
 }

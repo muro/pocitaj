@@ -1,0 +1,16 @@
+{
+  "uniqueId": "baloo2_font",
+  "developers": [
+    {
+      "developer": "Maithili Shingre",
+      "organization": "(Ek Type)"
+    }
+  ],
+  "artifactVersion": "1.0",
+  "description": "",
+  "name": "Baloo 2 Font",
+  "tag": "custom",
+  "licenses": [
+    "ofl-1.1"
+  ]
+}

@@ -20,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dev.aidistillery.pocitaj.data.ExerciseConfig
 import dev.aidistillery.pocitaj.logic.Exercise
+import dev.aidistillery.pocitaj.ui.credits.CreditsScreen
 import dev.aidistillery.pocitaj.ui.exercise.ExerciseScreen
 import dev.aidistillery.pocitaj.ui.exercise.ExerciseViewModel
 import dev.aidistillery.pocitaj.ui.exercise.ExerciseViewModelFactory
@@ -79,6 +80,7 @@ object Destinations {
     const val SUMMARY_ROUTE = "summary"
     const val PROGRESS_ROUTE = "progress"
     const val HISTORY_ROUTE = "history"
+    const val CREDITS_ROUTE = "credits"
     fun exerciseDetailRoute(type: String) = "exercise/$type"
 }
 
@@ -128,6 +130,9 @@ fun AppNavigation() {
                 },
                 onProgressClicked = {
                     navController.navigate(Destinations.PROGRESS_ROUTE)
+                },
+                onCreditsClicked = {
+                    navController.navigate(Destinations.CREDITS_ROUTE)
                 }
             )
         }
@@ -165,6 +170,11 @@ fun AppNavigation() {
         composable(route = Destinations.HISTORY_ROUTE) {
             val history by historyViewModel.historyByDate.collectAsState()
             HistoryScreen(history = history)
+        }
+        composable(route = Destinations.CREDITS_ROUTE) {
+            CreditsScreen {
+                navController.navigateUp()
+            }
         }
     }
 }
