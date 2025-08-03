@@ -1,6 +1,7 @@
 package dev.aidistillery.pocitaj.ui.setup
 
 import android.content.res.Configuration
+import android.graphics.Paint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -102,12 +103,17 @@ fun ExerciseSetupScreen(
                 }
             }
 
-            IconButton(onClick = onCreditsClicked) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = "Credits",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(onClick = onCreditsClicked) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Credits",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                }
             }
         }
     }
