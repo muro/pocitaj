@@ -385,7 +385,7 @@ object Curriculum {
 
         override fun generateExercise(): Exercise {
             var op1 = table
-            var op2 = Random.nextInt(0, 13)
+            var op2 = Random.nextInt(2, 13)
             if (Random.nextBoolean()) {
                 val temp = op1
                 op1 = op2
@@ -396,7 +396,7 @@ object Curriculum {
 
         override fun getAllPossibleFactIds(): List<String> {
             val facts = mutableSetOf<String>()
-            (0..12).forEach { op2 ->
+            (2..12).forEach { op2 ->
                 facts.add("${operation.name}_${table}_${op2}")
                 facts.add("${operation.name}_${op2}_${table}")
             }
@@ -412,13 +412,13 @@ object Curriculum {
         override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
-            val result = Random.nextInt(0, 11)
+            val result = Random.nextInt(2, 11)
             val op1 = divisor * result
             return Exercise(Division(op1, divisor))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..10).map { result ->
+            return (2..10).map { result ->
                 val op1 = divisor * result
                 "${operation.name}_${op1}_${divisor}"
             }
@@ -449,8 +449,8 @@ object Curriculum {
             TwoDigitSubtractionWithBorrow
         )
 
-        val multiplicationLevels = (0..12).map { MultiplicationTableLevel(it) }
-        val divisionLevels = (1..10).map { DivisionTableLevel(it) }
+        val multiplicationLevels = (2..12).map { MultiplicationTableLevel(it) }
+        val divisionLevels = (2..10).map { DivisionTableLevel(it) }
 
         val mulTableMap = multiplicationLevels.associateBy { it.table }
         val divTableMap = divisionLevels.associateBy { it.divisor }

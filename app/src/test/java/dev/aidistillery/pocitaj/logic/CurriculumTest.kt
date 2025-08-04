@@ -11,8 +11,8 @@ class CurriculumTest {
     @Test
     fun `getAllLevels returns correct number of levels`() {
         val levels = Curriculum.getAllLevels()
-        // 9 Addition + 6 Subtraction + 13 multiplication (0-12) + 10 division (1-10) + 8 mixed review
-        val expectedCount = 9 + 6 + 13 + 10 + 8
+        // 9 Addition + 6 Subtraction + 11 multiplication (2-12) + 9 division (2-10) + 8 mixed review
+        val expectedCount = 9 + 6 + 11 + 9 + 8
         assertEquals(expectedCount, levels.size)
     }
 
@@ -33,11 +33,10 @@ class CurriculumTest {
         val level = Curriculum.getLevelsFor(Operation.MULTIPLICATION).find { it.id == "MUL_TABLE_$table" }!!
         val factIds = level.getAllPossibleFactIds()
 
-        // (0..10) for op2 -> 11 facts. Times 2 for commutativity, but some are duplicates (e.g., 7x7)
         // The set logic handles duplicates, so we check for specific examples.
-        assertEquals(25, factIds.size) // 12 pairs, 7x7 is not duplicated
-        assertTrue(factIds.contains("MULTIPLICATION_7_0"))
-        assertTrue(factIds.contains("MULTIPLICATION_0_7"))
+        assertEquals(21, factIds.size) // 11 pairs, 7x7 is not duplicated
+        assertTrue(factIds.contains("MULTIPLICATION_7_2"))
+        assertTrue(factIds.contains("MULTIPLICATION_2_7"))
         assertTrue(factIds.contains("MULTIPLICATION_7_12"))
         assertTrue(factIds.contains("MULTIPLICATION_12_7"))
         assertTrue(factIds.contains("MULTIPLICATION_7_7"))
@@ -61,8 +60,8 @@ class CurriculumTest {
         val level = Curriculum.getLevelsFor(Operation.DIVISION).find { it.id == "DIV_BY_$divisor" }!!
         val factIds = level.getAllPossibleFactIds()
 
-        assertEquals(11, factIds.size) // 0..10 for the result
-        assertTrue(factIds.contains("DIVISION_0_6"))
+        assertEquals(9, factIds.size) // 2..10 for the result
+        assertTrue(factIds.contains("DIVISION_12_6"))
         assertTrue(factIds.contains("DIVISION_30_6"))
         assertTrue(factIds.contains("DIVISION_60_6"))
     }

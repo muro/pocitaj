@@ -93,7 +93,7 @@ class ProgressReportViewModelTest {
             for (f in additionFacts!!) {
                 println(f)
             }
-            assertEquals(169, additionFacts!!.size)
+            assertEquals(121, additionFacts!!.size)
             val masteredFact = additionFacts.find { it.factId == "MULTIPLICATION_2_3" }
             assertNotNull(masteredFact)
             assertEquals(3, masteredFact!!.mastery!!.strength)
