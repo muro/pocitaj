@@ -40,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -90,7 +91,9 @@ fun ExerciseSetupScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             LazyColumn(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag("setup_lazy_column"),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(operationLevels) { operationState ->

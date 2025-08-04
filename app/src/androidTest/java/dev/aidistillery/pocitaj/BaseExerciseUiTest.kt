@@ -1,12 +1,16 @@
 package dev.aidistillery.pocitaj
 
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.logic.Exercise
@@ -19,6 +23,12 @@ enum class FeedbackType(val contentDescription: String) {
     CORRECT("Correct Answer Image"),
     INCORRECT("Incorrect Answer Image"),
     UNRECOGNIZED("Unrecognized Answer Image")
+}
+
+fun SemanticsNodeInteraction.performVerifiedClick(nodeDescription: String): SemanticsNodeInteraction {
+    assertExists("Could not find the '$nodeDescription'. Check the finder logic.")
+    assertIsEnabled()
+    return performClick()
 }
 
 abstract class BaseExerciseUiTest {
@@ -64,10 +74,10 @@ abstract class BaseExerciseUiTest {
 
     fun navigateToOperation(operationSymbol: String) {
         // Click on the card to start the specific exercise type
-        composeTestRule.onNodeWithText(operationSymbol).performClick()
+        composeTestRule.onNodeWithText(operationSymbol).performVerifiedClick("Operation card '$operationSymbol'")
 
         // Click on the "Practice (Smart)" button
-        composeTestRule.onNodeWithText("Smart Practice").performClick()
+        composeTestRule.onNodeWithText("Smart Practice").performVerifiedClick("'Smart Practice' button")
 
         // Wait for the ExerciseScreen to be loaded by checking for a unique element.
         // The InkCanvas is a good unique identifier for the ExerciseScreen.
@@ -80,10 +90,14 @@ abstract class BaseExerciseUiTest {
 
     fun navigateToReviewOperation(operationSymbol: String) {
         // Click on the card to start the specific exercise type
-        composeTestRule.onNodeWithText(operationSymbol).performClick()
+        composeTestRule.onNodeWithText(operationSymbol).performVerifiedClick("Operation card '$operationSymbol'")
+
+        // Explicitly scroll the parent list to bring the button into view
+        composeTestRule.onNodeWithTag("setup_lazy_column")
+            .performScrollToNode(hasText("🧶"))
 
         // Click on the first "Review" button found
-        composeTestRule.onAllNodesWithText("🧶")[0].performClick()
+        composeTestRule.onAllNodesWithText("🧶")[0].performVerifiedClick("Review button")
 
         // Wait for the ExerciseScreen to be loaded by checking for a unique element.
         // The InkCanvas is a good unique identifier for the ExerciseScreen.
