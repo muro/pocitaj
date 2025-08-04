@@ -188,7 +188,7 @@ fun StandardGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>, operatio
     val maxOp2 = factsWithCoords.maxOfOrNull { it.second } ?: 0
     val maxOperand = maxOf(maxOp1, maxOp2, 10) // Ensure grid is at least 10x10
 
-    val opValues = (0..maxOperand).toList()
+    val opValues = (2..maxOperand).toList()
     val factsMap = factsWithCoords.associateBy { Pair(it.first, it.second) }
 
     @Suppress("UnusedBoxWithConstraintsScope")
@@ -229,7 +229,7 @@ fun StandardGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>, operatio
 @Composable
 fun DivisionGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>) {
     val divisors = factsWithCoords.map { it.second }.distinct().sorted()
-    val multipliers = (0..10).toList()
+    val multipliers = (2..10).toList()
     val factsMap = factsWithCoords.associateBy { Pair(it.first, it.second) }
 
     @Suppress("UnusedBoxWithConstraintsScope")
