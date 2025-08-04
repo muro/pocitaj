@@ -61,7 +61,10 @@ fun StartupScreen(error: String?, onRetry: () -> Unit) {
                         .scale(scale)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(stringResource(id = R.string.loading), color = MaterialTheme.colorScheme.onBackground)
+                Text(
+                    stringResource(id = R.string.loading),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
             } else {
                 Text(stringResource(id = R.string.error), color = MaterialTheme.colorScheme.error)
                 Spacer(modifier = Modifier.height(8.dp))

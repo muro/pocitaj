@@ -41,8 +41,8 @@ import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.data.toSymbol
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.SpeedBadge
-import dev.aidistillery.pocitaj.logic.getSpeedBadge
 import dev.aidistillery.pocitaj.logic.getLevelDisplayName
+import dev.aidistillery.pocitaj.logic.getSpeedBadge
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import dev.aidistillery.pocitaj.ui.theme.customColors
 
@@ -120,6 +120,7 @@ fun OperationProgress(
         Operation.ADDITION, Operation.SUBTRACTION -> {
             LevelProgressList(levelProgress = levelProgress)
         }
+
         Operation.MULTIPLICATION -> {
             val factsWithCoords = mapFactsToCoords(factProgress)
                 .filter { (op1, op2, _) -> op1 <= 12 && op2 <= 12 }
@@ -129,6 +130,7 @@ fun OperationProgress(
                 Text(stringResource(id = R.string.no_facts_to_display))
             }
         }
+
         Operation.DIVISION -> {
             val factsWithCoords = mapFactsToCoords(factProgress)
                 .filter { (_, op2, _) -> op2 != 0 && op2 <= 12 }
@@ -357,9 +359,21 @@ fun ProgressReportScreenPreview() {
             "ADDITION_9_1" to FactMastery("ADDITION_9_1", 1, 2, 0, 6000), // Struggling
 
             // Multiplication
-            "MULTIPLICATION_2_5" to FactMastery("MULTIPLICATION_2_5", 1, 5, 0, 500),  // Mastered, Gold
+            "MULTIPLICATION_2_5" to FactMastery(
+                "MULTIPLICATION_2_5",
+                1,
+                5,
+                0,
+                500
+            ),  // Mastered, Gold
             "MULTIPLICATION_5_2" to FactMastery("MULTIPLICATION_5_2", 1, 3, 0, 2000), // Learning
-            "MULTIPLICATION_10_1" to FactMastery("MULTIPLICATION_10_1", 1, 5, 0, 2500),// Mastered, Silver
+            "MULTIPLICATION_10_1" to FactMastery(
+                "MULTIPLICATION_10_1",
+                1,
+                5,
+                0,
+                2500
+            ),// Mastered, Silver
             "MULTIPLICATION_3_7" to FactMastery("MULTIPLICATION_3_7", 1, 1, 0, 4000), // Struggling
         )
 
@@ -434,10 +448,34 @@ fun EmptyProgressReportScreenPreview() {
 fun MultiplicationReportPreview() {
     AppTheme {
         val fakeMasteredFacts = mapOf(
-            "MULTIPLICATION_2_2" to FactMastery("MULTIPLICATION_2_2", 1, 5, 0, 500),  // Mastered, Gold
-            "MULTIPLICATION_2_3" to FactMastery("MULTIPLICATION_2_3", 1, 5, 0, 2000), // Mastered, Silver
-            "MULTIPLICATION_3_2" to FactMastery("MULTIPLICATION_3_2", 1, 5, 0, 2800), // Mastered, Bronze
-            "MULTIPLICATION_3_3" to FactMastery("MULTIPLICATION_3_3", 1, 5, 0, 4000), // Mastered, Slow
+            "MULTIPLICATION_2_2" to FactMastery(
+                "MULTIPLICATION_2_2",
+                1,
+                5,
+                0,
+                500
+            ),  // Mastered, Gold
+            "MULTIPLICATION_2_3" to FactMastery(
+                "MULTIPLICATION_2_3",
+                1,
+                5,
+                0,
+                2000
+            ), // Mastered, Silver
+            "MULTIPLICATION_3_2" to FactMastery(
+                "MULTIPLICATION_3_2",
+                1,
+                5,
+                0,
+                2800
+            ), // Mastered, Bronze
+            "MULTIPLICATION_3_3" to FactMastery(
+                "MULTIPLICATION_3_3",
+                1,
+                5,
+                0,
+                4000
+            ), // Mastered, Slow
             "MULTIPLICATION_4_4" to FactMastery("MULTIPLICATION_4_4", 1, 3, 0, 0),    // Learning
             "MULTIPLICATION_5_5" to FactMastery("MULTIPLICATION_5_5", 1, 1, 0, 0),    // Weak
         )
@@ -451,7 +489,8 @@ fun MultiplicationReportPreview() {
                 val parts = factId.split('_')
                 val op1 = parts.getOrNull(1)?.toIntOrNull() ?: 0
                 val op2 = parts.getOrNull(2)?.toIntOrNull() ?: 0
-                val speedBadge = getSpeedBadge(Operation.MULTIPLICATION, op1, op2, mastery?.avgDurationMs ?: 0L)
+                val speedBadge =
+                    getSpeedBadge(Operation.MULTIPLICATION, op1, op2, mastery?.avgDurationMs ?: 0L)
                 FactProgress(factId, mastery, speedBadge)
             }
 

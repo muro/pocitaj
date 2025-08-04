@@ -33,7 +33,8 @@ class ModelManager : InkModelManager {
 
             recognizer!!.recognize(
                 ink,
-                com.google.mlkit.vision.digitalink.RecognitionContext.builder().setPreContext("1234").build()
+                com.google.mlkit.vision.digitalink.RecognitionContext.builder()
+                    .setPreContext("1234").build()
             )
                 .addOnSuccessListener { result ->
                     val recognizedText = result.candidates.firstOrNull { it.text == hint }?.text

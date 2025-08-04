@@ -16,7 +16,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 
-private const val RESULT_ANIMATION_PROGRESS_TIME : Long = 600
+private const val RESULT_ANIMATION_PROGRESS_TIME: Long = 600
 
 class ExerciseFlowTest : BaseExerciseUiTest() {
 
@@ -98,7 +98,8 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // 7. Verify Navigation to Exercise Setup Screen
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onAllNodesWithText("Choose Your Challenge").fetchSemanticsNodes().isNotEmpty()
+            composeTestRule.onAllNodesWithText("Choose Your Challenge").fetchSemanticsNodes()
+                .isNotEmpty()
         }
     }
 
@@ -122,7 +123,8 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // Verify that the ExerciseSetupScreen is displayed
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onAllNodesWithText("Choose Your Challenge").fetchSemanticsNodes().isNotEmpty()
+            composeTestRule.onAllNodesWithText("Choose Your Challenge").fetchSemanticsNodes()
+                .isNotEmpty()
         }
     }
 
@@ -144,7 +146,8 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         val canvasNode = composeTestRule.onNodeWithTag("InkCanvas")
         canvasNode.assertExists("InkCanvas not found on screen.")
         val canvasBounds = canvasNode.fetchSemanticsNode().boundsInRoot
-        val strokes = DrawingTestUtils.getDefaultDrawingPath(canvasBounds.width, canvasBounds.height)
+        val strokes =
+            DrawingTestUtils.getDefaultDrawingPath(canvasBounds.width, canvasBounds.height)
         DrawingTestUtils.performStrokes(composeTestRule, canvasNode, strokes)
         if (delay > 0) {
             composeTestRule.mainClock.advanceTimeBy(delay)
@@ -209,7 +212,8 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     @Test
     fun whenIncorrectAnswerInReview_thenSkipsCorrection() {
         // 1. Master prerequisite levels
-        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        val application =
+            InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
         val factMasteryDao = application.database.factMasteryDao()
         runBlocking {
             Curriculum.SubtractionFrom5.getAllPossibleFactIds().forEach { factId ->
@@ -238,7 +242,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         composeTestRule.onNodeWithContentDescription("Teacher Image").assertDoesNotExist()
         composeTestRule.onNodeWithText("4 + 4 = ?").assertIsDisplayed()
     }
-    
+
     // TODO: Create a new test file (e.g., "LevelSelectionTest.kt") that does not rely on the
     //       ExerciseBook test double. This new test should verify that clicking a specific
     //       level button on the ExerciseSetupScreen correctly starts a session with exercises

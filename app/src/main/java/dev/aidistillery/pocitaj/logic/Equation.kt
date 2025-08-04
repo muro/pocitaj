@@ -6,6 +6,7 @@ import java.util.Locale
 interface Equation {
     // Displayed as the exercise question in the UI
     fun question(): String
+
     // Expected result, validated when a solution is submitted or as hint to stroke recognition.
     fun getExpectedResult(): Int
 
@@ -25,6 +26,7 @@ data class Addition(val a: Int, val b: Int) : Equation {
             question() // If no solution, just show the question
         }
     }
+
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.ADDITION, a, b)
 }
 
@@ -38,11 +40,14 @@ data class Subtraction(val a: Int, val b: Int) : Equation {
             question() // If no solution, just show the question
         }
     }
+
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.SUBTRACTION, a, b)
 }
 
 data class Multiplication(val a: Int, val b: Int) : Equation {
-    override fun question(): String = String.format(Locale.ENGLISH, "%d × %d = ?", a, b) // Using '×' for multiplication symbol
+    override fun question(): String =
+        String.format(Locale.ENGLISH, "%d × %d = ?", a, b) // Using '×' for multiplication symbol
+
     override fun getExpectedResult(): Int = a * b
     override fun getQuestionAsSolved(submittedSolution: Int?): String {
         return if (submittedSolution != null) {
@@ -51,6 +56,7 @@ data class Multiplication(val a: Int, val b: Int) : Equation {
             question() // If no solution, just show the question
         }
     }
+
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.MULTIPLICATION, a, b)
 }
 
@@ -61,11 +67,18 @@ data class MissingAddend(val a: Int, val result: Int) : Equation {
     override fun getExpectedResult(): Int = b
     override fun getQuestionAsSolved(submittedSolution: Int?): String {
         return if (submittedSolution != null) {
-            String.format(Locale.ENGLISH, "%d + %d = %d", a, submittedSolution, result) // Incorporate submitted solution
+            String.format(
+                Locale.ENGLISH,
+                "%d + %d = %d",
+                a,
+                submittedSolution,
+                result
+            ) // Incorporate submitted solution
         } else {
             question() // If no solution, just show the question
         }
     }
+
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.ADDITION, a, b)
 }
 
@@ -76,11 +89,18 @@ data class MissingSubtrahend(val a: Int, val result: Int) : Equation {
     override fun getExpectedResult(): Int = b
     override fun getQuestionAsSolved(submittedSolution: Int?): String {
         return if (submittedSolution != null) {
-            String.format(Locale.ENGLISH, "%d - %d = %d", a, submittedSolution, result) // Incorporate submitted solution
+            String.format(
+                Locale.ENGLISH,
+                "%d - %d = %d",
+                a,
+                submittedSolution,
+                result
+            ) // Incorporate submitted solution
         } else {
             question() // If no solution, just show the question
         }
     }
+
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.SUBTRACTION, a, b)
 }
 
@@ -94,5 +114,6 @@ data class Division(val a: Int, val b: Int) : Equation {
             question()
         }
     }
+
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.DIVISION, a, b)
 }

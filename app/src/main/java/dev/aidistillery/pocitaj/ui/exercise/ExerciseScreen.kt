@@ -335,19 +335,26 @@ fun PreviewExerciseScreen() {
     val exercise = Exercise(equation, equation.getExpectedResult())
     val mockInkModelManager = object : InkModelManager {
         override fun setModel(languageTag: String): String = "Model set"
-        override fun deleteActiveModel(): com.google.android.gms.tasks.Task<String?> = Tasks.forResult(null)
+        override fun deleteActiveModel(): com.google.android.gms.tasks.Task<String?> =
+            Tasks.forResult(null)
+
         override fun download(): com.google.android.gms.tasks.Task<String?> = Tasks.forResult(null)
         override suspend fun recognizeInk(ink: Ink, hint: String): String = "12"
     }
     val mockExerciseSource = object : ExerciseSource {
         override suspend fun initialize(config: ExerciseConfig) {}
         override fun getNextExercise(): Exercise? = null
-        override suspend fun recordAttempt(exercise: Exercise, submittedAnswer: Int, durationMs: Long) {}
+        override suspend fun recordAttempt(
+            exercise: Exercise,
+            submittedAnswer: Int,
+            durationMs: Long
+        ) {
+        }
     }
     val viewModel = ExerciseViewModel(mockInkModelManager, mockExerciseSource)
     viewModel.startExercises(ExerciseConfig(Operation.SUBTRACTION, 12, 10))
 
     AppTheme {
-        ExerciseScreen(exercise, viewModel) {_: String, _: Int -> }
+        ExerciseScreen(exercise, viewModel) { _: String, _: Int -> }
     }
 }

@@ -157,18 +157,21 @@ fun getGradientForOperation(operation: Operation): Brush {
                 MaterialTheme.customColors.additionGradientEnd
             )
         )
+
         Operation.SUBTRACTION -> Brush.linearGradient(
             listOf(
                 MaterialTheme.customColors.subtractionGradientStart,
                 MaterialTheme.customColors.subtractionGradientEnd
             )
         )
+
         Operation.MULTIPLICATION -> Brush.linearGradient(
             listOf(
                 MaterialTheme.customColors.multiplicationGradientStart,
                 MaterialTheme.customColors.multiplicationGradientEnd
             )
         )
+
         Operation.DIVISION -> Brush.linearGradient(
             listOf(
                 MaterialTheme.customColors.divisionGradientStart,

@@ -35,6 +35,7 @@ abstract class BaseExerciseUiTest {
 
     companion object {
         const val DEFAULT_UI_TIMEOUT = 1_000L
+
         // This is not a timeout, but a value to advance the test clock,
         // chosen to be slightly longer than the 1000ms recognition delay in the app.
         const val RECOGNITION_CLOCK_ADVANCE = 1100L
@@ -45,7 +46,8 @@ abstract class BaseExerciseUiTest {
 
     @Before
     fun setup() {
-        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        val application =
+            InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
         runBlocking {
             if (application.database.userDao().getUser(1) == null) {
                 application.database.userDao().insert(User(id = 1, name = "Default User"))
@@ -66,7 +68,8 @@ abstract class BaseExerciseUiTest {
 
     @After
     fun tearDown() {
-        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        val application =
+            InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
         runBlocking {
             application.database.clearAllTables()
         }
@@ -74,10 +77,12 @@ abstract class BaseExerciseUiTest {
 
     fun navigateToOperation(operationSymbol: String) {
         // Click on the card to start the specific exercise type
-        composeTestRule.onNodeWithText(operationSymbol).performVerifiedClick("Operation card '$operationSymbol'")
+        composeTestRule.onNodeWithText(operationSymbol)
+            .performVerifiedClick("Operation card '$operationSymbol'")
 
         // Click on the "Practice (Smart)" button
-        composeTestRule.onNodeWithText("Smart Practice").performVerifiedClick("'Smart Practice' button")
+        composeTestRule.onNodeWithText("Smart Practice")
+            .performVerifiedClick("'Smart Practice' button")
 
         // Wait for the ExerciseScreen to be loaded by checking for a unique element.
         // The InkCanvas is a good unique identifier for the ExerciseScreen.
@@ -90,7 +95,8 @@ abstract class BaseExerciseUiTest {
 
     fun navigateToReviewOperation(operationSymbol: String) {
         // Click on the card to start the specific exercise type
-        composeTestRule.onNodeWithText(operationSymbol).performVerifiedClick("Operation card '$operationSymbol'")
+        composeTestRule.onNodeWithText(operationSymbol)
+            .performVerifiedClick("Operation card '$operationSymbol'")
 
         // Explicitly scroll the parent list to bring the button into view
         composeTestRule.onNodeWithTag("setup_lazy_column")
@@ -113,7 +119,8 @@ abstract class BaseExerciseUiTest {
      * This is the primary way to create a predictable state for UI tests.
      */
     fun setExercises(exercises: List<Exercise>) {
-        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        val application =
+            InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
         (application.exerciseSource as ExerciseBook).loadSession(exercises)
     }
 
@@ -163,9 +170,12 @@ abstract class BaseExerciseUiTest {
     }
 
     fun assertNoFeedbackIsShown() {
-        composeTestRule.onNode(hasContentDescription(FeedbackType.CORRECT.contentDescription)).assertDoesNotExist()
-        composeTestRule.onNode(hasContentDescription(FeedbackType.INCORRECT.contentDescription)).assertDoesNotExist()
-        composeTestRule.onNode(hasContentDescription(FeedbackType.UNRECOGNIZED.contentDescription)).assertDoesNotExist()
+        composeTestRule.onNode(hasContentDescription(FeedbackType.CORRECT.contentDescription))
+            .assertDoesNotExist()
+        composeTestRule.onNode(hasContentDescription(FeedbackType.INCORRECT.contentDescription))
+            .assertDoesNotExist()
+        composeTestRule.onNode(hasContentDescription(FeedbackType.UNRECOGNIZED.contentDescription))
+            .assertDoesNotExist()
     }
 }
 

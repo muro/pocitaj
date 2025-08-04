@@ -37,7 +37,10 @@ data class Exercise(
             solved && correct() -> {
                 equation.question().replace("?", submittedSolution.toString())
             }
-            solved && !correct() -> equation.question().replace("?", submittedSolution.toString()).replace("=", "≠")
+
+            solved && !correct() -> equation.question().replace("?", submittedSolution.toString())
+                .replace("=", "≠")
+
             else -> equation.question()
         }
     }

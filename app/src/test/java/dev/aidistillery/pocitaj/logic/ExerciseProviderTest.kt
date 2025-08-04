@@ -44,7 +44,12 @@ class ExerciseProviderTest {
         val curriculum = Curriculum.getAllLevels()
         val userMastery = mapOf(
             "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 1, 1000L),
-            "ADDITION_1_2" to FactMastery("ADDITION_1_2", 1, 1, 500L), // Weakest (same strength, older timestamp)
+            "ADDITION_1_2" to FactMastery(
+                "ADDITION_1_2",
+                1,
+                1,
+                500L
+            ), // Weakest (same strength, older timestamp)
             "ADDITION_1_3" to FactMastery("ADDITION_1_3", 1, 2, 1500L)
         )
 

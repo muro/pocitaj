@@ -88,9 +88,11 @@ object Destinations {
 fun AppNavigation() {
     val navController = rememberNavController()
     val exerciseViewModel: ExerciseViewModel = viewModel(factory = ExerciseViewModelFactory)
-    val progressReportViewModel: ProgressReportViewModel = viewModel(factory = ProgressReportViewModelFactory)
+    val progressReportViewModel: ProgressReportViewModel =
+        viewModel(factory = ProgressReportViewModelFactory)
     val historyViewModel: HistoryViewModel = viewModel(factory = HistoryViewModelFactory)
-    val exerciseSetupViewModel: ExerciseSetupViewModel = viewModel(factory = ExerciseSetupViewModelFactory)
+    val exerciseSetupViewModel: ExerciseSetupViewModel =
+        viewModel(factory = ExerciseSetupViewModelFactory)
 
     LaunchedEffect(Unit) {
         exerciseViewModel.navigationEvents.collect { event ->
@@ -98,11 +100,13 @@ fun AppNavigation() {
                 is NavigationEvent.NavigateToExercise -> {
                     navController.navigate(Destinations.exerciseDetailRoute(event.type))
                 }
+
                 is NavigationEvent.NavigateToSummary -> {
                     navController.navigate(Destinations.SUMMARY_ROUTE) {
                         popUpTo(Destinations.HOME_ROUTE) { inclusive = false }
                     }
                 }
+
                 is NavigationEvent.NavigateBackToHome -> {
                     navController.navigate(Destinations.HOME_ROUTE) {
                         popUpTo(Destinations.HOME_ROUTE) { inclusive = true }

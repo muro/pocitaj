@@ -24,7 +24,8 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
     @Test
     fun progressReportScreen_displaysLevelProgress() {
         // GIVEN: A set of facts in the database
-        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        val application =
+            InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
         val factMasteryDao = application.database.factMasteryDao()
         runBlocking {
             factMasteryDao.upsert(FactMastery("ADDITION_1_1", 1, 5, 0))
@@ -57,7 +58,8 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
     @Test
     fun progressReportScreen_showsCorrectProgress() {
         // GIVEN: A user with partial and full mastery of some levels
-        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        val application =
+            InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
         val factMasteryDao = application.database.factMasteryDao()
         runBlocking {
             // Master all of SumsUpTo5
@@ -77,9 +79,11 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle()
 
         // THEN: The progress bars should show the correct progress
-        composeTestRule.onNodeWithTag("progress_report_list").performScrollToNode(hasTestTag("operation_card_ADDITION"))
+        composeTestRule.onNodeWithTag("progress_report_list")
+            .performScrollToNode(hasTestTag("operation_card_ADDITION"))
         composeTestRule.onNodeWithTag("progress_ADD_SUM_5_1.0").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("progress_report_list").performScrollToNode(hasTestTag("operation_card_SUBTRACTION"))
+        composeTestRule.onNodeWithTag("progress_report_list")
+            .performScrollToNode(hasTestTag("operation_card_SUBTRACTION"))
         composeTestRule.onRoot().printToLog("progress_report_list")
         composeTestRule.onNodeWithTag("progress_SUB_FROM_5_0.5").assertIsDisplayed()
     }

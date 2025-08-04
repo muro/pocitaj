@@ -22,7 +22,8 @@ class FactMasteryDaoTest {
     fun createDb() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
-            context, AppDatabase::class.java).build()
+            context, AppDatabase::class.java
+        ).build()
         factMasteryDao = db.factMasteryDao()
         userDao = db.userDao()
     }

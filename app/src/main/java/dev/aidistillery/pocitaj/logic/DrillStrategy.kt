@@ -46,7 +46,7 @@ private const val REPLACEABLE_MASTERY = L3_MASTERY - 1 // Strength 4
  * 4.  **Error Handling & Demotion:**
  * If a fact is answered incorrectly, it is immediately demoted to strength 0
  * and moved to the back of the working set for immediate repetition.
-*/
+ */
 class DrillStrategy(
     private val level: Level,
     private val userMastery: MutableMap<String, FactMastery>,
@@ -59,6 +59,7 @@ class DrillStrategy(
 
     companion object {
         private const val CONSECUTIVE_ANSWERS_FOR_PROMOTION = 2
+
         // To ensure that L2 -> L3 promotion happens in a separate session, we require
         // a minimum time gap between reviews. 5 minutes is a practical proxy for a
         // "different session" in a mobile app context.
@@ -89,11 +90,11 @@ class DrillStrategy(
 
         // Build the final list of candidates in the correct priority order.
         val potentialFactIds = (
-            l1Facts.map { it.factId } +
-            sortedL2Facts.map { it.factId } +
-            unseenFactIds +
-            masteredFacts.shuffled().map { it.factId }
-        ).distinct()
+                l1Facts.map { it.factId } +
+                        sortedL2Facts.map { it.factId } +
+                        unseenFactIds +
+                        masteredFacts.shuffled().map { it.factId }
+                ).distinct()
 
         workingSet.clear()
         workingSet.addAll(potentialFactIds.take(workingSetSize))
@@ -153,7 +154,8 @@ class DrillStrategy(
 
         } else { // Incorrect Answer
             consecutiveCorrectAnswers[factId] = 0
-            userMastery[factId] = mastery.copy(strength = 0, lastTestedTimestamp = System.currentTimeMillis())
+            userMastery[factId] =
+                mastery.copy(strength = 0, lastTestedTimestamp = System.currentTimeMillis())
 
             // move to the end of the workingSet list
             workingSet.remove(factId)
@@ -165,7 +167,11 @@ class DrillStrategy(
         if (workingSet.size < workingSetSize) {
             val candidates = allFactsInLevel
                 .filter { it !in workingSet }
-                .sortedWith(compareBy({ getMastery(it).strength }, { getMastery(it).lastTestedTimestamp }))
+                .sortedWith(
+                    compareBy(
+                        { getMastery(it).strength },
+                        { getMastery(it).lastTestedTimestamp })
+                )
                 .take(workingSetSize)
 
             if (candidates.isNotEmpty()) {

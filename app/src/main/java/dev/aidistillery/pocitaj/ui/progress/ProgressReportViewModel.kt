@@ -50,7 +50,8 @@ class ProgressReportViewModel(
                         val parts = factId.split('_')
                         val op1 = parts.getOrNull(1)?.toIntOrNull() ?: 0
                         val op2 = parts.getOrNull(2)?.toIntOrNull() ?: 0
-                        val speedBadge = getSpeedBadge(operation, op1, op2, mastery?.avgDurationMs ?: 0L)
+                        val speedBadge =
+                            getSpeedBadge(operation, op1, op2, mastery?.avgDurationMs ?: 0L)
                         FactProgress(factId, mastery, speedBadge)
                     }
                 }

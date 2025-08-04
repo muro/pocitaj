@@ -31,16 +31,19 @@ private fun getSpeedThreshold(operation: Operation, op1: Int, op2: Int): Long {
             op1 < 100 && op2 < 100 && (op1 % 10) + (op2 % 10) < 10 -> 7000L // Double digit, no carry
             else -> 10000L // Double digit, with carry
         }
+
         Operation.SUBTRACTION -> when {
             op1 < 10 && op2 < 10 -> 3000L // Single digit
             op1 < 100 && op2 < 100 && (op1 % 10) >= (op2 % 10) -> 7500L // Double digit, no borrow
             else -> 10500L // Double digit, with borrow
         }
+
         Operation.MULTIPLICATION -> when {
             op1 <= 10 && op2 <= 10 -> 3000L // Standard times table
             op1 <= 12 || op2 <= 12 -> 5000L // Extended times table
             else -> 12000L // Larger numbers
         }
+
         Operation.DIVISION -> 4000L // Division is generally a bit slower
     }
 }

@@ -82,7 +82,8 @@ class SmartPracticeStrategy(
 
         // This is the core of the smart practice logic. It ensures that the user spends most of their
         // time on new material, but also periodically reviews older concepts to prevent forgetting.
-        val isLearningExercise = masteredLevels.isEmpty() || random.nextFloat() < LEARNING_EXERCISE_PROBABILITY
+        val isLearningExercise =
+            masteredLevels.isEmpty() || random.nextFloat() < LEARNING_EXERCISE_PROBABILITY
 
         val levelToPractice = if (isLearningExercise) {
             currentLevel
@@ -100,14 +101,16 @@ class SmartPracticeStrategy(
 
     private fun findWeakestFactIn(level: Level): String {
         val allFactsInLevel = level.getAllPossibleFactIds()
-        val unmasteredFacts = allFactsInLevel.filter { (userMastery[it]?.strength ?: 0) < MASTERY_STRENGTH }
+        val unmasteredFacts =
+            allFactsInLevel.filter { (userMastery[it]?.strength ?: 0) < MASTERY_STRENGTH }
 
         val workingSet = if (unmasteredFacts.size < WORKING_SET_SIZE) {
             val newFactsNeeded = WORKING_SET_SIZE - unmasteredFacts.size
             val unseenFacts = allFactsInLevel.filter { !userMastery.containsKey(it) }
             unmasteredFacts + unseenFacts.shuffled(random).take(newFactsNeeded)
         } else {
-            unmasteredFacts.sortedWith(compareBy(
+            unmasteredFacts.sortedWith(
+                compareBy(
                 { userMastery[it]?.strength ?: 0 },
                 { userMastery[it]?.lastTestedTimestamp ?: 0L },
                 { it.split("_")[1].toInt() },

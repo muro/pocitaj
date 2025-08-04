@@ -19,18 +19,23 @@ class CurriculumTest {
     @Test
     fun `MultiplicationTableLevel generates correct exercises`() {
         val table = 7
-        val level = Curriculum.getLevelsFor(Operation.MULTIPLICATION).find { it.id == "MUL_TABLE_$table" }!!
+        val level =
+            Curriculum.getLevelsFor(Operation.MULTIPLICATION).find { it.id == "MUL_TABLE_$table" }!!
         repeat(100) {
             val exercise = level.generateExercise()
             val equation = exercise.equation as Multiplication
-            assertTrue("One of the operands must be $table", equation.a == table || equation.b == table)
+            assertTrue(
+                "One of the operands must be $table",
+                equation.a == table || equation.b == table
+            )
         }
     }
 
     @Test
     fun `MultiplicationTableLevel generates correct fact IDs`() {
         val table = 7
-        val level = Curriculum.getLevelsFor(Operation.MULTIPLICATION).find { it.id == "MUL_TABLE_$table" }!!
+        val level =
+            Curriculum.getLevelsFor(Operation.MULTIPLICATION).find { it.id == "MUL_TABLE_$table" }!!
         val factIds = level.getAllPossibleFactIds()
 
         // The set logic handles duplicates, so we check for specific examples.
@@ -45,7 +50,8 @@ class CurriculumTest {
     @Test
     fun `DivisionTableLevel generates correct exercises`() {
         val divisor = 6
-        val level = Curriculum.getLevelsFor(Operation.DIVISION).find { it.id == "DIV_BY_$divisor" }!!
+        val level =
+            Curriculum.getLevelsFor(Operation.DIVISION).find { it.id == "DIV_BY_$divisor" }!!
         repeat(100) {
             val exercise = level.generateExercise()
             val equation = exercise.equation as Division
@@ -57,7 +63,8 @@ class CurriculumTest {
     @Test
     fun `DivisionTableLevel generates correct fact IDs`() {
         val divisor = 6
-        val level = Curriculum.getLevelsFor(Operation.DIVISION).find { it.id == "DIV_BY_$divisor" }!!
+        val level =
+            Curriculum.getLevelsFor(Operation.DIVISION).find { it.id == "DIV_BY_$divisor" }!!
         val factIds = level.getAllPossibleFactIds()
 
         assertEquals(9, factIds.size) // 2..10 for the result

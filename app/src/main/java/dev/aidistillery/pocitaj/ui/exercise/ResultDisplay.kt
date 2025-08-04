@@ -60,7 +60,8 @@ fun ResultDisplay(
                     painter = painterResource(id = resultImageRes),
                     contentDescription = contentDesc,
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(baseSize * imageScale))
+                    modifier = Modifier.size(baseSize * imageScale)
+                )
                 if (answerResult is AnswerResult.ShowCorrection) {
                     Text(
                         text = answerResult.equation,

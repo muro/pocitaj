@@ -120,7 +120,6 @@ class ExerciseViewModel(
     }
 
 
-
     fun checkAnswer(answer: String, elapsedMs: Int) {
         viewModelScope.launch {
             currentExercise?.let { exercise ->
@@ -169,10 +168,12 @@ class ExerciseViewModel(
                         _answerResult.value = AnswerResult.None
                     }
                 }
+
                 is AnswerResult.ShowCorrection, is AnswerResult.Correct -> {
                     advanceToNextExercise()
                     _answerResult.value = AnswerResult.None
                 }
+
                 else -> {
                     _answerResult.value = AnswerResult.None
                 }

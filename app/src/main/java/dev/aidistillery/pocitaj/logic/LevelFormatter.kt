@@ -65,14 +65,17 @@ fun formatLevel(level: Level): LevelRepresentation {
                 level.id.endsWith("_MEDIUM") -> LevelRepresentation("🧶🧶")
                 else -> LevelRepresentation("🧶")
             }
+
             level.id.startsWith("MUL_TABLE_") -> {
                 val table = level.id.removePrefix("MUL_TABLE_")
                 LevelRepresentation("x$table")
             }
+
             level.id.startsWith("DIV_BY_") -> {
                 val divisor = level.id.removePrefix("DIV_BY_")
                 LevelRepresentation("÷$divisor")
             }
+
             else -> LevelRepresentation(level.id) // Fallback
         }
     }

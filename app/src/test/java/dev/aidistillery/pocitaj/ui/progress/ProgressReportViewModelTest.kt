@@ -147,7 +147,7 @@ class ProgressReportViewModelTest {
 
             assertTrue(additionLevels.containsKey("ADD_SUM_5"))
             val s5 = additionLevels["ADD_SUM_5"]!!
-            assertTrue(3/25 <= s5.progress)
+            assertTrue(3 / 25 <= s5.progress)
             assertTrue(additionLevels.containsKey("ADD_SUM_10"))
             val s10 = additionLevels["ADD_SUM_10"]!!
             assertTrue(0.03 <= s10.progress)
@@ -178,7 +178,8 @@ class ProgressReportViewModelTest {
 
             val progress = awaitItem()
             val additionProgress = progress[Operation.ADDITION]!![SumsUpTo5.id]!!
-            val subtractionProgress = progress[Operation.SUBTRACTION]!![Curriculum.SubtractionFrom5.id]!!
+            val subtractionProgress =
+                progress[Operation.SUBTRACTION]!![Curriculum.SubtractionFrom5.id]!!
 
             assertEquals(1.0f, additionProgress.progress)
             assertTrue(additionProgress.isMastered)

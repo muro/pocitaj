@@ -32,7 +32,9 @@ class AdaptiveExerciseSourceTest {
         override suspend fun insert(attempt: ExerciseAttempt) {
             attempts.add(attempt)
         }
-        override fun getAttemptsForUser(userId: Long) = MutableStateFlow(attempts.toList()).asStateFlow()
+
+        override fun getAttemptsForUser(userId: Long) =
+            MutableStateFlow(attempts.toList()).asStateFlow()
     }
 
     class FakeUserDao : UserDao {
@@ -43,8 +45,10 @@ class AdaptiveExerciseSourceTest {
             users[idToInsert] = user.copy(id = idToInsert)
             return idToInsert
         }
+
         override suspend fun getUser(id: Long): User? = users[id]
-        override suspend fun getUserByName(name: String): User? = users.values.find { it.name == name }
+        override suspend fun getUserByName(name: String): User? =
+            users.values.find { it.name == name }
     }
 
     @Before

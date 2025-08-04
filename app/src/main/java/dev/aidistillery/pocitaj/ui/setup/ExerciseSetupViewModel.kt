@@ -36,7 +36,8 @@ class ExerciseSetupViewModel(
     val operationLevels: StateFlow<List<OperationLevels>> =
         factMasteryDao.getAllFactsForUser(1) // Assuming user ID 1
             .map { masteryList ->
-                val masteredFacts = masteryList.filter { it.strength >= MASTERY_STRENGTH }.map { it.factId }.toSet()
+                val masteredFacts =
+                    masteryList.filter { it.strength >= MASTERY_STRENGTH }.map { it.factId }.toSet()
                 val allLevels = Curriculum.getAllLevels()
                 val masteredLevelIds = allLevels.filter { level ->
                     level.getAllPossibleFactIds().all { it in masteredFacts }
@@ -45,7 +46,8 @@ class ExerciseSetupViewModel(
                 allLevels.groupBy { it.operation }.map { (op, levels) ->
                     val levelStates = levels.map { level ->
                         val progress = level.getAllPossibleFactIds().let { facts ->
-                            if (facts.isEmpty()) 0f else facts.count { it in masteredFacts }.toFloat() / facts.size
+                            if (facts.isEmpty()) 0f else facts.count { it in masteredFacts }
+                                .toFloat() / facts.size
                         }
                         val starRating = when {
                             progress >= 1.0f -> 3

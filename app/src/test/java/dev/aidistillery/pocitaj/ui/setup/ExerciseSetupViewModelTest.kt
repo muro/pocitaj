@@ -49,6 +49,7 @@ class ExerciseSetupViewModelTest {
         suspend fun emit(value: List<FactMastery>) {
             flow.emit(value)
         }
+
         override fun getAllFactsForUser(userId: Long) = flow.asStateFlow()
         override suspend fun getFactMastery(userId: Long, factId: String): FactMastery? = null
         override suspend fun upsert(factMastery: FactMastery) {}

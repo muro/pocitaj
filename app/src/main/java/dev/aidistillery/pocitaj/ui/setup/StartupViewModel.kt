@@ -62,7 +62,8 @@ class StartupViewModel(
                 }
                 .addOnFailureListener { e ->
                     Log.e("StartupViewModel", "Failed to download model", e)
-                    _error.value = "Failed to download necessary files. Please check your internet connection."
+                    _error.value =
+                        "Failed to download necessary files. Please check your internet connection."
                     continuation.resume(false)
                 }
         }

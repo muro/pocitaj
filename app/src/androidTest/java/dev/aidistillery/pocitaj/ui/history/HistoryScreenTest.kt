@@ -22,7 +22,8 @@ class HistoryScreenTest : BaseExerciseUiTest() {
     @Test
     fun historyScreen_displaysHistory() {
         // GIVEN: A set of exercise attempts in the database
-        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        val application =
+            InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
         val exerciseAttemptDao = application.database.exerciseAttemptDao()
 
         runBlocking {
@@ -89,7 +90,8 @@ class HistoryScreenTest : BaseExerciseUiTest() {
 
     @Test
     fun historyScreen_displaysEmptyState() {
-        val application = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        val application =
+            InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
         runBlocking {
             if (application.database.userDao().getUser(1) == null) {
                 assertTrue(false)

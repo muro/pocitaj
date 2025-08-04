@@ -70,6 +70,7 @@ fun ProgressContainerScreen(
                         factProgressByOperation = factProgressByOperation,
                         levelProgressByOperation = levelProgressByOperation
                     )
+
                     1 -> HistoryScreen(history = history)
                 }
             }

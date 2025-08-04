@@ -23,14 +23,21 @@ class AdaptiveExerciseSource(
     private val EWMA_ALPHA = 0.2
 
     override suspend fun initialize(config: ExerciseConfig) {
-        val userMastery = factMasteryDao.getAllFactsForUser(userId).first().associateBy { it.factId }
-        val level = config.levelId?.let { Curriculum.getAllLevels().find { level -> level.id == it } }
+        val userMastery =
+            factMasteryDao.getAllFactsForUser(userId).first().associateBy { it.factId }
+        val level =
+            config.levelId?.let { Curriculum.getAllLevels().find { level -> level.id == it } }
 
         exerciseProvider = when {
-            level != null && level.strategy == ExerciseStrategy.REVIEW -> ReviewStrategy(level, userMastery.toMutableMap())
+            level != null && level.strategy == ExerciseStrategy.REVIEW -> ReviewStrategy(
+                level,
+                userMastery.toMutableMap()
+            )
+
             level != null -> DrillStrategy(level, userMastery.toMutableMap())
             else -> {
-                val filteredCurriculum = Curriculum.getAllLevels().filter { it.operation == config.operation }
+                val filteredCurriculum =
+                    Curriculum.getAllLevels().filter { it.operation == config.operation }
                 SmartPracticeStrategy(filteredCurriculum, userMastery.toMutableMap())
             }
         }

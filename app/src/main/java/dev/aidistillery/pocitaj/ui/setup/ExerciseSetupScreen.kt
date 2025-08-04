@@ -1,7 +1,6 @@
 package dev.aidistillery.pocitaj.ui.setup
 
 import android.content.res.Configuration
-import android.graphics.Paint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

@@ -61,6 +61,7 @@ import java.util.Locale
 
 enum class ResultStatus {
     CORRECT, INCORRECT, NOT_RECOGNIZED;
+
     companion object {
         fun fromBooleanPair(recognized: Boolean, correct: Boolean): ResultStatus {
             return if (!recognized) {
@@ -71,12 +72,14 @@ enum class ResultStatus {
         }
     }
 }
+
 data class ResultDescription(
     val equation: String,
     val status: ResultStatus,
     val elapsedMs: Int,
     val speedBadge: SpeedBadge
 )
+
 @Composable
 fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit) {
     PocitajScreen {
@@ -137,10 +140,18 @@ fun ResultsList(results: List<ResultDescription>, modifier: Modifier = Modifier)
             itemsIndexed(results) { index, result ->
                 AnimatedVisibility(
                     visible = visible.value,
-                    enter = fadeIn(animationSpec = tween(durationMillis = 500, delayMillis = index * 100)) +
+                    enter = fadeIn(
+                        animationSpec = tween(
+                            durationMillis = 500,
+                            delayMillis = index * 100
+                        )
+                    ) +
                             slideInVertically(
                                 initialOffsetY = { it / 2 },
-                                animationSpec = tween(durationMillis = 500, delayMillis = index * 100)
+                                animationSpec = tween(
+                                    durationMillis = 500,
+                                    delayMillis = index * 100
+                                )
                             )
                 ) {
                     ResultCard(result, modifier = Modifier.fillMaxWidth())
@@ -189,7 +200,14 @@ fun PreviewResultsList() {
     val results = ArrayList<ResultDescription>()
     results.add(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT, 1000, SpeedBadge.GOLD))
     results.add(ResultDescription("3 + 3 ≠ 5", ResultStatus.INCORRECT, 2100, SpeedBadge.SILVER))
-    results.add(ResultDescription("3 + 3 = ?", ResultStatus.NOT_RECOGNIZED, 3511, SpeedBadge.BRONZE))
+    results.add(
+        ResultDescription(
+            "3 + 3 = ?",
+            ResultStatus.NOT_RECOGNIZED,
+            3511,
+            SpeedBadge.BRONZE
+        )
+    )
 
     AppTheme {
         ResultsList(results)
@@ -239,7 +257,10 @@ fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
             }
-            SpeedBadgeIndicator(badge = result.speedBadge, modifier = Modifier.align(Alignment.TopEnd))
+            SpeedBadgeIndicator(
+                badge = result.speedBadge,
+                modifier = Modifier.align(Alignment.TopEnd)
+            )
         }
     }
 }
@@ -254,9 +275,11 @@ fun SpeedBadgeIndicator(badge: SpeedBadge, modifier: Modifier = Modifier) {
     }
 
     if (badgeColor != null) {
-        Canvas(modifier = modifier
-            .width(36.dp)
-            .height(36.dp)) {
+        Canvas(
+            modifier = modifier
+                .width(36.dp)
+                .height(36.dp)
+        ) {
             val path = Path().apply {
                 moveTo(size.width, 0f)
                 lineTo(size.width, size.height)
@@ -317,8 +340,22 @@ fun PreviewResultCardSlow() {
 fun PreviewResultsScreen() {
     val results = ArrayList<ResultDescription>()
     for (i in 1..5) {
-        results.add(ResultDescription("$i + ${i + 2} = ${2 * i + 2}", ResultStatus.CORRECT, 1234, SpeedBadge.GOLD))
-        results.add(ResultDescription("$i + ${i + 1} ≠ $i", ResultStatus.CORRECT, 1, SpeedBadge.BRONZE))
+        results.add(
+            ResultDescription(
+                "$i + ${i + 2} = ${2 * i + 2}",
+                ResultStatus.CORRECT,
+                1234,
+                SpeedBadge.GOLD
+            )
+        )
+        results.add(
+            ResultDescription(
+                "$i + ${i + 1} ≠ $i",
+                ResultStatus.CORRECT,
+                1,
+                SpeedBadge.BRONZE
+            )
+        )
     }
     AppTheme {
         ResultsScreen(results) {}

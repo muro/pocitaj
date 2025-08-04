@@ -2,11 +2,9 @@ package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertNull
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -24,11 +22,19 @@ class DrillStrategyTest {
 
     // --- Helper Functions ---
 
-    private fun createMastery(factId: String, strength: Int, lastTested: Long): Pair<String, FactMastery> {
+    private fun createMastery(
+        factId: String,
+        strength: Int,
+        lastTested: Long
+    ): Pair<String, FactMastery> {
         return factId to FactMastery(factId, 1, strength, lastTested)
     }
 
-    private fun setupStrategy(masteryMap: Map<String, FactMastery>, level: Level = testLevel, setSize: Int = 4): DrillStrategy {
+    private fun setupStrategy(
+        masteryMap: Map<String, FactMastery>,
+        level: Level = testLevel,
+        setSize: Int = 4
+    ): DrillStrategy {
         return DrillStrategy(level, masteryMap.toMutableMap(), workingSetSize = setSize)
     }
 
@@ -51,7 +57,8 @@ class DrillStrategyTest {
 
         // ASSERT
         assertEquals("Working set should be the target size", 4, workingSet.size)
-        assertTrue("All facts in the working set must be L1 facts",
+        assertTrue(
+            "All facts in the working set must be L1 facts",
             workingSet.all { (userMastery[it]?.strength ?: 0) < 3 }
         )
     }
@@ -73,8 +80,14 @@ class DrillStrategyTest {
 
         // ASSERT
         assertEquals("Working set should be the target size", 4, workingSet.size)
-        assertTrue("Must contain all L1 facts", workingSet.containsAll(listOf("ADDITION_1_1", "ADDITION_1_2")))
-        assertTrue("Must contain the two oldest L2 facts", workingSet.containsAll(listOf("ADDITION_1_3", "ADDITION_1_5")))
+        assertTrue(
+            "Must contain all L1 facts",
+            workingSet.containsAll(listOf("ADDITION_1_1", "ADDITION_1_2"))
+        )
+        assertTrue(
+            "Must contain the two oldest L2 facts",
+            workingSet.containsAll(listOf("ADDITION_1_3", "ADDITION_1_5"))
+        )
         assertFalse("Should not contain the newest L2 fact", workingSet.contains("ADDITION_1_4"))
     }
 
@@ -110,8 +123,15 @@ class DrillStrategyTest {
         val workingSet = strategy.getWorkingSet()
 
         // ASSERT
-        assertEquals("Working set size should be the total number of facts in the level", 3, workingSet.size)
-        assertTrue("Working set should contain all facts from the level", workingSet.containsAll(listOf("A", "B", "C")))
+        assertEquals(
+            "Working set size should be the total number of facts in the level",
+            3,
+            workingSet.size
+        )
+        assertTrue(
+            "Working set should contain all facts from the level",
+            workingSet.containsAll(listOf("A", "B", "C"))
+        )
     }
 
     @Test
@@ -120,10 +140,12 @@ class DrillStrategyTest {
         val userMastery = (3..10).map {
             createMastery("ADDITION_1_$it", 5, 1000L) // Mastered
         }.toMap().toMutableMap()
-        userMastery.putAll(mapOf(
-            createMastery("ADDITION_1_1", 1, 100L), // L1
-            createMastery("ADDITION_1_2", 3, 200L)  // L2
-        ))
+        userMastery.putAll(
+            mapOf(
+                createMastery("ADDITION_1_1", 1, 100L), // L1
+                createMastery("ADDITION_1_2", 3, 200L)  // L2
+            )
+        )
         val strategy = setupStrategy(userMastery)
 
         // ACT
@@ -132,8 +154,15 @@ class DrillStrategyTest {
 
         // ASSERT
         assertEquals("Working set should be full (2 unmastered + 2 mastered)", 4, workingSet.size)
-        assertTrue("Working set must contain the L1 and L2 facts", workingSet.containsAll(listOf("ADDITION_1_1", "ADDITION_1_2")))
-        assertEquals("Working set should be filled with 2 mastered L3 facts", 2, masteredFactsInSet.size)
+        assertTrue(
+            "Working set must contain the L1 and L2 facts",
+            workingSet.containsAll(listOf("ADDITION_1_1", "ADDITION_1_2"))
+        )
+        assertEquals(
+            "Working set should be filled with 2 mastered L3 facts",
+            2,
+            masteredFactsInSet.size
+        )
     }
 
 
@@ -191,7 +220,10 @@ class DrillStrategyTest {
         // ACT & ASSERT: Run a long session to observe the selection pattern.
         for (i in 1..50) {
             val exercise = strategy.getNextExercise()
-            assertNotNull("Should always provide a review exercise, even when all facts are mastered (iteration $i)", exercise)
+            assertNotNull(
+                "Should always provide a review exercise, even when all facts are mastered (iteration $i)",
+                exercise
+            )
             selectedFacts.add(exercise!!.getFactId())
             strategy.recordAttempt(exercise, true)
         }
@@ -219,7 +251,10 @@ class DrillStrategyTest {
         val initialWorkingSet = strategy.getWorkingSet()
 
         // Sanity-check the initial state
-        assertTrue("Fact to be mastered must be in the initial set", initialWorkingSet.contains("ADDITION_1_1"))
+        assertTrue(
+            "Fact to be mastered must be in the initial set",
+            initialWorkingSet.contains("ADDITION_1_1")
+        )
         assertEquals(4, initialWorkingSet.size)
 
         // ACT: Master the L2 fact
@@ -231,7 +266,11 @@ class DrillStrategyTest {
 
         assertEquals("Working set should maintain its size", 4, finalWorkingSet.size)
         assertFalse("Mastered fact should be removed", finalWorkingSet.contains("ADDITION_1_1"))
-        assertEquals("A new, unseen fact should have been added to fill the space", 1, unseenFactsInSet.size)
+        assertEquals(
+            "A new, unseen fact should have been added to fill the space",
+            1,
+            unseenFactsInSet.size
+        )
     }
 
     @Test
@@ -244,7 +283,10 @@ class DrillStrategyTest {
         for (i in 1..20) {
             // Get an exercise; fail if the provider dries up prematurely.
             val exercise = strategy.getNextExercise()
-            assertNotNull("Strategy should always provide an exercise when unmastered facts remain (iteration $i)", exercise)
+            assertNotNull(
+                "Strategy should always provide an exercise when unmastered facts remain (iteration $i)",
+                exercise
+            )
 
             // Answer correctly.
             strategy.recordAttempt(exercise!!, true)
