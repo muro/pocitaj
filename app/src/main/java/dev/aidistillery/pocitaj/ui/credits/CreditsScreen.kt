@@ -7,14 +7,17 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
 import com.mikepenz.aboutlibraries.ui.compose.android.rememberLibraries
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
+import dev.aidistillery.pocitaj.ui.theme.AppFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,8 +39,13 @@ fun CreditsScreen(onNavigateUp: () -> Unit) {
             libraries = libraries,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
+            textStyles = LibraryDefaults.libraryTextStyles(
+                nameTextStyle = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = AppFontFamily
+                ),
+                licensesTextStyle = MaterialTheme.typography.labelSmall
+            )
         )
-
     }
 }
