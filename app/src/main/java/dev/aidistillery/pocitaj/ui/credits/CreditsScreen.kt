@@ -11,7 +11,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.mikepenz.aboutlibraries.ui.compose.android.rememberLibraries
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,7 +31,9 @@ fun CreditsScreen(onNavigateUp: () -> Unit) {
             )
         }
     ) { paddingValues ->
+        val libraries by rememberLibraries()
         LibrariesContainer(
+            libraries = libraries,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
