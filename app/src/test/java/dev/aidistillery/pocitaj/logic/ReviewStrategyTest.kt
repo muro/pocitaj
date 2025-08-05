@@ -4,6 +4,7 @@ import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ReviewStrategyTest {
@@ -35,50 +36,80 @@ class ReviewStrategyTest {
         return ReviewStrategy(level, masteryMap.toMutableMap())
     }
 
-    // --- Tests ---
+    // --- getNextExercise Tests ---
 
     @Test
     fun `getNextExercise returns a fact when mastery is empty`() {
-        // ARRANGE: A user with no history at all.
         val userMastery = emptyMap<String, FactMastery>()
         val strategy = setupStrategy(userMastery)
-
-        // ACT: Request an exercise.
         val exercise = strategy.getNextExercise()
-
-        // ASSERT: The strategy should provide one of the new, unseen facts.
         assertNotNull("Should return a non-null exercise even with no history", exercise)
     }
 
     @Test
     fun `prioritizes overdue facts over recently tested facts`() {
-        // ARRANGE
         val now = System.currentTimeMillis()
         val oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000
         val fiveMinutesAgo = now - 5 * 60 * 1000
-
         val overdueFactId = "ADDITION_1_1"
         val recentFactId = "ADDITION_1_2"
-
         val userMastery = mapOf(
-            // This fact is strength 1 and very overdue. Urgency should be high.
             createMastery(overdueFactId, 1, oneWeekAgo),
-            // This fact is strength 4 and was just tested. Urgency should be very low.
             createMastery(recentFactId, 4, fiveMinutesAgo)
         )
         val strategy = setupStrategy(userMastery)
 
-        // ACT: Get the next exercise 20 times and count the selections.
         val selections = (1..20).mapNotNull { strategy.getNextExercise()?.getFactId() }
         val overdueSelections = selections.count { it == overdueFactId }
 
-        // ASSERT: The overdue fact should be selected almost every time.
-        // We allow for a small chance of the other fact being picked due to randomness.
         assertEquals(
             "The overdue fact should be selected in all 20 attempts",
             20,
             overdueSelections
         )
+    }
+
+    // --- recordAttempt Tests ---
+
+    @Test
+    fun `correct answer increases strength and updates timestamp`() {
+        // ARRANGE
+        val now = System.currentTimeMillis()
+        val factId = "ADDITION_1_1"
+        val initialStrength = 2
+        val userMastery = mutableMapOf(
+            factId to FactMastery(factId, 1, initialStrength, now - 100000)
+        )
+        val strategy = ReviewStrategy(testLevel, userMastery)
+        val exercise = exerciseFromFactId(factId)
+
+        // ACT
+        strategy.recordAttempt(exercise, wasCorrect = true)
+
+        // ASSERT
+        val updatedMastery = userMastery[factId]!!
+        assertEquals(initialStrength + 1, updatedMastery.strength)
+        assertTrue("Timestamp should be updated to be very recent", now - updatedMastery.lastTestedTimestamp < 1000)
+    }
+
+    @Test
+    fun `incorrect answer resets strength and updates timestamp`() {
+        // ARRANGE
+        val now = System.currentTimeMillis()
+        val factId = "ADDITION_1_1"
+        val userMastery = mutableMapOf(
+            factId to FactMastery(factId, 1, 5, now - 100000)
+        )
+        val strategy = ReviewStrategy(testLevel, userMastery)
+        val exercise = exerciseFromFactId(factId)
+
+        // ACT
+        strategy.recordAttempt(exercise, wasCorrect = false)
+
+        // ASSERT
+        val updatedMastery = userMastery[factId]!!
+        assertEquals("Strength should be reset to 1 on failure", 1, updatedMastery.strength)
+        assertTrue("Timestamp should be updated to be very recent", now - updatedMastery.lastTestedTimestamp < 1000)
     }
 }
 

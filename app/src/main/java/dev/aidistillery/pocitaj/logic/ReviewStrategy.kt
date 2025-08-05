@@ -143,6 +143,19 @@ class ReviewStrategy(
     }
 
     override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean) {
-        // TODO: Implement feedback logic
+        val factId = exercise.getFactId()
+        val now = System.currentTimeMillis()
+        val mastery = userMastery[factId] ?: FactMastery(factId, 1, 0, 0)
+
+        val newStrength = if (wasCorrect) {
+            (mastery.strength + 1).coerceAtMost(idealIntervals.keys.maxOrNull() ?: 7)
+        } else {
+            1 // Reset strength on failure
+        }
+
+        userMastery[factId] = mastery.copy(
+            strength = newStrength,
+            lastTestedTimestamp = now
+        )
     }
 }
