@@ -112,6 +112,9 @@ ksp {
 }
 
 aboutLibraries {
+    android {
+        registerAndroidTasks = true
+    }
     collect {
         configPath = file("licenses")
     }
