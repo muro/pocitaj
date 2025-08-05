@@ -55,7 +55,7 @@ class ExerciseSetupViewModel(
                             progress > 0.6f -> 1
                             else -> 0
                         }
-                        val isUnlocked = level.prerequisites.all { it in masteredLevelIds }
+                        val isUnlocked = true // level.prerequisites.all { it in masteredLevelIds }
                         LevelStatus(level, isUnlocked, starRating)
                     }
                     OperationLevels(op, levelStates)
