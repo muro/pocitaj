@@ -50,6 +50,11 @@ android {
     }
     tasks.withType<Test> {
         //timeout.set(Duration.ofSeconds(10))
+        testLogging {
+            events("passed", "skipped", "failed")
+            showStandardStreams = true
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        }
     }
     kotlin {
         compilerOptions {
