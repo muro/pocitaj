@@ -77,16 +77,16 @@ class ReviewStrategy(
 ) : ExerciseProvider {
 
     companion object {
+        private const val MAX_STRENGTH = 5
+
         // Defines the ideal time gap in milliseconds before a fact should be reviewed again.
         private val idealIntervals = mapOf(
-            0 to 10 * 1000L,             // 10 seconds (for immediate re-test on error)
-            1 to 4 * 60 * 60 * 1000L,    // 4 hours
-            2 to 8 * 60 * 60 * 1000L,    // 8 hours
-            3 to 24 * 60 * 60 * 1000L,   // 1 day
-            4 to 3 * 24 * 60 * 60 * 1000L, // 3 days
-            5 to 7 * 24 * 60 * 60 * 1000L, // 1 week
-            6 to 2 * 7 * 24 * 60 * 60 * 1000L, // 2 weeks
-            7 to 4 * 7 * 24 * 60 * 60 * 1000L, // 4 weeks
+            0 to 10 * 1000L,                      // 10 seconds
+            1 to 8 * 60 * 60 * 1000L,             // 8 hours
+            2 to 24 * 60 * 60 * 1000L,            // 1 day
+            3 to 3 * 24 * 60 * 60 * 1000L,        // 3 days
+            4 to 7 * 24 * 60 * 60 * 1000L,        // 1 week
+            5 to 2 * 7 * 24 * 60 * 60 * 1000L     // 2 weeks
         )
         // A fact is considered "due" for review when its urgency score is above this threshold.
         private const val URGENCY_THRESHOLD = 0.75
@@ -118,12 +118,12 @@ class ReviewStrategy(
         if (candidates.isEmpty()) {
             if (unseenFactIds.isNotEmpty()) {
                 candidates = unseenFactIds.associateWith { UNSEEN_FACT_URGENCY }
-            } else if (seenUrgencyScores.isNotEmpty()) {
-                // If there are no unseen facts left, just review one of the already-learned ones.
-                candidates = seenUrgencyScores
+            } else if (seenFactIds.isNotEmpty()) {
+                // If there are no unseen facts left, just review the least recently tested fact.
+                val leastRecentFactId = seenFactIds.minByOrNull { userMastery[it]!!.lastTestedTimestamp }
+                return leastRecentFactId?.let { exerciseFromFactId(it) }
             } else {
-                // This should not be reachable if allFactsInLevel is not empty, but as a safeguard:
-                return null
+                return null // Nothing to do.
             }
         }
 
@@ -148,7 +148,7 @@ class ReviewStrategy(
         val mastery = userMastery[factId] ?: FactMastery(factId, 1, 0, 0)
 
         val newStrength = if (wasCorrect) {
-            (mastery.strength + 1).coerceAtMost(idealIntervals.keys.maxOrNull() ?: 7)
+            (mastery.strength + 1).coerceAtMost(MAX_STRENGTH) // Cap strength at 5
         } else {
             1 // Reset strength on failure
         }

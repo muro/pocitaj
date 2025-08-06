@@ -157,9 +157,9 @@ class DrillStrategy(
             userMastery[factId] =
                 mastery.copy(strength = 0, lastTestedTimestamp = System.currentTimeMillis())
 
-            // move to the end of the workingSet list
+            // Move the incorrect fact to the front of the working set for immediate repetition.
             workingSet.remove(factId)
-            workingSet.add(factId)
+            workingSet.add(0, factId)
         }
     }
 
