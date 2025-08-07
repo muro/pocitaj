@@ -2,6 +2,7 @@ package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
 import kotlin.random.Random
+import kotlin.time.Clock
 
 private const val L3_MASTERY = 5
 private const val L2_MASTERY = 3
@@ -50,7 +51,8 @@ private const val REPLACEABLE_MASTERY = L3_MASTERY - 1 // Strength 4
 class DrillStrategy(
     private val level: Level,
     private val userMastery: MutableMap<String, FactMastery>,
-    private val workingSetSize: Int = 4
+    private val workingSetSize: Int = 4,
+    private val clock: Clock = Clock.System
 ) : ExerciseProvider {
 
     private val workingSet = mutableListOf<String>()
@@ -135,7 +137,7 @@ class DrillStrategy(
                 newStrength += 1
             } else if (mastery.strength == L3_MASTERY - 1) {
                 val lastTested = mastery.lastTestedTimestamp
-                val now = System.currentTimeMillis()
+                val now = clock.now().toEpochMilliseconds()
                 if (now - lastTested > MIN_SESSION_SPACING_MS) {
                     newStrength += 1
                 }
@@ -143,7 +145,7 @@ class DrillStrategy(
 
             val newMastery = mastery.copy(
                 strength = newStrength.coerceAtMost(L3_MASTERY),
-                lastTestedTimestamp = System.currentTimeMillis()
+                lastTestedTimestamp = clock.now().toEpochMilliseconds()
             )
             userMastery[factId] = newMastery
 
@@ -155,7 +157,7 @@ class DrillStrategy(
         } else { // Incorrect Answer
             consecutiveCorrectAnswers[factId] = 0
             userMastery[factId] =
-                mastery.copy(strength = 0, lastTestedTimestamp = System.currentTimeMillis())
+                mastery.copy(strength = 0, lastTestedTimestamp = clock.now().toEpochMilliseconds())
 
             // Move the incorrect fact to the front of the working set for immediate repetition.
             workingSet.remove(factId)

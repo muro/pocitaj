@@ -2,6 +2,7 @@ package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
 import kotlin.random.Random
+import kotlin.time.Clock
 
 /**
  * A strategy for practicing a large, mixed set of exercises. It uses a combination of heuristics
@@ -10,7 +11,8 @@ import kotlin.random.Random
 class SmartPracticeStrategy(
     private val curriculum: List<Level>,
     private val userMastery: Map<String, FactMastery>,
-    private val random: Random = Random.Default
+    private val random: Random = Random.Default,
+    private val clock: Clock = Clock.System
 ) : ExerciseProvider {
     companion object {
         private const val MASTERY_STRENGTH = 5

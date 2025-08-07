@@ -1,6 +1,8 @@
 package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
+import kotlin.time.Clock
+
 
 /**
  * Implements a spaced repetition strategy for long-term retention of learned facts.
@@ -73,7 +75,8 @@ import dev.aidistillery.pocitaj.data.FactMastery
  */
 class ReviewStrategy(
     private val level: Level,
-    private val userMastery: MutableMap<String, FactMastery>
+    private val userMastery: MutableMap<String, FactMastery>,
+    private val clock: Clock = Clock.System
 ) : ExerciseProvider {
 
     companion object {
@@ -100,7 +103,7 @@ class ReviewStrategy(
             return null
         }
 
-        val now = System.currentTimeMillis()
+        val now = clock.now().toEpochMilliseconds()
         val (seenFactIds, unseenFactIds) = allFactsInLevel.partition { userMastery.containsKey(it) }
 
         // Calculate urgency scores for all facts the user has seen before.
@@ -144,11 +147,11 @@ class ReviewStrategy(
 
     override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean) {
         val factId = exercise.getFactId()
-        val now = System.currentTimeMillis()
+        val now = clock.now().toEpochMilliseconds()
         val mastery = userMastery[factId] ?: FactMastery(factId, 1, 0, 0)
 
         val newStrength = if (wasCorrect) {
-            (mastery.strength + 1).coerceAtMost(MAX_STRENGTH) // Cap strength at 5
+            (mastery.strength + 1).coerceAtMost(MAX_STRENGTH)
         } else {
             1 // Reset strength on failure
         }

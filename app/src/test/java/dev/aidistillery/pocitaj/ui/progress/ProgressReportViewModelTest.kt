@@ -23,6 +23,8 @@ import org.junit.Test
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
+const val ENABLE_DETAILED_LOGGING = false
+
 // This rule replaces the main dispatcher with a test dispatcher
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainDispatcherRule(
@@ -90,8 +92,10 @@ class ProgressReportViewModelTest {
 
             val additionFacts = updatedFactProgress[Operation.MULTIPLICATION]
             assertNotNull(additionFacts)
-            for (f in additionFacts!!) {
-                println(f)
+            if (ENABLE_DETAILED_LOGGING) {
+                for (f in additionFacts!!) {
+                    println(f)
+                }
             }
             assertEquals(121, additionFacts!!.size)
             val masteredFact = additionFacts.find { it.factId == "MULTIPLICATION_2_3" }
