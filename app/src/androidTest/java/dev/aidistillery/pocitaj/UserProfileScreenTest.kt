@@ -3,6 +3,8 @@ package dev.aidistillery.pocitaj
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.data.UserDao
@@ -74,5 +76,23 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 3. Verify that the dialog is shown
         composeTestRule.onNodeWithText("Create a new profile").assertIsDisplayed()
+    }
+
+    @Test
+    fun whenUserIsAdded_thenAppearsInUserList() {
+        // 1. Navigate to the profile screen
+        composeTestRule.onNodeWithContentDescription("User Profile")
+            .performVerifiedClick("User Profile icon")
+
+        // 2. Click the "Add User" button
+        composeTestRule.onNodeWithText("Add User")
+            .performVerifiedClick("Add User button")
+
+        // 3. Enter a new user name and click "Add"
+        composeTestRule.onNodeWithText("User Name").performTextInput("Charlie")
+        composeTestRule.onNodeWithText("Add").performClick()
+
+        // 4. Verify that the new user is displayed in the list
+        composeTestRule.onNodeWithText("Charlie").assertIsDisplayed()
     }
 }

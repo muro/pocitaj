@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.aidistillery.pocitaj.R
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.ui.components.PocitajScreen
@@ -27,9 +28,11 @@ import dev.aidistillery.pocitaj.ui.theme.AppTheme
 fun UserProfileScreen(
     users: List<User>,
     onUserSelected: (Long) -> Unit,
-    onAddUserClicked: (String) -> Unit
+    onAddUserClicked: (String) -> Unit,
+    initialShowAddUserDialog: Boolean = false,
+    viewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModelFactory)
 ) {
-    var showAddUserDialog by remember { mutableStateOf(false) }
+    var showAddUserDialog by remember { mutableStateOf(initialShowAddUserDialog) }
     var newUserName by remember { mutableStateOf("") }
 
     PocitajScreen {
@@ -62,7 +65,7 @@ fun UserProfileScreen(
                     confirmButton = {
                         Button(
                             onClick = {
-                                onAddUserClicked(newUserName)
+                                viewModel.addUser(newUserName)
                                 showAddUserDialog = false
                             }
                         ) {
@@ -88,6 +91,19 @@ fun UserProfileScreenPreview() {
             users = listOf(User(id = 1, name = "Alice"), User(id = 2, name = "Bob")),
             onUserSelected = {},
             onAddUserClicked = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun UserProfileScreenAddUserDialogPreview() {
+    AppTheme {
+        UserProfileScreen(
+            users = listOf(User(id = 1, name = "Alice"), User(id = 2, name = "Bob")),
+            onUserSelected = {},
+            onAddUserClicked = {},
+            initialShowAddUserDialog = true
         )
     }
 }

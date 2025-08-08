@@ -10,9 +10,10 @@ import dev.aidistillery.pocitaj.data.UserDao
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class UserProfileViewModel(
-    userDao: UserDao
+    private val userDao: UserDao
 ) : ViewModel() {
 
     val users: StateFlow<List<User>> = userDao.getAllUsers()
@@ -21,6 +22,12 @@ class UserProfileViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    fun addUser(name: String) {
+        viewModelScope.launch {
+            userDao.insert(User(name = name))
+        }
+    }
 }
 
 object UserProfileViewModelFactory : ViewModelProvider.Factory {
