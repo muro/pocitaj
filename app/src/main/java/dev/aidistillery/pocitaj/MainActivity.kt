@@ -34,6 +34,8 @@ import dev.aidistillery.pocitaj.ui.progress.ProgressContainerScreen
 import dev.aidistillery.pocitaj.ui.progress.ProgressReportViewModel
 import dev.aidistillery.pocitaj.ui.progress.ProgressReportViewModelFactory
 import dev.aidistillery.pocitaj.ui.profile.UserProfileScreen
+import dev.aidistillery.pocitaj.ui.profile.UserProfileViewModel
+import dev.aidistillery.pocitaj.ui.profile.UserProfileViewModelFactory
 import dev.aidistillery.pocitaj.ui.setup.ExerciseSetupScreen
 import dev.aidistillery.pocitaj.ui.setup.ExerciseSetupViewModel
 import dev.aidistillery.pocitaj.ui.setup.ExerciseSetupViewModelFactory
@@ -95,6 +97,8 @@ fun AppNavigation() {
     val historyViewModel: HistoryViewModel = viewModel(factory = HistoryViewModelFactory)
     val exerciseSetupViewModel: ExerciseSetupViewModel =
         viewModel(factory = ExerciseSetupViewModelFactory)
+    val userProfileViewModel: UserProfileViewModel =
+        viewModel(factory = UserProfileViewModelFactory)
 
     LaunchedEffect(Unit) {
         exerciseViewModel.navigationEvents.collect { event ->
@@ -186,7 +190,9 @@ fun AppNavigation() {
             }
         }
         composable(route = Destinations.PROFILE_ROUTE) {
+            val users by userProfileViewModel.users.collectAsState()
             UserProfileScreen(
+                users = users,
                 onUserSelected = { userId ->
                     // TODO: Set the active user
                     navController.navigateUp()
