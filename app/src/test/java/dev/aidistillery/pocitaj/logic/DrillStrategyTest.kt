@@ -31,11 +31,11 @@ class DrillStrategyTest {
     }
 
     private fun setupStrategy(
-        masteryMap: Map<String, FactMastery>,
+        masteryMap: MutableMap<String, FactMastery>,
         level: Level = testLevel,
         setSize: Int = 4
     ): DrillStrategy {
-        return DrillStrategy(level, masteryMap.toMutableMap(), workingSetSize = setSize)
+        return DrillStrategy(level, masteryMap, workingSetSize = setSize)
     }
 
     // --- New Initialization Tests ---
@@ -43,7 +43,7 @@ class DrillStrategyTest {
     @Test
     fun `initial working set prioritizes L1 facts`() {
         // ARRANGE: 5 L1 facts, more than the working set size of 4.
-        val userMastery = mapOf(
+        val userMastery = mutableMapOf(
             createMastery("ADDITION_1_1", 0, 100L),
             createMastery("ADDITION_1_2", 1, 200L),
             createMastery("ADDITION_1_3", 2, 50L),
@@ -64,9 +64,9 @@ class DrillStrategyTest {
     }
 
     @Test
-    fun `initial working set fills with L2 facts when L1 isnt enough`() {
+    fun `initial working set fills with L2 facts when L1 isn't enough`() {
         // ARRANGE: 2 L1 facts and 3 L2 facts.
-        val userMastery = mapOf(
+        val userMastery = mutableMapOf(
             createMastery("ADDITION_1_1", 0, 100L), // L1
             createMastery("ADDITION_1_2", 1, 200L), // L1
             createMastery("ADDITION_1_3", 3, 50L),  // L2 (oldest)
@@ -94,7 +94,7 @@ class DrillStrategyTest {
     @Test
     fun `initial working set fills with unseen facts when L1 and L2 arent enough`() {
         // ARRANGE: 1 L1 fact and 1 L2 fact.
-        val userMastery = mapOf(
+        val userMastery = mutableMapOf(
             createMastery("ADDITION_1_1", 1, 100L), // L1
             createMastery("ADDITION_1_2", 3, 200L)  // L2
         )
@@ -117,7 +117,7 @@ class DrillStrategyTest {
         val smallLevel = object : Level by testLevel {
             override fun getAllPossibleFactIds() = listOf("A", "B", "C")
         }
-        val strategy = setupStrategy(emptyMap(), level = smallLevel)
+        val strategy = setupStrategy(mutableMapOf(), level = smallLevel)
 
         // ACT
         val workingSet = strategy.getWorkingSet()
@@ -175,10 +175,10 @@ class DrillStrategyTest {
         val exercise = exerciseFromFactId("ADDITION_1_1")
 
         strategy.recordAttempt(exercise, true) // 1st correct
-        assertEquals(2, strategy.getUpdatedMastery()["ADDITION_1_1"]!!.strength)
+        assertEquals(2, userMastery["ADDITION_1_1"]!!.strength)
 
         strategy.recordAttempt(exercise, true) // 2nd correct
-        assertEquals(3, strategy.getUpdatedMastery()["ADDITION_1_1"]!!.strength)
+        assertEquals(3, userMastery["ADDITION_1_1"]!!.strength)
     }
 
     @Test
@@ -192,7 +192,7 @@ class DrillStrategyTest {
 
         strategy.recordAttempt(exerciseFromFactId("ADDITION_1_1"), true)
 
-        assertEquals(5, strategy.getUpdatedMastery()["ADDITION_1_1"]!!.strength)
+        assertEquals(5, userMastery["ADDITION_1_1"]!!.strength)
     }
 
     @Test
@@ -203,7 +203,7 @@ class DrillStrategyTest {
 
         strategy.recordAttempt(exerciseFromFactId("ADDITION_1_1"), false)
 
-        assertEquals(0, strategy.getUpdatedMastery()["ADDITION_1_1"]!!.strength)
+        assertEquals(0, userMastery["ADDITION_1_1"]!!.strength)
         assertEquals("ADDITION_1_1", strategy.getWorkingSet().last())
     }
 
@@ -308,9 +308,4 @@ private fun DrillStrategy.getWorkingSet(): List<String> {
     return field.get(this) as List<String>
 }
 
-private fun DrillStrategy.getUpdatedMastery(): Map<String, FactMastery> {
-    val field = this::class.java.getDeclaredField("userMastery")
-    field.isAccessible = true
-    @Suppress("UNCHECKED_CAST")
-    return field.get(this) as Map<String, FactMastery>
-}
+
