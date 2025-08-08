@@ -16,6 +16,7 @@ private const val ENABLE_DETAILED_LOGGING = false
  * A powerful simulation harness to test and compare the long-term behavior of different
  * learning strategies against various student personas.
  */
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class StrategySimulationTest {
 
     // --- Test Configuration ---
