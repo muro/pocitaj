@@ -28,6 +28,12 @@ open class UserProfileViewModel(
             userDao.insert(User(name = name))
         }
     }
+
+    fun deleteUser(user: User) {
+        viewModelScope.launch {
+            userDao.delete(user)
+        }
+    }
 }
 
 object UserProfileViewModelFactory : ViewModelProvider.Factory {

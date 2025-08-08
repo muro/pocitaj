@@ -1,13 +1,21 @@
 package dev.aidistillery.pocitaj.ui.profile
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -15,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +43,7 @@ fun UserProfileScreen(
     users: List<User>,
     onUserSelected: (Long) -> Unit,
     onAddUserClicked: (String) -> Unit,
+    onDeleteUserClicked: (User) -> Unit,
     initialShowAddUserDialog: Boolean = false,
     viewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModelFactory)
 ) {
@@ -49,7 +59,20 @@ fun UserProfileScreen(
             Text(stringResource(id = R.string.user_profile))
             LazyColumn {
                 items(users) { user ->
-                    Text(user.name)
+                    Row(Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(user.name)
+                        IconButton(onClick = { onDeleteUserClicked(user) }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "${stringResource(id = R.string.delete)} ${user.name}"
+                            )
+                        }
+
+                    }
+
                 }
             }
             Button(onClick = { showAddUserDialog = true }) {
@@ -98,6 +121,10 @@ class FakeUserDao : UserDao {
     }
 
     override suspend fun getUser(id: Long): User? = users[id]
+    override suspend fun delete(user: User) {
+        users.remove(user.id)
+    }
+
     override suspend fun getUserByName(name: String): User? =
         users.values.find { it.name == name }
 
@@ -114,6 +141,7 @@ class FakeUserProfileViewModel : UserProfileViewModel(FakeUserDao()) {
     )
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_NO,
     showBackground = true,
@@ -131,11 +159,14 @@ fun UserProfileScreenPreview() {
             users = listOf(User(id = 1, name = "Alice"), User(id = 2, name = "Bob")),
             onUserSelected = {},
             onAddUserClicked = {},
-            viewModel = FakeUserProfileViewModel()
+            viewModel = FakeUserProfileViewModel(),
+            onDeleteUserClicked = { },
+            initialShowAddUserDialog = false
         )
     }
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_NO,
     showBackground = true,
@@ -154,7 +185,8 @@ fun UserProfileScreenAddUserDialogPreview() {
             onUserSelected = {},
             onAddUserClicked = {},
             initialShowAddUserDialog = true,
-            viewModel = FakeUserProfileViewModel()
+            viewModel = FakeUserProfileViewModel(),
+            onDeleteUserClicked = { }
         )
     }
 }

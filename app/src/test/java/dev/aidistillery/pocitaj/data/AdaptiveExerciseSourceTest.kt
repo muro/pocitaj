@@ -47,6 +47,10 @@ class AdaptiveExerciseSourceTest {
         }
 
         override suspend fun getUser(id: Long): User? = users[id]
+        override suspend fun delete(user: User) {
+            users.remove(user.id)
+        }
+
         override suspend fun getUserByName(name: String): User? =
             users.values.find { it.name == name }
 

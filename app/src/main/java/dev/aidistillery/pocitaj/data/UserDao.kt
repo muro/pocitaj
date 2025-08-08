@@ -1,6 +1,7 @@
 package dev.aidistillery.pocitaj.data
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
@@ -18,4 +19,7 @@ interface UserDao {
 
     @Query("SELECT * FROM user WHERE id = :id LIMIT 1")
     suspend fun getUser(id: Long): User?
+
+    @Delete
+    suspend fun delete(user: User)
 }
