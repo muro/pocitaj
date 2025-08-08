@@ -12,7 +12,7 @@ class ExerciseProviderTest {
     @Test
     fun `new user is always given an exercise from the first level`() {
         val curriculum = Curriculum.getAllLevels()
-        val userMastery = emptyMap<String, FactMastery>()
+        val userMastery = emptyMap<String, FactMastery>().toMutableMap()
 
         val provider = SmartPracticeStrategy(curriculum, userMastery, random = Random(123))
         val exercise = provider.getNextExercise()
@@ -24,7 +24,7 @@ class ExerciseProviderTest {
     @Test
     fun `provider picks from weakest facts`() {
         val curriculum = Curriculum.getAllLevels()
-        val userMastery = mapOf(
+        val userMastery = mutableMapOf(
             "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 3, 0),
             "ADDITION_1_2" to FactMastery("ADDITION_1_2", 1, 1, 0), // Weakest
             "ADDITION_1_3" to FactMastery("ADDITION_1_3", 1, 4, 0)
@@ -41,7 +41,7 @@ class ExerciseProviderTest {
     @Test
     fun `provider uses lastTestedTimestamp as a tie-breaker`() {
         val curriculum = Curriculum.getAllLevels()
-        val userMastery = mapOf(
+        val userMastery = mutableMapOf(
             "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 1, 1000L),
             "ADDITION_1_2" to FactMastery(
                 "ADDITION_1_2",
@@ -65,7 +65,7 @@ class ExerciseProviderTest {
         val level1Facts = curriculum[0].getAllPossibleFactIds()
         val userMastery = level1Facts.associateWith { factId ->
             FactMastery(factId, 1, 5, 0) // Strength 5 = mastered
-        }
+        }.toMutableMap()
 
         val provider = SmartPracticeStrategy(curriculum, userMastery, random = Random(123))
         val exercise = provider.getNextExercise()
@@ -80,7 +80,7 @@ class ExerciseProviderTest {
         val level1Facts = curriculum[0].getAllPossibleFactIds()
         val userMastery = level1Facts.associateWith { factId ->
             FactMastery(factId, 1, 5, 0) // Mastered
-        }
+        }.toMutableMap()
 
         // By providing a Random generator that always returns a high value,
         // we force the provider to choose a review question.
@@ -99,7 +99,7 @@ class ExerciseProviderTest {
     @Test
     fun `initial working set is created for new level`() {
         val curriculum = Curriculum.getAllLevels()
-        val userMastery = emptyMap<String, FactMastery>()
+        val userMastery = emptyMap<String, FactMastery>().toMutableMap()
 
         val provider = SmartPracticeStrategy(curriculum, userMastery, random = Random(123))
         val workingSet = mutableSetOf<String>()
@@ -136,7 +136,7 @@ class ExerciseProviderTest {
     @Test
     fun `provider creates division exercise`() {
         val curriculum = Curriculum.getLevelsFor(Operation.DIVISION)
-        val userMastery = emptyMap<String, FactMastery>()
+        val userMastery = emptyMap<String, FactMastery>().toMutableMap()
 
         val provider = SmartPracticeStrategy(curriculum, userMastery, random = Random(123))
         val exercise = provider.getNextExercise()
@@ -189,7 +189,7 @@ class ExerciseProviderTest {
     @Test
     fun `level with unmastered prerequisites is locked`() {
         val curriculum = Curriculum.getAllLevels()
-        val userMastery = emptyMap<String, FactMastery>() // No mastery at all
+        val userMastery = emptyMap<String, FactMastery>().toMutableMap()
 
         val provider = SmartPracticeStrategy(curriculum, userMastery, random = Random(123))
         val exercise = provider.getNextExercise()

@@ -10,7 +10,7 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
-private const val ENABLE_DETAILED_LOGGING = false
+private const val ENABLE_DETAILED_LOGGING = true
 
 /**
  * A powerful simulation harness to test and compare the long-term behavior of different
@@ -286,7 +286,8 @@ class StrategySimulationTest {
         val iterations = 100
         val strategies = mapOf(
             "ReviewStrategy" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock -> ReviewStrategy(l, m, c) } to 0),
-            "DrillStrategy" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock -> DrillStrategy(l, m, 4, c) } to 20)
+            "DrillStrategy" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock -> DrillStrategy(l, m, 4, c) } to 20),
+            "SmartPractice" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock -> SmartPracticeStrategy(listOf(l), m, Random.Default, c) } to 0)
         )
                 val students = listOf(PerfectStudent(), ImprovingStudent(), GoodStudent(), ForgetfulStudent(), PowerLawStudent(), FastPowerLawStudent())
 
