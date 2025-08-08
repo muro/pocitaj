@@ -49,6 +49,8 @@ class AdaptiveExerciseSourceTest {
         override suspend fun getUser(id: Long): User? = users[id]
         override suspend fun getUserByName(name: String): User? =
             users.values.find { it.name == name }
+
+        override fun getAllUsers() = MutableStateFlow(users.values.toList()).asStateFlow()
     }
 
     @Before

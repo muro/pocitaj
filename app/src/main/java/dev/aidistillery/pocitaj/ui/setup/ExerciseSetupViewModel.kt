@@ -7,10 +7,15 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import dev.aidistillery.pocitaj.App
 import dev.aidistillery.pocitaj.data.FactMasteryDao
 import dev.aidistillery.pocitaj.data.Operation
+import dev.aidistillery.pocitaj.data.User
+import dev.aidistillery.pocitaj.data.UserDao
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.Level
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -55,7 +60,7 @@ class ExerciseSetupViewModel(
                             progress > 0.6f -> 1
                             else -> 0
                         }
-                        val isUnlocked = true // level.prerequisites.all { it in masteredLevelIds }
+                        val isUnlocked = level.prerequisites.all { it in masteredLevelIds }
                         LevelStatus(level, isUnlocked, starRating)
                     }
                     OperationLevels(op, levelStates)

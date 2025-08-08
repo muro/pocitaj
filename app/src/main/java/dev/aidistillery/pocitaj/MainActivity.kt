@@ -33,6 +33,7 @@ import dev.aidistillery.pocitaj.ui.history.HistoryViewModelFactory
 import dev.aidistillery.pocitaj.ui.progress.ProgressContainerScreen
 import dev.aidistillery.pocitaj.ui.progress.ProgressReportViewModel
 import dev.aidistillery.pocitaj.ui.progress.ProgressReportViewModelFactory
+import dev.aidistillery.pocitaj.ui.profile.UserProfileScreen
 import dev.aidistillery.pocitaj.ui.setup.ExerciseSetupScreen
 import dev.aidistillery.pocitaj.ui.setup.ExerciseSetupViewModel
 import dev.aidistillery.pocitaj.ui.setup.ExerciseSetupViewModelFactory
@@ -81,6 +82,7 @@ object Destinations {
     const val PROGRESS_ROUTE = "progress"
     const val HISTORY_ROUTE = "history"
     const val CREDITS_ROUTE = "credits"
+    const val PROFILE_ROUTE = "profile"
     fun exerciseDetailRoute(type: String) = "exercise/$type"
 }
 
@@ -137,6 +139,9 @@ fun AppNavigation() {
                 },
                 onCreditsClicked = {
                     navController.navigate(Destinations.CREDITS_ROUTE)
+                },
+                onProfileClicked = {
+                    navController.navigate(Destinations.PROFILE_ROUTE)
                 }
             )
         }
@@ -179,6 +184,17 @@ fun AppNavigation() {
             CreditsScreen {
                 navController.navigateUp()
             }
+        }
+        composable(route = Destinations.PROFILE_ROUTE) {
+            UserProfileScreen(
+                onUserSelected = { userId ->
+                    // TODO: Set the active user
+                    navController.navigateUp()
+                },
+                onAddUserClicked = {
+                    // TODO: Navigate to an "Add User" screen
+                }
+            )
         }
     }
 }

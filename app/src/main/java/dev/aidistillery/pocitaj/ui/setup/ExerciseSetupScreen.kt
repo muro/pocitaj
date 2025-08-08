@@ -28,8 +28,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -61,7 +59,8 @@ fun ExerciseSetupScreen(
     operationLevels: List<OperationLevels>,
     onStartClicked: (operation: Operation, count: Int, difficulty: Int, levelId: String?) -> Unit,
     onProgressClicked: () -> Unit,
-    onCreditsClicked: () -> Unit
+    onCreditsClicked: () -> Unit,
+    onProfileClicked: () -> Unit,
 ) {
     PocitajScreen {
         Column(
@@ -71,29 +70,15 @@ fun ExerciseSetupScreen(
                 .padding(top = 32.dp), // Add top padding to avoid camera cutout
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            var showUserMenu by remember { mutableStateOf(false) }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { showUserMenu = true }) {
+                IconButton(onClick = onProfileClicked) {
                     Icon(
                         imageVector = Icons.Default.Person, // Placeholder icon
                         contentDescription = stringResource(id = R.string.user_profile),
                         tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                DropdownMenu(
-                    expanded = showUserMenu,
-                    onDismissRequest = { showUserMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Default User") },
-                        onClick = { /* TODO: Handle user selection */ }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Add User") },
-                        onClick = { /* TODO: Handle add user */ }
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
@@ -325,7 +310,8 @@ fun PreviewExerciseSetupScreen() {
             operationLevels = fakeOperationLevels,
             onStartClicked = { _, _, _, _ -> },
             onProgressClicked = { },
-            onCreditsClicked = { }
+            onCreditsClicked = { },
+            onProfileClicked = { }
         )
     }
 }
