@@ -53,7 +53,7 @@ class DrillStrategyTest {
         val strategy = setupStrategy(userMastery)
 
         // ACT
-        val workingSet = strategy.getWorkingSet()
+        val workingSet = strategy.workingSet
 
         // ASSERT
         assertEquals("Working set should be the target size", 4, workingSet.size)
@@ -76,7 +76,7 @@ class DrillStrategyTest {
         val strategy = setupStrategy(userMastery)
 
         // ACT
-        val workingSet = strategy.getWorkingSet()
+        val workingSet = strategy.workingSet
 
         // ASSERT
         assertEquals("Working set should be the target size", 4, workingSet.size)
@@ -101,7 +101,7 @@ class DrillStrategyTest {
         val strategy = setupStrategy(userMastery)
 
         // ACT
-        val workingSet = strategy.getWorkingSet()
+        val workingSet = strategy.workingSet
         val unseenFactsInSet = workingSet.filter { !userMastery.containsKey(it) }
 
         // ASSERT
@@ -120,7 +120,7 @@ class DrillStrategyTest {
         val strategy = setupStrategy(mutableMapOf(), level = smallLevel)
 
         // ACT
-        val workingSet = strategy.getWorkingSet()
+        val workingSet = strategy.workingSet
 
         // ASSERT
         assertEquals(
@@ -149,7 +149,7 @@ class DrillStrategyTest {
         val strategy = setupStrategy(userMastery)
 
         // ACT
-        val workingSet = strategy.getWorkingSet()
+        val workingSet = strategy.workingSet
         val masteredFactsInSet = workingSet.filter { (userMastery[it]?.strength ?: 0) >= 5 }
 
         // ASSERT
@@ -199,12 +199,12 @@ class DrillStrategyTest {
     fun `incorrect answer to L2 fact demotes it to L1 and moves to back of queue`() {
         val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 4, 100L))
         val strategy = setupStrategy(userMastery, setSize = 1)
-        assertEquals(listOf("ADDITION_1_1"), strategy.getWorkingSet())
+        assertEquals(listOf("ADDITION_1_1"), strategy.workingSet)
 
         strategy.recordAttempt(exerciseFromFactId("ADDITION_1_1"), false)
 
         assertEquals(0, userMastery["ADDITION_1_1"]!!.strength)
-        assertEquals("ADDITION_1_1", strategy.getWorkingSet().last())
+        assertEquals("ADDITION_1_1", strategy.workingSet.last())
     }
 
     @Test
@@ -248,7 +248,7 @@ class DrillStrategyTest {
             createMastery("ADDITION_1_4", 3, 400L)  // L2
         )
         val strategy = setupStrategy(userMastery)
-        val initialWorkingSet = strategy.getWorkingSet()
+        val initialWorkingSet = strategy.workingSet
 
         // Sanity-check the initial state
         assertTrue(
@@ -261,7 +261,7 @@ class DrillStrategyTest {
         strategy.recordAttempt(exerciseFromFactId("ADDITION_1_1"), true)
 
         // ASSERT
-        val finalWorkingSet = strategy.getWorkingSet()
+        val finalWorkingSet = strategy.workingSet
         val unseenFactsInSet = finalWorkingSet.filter { !userMastery.containsKey(it) }
 
         assertEquals("Working set should maintain its size", 4, finalWorkingSet.size)
@@ -295,17 +295,11 @@ class DrillStrategyTest {
         // FINAL ASSERT: The working set should still be full.
         assertEquals(
             "Working set should be replenished and remain full",
-            4, strategy.getWorkingSet().size
+            4, strategy.workingSet.size
         )
     }
 }
 
-// Helper extension to access internal state for testing
-private fun DrillStrategy.getWorkingSet(): List<String> {
-    val field = this::class.java.getDeclaredField("workingSet")
-    field.isAccessible = true
-    @Suppress("UNCHECKED_CAST")
-    return field.get(this) as List<String>
-}
+
 
 

@@ -55,7 +55,7 @@ class DrillStrategy(
     private val clock: Clock = Clock.System
 ) : ExerciseProvider {
 
-    private val workingSet = mutableListOf<String>()
+    internal val workingSet = mutableListOf<String>()
     private val allFactsInLevel = level.getAllPossibleFactIds()
     private val consecutiveCorrectAnswers = mutableMapOf<String, Int>()
 
