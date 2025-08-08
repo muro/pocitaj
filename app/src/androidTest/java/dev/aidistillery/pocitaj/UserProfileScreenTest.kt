@@ -59,6 +59,20 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
             .performVerifiedClick("User Profile icon")
 
         // 2. Verify that the UserProfileScreen is displayed
-        composeTestRule.onNodeWithText("User Profiles").assertIsDisplayed()
+        composeTestRule.onNodeWithText("User Profile").assertIsDisplayed()
+    }
+
+    @Test
+    fun whenAddUserClicked_thenAddUserDialogIsShown() {
+        // 1. Navigate to the profile screen
+        composeTestRule.onNodeWithContentDescription("User Profile")
+            .performVerifiedClick("User Profile icon")
+
+        // 2. Click the "Add User" button
+        composeTestRule.onNodeWithText("Add User")
+            .performVerifiedClick("Add User button")
+
+        // 3. Verify that the dialog is shown
+        composeTestRule.onNodeWithText("Create a new profile").assertIsDisplayed()
     }
 }

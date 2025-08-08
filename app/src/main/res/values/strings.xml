@@ -43,4 +43,9 @@
     <string name="results_title">Results</string>
     <string name="navigate_back">Back</string>
     <string name="user_profile">User Profile</string>
+    <string name="add_user">Add User</string>
+    <string name="create_a_new_profile">Create a new profile</string>
+    <string name="user_name">User Name</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
 </resources>
