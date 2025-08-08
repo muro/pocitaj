@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -72,6 +73,14 @@ fun ExerciseSetupScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                IconButton(onClick = { /* TODO: Handle profile click */ }) {
+                    Icon(
+                        imageVector = Icons.Default.Person, // Placeholder icon
+                        contentDescription = stringResource(id = R.string.user_profile),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     stringResource(id = R.string.choose_your_challenge),
                     style = MaterialTheme.typography.headlineSmall,
