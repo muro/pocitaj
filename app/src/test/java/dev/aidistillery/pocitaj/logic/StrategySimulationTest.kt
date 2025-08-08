@@ -10,7 +10,7 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
-private const val ENABLE_DETAILED_LOGGING = true
+private const val ENABLE_DETAILED_LOGGING = false
 
 /**
  * A powerful simulation harness to test and compare the long-term behavior of different
@@ -293,8 +293,8 @@ class StrategySimulationTest {
 
         students.forEach { student ->
             println("\n--- SIMULATION FOR STUDENT: ${student.name} ---")
-            println("| Strategy         | Touched | Coverage | Rep Rate | Velocity | Wasted | Boredom | Final Strengths Distribution")
-            println("|------------------|---------|----------|----------|----------|--------|---------|--------------------------------")
+            println("| Strategy              | Touched | Coverage | Rep Rate | Velocity | Wasted | Boredom | Final Strengths Distribution")
+            println("|-----------------------|---------|----------|----------|----------|--------|---------|--------------------------------")
 
             strategies.forEach { (_, pair) ->
                 val (provider, sessionLength) = pair
@@ -304,7 +304,7 @@ class StrategySimulationTest {
                     .joinToString(", ") { "S${it.key}:${it.value}" }
 
                     println(
-                        "| ${result.strategyName.padEnd(16)} | " +
+                        "| ${result.strategyName.padEnd(21)} | " +
                                 "${result.uniqueFactsShown.toString().padEnd(7)} | " +
                                 "${"%.0f%%".format(result.coverage * 100).padEnd(8)} | " +
                                 "${"%.0f%%".format(result.repetitionRate * 100).padEnd(8)} | " +
