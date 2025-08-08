@@ -153,7 +153,7 @@ class SmartPracticeStrategy(
      * Checks if a given level is fully mastered. A level is considered mastered if
      * every possible fact within it has reached the MASTERY_STRENGTH.
      */
-    private fun isLevelMastered(level: Level): Boolean {
+    internal fun isLevelMastered(level: Level): Boolean {
         val allFactsInLevel = level.getAllPossibleFactIds()
         if (allFactsInLevel.isEmpty()) return true
 
@@ -166,7 +166,7 @@ class SmartPracticeStrategy(
      * Checks if a given level is unlocked. A level is unlocked if all of its
      * prerequisites have been mastered.
      */
-    private fun isLevelUnlocked(level: Level): Boolean {
+    internal fun isLevelUnlocked(level: Level): Boolean {
         return level.prerequisites.all { prerequisiteId ->
             val prerequisiteLevel = curriculum.find { it.id == prerequisiteId }
             prerequisiteLevel?.let { isLevelMastered(it) } ?: false

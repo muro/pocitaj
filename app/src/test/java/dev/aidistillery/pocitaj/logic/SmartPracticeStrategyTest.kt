@@ -25,8 +25,7 @@ class SmartPracticeStrategyTest {
             "ADD_1_2" to FactMastery("ADD_1_2", 1, 5, 0)
         )
         val strategy = SmartPracticeStrategy(listOf(level1), userMastery)
-        val result = strategy.callPrivateFunc("isLevelMastered", level1) as Boolean
-        assertTrue(result)
+        assertTrue(strategy.isLevelMastered(level1))
     }
 
     @Test
@@ -36,8 +35,7 @@ class SmartPracticeStrategyTest {
             "ADD_1_2" to FactMastery("ADD_1_2", 1, 4, 0) // Not mastered
         )
         val strategy = SmartPracticeStrategy(listOf(level1), userMastery)
-        val result = strategy.callPrivateFunc("isLevelMastered", level1) as Boolean
-        assertFalse(result)
+        assertFalse(strategy.isLevelMastered(level1))
     }
 
     @Test
@@ -47,15 +45,13 @@ class SmartPracticeStrategyTest {
             // ADD_1_2 is missing
         )
         val strategy = SmartPracticeStrategy(listOf(level1), userMastery)
-        val result = strategy.callPrivateFunc("isLevelMastered", level1) as Boolean
-        assertFalse(result)
+        assertFalse(strategy.isLevelMastered(level1))
     }
 
     @Test
     fun `isLevelUnlocked returns true for a level with no prerequisites`() {
         val strategy = SmartPracticeStrategy(listOf(level1), mutableMapOf())
-        val result = strategy.callPrivateFunc("isLevelUnlocked", level1) as Boolean
-        assertTrue(result)
+        assertTrue(strategy.isLevelUnlocked(level1))
     }
 
     @Test
@@ -69,8 +65,7 @@ class SmartPracticeStrategyTest {
             "ADD_1_2" to FactMastery("ADD_1_2", 1, 5, 0)
         )
         val strategy = SmartPracticeStrategy(listOf(level1, level2), userMastery)
-        val result = strategy.callPrivateFunc("isLevelUnlocked", level2) as Boolean
-        assertTrue(result)
+        assertTrue(strategy.isLevelUnlocked(level2))
     }
 
     @Test
@@ -84,18 +79,6 @@ class SmartPracticeStrategyTest {
             "ADD_1_2" to FactMastery("ADD_1_2", 1, 4, 0) // Not mastered
         )
         val strategy = SmartPracticeStrategy(listOf(level1, level2), userMastery)
-        val result = strategy.callPrivateFunc("isLevelUnlocked", level2) as Boolean
-        assertFalse(result)
+        assertFalse(strategy.isLevelUnlocked(level2))
     }
-}
-
-/**
- * Helper function to call private methods on the SmartPracticeStrategy using reflection.
- */
-private fun SmartPracticeStrategy.callPrivateFunc(name: String, vararg args: Any?): Any? {
-    val method: Method = this::class.java.declaredMethods
-        .firstOrNull { it.name == name }
-        ?: throw NoSuchMethodException("Method $name not found")
-    method.isAccessible = true
-    return method.invoke(this, *args)
 }
