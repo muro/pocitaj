@@ -88,8 +88,8 @@ class StrategySimulationTest {
 
     private open class PowerLawStudent : StudentModel {
         override val name = "POWER_LAW"
-        internal val recallStrengths = mutableMapOf<String, Double>()
-        internal val learningFloors = mutableMapOf<String, Double>()
+        val recallStrengths = mutableMapOf<String, Double>()
+        val learningFloors = mutableMapOf<String, Double>()
         open val alphaSuccess = 0.1
         open val alphaFailure = 0.02
 
@@ -175,7 +175,7 @@ class StrategySimulationTest {
                     strategy = strategyProvider(level, userMastery, clock)
                 }
 
-                val exercise = strategy!!.getNextExercise()
+                val exercise = strategy.getNextExercise()
                 if (exercise == null) {
                     strategy = null
                     return@repeat
@@ -211,7 +211,7 @@ class StrategySimulationTest {
                     println("i=$it, fact=$factId, correct=$wasCorrect, learningFloor -> ${"%.3f".format(floor)}")
                 }
 
-                strategy!!.recordAttempt(exercise, wasCorrect)
+                strategy.recordAttempt(exercise, wasCorrect)
 
                 val finalStrength = userMastery[factId]?.strength ?: initialStrength
                 if (finalStrength > initialStrength) {
