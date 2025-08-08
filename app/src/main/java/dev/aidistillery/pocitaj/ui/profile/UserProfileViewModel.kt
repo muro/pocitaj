@@ -12,11 +12,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class UserProfileViewModel(
+open class UserProfileViewModel(
     private val userDao: UserDao
 ) : ViewModel() {
 
-    val users: StateFlow<List<User>> = userDao.getAllUsers()
+    open val users: StateFlow<List<User>> = userDao.getAllUsers()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
