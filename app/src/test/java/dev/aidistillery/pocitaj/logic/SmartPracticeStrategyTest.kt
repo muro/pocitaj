@@ -81,4 +81,12 @@ class SmartPracticeStrategyTest {
         val strategy = SmartPracticeStrategy(listOf(level1, level2), userMastery)
         assertFalse(strategy.isLevelUnlocked(level2))
     }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `creating strategy with an empty level throws exception`() {
+        val emptyLevel = object : Level by level1 {
+            override fun getAllPossibleFactIds() = emptyList<String>()
+        }
+        SmartPracticeStrategy(listOf(emptyLevel), mutableMapOf())
+    }
 }

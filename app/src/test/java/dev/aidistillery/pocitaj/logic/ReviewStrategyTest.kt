@@ -111,6 +111,14 @@ class ReviewStrategyTest {
         assertEquals("Strength should be reset to 1 on failure", 1, updatedMastery.strength)
         assertTrue("Timestamp should be updated to be very recent", now - updatedMastery.lastTestedTimestamp < 1000)
     }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `creating strategy with an empty level throws exception`() {
+        val emptyLevel = object : Level by testLevel {
+            override fun getAllPossibleFactIds() = emptyList<String>()
+        }
+        setupStrategy(mutableMapOf(), level = emptyLevel)
+    }
 }
 
 // Helper function copied from DrillStrategyTest

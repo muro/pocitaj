@@ -65,6 +65,11 @@ class SmartPracticeStrategy(
         private const val WORKING_SET_SIZE = 5
     }
 
+    init {
+        require(curriculum.isNotEmpty()) { "Curriculum cannot be empty" }
+        require(curriculum.all { it.getAllPossibleFactIds().isNotEmpty() }) { "All levels in the curriculum must not be empty" }
+    }
+
     override fun getNextExercise(): Exercise {
         val currentLevel = findCurrentLevel()
         val masteredLevels = getMasteredLevels(currentLevel)

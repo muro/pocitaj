@@ -79,6 +79,10 @@ class ReviewStrategy(
     private val clock: Clock = Clock.System
 ) : ExerciseProvider {
 
+    init {
+        require(level.getAllPossibleFactIds().isNotEmpty()) { "Level cannot be empty" }
+    }
+
     companion object {
         private const val MAX_STRENGTH = 5
 

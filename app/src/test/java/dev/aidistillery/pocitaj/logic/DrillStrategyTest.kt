@@ -298,6 +298,14 @@ class DrillStrategyTest {
             4, strategy.workingSet.size
         )
     }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `creating strategy with an empty level throws exception`() {
+        val emptyLevel = object : Level by testLevel {
+            override fun getAllPossibleFactIds() = emptyList<String>()
+        }
+        setupStrategy(mutableMapOf(), level = emptyLevel)
+    }
 }
 
 

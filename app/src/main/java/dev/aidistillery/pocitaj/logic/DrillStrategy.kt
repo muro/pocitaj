@@ -69,6 +69,7 @@ class DrillStrategy(
     }
 
     init {
+        require(allFactsInLevel.isNotEmpty()) { "Level cannot be empty" }
         updateWorkingSet()
     }
 
