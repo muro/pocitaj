@@ -56,6 +56,7 @@ import dev.aidistillery.pocitaj.data.UserAppearance
 import dev.aidistillery.pocitaj.data.UserDao
 import dev.aidistillery.pocitaj.ui.components.PocitajScreen
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -198,7 +199,7 @@ fun EditUserAppearanceDialog(
                     columns = GridCells.Adaptive(minSize = 48.dp),
                     modifier = Modifier.padding(top = 16.dp)
                 ) {
-                    items(UserAppearance.icons.entries.toList()) { (iconId, iconRes) ->
+                    items(UserAppearance.icons.entries.toList().filter { it.key != "robot" }) { (iconId, iconRes) ->
                         IconButton(
                             onClick = { selectedIconId = iconId },
                             modifier = Modifier.testTag("icon_select_$iconId")
@@ -216,8 +217,12 @@ fun EditUserAppearanceDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text("Color")
-                LazyRow(modifier = Modifier.padding(top = 16.dp)) {
-                    itemsIndexed(UserAppearance.colors) { index, color ->
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 48.dp),
+                    modifier = Modifier.padding(top = 16.dp)
+                ) {
+                    items(UserAppearance.colors.size - 1) { index ->
+                        val color = UserAppearance.colors[index]
                         IconButton(
                             onClick = { selectedColor = color },
                             modifier = Modifier.testTag("color_select_$index")
@@ -265,6 +270,10 @@ class FakeUserDao : UserDao {
         users[user.id] = user.copy()
     }
 
+    override fun getAllUsersFlow(): Flow<List<User>> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getUser(id: Long): User? = users[id]
     override suspend fun delete(user: User) {
         users.remove(user.id)
@@ -272,6 +281,10 @@ class FakeUserDao : UserDao {
 
     override suspend fun getUserByName(name: String): User? =
         users.values.find { it.name == name }
+
+    override suspend fun getUserFlow(id: Long): User? {
+        TODO("Not yet implemented")
+    }
 
     override fun getAllUsers() = MutableStateFlow(users.values.toList()).asStateFlow()
 }
@@ -336,6 +349,27 @@ fun UserProfileScreenAddUserDialogPreview() {
             initialShowAddUserDialog = true,
             viewModel = FakeUserProfileViewModel(),
             onDeleteUserClicked = { }
+        )
+    }
+}
+
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
+@Composable
+fun EditUserAppearanceDialogPreview() {
+    AppTheme {
+        EditUserAppearanceDialog(
+            user = User(id = 2, name = "Caleb", iconId = "bull", color = UserAppearance.colors[2].toArgb()),
+            onDismiss = {},
+            onSave = {}
         )
     }
 }

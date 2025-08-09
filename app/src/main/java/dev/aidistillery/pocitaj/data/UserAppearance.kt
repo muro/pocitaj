@@ -8,9 +8,12 @@ object UserAppearance {
         "alligator" to R.drawable.alligator,
         "bull" to R.drawable.bull,
         "butterfly" to R.drawable.butterfly,
+        "crab" to R.drawable.crab,
         "jellyfish" to R.drawable.jellyfish,
         "lion" to R.drawable.lion,
         "owl" to R.drawable.owl,
+        "panda" to R.drawable.panda,
+        "sloth" to R.drawable.sloth,
         "starfish" to R.drawable.starfish,
         "robot" to R.drawable.robot
     )
@@ -24,6 +27,8 @@ object UserAppearance {
         Color(0xFF2196F3), // Blue
         Color(0xFF03A9F4), // Light Blue
         Color(0xFF00BCD4),  // Cyan
+        Color(0xFF4CAF50), // Green
+        Color(0xFFFF9800), // Orange
         Color(0xFFCCCCCC) // Grey
     )
 }

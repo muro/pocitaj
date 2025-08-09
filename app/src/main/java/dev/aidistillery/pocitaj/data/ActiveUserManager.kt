@@ -27,7 +27,7 @@ class ActiveUserManager(
     suspend fun init() {
         // First, ensure the default user exists.                                                                                                   │
         if (userDao.getUser(1L) == null) {
-            userDao.insert(User(id = 1, name = "Default User", iconId = "robot", color = UserAppearance.colors.last().toArgb()))
+            userDao.insert(User(id = 1, name = "Default User"))
         }
 
         val activeUserId = context.dataStore.data
