@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToString
 import androidx.test.platform.app.InstrumentationRegistry
@@ -224,16 +225,19 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 3. Verify the dialog appears
         composeTestRule.onNodeWithText("Edit Appearance").assertIsDisplayed()
 
-        // 4. Change the icon and color
+        // 4. Change the icon, color, and name
+        composeTestRule.onNodeWithTag("edit_user_name_field").performTextClearance()
+        composeTestRule.onNodeWithTag("edit_user_name_field").performTextInput("Caleb Jr.")
         composeTestRule.onNodeWithTag("icon_select_bull").performClick()
-        composeTestRule.onNodeWithTag("color_select_2").performClick() // Index of the blue color
+        composeTestRule.onNodeWithTag("color_select_2").performClick() // Index of the purple color
         composeTestRule.onNodeWithText("Save").performClick()
 
         // 5. Verify the dialog is gone
         composeTestRule.onNodeWithText("Edit Appearance").assertDoesNotExist()
 
         // 6. Verify the UI has updated with the new appearance
-        composeTestRule.onNodeWithTag("UserIcon_Caleb_bull", useUnmergedTree = true).assertIsDisplayed()
-        // We would also need a way to verify the color, but checking the icon is a good start.
+        composeTestRule.onNodeWithText("Caleb Jr.").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("UserIcon_Caleb Jr._bull", useUnmergedTree = true).assertIsDisplayed()
+        // We would also need a way to verify the color, but checking the icon and name is a strong verification.
     }
 }

@@ -205,12 +205,8 @@ fun AppNavigation(restartApp: () -> Unit) {
             UserProfileScreen(
                 users = users,
                 onUserSelected = { userId ->
-                    if (activeUser.id != userId) {
-                        userProfileViewModel.setActiveUser(userId)
-                        restartApp()
-                    } else {
-                        navController.popBackStack()
-                    }
+                    userProfileViewModel.setActiveUser(userId)
+                    restartApp()
                 },
                 onAddUserClicked = {
                     // TODO: Navigate to an "Add User" screen

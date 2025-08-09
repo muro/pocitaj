@@ -188,12 +188,20 @@ fun EditUserAppearanceDialog(
 ) {
     var selectedIconId by remember { mutableStateOf(user.iconId) }
     var selectedColor by remember { mutableStateOf(Color(user.color)) }
+    var newName by remember { mutableStateOf(user.name) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Edit Appearance") },
         text = {
             Column {
+                TextField(
+                    value = newName,
+                    onValueChange = { newName = it },
+                    label = { Text("User Name") },
+                    modifier = Modifier.testTag("edit_user_name_field")
+                )
+                Spacer(modifier = Modifier.height(16.dp))
                 Text("Icon")
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(minSize = 48.dp),
@@ -244,7 +252,7 @@ fun EditUserAppearanceDialog(
         },
         confirmButton = {
             Button(onClick = {
-                onSave(user.copy(iconId = selectedIconId, color = selectedColor.toArgb()))
+                onSave(user.copy(name = newName, iconId = selectedIconId, color = selectedColor.toArgb()))
             }) {
                 Text("Save")
             }
