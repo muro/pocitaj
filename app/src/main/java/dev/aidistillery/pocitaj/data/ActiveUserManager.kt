@@ -1,6 +1,7 @@
 package dev.aidistillery.pocitaj.data
 
 import android.content.Context
+import androidx.compose.ui.graphics.toArgb
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -26,7 +27,7 @@ class ActiveUserManager(
     suspend fun init() {
         // First, ensure the default user exists.                                                                                                   │
         if (userDao.getUser(1L) == null) {
-            userDao.insert(User(id = 1, name = "Default User"))
+            userDao.insert(User(id = 1, name = "Default User", iconId = "robot", color = UserAppearance.colors.last().toArgb()))
         }
 
         val activeUserId = context.dataStore.data

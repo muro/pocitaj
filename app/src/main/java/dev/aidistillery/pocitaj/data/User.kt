@@ -1,5 +1,6 @@
 package dev.aidistillery.pocitaj.data
 
+import androidx.compose.ui.graphics.toArgb
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -8,5 +9,6 @@ data class User(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val name: String,
-    val avatar: String? = null
+    val iconId: String = "alligator",
+    val color: Int = UserAppearance.colors[0].toArgb()
 )

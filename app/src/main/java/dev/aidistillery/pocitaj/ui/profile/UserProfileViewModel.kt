@@ -35,6 +35,12 @@ open class UserProfileViewModel(
         }
     }
 
+    fun updateUser(user: User) {
+        viewModelScope.launch {
+            userDao.update(user)
+        }
+    }
+
     fun setActiveUser(userId: Long) {
         viewModelScope.launch {
             val user = userDao.getUser(userId)

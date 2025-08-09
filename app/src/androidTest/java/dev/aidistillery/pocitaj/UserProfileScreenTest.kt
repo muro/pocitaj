@@ -1,11 +1,14 @@
 package dev.aidistillery.pocitaj
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.printToString
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.User
@@ -170,5 +173,67 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 3. Verify that "Alice" is the active user
         assertEquals("Alice", globals.activeUserManager.activeUser.name)
+    }
+
+    @Test
+    fun whenUserHasCustomAppearance_thenIconAndEditButtonAreDisplayed() {
+        // 1. Set up a user with a specific icon and color
+        runBlocking {
+            globals.userDao.insert(User(name = "Zoe", iconId = "lion", color = 0xFF2196F3.toInt()))
+        }
+
+        // 2. Navigate to the profile screen
+        composeTestRule.onNodeWithContentDescription("User Profile")
+            .performVerifiedClick("User Profile icon")
+        composeTestRule.waitForIdle()
+
+        // 3. Verify the user's icon is displayed
+        // We'll identify the icon by a test tag combining the user's name and iconId
+        print(composeTestRule.onRoot().printToString())
+        composeTestRule.onNodeWithTag("UserIcon_Zoe_lion", useUnmergedTree = true).assertIsDisplayed()
+
+        // 4. Verify the "Edit" button for that user is displayed
+        composeTestRule.onNodeWithContentDescription("Edit Zoe").assertIsDisplayed()
+    }
+
+    @Test
+    fun whenDefaultUserIsDisplayed_thenEditAndDeleteAreDisabled() {
+        // 1. Navigate to the profile screen
+        composeTestRule.onNodeWithContentDescription("User Profile")
+            .performVerifiedClick("User Profile icon")
+        composeTestRule.waitForIdle()
+
+        // 2. Verify the "Edit" button for the default user is not enabled
+        composeTestRule.onNodeWithContentDescription("Edit Default User").assertIsNotEnabled()
+
+        // 3. Verify the "Delete" button for the default user is not enabled
+        composeTestRule.onNodeWithContentDescription("Delete Default User").assertIsNotEnabled()
+    }
+
+    @Test
+    fun whenEditIsClicked_thenAppearanceCanBeChanged() {
+        // 1. Set up a user
+        runBlocking {
+            globals.userDao.insert(User(name = "Caleb", iconId = "alligator", color = 0xFFF44336.toInt()))
+        }
+
+        // 2. Navigate to the profile screen and click "Edit"
+        composeTestRule.onNodeWithContentDescription("User Profile").performClick()
+        composeTestRule.onNodeWithContentDescription("Edit Caleb", useUnmergedTree = true).performClick()
+
+        // 3. Verify the dialog appears
+        composeTestRule.onNodeWithText("Edit Appearance").assertIsDisplayed()
+
+        // 4. Change the icon and color
+        composeTestRule.onNodeWithTag("icon_select_bull").performClick()
+        composeTestRule.onNodeWithTag("color_select_2").performClick() // Index of the blue color
+        composeTestRule.onNodeWithText("Save").performClick()
+
+        // 5. Verify the dialog is gone
+        composeTestRule.onNodeWithText("Edit Appearance").assertDoesNotExist()
+
+        // 6. Verify the UI has updated with the new appearance
+        composeTestRule.onNodeWithTag("UserIcon_Caleb_bull", useUnmergedTree = true).assertIsDisplayed()
+        // We would also need a way to verify the color, but checking the icon is a good start.
     }
 }
