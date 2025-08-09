@@ -1,35 +1,61 @@
 # Gemini Project Configuration
 
-# NOTE FOR GEMINI:
-# When creating git commit messages, be mindful of shell quoting. To include a
-# single quote (') in a message, wrap the entire multi-line message in double
-# quotes ("). Do not use backticks (`).
-# Also, please always ask before committing to git by showing me the proposed commit message. If I approve the message, you should proceed with the commit.
-# When creating commit messages, keep them concise. A message should have a short title and an optional, brief body (1-2 sentences) explaining the 'why'. For complex changes, a more detailed explanation or a bulleted list is acceptable if it adds important context. Use the Conventional Commits format and push after committing.
-# Always confirm when you want to run git checkout to revert changes.
-# When I reply with "LGTM", it means OK or proceed.
+## This file contains principles and expected practices for making changes in this project.
 
-# When asked to check the project or run tests, run both unit and android instrumentation
-# tests.
+The use of AI tools is explicitly allowed and encouraged - use the best available tools
+to build the project quickly and efficiently.
 
-# If you are adding dependencies, please use libs.versions.toml and if the same version
-# is used across multiple libraries, use just one version contact with a good name - update the
-# name if the use changes. Use names with clarity and consistency. For the version, avoid "version"
-# suffix and kebab-style - use caml case.
+## Preparing changes
 
-# When editing any kotlin or java files, please double-check that all imports are at the top of the file.
-# ViewModel factories should be in the same file as the ViewModel.
+To save time, run tests for a single build variant. Use the `debug` variant by default, for example:
+`./gradlew testDebugUnitTest connectedDebugAndroidTest`.
 
-# After you make changes, please verify that all unit and instrumented tests pass.
+Always verify that tests pass. When running tests, run both unit and instrumentation tests and
+make sure they both pass before committing any changes.
+Don't blindly remove tests just to make the overall test suite pass. Make sure you verify behaviour,
+unit tests of functions are great, but not sufficient.
+When running tests and attempting to fix failing tests, take into account which tests changed status
+and whether previously failing tests started to pass. Whenever running tests, get details of every
+failing test case, so that failure can be better pinpointed. It will also make it clearer when there
+is progress by fixing a subset of failing test cases, where the overall test doesn't change status.
+When reporting on test results, list each failing test case individually. This helps track progress
+even if the overall test suite is still failing.
 
-# When running tests and attempting to fix failing tests, take into account which tests changed status
-# and whether previously failing tests started to pass.
-# Whenever running tests, get details of every failing test case so that failure can be better pinpointed. It will also make it clearer when there is progress by fixing a subset of failing test
-cases, where the overall test doesn't change status.
-# When reporting on test results, list each failing test case individually. This helps track progress even if the overall test suite is still failing.
+## Committing code
 
-# Ensure all source files end with a single newline character.
+Use concise commit messages, explaining the "why" - explanation of the purpose and reasons behind
+the
+change. You may use [Conventional Commits](https://www.conventionalcommits.org/) and include
+details in a bullet list at the end.
 
+Avoid or escape single quotes in commit messages. Do not use backticks. Push after committing.
+When I reply with "LGTM", it means OK or proceed.
+
+## Libraries / dependencies
+
+It's ok to use open source dependencies, especially Apache and MIT licensed. Please use
+libs.versions.toml and reuse the same version across libraries whenever possible.
+Use names with clarity and consistency. For the version, avoid "version" suffix and kebab-style,
+use caml case instead. Always use the latest dependency version.
+
+## Code style
+
+Add imports at the top of the file.
+Plase ViewModel factories into the same file as the ViewModel.
+Ensure all source files end with a single newline character.
+Simple is better than complex - avoid creating additional tiny classes, if the functionality can
+be included in an existing fitting place.
+Prefer short, single-word names with clear purpose - avoid multi-word obtuse names, or explaining
+names such as AppContainerFactoryManager.
+Your target audience are exprerienced expert programmers that have the experience to avoid too many
+interacting objects, too many objects to collaborate on simple tasks. They choose well-understood
+and powerful core of the language, staying true to the language's style. e.g. in C++, they would use
+the STL, but avoid template metaprogramming, boost, exceptions, functors. They might use a macro
+if that helps them achieve the goal elegantly. Rather than abstractions and multiple
+implementations,
+they prefer the correct tool to achieve their goal with simplicity and clarity.
+
+Additional principles:
 
 Foundational Principles
 Simplicity Through Reduction: Identify the essential purpose and eliminate everything that distracts from it. Begin with complexity, then deliberately remove until reaching the simplest effective solution.
