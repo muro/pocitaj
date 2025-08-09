@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.FactMasteryDao
 import dev.aidistillery.pocitaj.data.Operation
+import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.logic.Curriculum
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -57,7 +58,7 @@ class ExerciseSetupViewModelTest {
     @Before
     fun setup() {
         fakeDao = FakeFactMasteryDao()
-        viewModel = ExerciseSetupViewModel(fakeDao)
+        viewModel = ExerciseSetupViewModel(fakeDao, User(id = 1, name = "Test User"))
     }
 
     @Test

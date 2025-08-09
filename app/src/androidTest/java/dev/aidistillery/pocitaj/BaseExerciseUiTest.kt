@@ -3,7 +3,9 @@ package dev.aidistillery.pocitaj
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -44,14 +46,18 @@ abstract class BaseExerciseUiTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
+    lateinit var globals: TestGlobals
+
     @Before
     fun setup() {
         val application =
             InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        globals = application.globals as TestGlobals
         runBlocking {
-            if (application.database.userDao().getUser(1) == null) {
-                application.database.userDao().insert(User(id = 1, name = "Default User"))
+            if (globals.userDao.getUser(1) == null) {
+                globals.userDao.insert(User(id = 1, name = "Default User"))
             }
+            globals.activeUserManager.init()
         }
     }
 
@@ -61,24 +67,33 @@ abstract class BaseExerciseUiTest {
         // The "Choose Your Challenge" title uniquely identifies the ExerciseSetupScreen.
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
             composeTestRule
-                .onAllNodesWithText("Choose Your Challenge")
+                .onAllNodesWithText("Challenge")
                 .fetchSemanticsNodes().size == 1
         }
     }
 
     @After
     fun tearDown() {
-        val application =
-            InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
-        runBlocking {
-            application.database.clearAllTables()
-        }
+        globals.reset()
     }
 
-    fun navigateToOperation(operationSymbol: String) {
+    fun openOperationCard(operationSymbol: String) {
+        composeTestRule.onNodeWithTag("setup_lazy_column")
+            .performScrollToNode(hasTestTag("operation_card_${operationSymbol}"))
+
         // Click on the card to start the specific exercise type
         composeTestRule.onNodeWithText(operationSymbol)
             .performVerifiedClick("Operation card '$operationSymbol'")
+
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
+            composeTestRule
+                .onNodeWithText("Smart Practice")
+                .isDisplayed()
+        }
+    }
+
+    fun navigateToSmartPractice(operationSymbol: String) {
+        openOperationCard(operationSymbol)
 
         // Click on the "Practice (Smart)" button
         composeTestRule.onNodeWithText("Smart Practice")
@@ -119,9 +134,7 @@ abstract class BaseExerciseUiTest {
      * This is the primary way to create a predictable state for UI tests.
      */
     fun setExercises(exercises: List<Exercise>) {
-        val application =
-            InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
-        (application.exerciseSource as ExerciseBook).loadSession(exercises)
+        (globals.exerciseSource as ExerciseBook).loadSession(exercises)
     }
 
     /**

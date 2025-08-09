@@ -28,7 +28,8 @@ data class LevelProgress(
 )
 
 class ProgressReportViewModel(
-    factMasteryDao: FactMasteryDao
+    private val factMasteryDao: FactMasteryDao,
+    private val activeUserId: Long
 ) : ViewModel() {
 
     private val allFactsByOperation = Curriculum.getAllLevels()
@@ -41,7 +42,7 @@ class ProgressReportViewModel(
         .mapValues { (_, factIds) -> factIds.distinct() }
 
     val factProgressByOperation: StateFlow<Map<Operation, List<FactProgress>>> =
-        factMasteryDao.getAllFactsForUser(1) // Assuming user ID 1
+        factMasteryDao.getAllFactsForUser(activeUserId)
             .map { masteryList ->
                 val masteryMap = masteryList.associateBy { it.factId }
                 allFactsByOperation.mapValues { (operation, factIds) ->
@@ -63,7 +64,7 @@ class ProgressReportViewModel(
             )
 
     val levelProgressByOperation: StateFlow<Map<Operation, Map<String, LevelProgress>>> =
-        factMasteryDao.getAllFactsForUser(1) // Assuming user ID 1
+        factMasteryDao.getAllFactsForUser(activeUserId)
             .map { masteryList ->
                 val masteryMap = masteryList.associateBy { it.factId }
                 Curriculum.getAllLevels().groupBy { it.operation }
@@ -92,9 +93,10 @@ class ProgressReportViewModel(
 object ProgressReportViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-        val application = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as App
+        val globals = App.app.globals
         return ProgressReportViewModel(
-            factMasteryDao = application.database.factMasteryDao()
+            factMasteryDao = globals.factMasteryDao,
+            activeUserId = globals.activeUser.id
         ) as T
     }
 }

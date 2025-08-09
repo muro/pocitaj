@@ -71,7 +71,7 @@ class ProgressReportViewModelTest {
     fun `flows emit correct progress data`() = runTest {
         // ARRANGE
         val fakeDao = FakeFactMasteryDao()
-        val viewModel = ProgressReportViewModel(fakeDao)
+        val viewModel = ProgressReportViewModel(fakeDao, 1)
         val facts = listOf(
             FactMastery("ADDITION_1_1", 1, 5, 5), // Mastered
             FactMastery("MULTIPLICATION_2_3", 1, 3, 4) // Learning
@@ -127,7 +127,7 @@ class ProgressReportViewModelTest {
     fun `level progress`() = runTest {
         // ARRANGE
         val fakeDao = FakeFactMasteryDao()
-        val viewModel = ProgressReportViewModel(fakeDao)
+        val viewModel = ProgressReportViewModel(fakeDao, 1)
         val facts = listOf(
             FactMastery("ADDITION_1_1", 1, 5, 5), // Mastered
             FactMastery("ADDITION_1_3", 1, 5, 5), // Mastered
@@ -164,7 +164,7 @@ class ProgressReportViewModelTest {
     fun `levelProgress_updatesForHalfAndFullMastery`() = runTest {
         // ARRANGE
         val fakeDao = FakeFactMasteryDao()
-        val viewModel = ProgressReportViewModel(fakeDao)
+        val viewModel = ProgressReportViewModel(fakeDao, 1)
         val masteredAdditionFacts = SumsUpTo5.getAllPossibleFactIds().map {
             FactMastery(it, 1, 5, 0)
         }

@@ -47,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.aidistillery.pocitaj.R
 import dev.aidistillery.pocitaj.data.Operation
+import dev.aidistillery.pocitaj.data.User
+import dev.aidistillery.pocitaj.data.toSymbol
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.formatLevel
 import dev.aidistillery.pocitaj.ui.components.AutoSizeText
@@ -57,6 +59,7 @@ import dev.aidistillery.pocitaj.ui.theme.getGradientForOperation
 @Composable
 fun ExerciseSetupScreen(
     operationLevels: List<OperationLevels>,
+    activeUser: User,
     onStartClicked: (operation: Operation, count: Int, difficulty: Int, levelId: String?) -> Unit,
     onProgressClicked: () -> Unit,
     onCreditsClicked: () -> Unit,
@@ -74,13 +77,17 @@ fun ExerciseSetupScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onProfileClicked) {
+                IconButton(
+                    onClick = onProfileClicked,
+                    modifier = Modifier.testTag("user_profile_${activeUser.name}")
+                ) {
                     Icon(
                         imageVector = Icons.Default.Person, // Placeholder icon
                         contentDescription = stringResource(id = R.string.user_profile),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
+                Text(text = activeUser.name)
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     stringResource(id = R.string.choose_your_challenge),
@@ -108,10 +115,10 @@ fun ExerciseSetupScreen(
                 items(operationLevels) { operationState ->
                     OperationCard(
                         operationLevels = operationState,
-                        onStartClicked = { levelId ->
-                            onStartClicked(operationState.operation, 10, 10, levelId)
-                        }
+                        modifier = Modifier.testTag("operation_card_${operationState.operation.toSymbol()}"),
+                        initialExpanded = false
                     )
+                    { levelId -> onStartClicked(operationState.operation, 10, 10, levelId) }
                 }
             }
 
@@ -135,8 +142,9 @@ fun ExerciseSetupScreen(
 @Composable
 fun OperationCard(
     operationLevels: OperationLevels,
+    modifier: Modifier = Modifier,
+    initialExpanded: Boolean = false,
     onStartClicked: (levelId: String?) -> Unit,
-    initialExpanded: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(initialExpanded) }
     val gradient = getGradientForOperation(operationLevels.operation)
@@ -146,7 +154,7 @@ fun OperationCard(
 
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .scale(scale)
             .clickable(
@@ -226,6 +234,7 @@ fun LevelTile(levelStatus: LevelStatus, onClick: () -> Unit, modifier: Modifier 
     Card(
         modifier = modifier
             .aspectRatio(1f)
+            .testTag("${levelStatus.level.id}-${levelStatus.starRating}_stars")
             .clickable(enabled = levelStatus.isUnlocked, onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
@@ -276,9 +285,8 @@ fun PreviewExpandedOperationCard() {
     AppTheme {
         OperationCard(
             operationLevels = operationLevels,
-            onStartClicked = {},
             initialExpanded = true
-        )
+        ) {}
     }
 }
 
@@ -308,6 +316,7 @@ fun PreviewExerciseSetupScreen() {
     AppTheme {
         ExerciseSetupScreen(
             operationLevels = fakeOperationLevels,
+            activeUser = User(7, "John Doe"),
             onStartClicked = { _, _, _, _ -> },
             onProgressClicked = { },
             onCreditsClicked = { },

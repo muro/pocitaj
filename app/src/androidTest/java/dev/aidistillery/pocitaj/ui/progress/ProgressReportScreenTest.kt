@@ -26,7 +26,7 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
         // GIVEN: A set of facts in the database
         val application =
             InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
-        val factMasteryDao = application.database.factMasteryDao()
+        val factMasteryDao = application.globals.factMasteryDao
         runBlocking {
             factMasteryDao.upsert(FactMastery("ADDITION_1_1", 1, 5, 0))
             factMasteryDao.upsert(FactMastery("ADDITION_1_2", 1, 3, 0))
@@ -60,7 +60,7 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
         // GIVEN: A user with partial and full mastery of some levels
         val application =
             InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
-        val factMasteryDao = application.database.factMasteryDao()
+        val factMasteryDao = application.globals.factMasteryDao
         runBlocking {
             // Master all of SumsUpTo5
             Curriculum.SumsUpTo5.getAllPossibleFactIds().forEach { factId ->

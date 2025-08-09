@@ -66,7 +66,6 @@ class AdaptiveExerciseSourceTest {
         exerciseSource = AdaptiveExerciseSource(
             factMasteryDao,
             exerciseAttemptDao,
-            userDao,
             1L
         )
     }

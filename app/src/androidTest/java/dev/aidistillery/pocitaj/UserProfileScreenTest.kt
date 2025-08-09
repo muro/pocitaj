@@ -2,12 +2,18 @@ package dev.aidistillery.pocitaj
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.platform.app.InstrumentationRegistry
+import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.User
+import dev.aidistillery.pocitaj.logic.Addition
+import dev.aidistillery.pocitaj.logic.Curriculum
+import dev.aidistillery.pocitaj.logic.Exercise
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class UserProfileScreenTest : BaseExerciseUiTest() {
@@ -15,12 +21,9 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
     @Test
     fun whenScreenIsLoaded_thenUsersAreDisplayed() {
         // 1. Set up the fake user data
-        val application =
-            InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
-        val userDao = application.database.userDao()
         runBlocking {
-            userDao.insert(User(name = "Alice"))
-            userDao.insert(User(name = "Bob"))
+            globals.userDao.insert(User(name = "Alice"))
+            globals.userDao.insert(User(name = "Bob"))
         }
 
         // 2. Navigate to the profile screen
@@ -79,7 +82,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 1. Set up the fake user data
         val application =
             InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
-        val userDao = application.database.userDao()
+        val userDao = application.globals.userDao
         runBlocking {
             userDao.insert(User(name = "Alice"))
             userDao.insert(User(name = "Bob"))
@@ -98,5 +101,74 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 4. Verify that "Alice" is no longer displayed
         composeTestRule.onNodeWithText("Alice").assertDoesNotExist()
+    }
+
+    @Test
+    fun whenUserIsSwitched_thenProgressIsUpdated() {
+        // 1. Set up the fake user data
+        runBlocking {
+            globals.userDao.insert(User(id = 2, name = "Alice"))
+            globals.userDao.insert(User(id = 3, name = "Bob"))
+            Curriculum.SubtractionFrom5.getAllPossibleFactIds().forEach { factId ->
+                globals.factMasteryDao.upsert(FactMastery(factId, 2, 5, 0))
+            }
+        }
+
+        // 2. Verify Initial State (Default User)
+        openOperationCard("-")
+        composeTestRule.onNodeWithTag("${Curriculum.SubtractionFrom5.id}-0_stars")
+            .assertIsDisplayed()
+
+        // 3. Switch to Alice
+        composeTestRule.onNodeWithContentDescription("User Profile")
+            .performVerifiedClick("User Profile icon")
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText("Alice").performClick()
+        composeTestRule.waitForIdle()
+
+        // 4. Verify Alice's State
+        openOperationCard("-")
+        composeTestRule.onNodeWithTag("user_profile_Alice").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("${Curriculum.SubtractionFrom5.id}-3_stars")
+            .assertIsDisplayed()
+
+        // 5. Start an Exercise as Alice
+        setExercises(listOf(Exercise(Addition(1, 4))))
+        navigateToSmartPractice("+")
+        drawAnswer("5") // Correct
+        verifyFeedback(FeedbackType.CORRECT)
+        composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME)
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("Back").performClick()
+        composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME)
+        composeTestRule.waitForIdle()
+
+        // 6. Switch to Bob
+        composeTestRule.onNodeWithContentDescription("User Profile")
+            .performVerifiedClick("User Profile icon")
+        composeTestRule.onNodeWithText("Bob").performClick()
+        composeTestRule.waitForIdle()
+
+        // 7. Verify Bob's State
+        openOperationCard("-")
+        composeTestRule.onNodeWithTag("${Curriculum.SubtractionFrom5.id}-0_stars")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun whenUserIsSelected_thenIsSetActive() {
+        // 1. Set up the fake user data
+        runBlocking {
+            globals.userDao.insert(User(id = 2, name = "Alice"))
+        }
+
+        // 2. Navigate to the profile screen and select "Alice"
+        composeTestRule.onNodeWithContentDescription("User Profile")
+            .performVerifiedClick("User Profile icon")
+        composeTestRule.onNodeWithText("Alice").performClick()
+        composeTestRule.waitForIdle()
+
+        // 3. Verify that "Alice" is the active user
+        assertEquals("Alice", globals.activeUserManager.activeUser.name)
     }
 }

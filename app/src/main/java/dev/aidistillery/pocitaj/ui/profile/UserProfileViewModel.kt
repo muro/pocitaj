@@ -34,14 +34,23 @@ open class UserProfileViewModel(
             userDao.delete(user)
         }
     }
+
+    fun setActiveUser(userId: Long) {
+        viewModelScope.launch {
+            val user = userDao.getUser(userId)
+            if (user != null) {
+                (App.app.globals.activeUserManager).setActiveUser(user)
+            }
+        }
+    }
 }
 
 object UserProfileViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-        val application = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as App
+        val globals = App.app.globals
         return UserProfileViewModel(
-            userDao = application.database.userDao()
+            userDao = globals.userDao
         ) as T
     }
 }

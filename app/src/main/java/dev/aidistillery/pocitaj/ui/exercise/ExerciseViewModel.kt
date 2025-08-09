@@ -213,10 +213,10 @@ class ExerciseViewModel(
 object ExerciseViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-        val application = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as App
+        val globals = App.app.globals
         return ExerciseViewModel(
-            inkModelManager = application.inkModelManager,
-            exerciseSource = application.exerciseSource
+            inkModelManager = globals.inkModelManager,
+            exerciseSource = globals.exerciseSource
         ) as T
     }
 }

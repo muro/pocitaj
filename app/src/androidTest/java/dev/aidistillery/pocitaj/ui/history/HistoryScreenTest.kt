@@ -24,10 +24,10 @@ class HistoryScreenTest : BaseExerciseUiTest() {
         // GIVEN: A set of exercise attempts in the database
         val application =
             InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
-        val exerciseAttemptDao = application.database.exerciseAttemptDao()
+        val exerciseAttemptDao = application.globals.exerciseAttemptDao
 
         runBlocking {
-            if (application.database.userDao().getUser(1) == null) {
+            if (application.globals.userDao.getUser(1) == null) {
                 assertTrue(false)
                 Log.e("HistoryScreenTest", "User with ID 1 not found in the database.")
             }
@@ -93,7 +93,7 @@ class HistoryScreenTest : BaseExerciseUiTest() {
         val application =
             InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
         runBlocking {
-            if (application.database.userDao().getUser(1) == null) {
+            if (application.globals.userDao.getUser(1) == null) {
                 assertTrue(false)
                 Log.e("HistoryScreenTest", "User with ID 1 not found in the database.")
             }

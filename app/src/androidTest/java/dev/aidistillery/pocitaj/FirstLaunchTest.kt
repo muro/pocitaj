@@ -12,7 +12,7 @@ class FirstLaunchTest : BaseExerciseUiTest() {
         setExercises(listOf(Exercise(Addition(1, 1))))
 
         // 2. Navigate to the exercise screen
-        navigateToOperation("+")
+        navigateToSmartPractice("+")
 
         // 3. Draw an answer
         drawAnswer("2")

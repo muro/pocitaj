@@ -13,6 +13,10 @@ enum class Operation {
         fun fromString(type: String): Operation? {
             return entries.find { it.name.equals(type, ignoreCase = true) }
         }
+
+        fun fromSymbol(symbol: String): Operation? {
+            return Operation.entries.find { it.toSymbol() == symbol }
+        }
     }
 }
 
@@ -24,3 +28,4 @@ fun Operation.toSymbol(): String {
         Operation.DIVISION -> "÷"
     }
 }
+

@@ -15,8 +15,7 @@ import java.lang.reflect.Field
 class AdaptiveExerciseSource(
     private val factMasteryDao: FactMasteryDao,
     private val exerciseAttemptDao: ExerciseAttemptDao,
-    private val userDao: UserDao,
-    private val userId: Long
+    private val activeUserId: Long
 ) : ExerciseSource {
 
     private var exerciseProvider: ExerciseProvider? = null
@@ -24,7 +23,7 @@ class AdaptiveExerciseSource(
 
     override suspend fun initialize(config: ExerciseConfig) {
         val userMastery =
-            factMasteryDao.getAllFactsForUser(userId).first().associateBy { it.factId }
+            factMasteryDao.getAllFactsForUser(activeUserId).first().associateBy { it.factId }
         val level =
             config.levelId?.let { Curriculum.getAllLevels().find { level -> level.id == it } }
 
@@ -84,7 +83,7 @@ class AdaptiveExerciseSource(
 
         withContext(Dispatchers.IO) {
             val attempt = ExerciseAttempt(
-                userId = userId,
+                userId = activeUserId,
                 timestamp = System.currentTimeMillis(),
                 problemText = exercise.equation.question(),
                 logicalOperation = exercise.getFactId().split("_")[0].let { Operation.valueOf(it) },
@@ -96,7 +95,7 @@ class AdaptiveExerciseSource(
             exerciseAttemptDao.insert(attempt)
 
             val factId = exercise.getFactId()
-            val currentMastery = factMasteryDao.getFactMastery(userId, factId)
+            val currentMastery = factMasteryDao.getFactMastery(activeUserId, factId)
             val currentStrength = currentMastery?.strength ?: 0
             val currentAvgDuration = currentMastery?.avgDurationMs ?: 0L
 
@@ -118,7 +117,7 @@ class AdaptiveExerciseSource(
 
             val newMastery = FactMastery(
                 factId = factId,
-                userId = userId,
+                userId = activeUserId,
                 strength = newStrength.coerceAtMost(5), // Cap at 5 (mastered)
                 lastTestedTimestamp = System.currentTimeMillis(),
                 avgDurationMs = newAvgDuration

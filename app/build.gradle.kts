@@ -99,6 +99,7 @@ dependencies {
     implementation(libs.aboutlibraries.compose.m3)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    implementation(libs.datastore.preferences)
     ksp(libs.room.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

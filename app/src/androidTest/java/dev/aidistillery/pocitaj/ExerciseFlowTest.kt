@@ -7,7 +7,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
-import androidx.test.platform.app.InstrumentationRegistry
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.logic.Addition
 import dev.aidistillery.pocitaj.logic.Curriculum
@@ -16,7 +15,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 
-private const val RESULT_ANIMATION_PROGRESS_TIME: Long = 600
+const val RESULT_ANIMATION_PROGRESS_TIME: Long = 600
 
 class ExerciseFlowTest : BaseExerciseUiTest() {
 
@@ -36,7 +35,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         setExercises(listOf(Exercise(Addition(5, 3)))) // 5 + 3 = 8
 
         // 2. Navigate to "Start Addition"
-        navigateToOperation("+")
+        navigateToSmartPractice("+")
 
         // 3. Wait for the UI to settle
         composeTestRule.waitForIdle()
@@ -51,7 +50,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     @Test
     fun whenTwoQuestionsAnswered_thenUIAdvancesAndShowsFeedback() {
         setExercises(listOf(Exercise(Addition(1, 1)), Exercise(Addition(2, 2))))
-        navigateToOperation("+")
+        navigateToSmartPractice("+")
 
         // First Question
         drawAnswer("1")
@@ -71,7 +70,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         setExercises(listOf(Exercise(Addition(1, 1)), Exercise(Addition(2, 2))))
 
         // 2. Navigate to "Addition"
-        navigateToOperation("+")
+        navigateToSmartPractice("+")
 
         // 3. Wait for the UI to settle
         composeTestRule.waitForIdle()
@@ -98,7 +97,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // 7. Verify Navigation to Exercise Setup Screen
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onAllNodesWithText("Choose Your Challenge").fetchSemanticsNodes()
+            composeTestRule.onAllNodesWithText("Challenge").fetchSemanticsNodes()
                 .isNotEmpty()
         }
     }
@@ -109,7 +108,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         setExercises(listOf(Exercise(Addition(1, 1))))
 
         // Navigate to the Exercise Screen
-        navigateToOperation("+")
+        navigateToSmartPractice("+")
 
         // Verify that an element unique to the Exercise Screen is present
         // Using onNodeWithTag for the canvas is a good unique identifier
@@ -123,7 +122,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // Verify that the ExerciseSetupScreen is displayed
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onAllNodesWithText("Choose Your Challenge").fetchSemanticsNodes()
+            composeTestRule.onAllNodesWithText("Challenge").fetchSemanticsNodes()
                 .isNotEmpty()
         }
     }
@@ -131,7 +130,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     @Test
     fun whenUnrecognizedAnswerDrawn_thenUnrecognizedFeedbackIsShown() {
         setExercises(listOf(Exercise(Addition(1, 1))))
-        navigateToOperation("+")
+        navigateToSmartPractice("+")
 
         composeTestRule.waitForIdle()
 
@@ -160,7 +159,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         setExercises(listOf(Exercise(Addition(100, 23)))) // Answer is 123
 
         // 2. Navigate
-        navigateToOperation("+")
+        navigateToSmartPractice("+")
         composeTestRule.waitForIdle()
 
         // 3. Draw the digits with delays, updating the fake result each time
@@ -188,7 +187,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         setExercises(listOf(Exercise(Addition(2, 2)), Exercise(Addition(3, 3))))
 
         // 2. Navigate to a non-review level
-        navigateToOperation("+") // "Smart Practice" is a training level
+        navigateToSmartPractice("+") // "Smart Practice" is a training level
 
         // 3. Answer incorrectly
         drawAnswer("5")
@@ -212,9 +211,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     @Test
     fun whenIncorrectAnswerInReview_thenSkipsCorrection() {
         // 1. Master prerequisite levels
-        val application =
-            InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
-        val factMasteryDao = application.database.factMasteryDao()
+        val factMasteryDao = globals.factMasteryDao
         runBlocking {
             Curriculum.SubtractionFrom5.getAllPossibleFactIds().forEach { factId ->
                 factMasteryDao.upsert(FactMastery(factId, 1, 5, 0))

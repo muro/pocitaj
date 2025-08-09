@@ -32,7 +32,7 @@
     <string name="progress_tab">Progress</string>
     <string name="history_tab">History</string>
     <string name="no_progress_yet">No adventures to report.</string>
-    <string name="choose_your_challenge">Choose Your Challenge</string>
+    <string name="choose_your_challenge">Challenge</string>
     <string name="progress_button">My Progress</string>
     <string name="practice_smart">Smart Practice</string>
     <string name="no_facts_to_display">No facts to display for this level.</string>

@@ -1,5 +1,6 @@
 package dev.aidistillery.pocitaj
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,23 +31,24 @@ import dev.aidistillery.pocitaj.ui.exercise.UiState
 import dev.aidistillery.pocitaj.ui.history.HistoryScreen
 import dev.aidistillery.pocitaj.ui.history.HistoryViewModel
 import dev.aidistillery.pocitaj.ui.history.HistoryViewModelFactory
-import dev.aidistillery.pocitaj.ui.progress.ProgressContainerScreen
-import dev.aidistillery.pocitaj.ui.progress.ProgressReportViewModel
-import dev.aidistillery.pocitaj.ui.progress.ProgressReportViewModelFactory
 import dev.aidistillery.pocitaj.ui.profile.UserProfileScreen
 import dev.aidistillery.pocitaj.ui.profile.UserProfileViewModel
 import dev.aidistillery.pocitaj.ui.profile.UserProfileViewModelFactory
+import dev.aidistillery.pocitaj.ui.progress.ProgressContainerScreen
+import dev.aidistillery.pocitaj.ui.progress.ProgressReportViewModel
+import dev.aidistillery.pocitaj.ui.progress.ProgressReportViewModelFactory
 import dev.aidistillery.pocitaj.ui.setup.ExerciseSetupScreen
 import dev.aidistillery.pocitaj.ui.setup.ExerciseSetupViewModel
 import dev.aidistillery.pocitaj.ui.setup.ExerciseSetupViewModelFactory
 import dev.aidistillery.pocitaj.ui.setup.StartupScreen
 import dev.aidistillery.pocitaj.ui.setup.StartupViewModel
+import dev.aidistillery.pocitaj.ui.setup.StartupViewModelFactory
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 
 
 class MainActivity : ComponentActivity() {
 
-    private val startupViewModel: StartupViewModel by viewModels()
+    private val startupViewModel: StartupViewModel by viewModels { StartupViewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +66,7 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { targetState ->
                     if (targetState) {
-                        AppNavigation()
+                        AppNavigation(::restartApp)
                     } else {
                         StartupScreen(
                             error = error,
@@ -74,6 +76,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun restartApp() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+        finish()
     }
 }
 
@@ -89,7 +98,7 @@ object Destinations {
 }
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(restartApp: () -> Unit) {
     val navController = rememberNavController()
     val exerciseViewModel: ExerciseViewModel = viewModel(factory = ExerciseViewModelFactory)
     val progressReportViewModel: ProgressReportViewModel =
@@ -134,6 +143,7 @@ fun AppNavigation() {
             val operationLevels by exerciseSetupViewModel.operationLevels.collectAsState()
             ExerciseSetupScreen(
                 operationLevels = operationLevels,
+                activeUser = exerciseSetupViewModel.activeUser,
                 onStartClicked = { operation, count, difficulty, levelId ->
                     val config = ExerciseConfig(operation, difficulty, count, levelId)
                     exerciseViewModel.startExercises(config)
@@ -191,11 +201,16 @@ fun AppNavigation() {
         }
         composable(route = Destinations.PROFILE_ROUTE) {
             val users by userProfileViewModel.users.collectAsState()
+            val activeUser = exerciseSetupViewModel.activeUser
             UserProfileScreen(
                 users = users,
                 onUserSelected = { userId ->
-                    // TODO: Set the active user
-                    navController.navigateUp()
+                    if (activeUser.id != userId) {
+                        userProfileViewModel.setActiveUser(userId)
+                        restartApp()
+                    } else {
+                        navController.popBackStack()
+                    }
                 },
                 onAddUserClicked = {
                     // TODO: Navigate to an "Add User" screen

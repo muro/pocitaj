@@ -2,6 +2,7 @@ package dev.aidistillery.pocitaj.ui.profile
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -58,8 +59,14 @@ fun UserProfileScreen(
         ) {
             Text(stringResource(id = R.string.user_profile))
             LazyColumn {
+                // TODO: ignore the default user, it should be invisible
                 items(users) { user ->
-                    Row(Modifier.fillMaxWidth(),
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onUserSelected(user.id)
+                            },
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {

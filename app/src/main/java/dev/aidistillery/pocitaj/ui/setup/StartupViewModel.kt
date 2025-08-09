@@ -1,12 +1,11 @@
 package dev.aidistillery.pocitaj.ui.setup
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import dev.aidistillery.pocitaj.App
-import dev.aidistillery.pocitaj.ModelManager
-import dev.aidistillery.pocitaj.data.AdaptiveExerciseSource
+import dev.aidistillery.pocitaj.Globals
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,8 +15,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class StartupViewModel(
-    application: Application
-) : AndroidViewModel(application) {
+    private val globals: Globals
+) : ViewModel() {
 
     private val _isInitialized = MutableStateFlow(false)
     val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
@@ -27,22 +26,19 @@ class StartupViewModel(
 
     fun initializeApp() {
         viewModelScope.launch {
-            val app = getApplication<App>()
-
             val modelDownload = async {
-                if (!app.isInkModelManagerInitialized) {
-                    app.inkModelManager = ModelManager()
-                }
                 downloadModel()
             }
             val sourceCreation = async {
-                if (!app.isExerciseSourceInitialized) {
-                    createExerciseSource()
-                }
+                createExerciseSource()
+            }
+            val userManagerInitialization = async {
+                globals.activeUserManager.init()
             }
 
             val modelDownloaded = modelDownload.await()
             sourceCreation.await()
+            userManagerInitialization.await()
 
             if (modelDownloaded) {
                 _isInitialized.value = true
@@ -53,7 +49,7 @@ class StartupViewModel(
     private suspend fun downloadModel(): Boolean {
         Log.i("StartupViewModel", "Downloading model...")
         return suspendCoroutine { continuation ->
-            val inkModelManager = getApplication<App>().inkModelManager
+            val inkModelManager = globals.inkModelManager
             inkModelManager.setModel("en-US")
             inkModelManager.download()
                 .addOnSuccessListener {
@@ -70,12 +66,16 @@ class StartupViewModel(
     }
 
     private suspend fun createExerciseSource() {
-        val app = getApplication<App>()
-        app.exerciseSource = AdaptiveExerciseSource(
-            app.database.factMasteryDao(),
-            app.database.exerciseAttemptDao(),
-            app.database.userDao(),
-            1L
-        )
+        // No-op. The exercise source is now initialized in the Globals container.
+    }
+}
+
+object StartupViewModelFactory : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(StartupViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return StartupViewModel(App.app.globals) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

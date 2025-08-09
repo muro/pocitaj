@@ -8,14 +8,10 @@ import dev.aidistillery.pocitaj.App
 import dev.aidistillery.pocitaj.data.FactMasteryDao
 import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.data.User
-import dev.aidistillery.pocitaj.data.UserDao
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.Level
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -31,7 +27,8 @@ data class OperationLevels(
 )
 
 class ExerciseSetupViewModel(
-    factMasteryDao: FactMasteryDao
+    private val factMasteryDao: FactMasteryDao,
+    val activeUser: User
 ) : ViewModel() {
 
     companion object {
@@ -39,7 +36,7 @@ class ExerciseSetupViewModel(
     }
 
     val operationLevels: StateFlow<List<OperationLevels>> =
-        factMasteryDao.getAllFactsForUser(1) // Assuming user ID 1
+        factMasteryDao.getAllFactsForUser(activeUser.id)
             .map { masteryList ->
                 val masteredFacts =
                     masteryList.filter { it.strength >= MASTERY_STRENGTH }.map { it.factId }.toSet()
@@ -76,9 +73,10 @@ class ExerciseSetupViewModel(
 object ExerciseSetupViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-        val application = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as App
+        val globals = App.app.globals
         return ExerciseSetupViewModel(
-            factMasteryDao = application.database.factMasteryDao()
+            factMasteryDao = globals.factMasteryDao,
+            activeUser = globals.activeUser
         ) as T
     }
 }
