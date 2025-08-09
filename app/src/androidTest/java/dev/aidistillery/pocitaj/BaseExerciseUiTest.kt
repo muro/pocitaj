@@ -67,7 +67,7 @@ abstract class BaseExerciseUiTest {
         // The "Choose Your Challenge" title uniquely identifies the ExerciseSetupScreen.
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
             composeTestRule
-                .onAllNodesWithText("Challenge")
+                .onAllNodesWithText("Choose Your Challenge")
                 .fetchSemanticsNodes().size == 1
         }
     }

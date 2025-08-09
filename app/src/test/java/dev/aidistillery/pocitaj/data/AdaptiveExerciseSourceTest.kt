@@ -1,6 +1,7 @@
 package dev.aidistillery.pocitaj.data
 
 import dev.aidistillery.pocitaj.logic.Curriculum
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.runBlocking
@@ -46,6 +47,14 @@ class AdaptiveExerciseSourceTest {
             return idToInsert
         }
 
+        override suspend fun update(user: User) {
+            users[user.id] = user.copy()
+        }
+
+        override fun getAllUsersFlow(): Flow<List<User>> {
+            TODO("Not yet implemented")
+        }
+
         override suspend fun getUser(id: Long): User? = users[id]
         override suspend fun delete(user: User) {
             users.remove(user.id)
@@ -53,6 +62,10 @@ class AdaptiveExerciseSourceTest {
 
         override suspend fun getUserByName(name: String): User? =
             users.values.find { it.name == name }
+
+        override suspend fun getUserFlow(id: Long): User? {
+            TODO("Not yet implemented")
+        }
 
         override fun getAllUsers() = MutableStateFlow(users.values.toList()).asStateFlow()
     }

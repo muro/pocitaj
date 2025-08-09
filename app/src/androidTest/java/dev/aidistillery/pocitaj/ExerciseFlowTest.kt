@@ -97,7 +97,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // 7. Verify Navigation to Exercise Setup Screen
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onAllNodesWithText("Challenge").fetchSemanticsNodes()
+            composeTestRule.onAllNodesWithText("Choose Your Challenge").fetchSemanticsNodes()
                 .isNotEmpty()
         }
     }
@@ -122,7 +122,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // Verify that the ExerciseSetupScreen is displayed
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onAllNodesWithText("Challenge").fetchSemanticsNodes()
+            composeTestRule.onAllNodesWithText("Choose Your Challenge").fetchSemanticsNodes()
                 .isNotEmpty()
         }
     }

@@ -40,14 +40,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.aidistillery.pocitaj.R
 import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.data.User
+import dev.aidistillery.pocitaj.data.UserAppearance
 import dev.aidistillery.pocitaj.data.toSymbol
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.formatLevel
@@ -80,18 +84,19 @@ fun ExerciseSetupScreen(
                 IconButton(
                     onClick = onProfileClicked,
                     modifier = Modifier.testTag("user_profile_${activeUser.name}")
+                        .padding(end = 8.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Person, // Placeholder icon
-                        contentDescription = stringResource(id = R.string.user_profile),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
+                    val iconRes = UserAppearance.icons[activeUser.iconId]
+                    if (iconRes != null) {
+                        Icon(
+                            painter = painterResource(id = iconRes),
+                            contentDescription = stringResource(id = R.string.user_profile),
+                            tint = Color(activeUser.color)
+                        )
+                    }
                 }
-                Text(text = activeUser.name)
-                Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    stringResource(id = R.string.choose_your_challenge),
-                    style = MaterialTheme.typography.headlineSmall,
+                    text = activeUser.name,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.weight(1f))
@@ -103,6 +108,13 @@ fun ExerciseSetupScreen(
                     )
                 }
             }
+
+            Text(
+                stringResource(id = R.string.choose_your_challenge),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(top = 16.dp)
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
