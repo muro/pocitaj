@@ -89,7 +89,10 @@ class ReviewStrategyTest {
         // ASSERT
         val updatedMastery = userMastery[factId]!!
         assertEquals(initialStrength + 1, updatedMastery.strength)
-        assertTrue("Timestamp should be updated to be very recent", now - updatedMastery.lastTestedTimestamp < 1000)
+        assertTrue(
+            "Timestamp should be updated to be very recent",
+            now - updatedMastery.lastTestedTimestamp < 1000
+        )
     }
 
     @Test
@@ -109,7 +112,10 @@ class ReviewStrategyTest {
         // ASSERT
         val updatedMastery = userMastery[factId]!!
         assertEquals("Strength should be reset to 1 on failure", 1, updatedMastery.strength)
-        assertTrue("Timestamp should be updated to be very recent", now - updatedMastery.lastTestedTimestamp < 1000)
+        assertTrue(
+            "Timestamp should be updated to be very recent",
+            now - updatedMastery.lastTestedTimestamp < 1000
+        )
     }
 
     @Test(expected = IllegalArgumentException::class)

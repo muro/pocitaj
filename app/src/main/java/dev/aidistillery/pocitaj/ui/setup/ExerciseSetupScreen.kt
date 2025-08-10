@@ -81,7 +81,8 @@ fun ExerciseSetupScreen(
             ) {
                 IconButton(
                     onClick = onProfileClicked,
-                    modifier = Modifier.testTag("user_profile_${activeUser.name}")
+                    modifier = Modifier
+                        .testTag("user_profile_${activeUser.name}")
                         .padding(end = 8.dp)
                 ) {
                     val iconRes = UserAppearance.icons[activeUser.iconId]

@@ -252,10 +252,12 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 2. Navigate to profile and delete the user
         composeTestRule.onNodeWithContentDescription("User Profile").performClick()
-        composeTestRule.onNodeWithContentDescription("Delete Frank", useUnmergedTree = true).performClick()
+        composeTestRule.onNodeWithContentDescription("Delete Frank", useUnmergedTree = true)
+            .performClick()
 
         // 3. Verify the simple confirmation dialog is shown
-        composeTestRule.onNodeWithText("This profile has no significant progress. Are you sure you want to permanently delete it?").assertIsDisplayed()
+        composeTestRule.onNodeWithText("This profile has no significant progress. Are you sure you want to permanently delete it?")
+            .assertIsDisplayed()
         composeTestRule.onNodeWithText("Delete").performClick()
 
         // 4. Verify user is gone from the main list
@@ -285,10 +287,12 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 2. Navigate to profile and try to delete the user
         composeTestRule.onNodeWithContentDescription("User Profile").performClick()
-        composeTestRule.onNodeWithContentDescription("Delete Grace", useUnmergedTree = true).performClick()
+        composeTestRule.onNodeWithContentDescription("Delete Grace", useUnmergedTree = true)
+            .performClick()
 
         // 3. Verify the type-to-confirm dialog is shown and the delete button is disabled
-        composeTestRule.onNodeWithText("This profile has a lot of progress! Deleting it will erase all their data permanently.").assertIsDisplayed()
+        composeTestRule.onNodeWithText("This profile has a lot of progress! Deleting it will erase all their data permanently.")
+            .assertIsDisplayed()
         composeTestRule.onNodeWithText("Delete").assertIsNotEnabled()
 
         // 4. Type the wrong name and verify the delete button is still disabled

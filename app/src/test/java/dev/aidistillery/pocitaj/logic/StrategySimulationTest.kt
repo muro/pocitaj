@@ -53,6 +53,7 @@ class StrategySimulationTest {
     private interface StudentModel {
         val name: String
         fun getSuccessProbability(context: SimulationContext): Double
+
         // Optional hooks for the model to update its internal state after an attempt
         fun recordAttempt(context: SimulationContext, wasCorrect: Boolean) {}
     }
@@ -69,7 +70,8 @@ class StrategySimulationTest {
 
     private class ImprovingStudent : StudentModel {
         override val name = "IMPROVING"
-        override fun getSuccessProbability(context: SimulationContext) = (0.5 + (context.attempts * 0.1)).coerceAtMost(1.0)
+        override fun getSuccessProbability(context: SimulationContext) =
+            (0.5 + (context.attempts * 0.1)).coerceAtMost(1.0)
     }
 
     private class ForgetfulStudent : StudentModel {
@@ -208,7 +210,13 @@ class StrategySimulationTest {
 
                 if (ENABLE_DETAILED_LOGGING && strategy is DrillStrategy && studentModel is PowerLawStudent) {
                     val floor = studentModel.learningFloors[factId]
-                    println("i=$it, fact=$factId, correct=$wasCorrect, learningFloor -> ${"%.3f".format(floor)}")
+                    println(
+                        "i=$it, fact=$factId, correct=$wasCorrect, learningFloor -> ${
+                            "%.3f".format(
+                                floor
+                            )
+                        }"
+                    )
                 }
 
                 strategy.recordAttempt(exercise, wasCorrect)
@@ -258,7 +266,13 @@ class StrategySimulationTest {
                     val scoreIncrease = 1.0 / distance
                     boredomScore += scoreIncrease
                     if (ENABLE_DETAILED_LOGGING) {
-                        println("i=$i, fact=$factId, BORING repetition. Last seen correctly $distance turns ago. Score += ${"%.2f".format(scoreIncrease)}")
+                        println(
+                            "i=$i, fact=$factId, BORING repetition. Last seen correctly $distance turns ago. Score += ${
+                                "%.2f".format(
+                                    scoreIncrease
+                                )
+                            }"
+                        )
                     }
                 }
             }
@@ -277,7 +291,9 @@ class StrategySimulationTest {
             coverage = uniqueFactsShown.toDouble() / totalFacts,
             repetitionRate = (detailedHistory.size - uniqueFactsShown).toDouble() / detailedHistory.size,
             learningVelocity = learningVelocity,
-            wastedRepetitions = detailedHistory.count { (factId, _) -> (userMastery[factId]?.strength ?: 0) >= 5 },
+            wastedRepetitions = detailedHistory.count { (factId, _) ->
+                (userMastery[factId]?.strength ?: 0) >= 5
+            },
             boredomScore = boredomScore
         )
     }
@@ -286,11 +302,38 @@ class StrategySimulationTest {
     fun compare_all_strategies_and_students() {
         val iterations = 100
         val strategies = mapOf(
-            "ReviewStrategy" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock -> ReviewStrategy(l, m, c) } to 0),
-            "DrillStrategy" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock -> DrillStrategy(l, m, 4, c) } to 20),
-            "SmartPractice" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock -> SmartPracticeStrategy(listOf(l), m, Random.Default, c) } to 0)
+            "ReviewStrategy" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
+                ReviewStrategy(
+                    l,
+                    m,
+                    c
+                )
+            } to 0),
+            "DrillStrategy" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
+                DrillStrategy(
+                    l,
+                    m,
+                    4,
+                    c
+                )
+            } to 20),
+            "SmartPractice" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
+                SmartPracticeStrategy(
+                    listOf(l),
+                    m,
+                    Random.Default,
+                    c
+                )
+            } to 0)
         )
-                val students = listOf(PerfectStudent(), ImprovingStudent(), GoodStudent(), ForgetfulStudent(), PowerLawStudent(), FastPowerLawStudent())
+        val students = listOf(
+            PerfectStudent(),
+            ImprovingStudent(),
+            GoodStudent(),
+            ForgetfulStudent(),
+            PowerLawStudent(),
+            FastPowerLawStudent()
+        )
 
         students.forEach { student ->
             println("\n--- SIMULATION FOR STUDENT: ${student.name} ---")
@@ -299,21 +342,22 @@ class StrategySimulationTest {
 
             strategies.forEach { (_, pair) ->
                 val (provider, sessionLength) = pair
-                val result = runStrategySimulation(testLevel, iterations, sessionLength, student, provider)
+                val result =
+                    runStrategySimulation(testLevel, iterations, sessionLength, student, provider)
 
                 val distString = result.finalStrengthDistribution.entries.sortedBy { it.key }
                     .joinToString(", ") { "S${it.key}:${it.value}" }
 
-                    println(
-                        "| ${result.strategyName.padEnd(21)} | " +
-                                "${result.uniqueFactsShown.toString().padEnd(7)} | " +
-                                "${"%.0f%%".format(result.coverage * 100).padEnd(8)} | " +
-                                "${"%.0f%%".format(result.repetitionRate * 100).padEnd(8)} | " +
-                                "${"%.2f".format(result.learningVelocity).padEnd(8)} | " +
-                                "${result.wastedRepetitions.toString().padEnd(6)} | " +
-                                "${"%.2f".format(result.boredomScore).padEnd(7)} | " +
-                                distString
-                    )
+                println(
+                    "| ${result.strategyName.padEnd(21)} | " +
+                            "${result.uniqueFactsShown.toString().padEnd(7)} | " +
+                            "${"%.0f%%".format(result.coverage * 100).padEnd(8)} | " +
+                            "${"%.0f%%".format(result.repetitionRate * 100).padEnd(8)} | " +
+                            "${"%.2f".format(result.learningVelocity).padEnd(8)} | " +
+                            "${result.wastedRepetitions.toString().padEnd(6)} | " +
+                            "${"%.2f".format(result.boredomScore).padEnd(7)} | " +
+                            distString
+                )
                 assertTrue("Should always touch at least one fact", result.uniqueFactsShown > 0)
             }
         }

@@ -23,7 +23,8 @@ class CreditsScreenTest : BaseExerciseUiTest() {
         composeTestRule.onNodeWithText("Open Source Licenses").assertIsDisplayed()
 
         // 3. Wait until the asynchronously loaded library list appears
-        composeTestRule.onAllNodesWithText("AboutLibraries", substring = true).fetchSemanticsNodes().isNotEmpty()
+        composeTestRule.onAllNodesWithText("AboutLibraries", substring = true).fetchSemanticsNodes()
+            .isNotEmpty()
 
         // 4. Find the scrollable container and scroll to the specific library
         composeTestRule.onNode(hasScrollAction()).performScrollToNode(hasText("Baloo 2 Font"))

@@ -67,7 +67,9 @@ class SmartPracticeStrategy(
 
     init {
         require(curriculum.isNotEmpty()) { "Curriculum cannot be empty" }
-        require(curriculum.all { it.getAllPossibleFactIds().isNotEmpty() }) { "All levels in the curriculum must not be empty" }
+        require(curriculum.all {
+            it.getAllPossibleFactIds().isNotEmpty()
+        }) { "All levels in the curriculum must not be empty" }
     }
 
     override fun getNextExercise(): Exercise {

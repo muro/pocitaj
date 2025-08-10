@@ -19,20 +19,24 @@ abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 // Create the new table
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE users_new (
                         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                         name TEXT NOT NULL,
                         iconId TEXT NOT NULL DEFAULT 'alligator',
                         color INTEGER NOT NULL DEFAULT ${0xFFF44336.toInt()}
                     )
-                """)
+                """
+                )
 
                 // Copy the data
-                db.execSQL("""
+                db.execSQL(
+                    """
                     INSERT INTO users_new (id, name)
                     SELECT id, name FROM user
-                """)
+                """
+                )
 
                 // Remove the old table
                 db.execSQL("DROP TABLE user")

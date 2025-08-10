@@ -31,11 +31,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,7 +79,10 @@ fun UserProfileScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Text(stringResource(id = R.string.user_profile), color = MaterialTheme.colorScheme.primary)
+            Text(
+                stringResource(id = R.string.user_profile),
+                color = MaterialTheme.colorScheme.primary
+            )
             LazyColumn(modifier = Modifier.testTag("user_profile_list")) {
                 items(users.filter { it.id != 1L }) { user ->
                     Row(
@@ -105,7 +106,11 @@ fun UserProfileScreen(
                             )
                         }
                         Spacer(modifier = Modifier.width(16.dp))
-                        Text(user.name, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.primary)
+                        Text(
+                            user.name,
+                            modifier = Modifier.weight(1f),
+                            color = MaterialTheme.colorScheme.primary
+                        )
                         IconButton(
                             onClick = { editingUser = user },
                             enabled = user.id != 1L
@@ -285,7 +290,9 @@ fun EditUserAppearanceDialog(
                     columns = GridCells.Adaptive(minSize = 48.dp),
                     modifier = Modifier.padding(top = 16.dp)
                 ) {
-                    items(UserAppearance.icons.entries.toList().filter { it.key != "robot" }) { (iconId, iconRes) ->
+                    items(
+                        UserAppearance.icons.entries.toList()
+                            .filter { it.key != "robot" }) { (iconId, iconRes) ->
                         IconButton(
                             onClick = { selectedIconId = iconId },
                             modifier = Modifier.testTag("icon_select_$iconId")
@@ -330,7 +337,13 @@ fun EditUserAppearanceDialog(
         },
         confirmButton = {
             Button(onClick = {
-                onSave(user.copy(name = newName, iconId = selectedIconId, color = selectedColor.toArgb()))
+                onSave(
+                    user.copy(
+                        name = newName,
+                        iconId = selectedIconId,
+                        color = selectedColor.toArgb()
+                    )
+                )
             }) {
                 Text("Save")
             }
@@ -415,8 +428,19 @@ fun UserProfileScreenPreview() {
     AppTheme {
         UserProfileScreen(
             users = listOf(
-                User(id = 2, name = "Caleb", iconId = "bull", color = UserAppearance.colors[2].toArgb()),
-                User(id = 3, name = "Dora", iconId = "owl", color = UserAppearance.colors[4].toArgb())),
+                User(
+                    id = 2,
+                    name = "Caleb",
+                    iconId = "bull",
+                    color = UserAppearance.colors[2].toArgb()
+                ),
+                User(
+                    id = 3,
+                    name = "Dora",
+                    iconId = "owl",
+                    color = UserAppearance.colors[4].toArgb()
+                )
+            ),
             onUserSelected = {},
             viewModel = FakeUserProfileViewModel(FakeUserDao(), FakeExerciseAttemptDao()),
             initialShowAddUserDialog = false
@@ -440,8 +464,19 @@ fun UserProfileScreenAddUserDialogPreview() {
     AppTheme {
         UserProfileScreen(
             users = listOf(
-                User(id = 2, name = "Alice", iconId = "jellyfish", color = UserAppearance.colors[5].toArgb()),
-                User(id = 3, name = "Bob", iconId = "starfish", color = UserAppearance.colors[7].toArgb())),
+                User(
+                    id = 2,
+                    name = "Alice",
+                    iconId = "jellyfish",
+                    color = UserAppearance.colors[5].toArgb()
+                ),
+                User(
+                    id = 3,
+                    name = "Bob",
+                    iconId = "starfish",
+                    color = UserAppearance.colors[7].toArgb()
+                )
+            ),
             onUserSelected = {},
             initialShowAddUserDialog = true,
             viewModel = FakeUserProfileViewModel(FakeUserDao(), FakeExerciseAttemptDao())
@@ -484,7 +519,12 @@ fun AddUserDialogWithArchivedPreview() {
 fun EditUserAppearanceDialogPreview() {
     AppTheme {
         EditUserAppearanceDialog(
-            user = User(id = 2, name = "Caleb", iconId = "bull", color = UserAppearance.colors[2].toArgb()),
+            user = User(
+                id = 2,
+                name = "Caleb",
+                iconId = "bull",
+                color = UserAppearance.colors[2].toArgb()
+            ),
             onDismiss = {},
             onSave = {}
         )

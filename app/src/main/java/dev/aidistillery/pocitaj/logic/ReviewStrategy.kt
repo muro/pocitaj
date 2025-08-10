@@ -95,8 +95,10 @@ class ReviewStrategy(
             4 to 7 * 24 * 60 * 60 * 1000L,        // 1 week
             5 to 2 * 7 * 24 * 60 * 60 * 1000L     // 2 weeks
         )
+
         // A fact is considered "due" for review when its urgency score is above this threshold.
         private const val URGENCY_THRESHOLD = 0.75
+
         // The default urgency for a fact that has never been seen before.
         private const val UNSEEN_FACT_URGENCY = 1.0
     }
@@ -127,7 +129,8 @@ class ReviewStrategy(
                 candidates = unseenFactIds.associateWith { UNSEEN_FACT_URGENCY }
             } else if (seenFactIds.isNotEmpty()) {
                 // If there are no unseen facts left, just review the least recently tested fact.
-                val leastRecentFactId = seenFactIds.minByOrNull { userMastery[it]!!.lastTestedTimestamp }
+                val leastRecentFactId =
+                    seenFactIds.minByOrNull { userMastery[it]!!.lastTestedTimestamp }
                 return leastRecentFactId?.let { exerciseFromFactId(it) }
             } else {
                 return null // Nothing to do.

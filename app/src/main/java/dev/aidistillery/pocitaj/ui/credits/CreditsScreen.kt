@@ -69,11 +69,16 @@ fun CreditsScreenContent(
                     fontFamily = AppFontFamily
                 )
             ),
-            colors = LibraryDefaults.libraryColors(licenseChipColors = LibraryDefaults.chipColors(containerColor = MaterialTheme.colorScheme.background)),
+            colors = LibraryDefaults.libraryColors(
+                licenseChipColors = LibraryDefaults.chipColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
+            ),
             padding = LibraryDefaults.libraryPadding(
                 contentPadding = PaddingValues(8.dp),
                 licensePadding = LibraryDefaults.chipPadding(containerPadding = PaddingValues(0.dp)),
-                verticalPadding = 0.dp)
+                verticalPadding = 0.dp
+            )
 
         )
     }
