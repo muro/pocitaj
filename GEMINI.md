@@ -55,6 +55,8 @@ if that helps them achieve the goal elegantly. Rather than abstractions and mult
 implementations,
 they prefer the correct tool to achieve their goal with simplicity and clarity.
 
+Use singular database table names.
+
 Additional principles:
 
 Foundational Principles

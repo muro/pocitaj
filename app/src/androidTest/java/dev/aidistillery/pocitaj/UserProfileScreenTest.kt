@@ -1,6 +1,7 @@
 package dev.aidistillery.pocitaj
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -11,7 +12,9 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToString
 import androidx.test.platform.app.InstrumentationRegistry
+import dev.aidistillery.pocitaj.data.ExerciseAttempt
 import dev.aidistillery.pocitaj.data.FactMastery
+import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.logic.Addition
 import dev.aidistillery.pocitaj.logic.Curriculum
@@ -103,7 +106,10 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         composeTestRule.onNodeWithContentDescription("Delete Alice")
             .performVerifiedClick("Delete Alice icon")
 
-        // 4. Verify that "Alice" is no longer displayed
+        // 4. Confirm the deletion in the dialog
+        composeTestRule.onNodeWithText("Delete").performClick()
+
+        // 5. Verify that "Alice" is no longer displayed
         composeTestRule.onNodeWithText("Alice").assertDoesNotExist()
     }
 
@@ -191,36 +197,31 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 3. Verify the user's icon is displayed
         // We'll identify the icon by a test tag combining the user's name and iconId
         print(composeTestRule.onRoot().printToString())
-        composeTestRule.onNodeWithTag("UserIcon_Zoe_lion", useUnmergedTree = true).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("UserIcon_Zoe_lion", useUnmergedTree = true)
+            .assertIsDisplayed()
 
         // 4. Verify the "Edit" button for that user is displayed
         composeTestRule.onNodeWithContentDescription("Edit Zoe").assertIsDisplayed()
     }
 
-    @Test
-    fun whenDefaultUserIsDisplayed_thenEditAndDeleteAreDisabled() {
-        // 1. Navigate to the profile screen
-        composeTestRule.onNodeWithContentDescription("User Profile")
-            .performVerifiedClick("User Profile icon")
-        composeTestRule.waitForIdle()
-
-        // 2. Verify the "Edit" button for the default user is not enabled
-        composeTestRule.onNodeWithContentDescription("Edit Default User").assertIsNotEnabled()
-
-        // 3. Verify the "Delete" button for the default user is not enabled
-        composeTestRule.onNodeWithContentDescription("Delete Default User").assertIsNotEnabled()
-    }
 
     @Test
     fun whenEditIsClicked_thenAppearanceCanBeChanged() {
         // 1. Set up a user
         runBlocking {
-            globals.userDao.insert(User(name = "Caleb", iconId = "alligator", color = 0xFFF44336.toInt()))
+            globals.userDao.insert(
+                User(
+                    name = "Caleb",
+                    iconId = "alligator",
+                    color = 0xFFF44336.toInt()
+                )
+            )
         }
 
         // 2. Navigate to the profile screen and click "Edit"
         composeTestRule.onNodeWithContentDescription("User Profile").performClick()
-        composeTestRule.onNodeWithContentDescription("Edit Caleb", useUnmergedTree = true).performClick()
+        composeTestRule.onNodeWithContentDescription("Edit Caleb", useUnmergedTree = true)
+            .performClick()
 
         // 3. Verify the dialog appears
         composeTestRule.onNodeWithText("Edit Appearance").assertIsDisplayed()
@@ -237,7 +238,70 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 6. Verify the UI has updated with the new appearance
         composeTestRule.onNodeWithText("Caleb Jr.").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("UserIcon_Caleb Jr._bull", useUnmergedTree = true).assertIsDisplayed()
+        composeTestRule.onNodeWithTag("UserIcon_Caleb Jr._bull", useUnmergedTree = true)
+            .assertIsDisplayed()
         // We would also need a way to verify the color, but checking the icon and name is a strong verification.
+    }
+
+    @Test
+    fun whenUserWithNoHistoryIsDeleted_thenIsPermanentlyDeleted() {
+        // 1. Set up a user with no history
+        runBlocking {
+            globals.userDao.insert(User(name = "Frank"))
+        }
+
+        // 2. Navigate to profile and delete the user
+        composeTestRule.onNodeWithContentDescription("User Profile").performClick()
+        composeTestRule.onNodeWithContentDescription("Delete Frank", useUnmergedTree = true).performClick()
+
+        // 3. Verify the simple confirmation dialog is shown
+        composeTestRule.onNodeWithText("This profile has no significant progress. Are you sure you want to permanently delete it?").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Delete").performClick()
+
+        // 4. Verify user is gone from the main list
+        composeTestRule.onNodeWithText("Frank").assertDoesNotExist()
+    }
+
+    @Test
+    fun whenUserWithHistoryIsDeleted_thenTypeToConfirmIsRequired() {
+        // 1. Set up a user with history
+        runBlocking {
+            val userId = globals.userDao.insert(User(name = "Grace"))
+            repeat(11) { // Add 11 exercises to cross the archive threshold
+                globals.exerciseAttemptDao.insert(
+                    ExerciseAttempt(
+                        userId = userId,
+                        problemText = "1+1=2",
+                        submittedAnswer = 2,
+                        correctAnswer = 2,
+                        durationMs = 1000,
+                        timestamp = System.currentTimeMillis(),
+                        logicalOperation = Operation.ADDITION,
+                        wasCorrect = true
+                    )
+                )
+            }
+        }
+
+        // 2. Navigate to profile and try to delete the user
+        composeTestRule.onNodeWithContentDescription("User Profile").performClick()
+        composeTestRule.onNodeWithContentDescription("Delete Grace", useUnmergedTree = true).performClick()
+
+        // 3. Verify the type-to-confirm dialog is shown and the delete button is disabled
+        composeTestRule.onNodeWithText("This profile has a lot of progress! Deleting it will erase all their data permanently.").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Delete").assertIsNotEnabled()
+
+        // 4. Type the wrong name and verify the delete button is still disabled
+        composeTestRule.onNodeWithText("Type 'Grace' to confirm").performTextInput("Wrong Name")
+        composeTestRule.onNodeWithText("Delete").assertIsNotEnabled()
+
+        // 5. Type the correct name and verify the delete button is enabled
+        composeTestRule.onNodeWithText("Type 'Grace' to confirm").performTextClearance()
+        composeTestRule.onNodeWithText("Type 'Grace' to confirm").performTextInput("Grace")
+        composeTestRule.onNodeWithText("Delete").assertIsEnabled()
+
+        // 6. Click delete and verify the user is gone
+        composeTestRule.onNodeWithText("Delete").performClick()
+        composeTestRule.onNodeWithText("Grace").assertDoesNotExist()
     }
 }

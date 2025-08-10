@@ -17,12 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -33,8 +31,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +52,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.aidistillery.pocitaj.R
+import dev.aidistillery.pocitaj.data.ExerciseAttempt
+import dev.aidistillery.pocitaj.data.ExerciseAttemptDao
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.data.UserAppearance
 import dev.aidistillery.pocitaj.data.UserDao
@@ -66,13 +69,12 @@ fun UserProfileScreen(
     users: List<User>,
     onUserSelected: (Long) -> Unit,
     onAddUserClicked: (String) -> Unit,
-    onDeleteUserClicked: (User) -> Unit,
     initialShowAddUserDialog: Boolean = false,
     viewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModelFactory)
 ) {
     var showAddUserDialog by remember { mutableStateOf(initialShowAddUserDialog) }
-    var newUserName by remember { mutableStateOf("") }
     var editingUser by remember { mutableStateOf<User?>(null) }
+    var userToDelete by remember { mutableStateOf<User?>(null) }
 
     PocitajScreen {
         Column(
@@ -82,15 +84,12 @@ fun UserProfileScreen(
         ) {
             Text(stringResource(id = R.string.user_profile), color = MaterialTheme.colorScheme.primary)
             LazyColumn(modifier = Modifier.testTag("user_profile_list")) {
-                // TODO: ignore the default user, it should be invisible
-                items(users) { user ->
+                items(users.filter { it.id != 1L }) { user ->
                     Row(
                         Modifier
                             .fillMaxWidth()
-                            .padding(top=8.dp, bottom = 8.dp)
-                            .clickable {
-                                onUserSelected(user.id)
-                            },
+                            .padding(top = 8.dp, bottom = 8.dp)
+                            .clickable { onUserSelected(user.id) },
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -119,18 +118,16 @@ fun UserProfileScreen(
                             )
                         }
                         IconButton(
-                            onClick = { onDeleteUserClicked(user) },
+                            onClick = { userToDelete = user },
                             enabled = user.id != 1L
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "${stringResource(id = R.string.delete)} ${user.name}",
+                                contentDescription = "Delete ${user.name}",
                                 tint = MaterialTheme.colorScheme.secondary
                             )
                         }
-
                     }
-
                 }
             }
             Button(onClick = { showAddUserDialog = true }) {
@@ -138,30 +135,11 @@ fun UserProfileScreen(
             }
 
             if (showAddUserDialog) {
-                AlertDialog(
-                    onDismissRequest = { showAddUserDialog = false },
-                    title = { Text(stringResource(id = R.string.create_a_new_profile)) },
-                    text = {
-                        TextField(
-                            value = newUserName,
-                            onValueChange = { newUserName = it },
-                            label = { Text(stringResource(id = R.string.user_name)) }
-                        )
-                    },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                viewModel.addUser(newUserName)
-                                showAddUserDialog = false
-                            }
-                        ) {
-                            Text(stringResource(id = R.string.add))
-                        }
-                    },
-                    dismissButton = {
-                        Button(onClick = { showAddUserDialog = false }) {
-                            Text(stringResource(id = R.string.cancel))
-                        }
+                AddUserDialog(
+                    onDismiss = { showAddUserDialog = false },
+                    onAddUser = { name ->
+                        viewModel.addUser(name)
+                        showAddUserDialog = false
                     }
                 )
             }
@@ -176,8 +154,109 @@ fun UserProfileScreen(
                     }
                 )
             }
+
+            userToDelete?.let { user ->
+                DeleteUserDialog(
+                    user = user,
+                    onDismiss = { userToDelete = null },
+                    onConfirmDelete = {
+                        viewModel.deleteUser(user)
+                        userToDelete = null
+                    },
+                    getAttemptCount = { viewModel.getAttemptCountForUser(user) }
+                )
+            }
         }
     }
+}
+
+@Composable
+fun AddUserDialog(
+    onDismiss: () -> Unit,
+    onAddUser: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var newUserName by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = modifier.testTag("add_user_dialog"),
+        title = { Text(stringResource(id = R.string.create_a_new_profile)) },
+        text = {
+            TextField(
+                value = newUserName,
+                onValueChange = { newUserName = it },
+                label = { Text(stringResource(id = R.string.user_name)) }
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = { onAddUser(newUserName) },
+                enabled = newUserName.isNotBlank()
+            ) {
+                Text(stringResource(id = R.string.add))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text(stringResource(id = R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+fun DeleteUserDialog(
+    user: User,
+    onDismiss: () -> Unit,
+    onConfirmDelete: () -> Unit,
+    getAttemptCount: suspend () -> Int
+) {
+    var attemptCount by remember { mutableStateOf<Int?>(null) }
+    var confirmText by remember { mutableStateOf("") }
+
+    LaunchedEffect(user) {
+        attemptCount = getAttemptCount()
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Delete '${user.name}'?") },
+        text = {
+            Column {
+                val count = attemptCount
+                if (count == null) {
+                    Text("Loading...")
+                } else if (count <= 10) {
+                    Text("This profile has no significant progress. Are you sure you want to permanently delete it?")
+                } else {
+                    Text("This profile has a lot of progress! Deleting it will erase all their data permanently.")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextField(
+                        value = confirmText,
+                        onValueChange = { confirmText = it },
+                        label = { Text("Type '${user.name}' to confirm") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirmDelete,
+                enabled = attemptCount?.let { count ->
+                    if (count <= 10) true else confirmText == user.name
+                } ?: false
+            ) {
+                Text("Delete")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable
@@ -278,9 +357,7 @@ class FakeUserDao : UserDao {
         users[user.id] = user.copy()
     }
 
-    override fun getAllUsersFlow(): Flow<List<User>> {
-        TODO("Not yet implemented")
-    }
+    override fun getAllUsersFlow() = MutableStateFlow(users.values.toList()).asStateFlow()
 
     override suspend fun getUser(id: Long): User? = users[id]
     override suspend fun delete(user: User) {
@@ -290,15 +367,31 @@ class FakeUserDao : UserDao {
     override suspend fun getUserByName(name: String): User? =
         users.values.find { it.name == name }
 
-    override suspend fun getUserFlow(id: Long): User? {
-        TODO("Not yet implemented")
+    override suspend fun getUserFlow(id: Long): User? = users[id]
+
+    override fun getAllUsers() = getAllUsersFlow()
+}
+
+class FakeExerciseAttemptDao : ExerciseAttemptDao {
+    private val attempts = mutableListOf<ExerciseAttempt>()
+    override suspend fun insert(attempt: ExerciseAttempt) {
+        attempts.add(attempt)
     }
 
-    override fun getAllUsers() = MutableStateFlow(users.values.toList()).asStateFlow()
+    override fun getAttemptsForUser(userId: Long): Flow<List<ExerciseAttempt>> {
+        return MutableStateFlow(attempts.filter { it.userId == userId }).asStateFlow()
+    }
+
+    override suspend fun getAttemptCountForUser(userId: Long): Int {
+        return attempts.count { it.userId == userId }
+    }
 }
 
 
-class FakeUserProfileViewModel : UserProfileViewModel(FakeUserDao()) {
+class FakeUserProfileViewModel(
+    userDao: UserDao,
+    exerciseAttemptDao: ExerciseAttemptDao
+) : UserProfileViewModel(userDao, exerciseAttemptDao) {
     override val users: StateFlow<List<User>> = MutableStateFlow(
         listOf(
             User(id = 1, name = "Alice"),
@@ -327,8 +420,7 @@ fun UserProfileScreenPreview() {
                 User(id = 3, name = "Dora", iconId = "owl", color = UserAppearance.colors[4].toArgb())),
             onUserSelected = {},
             onAddUserClicked = {},
-            viewModel = FakeUserProfileViewModel(),
-            onDeleteUserClicked = { },
+            viewModel = FakeUserProfileViewModel(FakeUserDao(), FakeExerciseAttemptDao()),
             initialShowAddUserDialog = false
         )
     }
@@ -355,8 +447,28 @@ fun UserProfileScreenAddUserDialogPreview() {
             onUserSelected = {},
             onAddUserClicked = {},
             initialShowAddUserDialog = true,
-            viewModel = FakeUserProfileViewModel(),
-            onDeleteUserClicked = { }
+            viewModel = FakeUserProfileViewModel(FakeUserDao(), FakeExerciseAttemptDao())
+        )
+    }
+}
+
+@SuppressLint("ViewModelConstructorInComposable")
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
+@Composable
+fun AddUserDialogWithArchivedPreview() {
+    AppTheme {
+        AddUserDialog(
+            onDismiss = {},
+            onAddUser = {}
         )
     }
 }

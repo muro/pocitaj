@@ -12,4 +12,7 @@ interface ExerciseAttemptDao {
 
     @Query("SELECT * FROM exercise_attempt WHERE userId = :userId ORDER BY timestamp DESC")
     fun getAttemptsForUser(userId: Long): Flow<List<ExerciseAttempt>>
+
+    @Query("SELECT COUNT(*) FROM exercise_attempt WHERE userId = :userId")
+    suspend fun getAttemptCountForUser(userId: Long): Int
 }

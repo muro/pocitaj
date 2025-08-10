@@ -36,6 +36,10 @@ class AdaptiveExerciseSourceTest {
 
         override fun getAttemptsForUser(userId: Long) =
             MutableStateFlow(attempts.toList()).asStateFlow()
+
+        override suspend fun getAttemptCountForUser(userId: Long): Int {
+            return attempts.size
+        }
     }
 
     class FakeUserDao : UserDao {

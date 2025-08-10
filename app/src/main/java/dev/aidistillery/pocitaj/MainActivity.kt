@@ -210,10 +210,6 @@ fun AppNavigation(restartApp: () -> Unit) {
                 },
                 onAddUserClicked = {
                     // TODO: Navigate to an "Add User" screen
-                },
-                onDeleteUserClicked = { user ->
-                    userProfileViewModel.deleteUser(user)
-                    // TODO: Switch to another user?
                 }
             )
         }

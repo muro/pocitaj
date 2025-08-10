@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import dev.aidistillery.pocitaj.App
+import dev.aidistillery.pocitaj.data.ExerciseAttemptDao
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.data.UserDao
 import kotlinx.coroutines.flow.SharingStarted
@@ -13,7 +14,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 open class UserProfileViewModel(
-    private val userDao: UserDao
+    private val userDao: UserDao,
+    private val exerciseAttemptDao: ExerciseAttemptDao
 ) : ViewModel() {
 
     open val users: StateFlow<List<User>> = userDao.getAllUsers()
@@ -41,6 +43,10 @@ open class UserProfileViewModel(
         }
     }
 
+    suspend fun getAttemptCountForUser(user: User): Int {
+        return exerciseAttemptDao.getAttemptCountForUser(user.id)
+    }
+
     fun setActiveUser(userId: Long) {
         viewModelScope.launch {
             val user = userDao.getUser(userId)
@@ -56,7 +62,8 @@ object UserProfileViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
         val globals = App.app.globals
         return UserProfileViewModel(
-            userDao = globals.userDao
+            userDao = globals.userDao,
+            exerciseAttemptDao = globals.exerciseAttemptDao
         ) as T
     }
 }
