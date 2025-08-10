@@ -207,9 +207,6 @@ fun AppNavigation(restartApp: () -> Unit) {
                 onUserSelected = { userId ->
                     userProfileViewModel.setActiveUser(userId)
                     restartApp()
-                },
-                onAddUserClicked = {
-                    // TODO: Navigate to an "Add User" screen
                 }
             )
         }

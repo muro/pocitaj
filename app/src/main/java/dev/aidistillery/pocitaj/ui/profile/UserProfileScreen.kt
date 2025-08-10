@@ -68,7 +68,6 @@ import kotlinx.coroutines.flow.asStateFlow
 fun UserProfileScreen(
     users: List<User>,
     onUserSelected: (Long) -> Unit,
-    onAddUserClicked: (String) -> Unit,
     initialShowAddUserDialog: Boolean = false,
     viewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModelFactory)
 ) {
@@ -419,7 +418,6 @@ fun UserProfileScreenPreview() {
                 User(id = 2, name = "Caleb", iconId = "bull", color = UserAppearance.colors[2].toArgb()),
                 User(id = 3, name = "Dora", iconId = "owl", color = UserAppearance.colors[4].toArgb())),
             onUserSelected = {},
-            onAddUserClicked = {},
             viewModel = FakeUserProfileViewModel(FakeUserDao(), FakeExerciseAttemptDao()),
             initialShowAddUserDialog = false
         )
@@ -445,7 +443,6 @@ fun UserProfileScreenAddUserDialogPreview() {
                 User(id = 2, name = "Alice", iconId = "jellyfish", color = UserAppearance.colors[5].toArgb()),
                 User(id = 3, name = "Bob", iconId = "starfish", color = UserAppearance.colors[7].toArgb())),
             onUserSelected = {},
-            onAddUserClicked = {},
             initialShowAddUserDialog = true,
             viewModel = FakeUserProfileViewModel(FakeUserDao(), FakeExerciseAttemptDao())
         )
