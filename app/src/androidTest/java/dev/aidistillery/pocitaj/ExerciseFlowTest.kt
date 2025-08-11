@@ -122,6 +122,11 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // Verify that the ExerciseSetupScreen is displayed
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
+            composeTestRule.onAllNodesWithText("Results").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        Espresso.pressBack()
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
             composeTestRule.onAllNodesWithText("Choose Your Challenge").fetchSemanticsNodes()
                 .isNotEmpty()
         }
@@ -258,6 +263,30 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
 
         // 4. Verify the card is closed (by checking that "Smart Practice" is no longer visible)
         composeTestRule.onNodeWithText("Smart Practice").assertDoesNotExist()
+    }
+
+    @Test
+    fun whenSystemBackButtonPressedOnExerciseScreen_thenNavigatesToResults() {
+        // Set a dummy exercise to prevent crashes
+        setExercises(listOf(Exercise(Addition(1, 1))))
+
+        // Navigate to the Exercise Screen
+        navigateToSmartPractice("+")
+
+        // Verify that an element unique to the Exercise Screen is present
+        // Using onNodeWithTag for the canvas is a good unique identifier
+        composeTestRule.onNodeWithTag("InkCanvas").assertIsDisplayed()
+
+        // Perform a back press
+        Espresso.pressBack()
+
+        // Wait for UI to settle
+        composeTestRule.waitForIdle()
+
+        // Verify that the ResultsScreen is displayed
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
+            composeTestRule.onAllNodesWithText("Results").fetchSemanticsNodes().isNotEmpty()
+        }
     }
 }
 

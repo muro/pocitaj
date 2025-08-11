@@ -202,6 +202,13 @@ class ExerciseViewModel(
         }
     }
 
+    fun endSessionEarly() {
+        viewModelScope.launch {
+            exercisesRemaining = 0
+            advanceToNextExercise()
+        }
+    }
+
     fun onSecretAreaTapped() {
         tapCount++
         if (tapCount >= DEBUG_TAP_THRESHOLD) {

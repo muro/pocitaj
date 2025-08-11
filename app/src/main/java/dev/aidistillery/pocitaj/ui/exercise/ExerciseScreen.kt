@@ -2,6 +2,7 @@ package dev.aidistillery.pocitaj.ui.exercise
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -182,6 +183,10 @@ fun ExerciseScreen(
     viewModel: ExerciseViewModel,
     onAnswerSubmit: (String, Int) -> Unit
 ) {
+    BackHandler {
+        viewModel.endSessionEarly()
+    }
+
     PocitajScreen {
         val answerResult by viewModel.answerResult.collectAsState()
         val recognizedText by viewModel.recognizedText.collectAsState()
