@@ -149,6 +149,17 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         verifyFeedback(FeedbackType.CORRECT)
         composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME)
         composeTestRule.waitForIdle()
+
+        // Verify the attempt was saved for Alice (User ID 2)
+        var attemptsForDefaultUser = 0
+        var attemptsForAlice = 0
+        runBlocking {
+            attemptsForAlice = globals.exerciseAttemptDao.getAttemptCountForUser(2)
+            attemptsForDefaultUser = globals.exerciseAttemptDao.getAttemptCountForUser(1)
+        }
+        assertEquals(1, attemptsForAlice)
+        assertEquals(0, attemptsForDefaultUser)
+
         composeTestRule.onNodeWithTag("Back").performClick()
         composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME)
         composeTestRule.waitForIdle()

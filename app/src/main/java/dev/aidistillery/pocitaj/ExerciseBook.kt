@@ -1,12 +1,21 @@
 package dev.aidistillery.pocitaj
 
+import dev.aidistillery.pocitaj.data.DataStoreActiveUserManager
+import dev.aidistillery.pocitaj.data.ExerciseAttempt
+import dev.aidistillery.pocitaj.data.ExerciseAttemptDao
 import dev.aidistillery.pocitaj.data.ExerciseConfig
 import dev.aidistillery.pocitaj.data.ExerciseSource
+import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.logic.Exercise
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 // Holds a set of exercises to do in a session.
 // Each Exercise can be checked for correct solution
-class ExerciseBook : ExerciseSource {
+class ExerciseBook(
+    val exerciseAttemptDao: ExerciseAttemptDao,
+    val activeUserManager: DataStoreActiveUserManager
+) : ExerciseSource {
 
     private val exercises = mutableListOf<Exercise>()
     private var currentIndex = -1
@@ -25,7 +34,21 @@ class ExerciseBook : ExerciseSource {
     }
 
     override suspend fun recordAttempt(exercise: Exercise, submittedAnswer: Int, durationMs: Long) {
-        // No-op for the test implementation
+        val wasCorrect = exercise.equation.getExpectedResult() == submittedAnswer
+        withContext(Dispatchers.IO) {
+            val attempt = ExerciseAttempt(
+                userId = activeUserManager.activeUser.id,
+                timestamp = System.currentTimeMillis(),
+                problemText = exercise.equation.question(),
+                logicalOperation = exercise.getFactId()
+                    .split("_")[0].let { Operation.valueOf(it) },
+                correctAnswer = exercise.equation.getExpectedResult(),
+                submittedAnswer = submittedAnswer,
+                wasCorrect = wasCorrect,
+                durationMs = durationMs
+            )
+            exerciseAttemptDao.insert(attempt)
+        }
     }
 
     /**
@@ -36,5 +59,5 @@ class ExerciseBook : ExerciseSource {
         exercises.clear()
         exercises.addAll(predefinedExercises)
         currentIndex = -1
-    }
+    } 
 }

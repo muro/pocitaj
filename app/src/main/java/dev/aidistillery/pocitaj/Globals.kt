@@ -3,6 +3,7 @@ package dev.aidistillery.pocitaj
 import android.content.Context
 import androidx.room.Room
 import dev.aidistillery.pocitaj.data.ActiveUserManager
+import dev.aidistillery.pocitaj.data.DataStoreActiveUserManager
 import dev.aidistillery.pocitaj.data.AdaptiveExerciseSource
 import dev.aidistillery.pocitaj.data.AppDatabase
 import dev.aidistillery.pocitaj.data.ExerciseAttemptDao
@@ -31,10 +32,10 @@ class ProductionGlobals(private val context: Context) : Globals {
     override val factMasteryDao: FactMasteryDao by lazy { database.factMasteryDao() }
     override val exerciseAttemptDao: ExerciseAttemptDao by lazy { database.exerciseAttemptDao() }
     override val activeUserManager: ActiveUserManager by lazy {
-        ActiveUserManager(context, userDao)
+        DataStoreActiveUserManager(context, userDao)
     }
     override val exerciseSource: ExerciseSource by lazy {
-        AdaptiveExerciseSource(factMasteryDao, exerciseAttemptDao, activeUser.id)
+        AdaptiveExerciseSource(factMasteryDao, exerciseAttemptDao, activeUserManager)
     }
     override val inkModelManager: InkModelManager by lazy {
         ModelManager()

@@ -11,19 +11,26 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
 
-class ActiveUserManager(
+interface ActiveUserManager {
+    val activeUser: User
+
+    suspend fun init()
+    suspend fun setActiveUser(user: User)
+}
+
+class DataStoreActiveUserManager(
     private val context: Context,
     private val userDao: UserDao
-) {
+) : ActiveUserManager {
+
+    override lateinit var activeUser: User
+        private set
 
     private object Keys {
         val ACTIVE_USER_ID = longPreferencesKey("active_user_id")
     }
 
-    lateinit var activeUser: User
-        private set
-
-    suspend fun init() {
+    override suspend fun init() {
         // First, ensure the default user exists.                                                                                                   │
         if (userDao.getUser(1L) == null) {
             userDao.insert(User(id = 1, name = "Default User"))
@@ -38,13 +45,14 @@ class ActiveUserManager(
         if (user == null) {
             throw IllegalStateException("Default user not found and could not be created.")
         }
-        activeUser = user!!
+        activeUser = user
     }
 
-    suspend fun setActiveUser(user: User) {
+    override suspend fun setActiveUser(user: User) {
         activeUser = user
         context.dataStore.edit { preferences ->
             preferences[Keys.ACTIVE_USER_ID] = user.id
         }
+        init()
     }
 }

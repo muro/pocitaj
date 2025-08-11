@@ -15,8 +15,24 @@ class AdaptiveExerciseSourceTest {
     private lateinit var exerciseAttemptDao: FakeExerciseAttemptDao
     private lateinit var userDao: FakeUserDao
     private lateinit var exerciseSource: AdaptiveExerciseSource
+    private lateinit var activeUserManager: FakeActiveUserManager
 
     // --- Test Doubles ---
+
+    class FakeActiveUserManager(private val userDao: FakeUserDao) : ActiveUserManager {
+        override lateinit var activeUser: User
+        override suspend fun init() {
+            activeUser = userDao.getUser(1L) ?: run {
+                val newId = userDao.insert(User(id = 1, name = "Default User"))
+                userDao.getUser(newId)!!
+            }
+        }
+
+        override suspend fun setActiveUser(user: User) {
+            activeUser = user
+        }
+    }
+
     class FakeFactMasteryDao : FactMasteryDao {
         private val facts = mutableMapOf<String, FactMastery>()
         private val flow = MutableStateFlow<List<FactMastery>>(emptyList())
@@ -79,11 +95,15 @@ class AdaptiveExerciseSourceTest {
         factMasteryDao = FakeFactMasteryDao()
         exerciseAttemptDao = FakeExerciseAttemptDao()
         userDao = FakeUserDao()
+        activeUserManager = FakeActiveUserManager(userDao)
+        runBlocking {
+            activeUserManager.init()
+        }
 
         exerciseSource = AdaptiveExerciseSource(
             factMasteryDao,
             exerciseAttemptDao,
-            1L
+            activeUserManager
         )
     }
 
