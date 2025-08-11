@@ -244,5 +244,20 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
     //       ExerciseBook test double. This new test should verify that clicking a specific
     //       level button on the ExerciseSetupScreen correctly starts a session with exercises
     //       only from that level.
+
+    @Test
+    fun whenOperationCardIsExpanded_backButtonClosesIt() {
+        // 1. Open the Addition card
+        composeTestRule.onNodeWithText("+").performClick()
+
+        // 2. Verify the card is expanded (by checking that "Smart Practice" is visible)
+        composeTestRule.onNodeWithText("Smart Practice").assertIsDisplayed()
+
+        // 3. Press the back button
+        Espresso.pressBack()
+
+        // 4. Verify the card is closed (by checking that "Smart Practice" is no longer visible)
+        composeTestRule.onNodeWithText("Smart Practice").assertDoesNotExist()
+    }
 }
 

@@ -59,5 +59,5 @@ class ExerciseBook(
         exercises.clear()
         exercises.addAll(predefinedExercises)
         currentIndex = -1
-    } 
+    }
 }

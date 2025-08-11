@@ -1,6 +1,7 @@
 package dev.aidistillery.pocitaj.ui.setup
 
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -67,6 +68,12 @@ fun ExerciseSetupScreen(
     onCreditsClicked: () -> Unit,
     onProfileClicked: () -> Unit,
 ) {
+    var expandedOperation by remember { mutableStateOf<Operation?>(null) }
+
+    BackHandler(enabled = expandedOperation != null) {
+        expandedOperation = null
+    }
+
     PocitajScreen {
         Column(
             modifier = Modifier
@@ -127,9 +134,17 @@ fun ExerciseSetupScreen(
                     OperationCard(
                         operationLevels = operationState,
                         modifier = Modifier.testTag("operation_card_${operationState.operation.toSymbol()}"),
-                        initialExpanded = false
+                        expanded = expandedOperation == operationState.operation,
+                        onCardClicked = {
+                            expandedOperation = if (expandedOperation == operationState.operation) {
+                                null
+                            } else {
+                                operationState.operation
+                            }
+                        },
+                        onStartClicked = { levelId -> onStartClicked(operationState.operation, 10, 10, levelId) }
                     )
-                    { levelId -> onStartClicked(operationState.operation, 10, 10, levelId) }
+
                 }
             }
 
@@ -154,10 +169,10 @@ fun ExerciseSetupScreen(
 fun OperationCard(
     operationLevels: OperationLevels,
     modifier: Modifier = Modifier,
-    initialExpanded: Boolean = false,
+    expanded: Boolean,
+    onCardClicked: () -> Unit,
     onStartClicked: (levelId: String?) -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(initialExpanded) }
     val gradient = getGradientForOperation(operationLevels.operation)
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -171,7 +186,7 @@ fun OperationCard(
             .clickable(
                 interactionSource = interactionSource,
                 indication = null
-            ) { expanded = !expanded },
+            ) { onCardClicked() },
         shape = RoundedCornerShape(24.dp),
     ) {
         Column(
@@ -296,8 +311,10 @@ fun PreviewExpandedOperationCard() {
     AppTheme {
         OperationCard(
             operationLevels = operationLevels,
-            initialExpanded = true
-        ) {}
+            expanded = true,
+            onCardClicked = { },
+            onStartClicked = {}
+        )
     }
 }
 
