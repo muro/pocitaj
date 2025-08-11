@@ -23,7 +23,7 @@ fun getSpeedBadge(operation: Operation, op1: Int, op2: Int, avgDurationMs: Long)
     }
 }
 
-private fun getSpeedThreshold(operation: Operation, op1: Int, op2: Int): Long {
+internal fun getSpeedThreshold(operation: Operation, op1: Int, op2: Int): Long {
     return when (operation) {
         Operation.ADDITION -> when {
             op1 < 10 && op2 < 10 && op1 + op2 < 10 -> 2500L // Single digit, no carry

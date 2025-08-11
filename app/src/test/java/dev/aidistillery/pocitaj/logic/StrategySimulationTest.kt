@@ -53,6 +53,7 @@ class StrategySimulationTest {
     private interface StudentModel {
         val name: String
         fun getSuccessProbability(context: SimulationContext): Double
+        fun getAttemptDuration(context: SimulationContext): Long
 
         // Optional hooks for the model to update its internal state after an attempt
         fun recordAttempt(context: SimulationContext, wasCorrect: Boolean) {}
@@ -61,17 +62,30 @@ class StrategySimulationTest {
     private class PerfectStudent : StudentModel {
         override val name = "PERFECT"
         override fun getSuccessProbability(context: SimulationContext) = 1.0
+        override fun getAttemptDuration(context: SimulationContext): Long = 500L // Always Gold
     }
 
     private class GoodStudent : StudentModel {
         override val name = "GOOD"
         override fun getSuccessProbability(context: SimulationContext) = 0.9
+        // Speed is linked to accuracy. 90% accuracy = 90% of the way to Gold speed.
+        override fun getAttemptDuration(context: SimulationContext): Long {
+            val threshold = getSpeedThreshold(Operation.ADDITION, 1, 1)
+            return (threshold * (1.0 - 0.9) * 2).toLong() // (1 - accuracy) * 2 -> Bronze/Silver
+        }
     }
 
     private class ImprovingStudent : StudentModel {
         override val name = "IMPROVING"
         override fun getSuccessProbability(context: SimulationContext) =
             (0.5 + (context.attempts * 0.1)).coerceAtMost(1.0)
+
+        override fun getAttemptDuration(context: SimulationContext): Long {
+            val accuracy = getSuccessProbability(context)
+            val threshold = getSpeedThreshold(Operation.ADDITION, 1, 1)
+            // As accuracy approaches 1.0, duration approaches the Gold threshold (threshold * 0.5)
+            return (threshold * (1.0 - accuracy) * 2.0).coerceAtLeast(threshold * 0.5).toLong()
+        }
     }
 
     private class ForgetfulStudent : StudentModel {
@@ -85,6 +99,11 @@ class StrategySimulationTest {
                 val exercisesSince = context.currentPosition - context.lastSeenPosition - 1
                 (1.0 - (exercisesSince * 0.03)).coerceAtLeast(0.0)
             }
+        }
+        override fun getAttemptDuration(context: SimulationContext): Long {
+            val accuracy = getSuccessProbability(context)
+            val threshold = getSpeedThreshold(Operation.ADDITION, 1, 1)
+            return (threshold * (1.0 - accuracy) * 3.0).coerceAtLeast(threshold * 0.5).toLong()
         }
     }
 
@@ -103,6 +122,12 @@ class StrategySimulationTest {
                 // The probability of recall decays exponentially over time.
                 Math.pow(context.recallStrength, timeSince)
             }
+        }
+
+        override fun getAttemptDuration(context: SimulationContext): Long {
+            val accuracy = getSuccessProbability(context)
+            val threshold = getSpeedThreshold(Operation.ADDITION, 1, 1)
+            return (threshold * (1.0 - accuracy) * 2.5).coerceAtLeast(threshold * 0.5).toLong()
         }
 
         override fun recordAttempt(context: SimulationContext, wasCorrect: Boolean) {
@@ -207,6 +232,13 @@ class StrategySimulationTest {
                 }
                 lastSeenPositions[factId] = it
                 studentModel.recordAttempt(context, wasCorrect)
+
+                // Set the duration and speed badge on the exercise
+                val duration = studentModel.getAttemptDuration(context)
+                exercise.timeTakenMillis = duration.toInt()
+                val (op, op1, op2) = exercise.equation.getFact()
+                exercise.speedBadge = getSpeedBadge(op, op1, op2, duration)
+
 
                 if (ENABLE_DETAILED_LOGGING && strategy is DrillStrategy && studentModel is PowerLawStudent) {
                     val floor = studentModel.learningFloors[factId]
