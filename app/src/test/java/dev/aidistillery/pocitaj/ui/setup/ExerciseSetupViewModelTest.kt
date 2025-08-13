@@ -69,7 +69,8 @@ class ExerciseSetupViewModelTest {
             skipItems(1)
 
             val initialState = awaitItem()
-            val initialAddLevels = initialState.find { it.operation == Operation.ADDITION }!!.levels
+            val initialAddLevels =
+                initialState.find { it.operation == Operation.ADDITION }!!.levelStatuses
             assertEquals(0, initialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.starRating)
             assertTrue(initialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.isUnlocked)
             // TODO: Re-enable and fix these assertions. With the removal of the prerequisite
@@ -84,7 +85,8 @@ class ExerciseSetupViewModelTest {
 
             // 3. New state: First level is mastered, second is unlocked
             val updatedState = awaitItem()
-            val updatedAddLevels = updatedState.find { it.operation == Operation.ADDITION }!!.levels
+            val updatedAddLevels =
+                updatedState.find { it.operation == Operation.ADDITION }!!.levelStatuses
             assertEquals(3, updatedAddLevels.find { it.level.id == "ADD_SUM_5" }!!.starRating)
             assertTrue(updatedAddLevels.find { it.level.id == "ADD_SUM_10" }!!.isUnlocked)
             // assertFalse(updatedAddLevels.find { it.level.id == "ADD_SUM_20" }!!.isUnlocked)

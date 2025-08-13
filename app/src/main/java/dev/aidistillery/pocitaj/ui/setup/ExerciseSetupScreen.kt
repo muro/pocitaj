@@ -78,8 +78,7 @@ fun ExerciseSetupScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
-                .padding(top = 32.dp), // Add top padding to avoid camera cutout
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
@@ -127,7 +126,7 @@ fun ExerciseSetupScreen(
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
-                    .testTag("setup_lazy_column"),
+                    .testTag("operation_cards_container"),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(operationLevels) { operationState ->
@@ -232,14 +231,14 @@ fun OperationCard(
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        for (row in operationLevels.levels.chunked(2)) {
+                        for (row in operationLevels.levelStatuses.chunked(2)) {
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                for (level in row) {
+                                for (levelstatus in row) {
                                     LevelTile(
-                                        levelStatus = level,
-                                        onClick = { onStartClicked(level.level.id) },
+                                        levelStatus = levelstatus,
+                                        onClick = { onStartClicked(levelstatus.level.id) },
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
@@ -277,7 +276,8 @@ fun LevelTile(levelStatus: LevelStatus, onClick: () -> Unit, modifier: Modifier 
         ) {
             AutoSizeText(
                 text = formatLevel(levelStatus.level).shortLabel,
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.testTag("level_${levelStatus.level.id}")
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -302,10 +302,15 @@ fun LevelTile(levelStatus: LevelStatus, onClick: () -> Unit, modifier: Modifier 
 fun PreviewExpandedOperationCard() {
     val operationLevels = OperationLevels(
         operation = Operation.ADDITION,
-        levels = listOf(
+        levelStatuses = listOf(
             LevelStatus(Curriculum.SumsUpTo5, isUnlocked = true, starRating = 3),
             LevelStatus(Curriculum.SumsUpTo10, isUnlocked = true, starRating = 1),
-            LevelStatus(Curriculum.SumsUpTo20, isUnlocked = false, starRating = 0)
+            LevelStatus(Curriculum.SumsUpTo20, isUnlocked = false, starRating = 0),
+            LevelStatus(
+                level = Curriculum.getAllLevels().find { it.id == "ADD_REVIEW_1" }!!,
+                isUnlocked = true,
+                starRating = 2
+            )
         )
     )
     AppTheme {
@@ -333,7 +338,7 @@ fun PreviewExerciseSetupScreen() {
     val fakeOperationLevels = Operation.entries.map { op ->
         OperationLevels(
             operation = op,
-            levels = listOf(
+            levelStatuses = listOf(
                 LevelStatus(Curriculum.SumsUpTo5, isUnlocked = true, starRating = 3),
                 LevelStatus(Curriculum.SumsUpTo10, isUnlocked = true, starRating = 1),
                 LevelStatus(Curriculum.SumsUpTo20, isUnlocked = false, starRating = 0)

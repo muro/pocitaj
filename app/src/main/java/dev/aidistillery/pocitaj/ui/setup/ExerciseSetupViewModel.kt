@@ -23,7 +23,7 @@ data class LevelStatus(
 
 data class OperationLevels(
     val operation: Operation,
-    val levels: List<LevelStatus>
+    val levelStatuses: List<LevelStatus>
 )
 
 class ExerciseSetupViewModel(

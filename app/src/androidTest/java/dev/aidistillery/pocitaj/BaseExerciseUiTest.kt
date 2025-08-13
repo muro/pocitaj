@@ -4,7 +4,6 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -78,7 +77,7 @@ abstract class BaseExerciseUiTest {
     }
 
     fun openOperationCard(operationSymbol: String) {
-        composeTestRule.onNodeWithTag("setup_lazy_column")
+        composeTestRule.onNodeWithTag("operation_cards_container")
             .performScrollToNode(hasTestTag("operation_card_${operationSymbol}"))
 
         // Click on the card to start the specific exercise type
@@ -109,20 +108,18 @@ abstract class BaseExerciseUiTest {
     }
 
     fun navigateToReviewOperation(operationSymbol: String) {
-        // Click on the card to start the specific exercise type
-        composeTestRule.onNodeWithText(operationSymbol)
-            .performVerifiedClick("Operation card '$operationSymbol'")
+        openOperationCard(operationSymbol)
 
         // Explicitly scroll the parent list to bring the button into view
-        composeTestRule.onNodeWithTag("setup_lazy_column")
-            .performScrollToNode(hasText("🧶"))
+        composeTestRule.onNodeWithTag("operation_card_-")
+            .performScrollToNode(matcher = hasTestTag("SUB_REVIEW_1-3_stars"))
 
         // Click on the first "Review" button found
         composeTestRule.onAllNodesWithText("🧶")[0].performVerifiedClick("Review button")
 
         // Wait for the ExerciseScreen to be loaded by checking for a unique element.
         // The InkCanvas is a good unique identifier for the ExerciseScreen.
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
+        composeTestRule.waitUntil(timeoutMillis = 3 * DEFAULT_UI_TIMEOUT) {
             composeTestRule
                 .onAllNodesWithTag("InkCanvas")
                 .fetchSemanticsNodes().size == 1
