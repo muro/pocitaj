@@ -37,9 +37,10 @@ class ModelManager : InkModelManager {
                     .setPreContext("1234").build()
             )
                 .addOnSuccessListener { result ->
-                    val recognizedText = result.candidates.firstOrNull { it.text == hint }?.text
-                        ?: result.candidates.firstOrNull()?.text
-                        ?: ""
+                    // on rare occasions, the recognized text includes a space on the start
+                    val foundCandidate = result.candidates.firstOrNull { it.text.trim() == hint }
+                        ?: result.candidates.firstOrNull()
+                    val recognizedText = foundCandidate?.text?.trim() ?: ""
                     continuation.resume(recognizedText)
                     Log.i("ModelManager", "Recognized text: $recognizedText")
                 }
