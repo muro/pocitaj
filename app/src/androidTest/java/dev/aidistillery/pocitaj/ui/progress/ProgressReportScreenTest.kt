@@ -40,8 +40,6 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
         composeTestRule.onNodeWithContentDescription("My Progress").performClick()
         composeTestRule.waitForIdle()
 
-        composeTestRule.onRoot().printToLog("ProgressReportScreenTest")
-
         // THEN: The progress grids for the levels should be displayed
         composeTestRule.onNodeWithTag("operation_card_ADDITION").assertIsDisplayed()
         composeTestRule.onNodeWithTag("progress_report_list")

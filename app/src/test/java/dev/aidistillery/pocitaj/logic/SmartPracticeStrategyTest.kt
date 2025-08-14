@@ -23,7 +23,7 @@ class SmartPracticeStrategyTest {
             "ADD_1_1" to FactMastery("ADD_1_1", 1, 5, 0),
             "ADD_1_2" to FactMastery("ADD_1_2", 1, 5, 0)
         )
-        val strategy = SmartPracticeStrategy(listOf(level1), userMastery)
+        val strategy = SmartPracticeStrategy(listOf(level1), userMastery, 1L)
         assertTrue(strategy.isLevelMastered(level1))
     }
 
@@ -33,7 +33,7 @@ class SmartPracticeStrategyTest {
             "ADD_1_1" to FactMastery("ADD_1_1", 1, 5, 0),
             "ADD_1_2" to FactMastery("ADD_1_2", 1, 4, 0) // Not mastered
         )
-        val strategy = SmartPracticeStrategy(listOf(level1), userMastery)
+        val strategy = SmartPracticeStrategy(listOf(level1), userMastery, 1L)
         assertFalse(strategy.isLevelMastered(level1))
     }
 
@@ -43,13 +43,13 @@ class SmartPracticeStrategyTest {
             "ADD_1_1" to FactMastery("ADD_1_1", 1, 5, 0)
             // ADD_1_2 is missing
         )
-        val strategy = SmartPracticeStrategy(listOf(level1), userMastery)
+        val strategy = SmartPracticeStrategy(listOf(level1), userMastery, 1L)
         assertFalse(strategy.isLevelMastered(level1))
     }
 
     @Test
     fun `isLevelUnlocked returns true for a level with no prerequisites`() {
-        val strategy = SmartPracticeStrategy(listOf(level1), mutableMapOf())
+        val strategy = SmartPracticeStrategy(listOf(level1), mutableMapOf(), 1L)
         assertTrue(strategy.isLevelUnlocked(level1))
     }
 
@@ -63,7 +63,7 @@ class SmartPracticeStrategyTest {
             "ADD_1_1" to FactMastery("ADD_1_1", 1, 5, 0),
             "ADD_1_2" to FactMastery("ADD_1_2", 1, 5, 0)
         )
-        val strategy = SmartPracticeStrategy(listOf(level1, level2), userMastery)
+        val strategy = SmartPracticeStrategy(listOf(level1, level2), userMastery, 1L)
         assertTrue(strategy.isLevelUnlocked(level2))
     }
 
@@ -77,7 +77,7 @@ class SmartPracticeStrategyTest {
             "ADD_1_1" to FactMastery("ADD_1_1", 1, 5, 0),
             "ADD_1_2" to FactMastery("ADD_1_2", 1, 4, 0) // Not mastered
         )
-        val strategy = SmartPracticeStrategy(listOf(level1, level2), userMastery)
+        val strategy = SmartPracticeStrategy(listOf(level1, level2), userMastery, 1L)
         assertFalse(strategy.isLevelUnlocked(level2))
     }
 
@@ -86,6 +86,6 @@ class SmartPracticeStrategyTest {
         val emptyLevel = object : Level by level1 {
             override fun getAllPossibleFactIds() = emptyList<String>()
         }
-        SmartPracticeStrategy(listOf(emptyLevel), mutableMapOf())
+        SmartPracticeStrategy(listOf(emptyLevel), mutableMapOf(), 1L)
     }
 }

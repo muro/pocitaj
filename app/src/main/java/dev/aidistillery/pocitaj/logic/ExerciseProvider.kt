@@ -1,5 +1,6 @@
 package dev.aidistillery.pocitaj.logic
 
+import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
 
 /**
@@ -18,7 +19,7 @@ enum class ExerciseStrategy {
  */
 interface ExerciseProvider {
     fun getNextExercise(): Exercise?
-    fun recordAttempt(exercise: Exercise, wasCorrect: Boolean)
+    fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): FactMastery?
 }
 
 /**

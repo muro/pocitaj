@@ -33,9 +33,10 @@ class DrillStrategyTest {
     private fun setupStrategy(
         masteryMap: MutableMap<String, FactMastery>,
         level: Level = testLevel,
-        setSize: Int = 4
+        setSize: Int = 4,
+        userId: Long = 1L
     ): DrillStrategy {
-        return DrillStrategy(level, masteryMap, workingSetSize = setSize)
+        return DrillStrategy(level, masteryMap, setSize, activeUserId = userId)
     }
 
     // --- New Initialization Tests ---
@@ -168,43 +169,58 @@ class DrillStrategyTest {
 
     // --- Existing Tests for `recordAttempt` ---
 
-    @Test
-    fun `correct answer to L1 fact promotes it to L2 after two consecutive answers`() {
-        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 1, 100L))
-        val strategy = setupStrategy(userMastery)
-        val exercise = exerciseFromFactId("ADDITION_1_1")
-
-        strategy.recordAttempt(exercise, true) // 1st correct
-        assertEquals(2, userMastery["ADDITION_1_1"]!!.strength)
-
-        strategy.recordAttempt(exercise, true) // 2nd correct
-        assertEquals(3, userMastery["ADDITION_1_1"]!!.strength)
-    }
+    
 
     @Test
-    fun `correct answer to L2 fact in a new session promotes it to L3`() {
-        val yesterday = System.currentTimeMillis() - 24 * 60 * 60 * 1000
-        val userMastery = testLevel.getAllPossibleFactIds().associateWith {
-            FactMastery(it, 1, 5, 0)
-        }.toMutableMap()
-        userMastery["ADDITION_1_1"] = FactMastery("ADDITION_1_1", 1, 4, yesterday)
-        val strategy = setupStrategy(userMastery)
-
-        strategy.recordAttempt(exerciseFromFactId("ADDITION_1_1"), true)
-
-        assertEquals(5, userMastery["ADDITION_1_1"]!!.strength)
-    }
-
-    @Test
-    fun `incorrect answer to L2 fact demotes it to L1 and moves to back of queue`() {
+    fun `incorrect answer to L2 fact demotes it to strength 1`() {
         val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 4, 100L))
         val strategy = setupStrategy(userMastery, setSize = 1)
         assertEquals(listOf("ADDITION_1_1"), strategy.workingSet)
+        val exercise = exerciseFromFactId("ADDITION_1_1")
 
-        strategy.recordAttempt(exerciseFromFactId("ADDITION_1_1"), false)
+        strategy.recordAttempt(exercise, false)
 
-        assertEquals(0, userMastery["ADDITION_1_1"]!!.strength)
-        assertEquals("ADDITION_1_1", strategy.workingSet.last())
+        assertEquals(1, userMastery["ADDITION_1_1"]!!.strength)
+    }
+
+    @Test
+    fun `recordAttempt for new fact assigns correct userId`() {
+        // ARRANGE
+        val userMastery = mutableMapOf<String, FactMastery>()
+        val testUserId = 7L
+        val strategy = setupStrategy(userMastery, userId = testUserId)
+        val exercise = exerciseFromFactId("ADDITION_1_1")
+
+        // ACT
+        val newMastery = strategy.recordAttempt(exercise, wasCorrect = true)
+
+        // ASSERT
+        assertNotNull("Should return a new mastery object", newMastery)
+        assertEquals("The new mastery should be assigned to the correct user", testUserId, newMastery!!.userId)
+    }
+
+    @Test
+    fun `strength 2 to 3 does not happen if speed is too slow`() {
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 2, 100L))
+        val strategy = setupStrategy(userMastery)
+        val exercise = exerciseFromFactId("ADDITION_1_1")
+        exercise.speedBadge = SpeedBadge.NONE // Too slow
+
+        strategy.recordAttempt(exercise, true)
+
+        assertEquals("Strength should not increase without the required speed", 2, userMastery["ADDITION_1_1"]!!.strength)
+    }
+
+    @Test
+    fun `strength 2 to 3 requires bronze badge`() {
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 2, 100L))
+        val strategy = setupStrategy(userMastery)
+        val exercise = exerciseFromFactId("ADDITION_1_1")
+        exercise.speedBadge = SpeedBadge.BRONZE
+
+        strategy.recordAttempt(exercise, true)
+
+        assertEquals("Strength should advance to 3 with a Bronze badge", 3, userMastery["ADDITION_1_1"]!!.strength)
     }
 
     @Test

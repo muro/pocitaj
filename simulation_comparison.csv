@@ -1,0 +1,172 @@
+Student,Strategy,Metric,Before,After
+PERFECT,ReviewStrategy,Touched,20,20
+PERFECT,ReviewStrategy,Coverage,1,1
+PERFECT,ReviewStrategy,Rep Rate,0.8,0.8
+PERFECT,ReviewStrategy,Velocity,1,5
+PERFECT,ReviewStrategy,Wasted,100,100
+PERFECT,ReviewStrategy,Boredom,4,4
+PERFECT,ReviewStrategy,S5,20,0
+PERFECT,ReviewStrategy,S6,0,20
+PERFECT,DrillStrategy,Touched,20,20
+PERFECT,DrillStrategy,Coverage,1,1
+PERFECT,DrillStrategy,Rep Rate,0.8,0.8
+PERFECT,DrillStrategy,Velocity,1.22,1.02
+PERFECT,DrillStrategy,Wasted,100,92
+PERFECT,DrillStrategy,Boredom,18.46,24.02
+PERFECT,DrillStrategy,S4,0,2
+PERFECT,DrillStrategy,S5,20,18
+PERFECT,SmartPracticeStrategy,Touched,20,20
+PERFECT,SmartPracticeStrategy,Coverage,1,1
+PERFECT,SmartPracticeStrategy,Rep Rate,0.8,0.8
+PERFECT,SmartPracticeStrategy,Velocity,1,1
+PERFECT,SmartPracticeStrategy,Wasted,100,100
+PERFECT,SmartPracticeStrategy,Boredom,4.55,4.48
+PERFECT,SmartPracticeStrategy,S5,20,20
+IMPROVING,ReviewStrategy,Touched,20,20
+IMPROVING,ReviewStrategy,Coverage,1,1
+IMPROVING,ReviewStrategy,Rep Rate,0.8,0.8
+IMPROVING,ReviewStrategy,Velocity,1.15,2.56
+IMPROVING,ReviewStrategy,Wasted,50,100
+IMPROVING,ReviewStrategy,Boredom,3,3
+IMPROVING,ReviewStrategy,S2,1,0
+IMPROVING,ReviewStrategy,S3,3,0
+IMPROVING,ReviewStrategy,S4,6,0
+IMPROVING,ReviewStrategy,S5,10,0
+IMPROVING,ReviewStrategy,S6,0,20
+IMPROVING,DrillStrategy,Touched,19,20
+IMPROVING,DrillStrategy,Coverage,0.95,1
+IMPROVING,DrillStrategy,Rep Rate,0.81,0.8
+IMPROVING,DrillStrategy,Velocity,1.28,1.12
+IMPROVING,DrillStrategy,Wasted,42,53
+IMPROVING,DrillStrategy,Boredom,17.51,18.15
+IMPROVING,DrillStrategy,S1,2,0
+IMPROVING,DrillStrategy,S2,0,1
+IMPROVING,DrillStrategy,S3,3,1
+IMPROVING,DrillStrategy,S4,7,8
+IMPROVING,DrillStrategy,S5,7,10
+IMPROVING,SmartPracticeStrategy,Touched,20,20
+IMPROVING,SmartPracticeStrategy,Coverage,1,1
+IMPROVING,SmartPracticeStrategy,Rep Rate,0.8,0.8
+IMPROVING,SmartPracticeStrategy,Velocity,1.14,1.1
+IMPROVING,SmartPracticeStrategy,Wasted,15,53
+IMPROVING,SmartPracticeStrategy,Boredom,3.59,2.81
+IMPROVING,SmartPracticeStrategy,S3,1,0
+IMPROVING,SmartPracticeStrategy,S4,16,10
+IMPROVING,SmartPracticeStrategy,S5,3,10
+GOOD,ReviewStrategy,Touched,20,20
+GOOD,ReviewStrategy,Coverage,1,1
+GOOD,ReviewStrategy,Rep Rate,0.8,0.8
+GOOD,ReviewStrategy,Velocity,1.12,3.7
+GOOD,ReviewStrategy,Wasted,50,90
+GOOD,ReviewStrategy,Boredom,3.45,3.5
+GOOD,ReviewStrategy,S1,3,2
+GOOD,ReviewStrategy,S2,3,0
+GOOD,ReviewStrategy,S3,2,0
+GOOD,ReviewStrategy,S4,2,0
+GOOD,ReviewStrategy,S5,10,0
+GOOD,ReviewStrategy,S6,0,18
+GOOD,DrillStrategy,Touched,20,20
+GOOD,DrillStrategy,Coverage,1,1
+GOOD,DrillStrategy,Rep Rate,0.8,0.8
+GOOD,DrillStrategy,Velocity,1.14,1.06
+GOOD,DrillStrategy,Wasted,66,52
+GOOD,DrillStrategy,Boredom,17.8,21.77
+GOOD,DrillStrategy,S0,0,0
+GOOD,DrillStrategy,S1,0,0
+GOOD,DrillStrategy,S2,0,1
+GOOD,DrillStrategy,S3,0,1
+GOOD,DrillStrategy,S4,7,8
+GOOD,DrillStrategy,S5,13,10
+GOOD,SmartPracticeStrategy,Touched,20,20
+GOOD,SmartPracticeStrategy,Coverage,1,1
+GOOD,SmartPracticeStrategy,Rep Rate,0.8,0.8
+GOOD,SmartPracticeStrategy,Velocity,1.11,1.09
+GOOD,SmartPracticeStrategy,Wasted,20,30
+GOOD,SmartPracticeStrategy,Boredom,6.01,3.54
+GOOD,SmartPracticeStrategy,S2,0,2
+GOOD,SmartPracticeStrategy,S3,2,0
+GOOD,SmartPracticeStrategy,S4,14,12
+GOOD,SmartPracticeStrategy,S5,4,6
+FORGETFUL,ReviewStrategy,Touched,20,20
+FORGETFUL,ReviewStrategy,Coverage,1,1
+FORGETFUL,ReviewStrategy,Rep Rate,0.8,0.8
+FORGETFUL,ReviewStrategy,Velocity,1.82,3.23
+FORGETFUL,ReviewStrategy,Wasted,0,29
+FORGETFUL,ReviewStrategy,Boredom,2.05,4.77
+FORGETFUL,ReviewStrategy,S1,13,14
+FORGETFUL,ReviewStrategy,S2,4,0
+FORGETFUL,ReviewStrategy,S3,0,0
+FORGETFUL,ReviewStrategy,S4,3,0
+FORGETFUL,ReviewStrategy,S5,0,5
+FORGETFUL,ReviewStrategy,S6,0,1
+FORGETFUL,DrillStrategy,Touched,19,20
+FORGETFUL,DrillStrategy,Coverage,0.95,1
+FORGETFUL,DrillStrategy,Rep Rate,0.81,0.8
+FORGETFUL,DrillStrategy,Velocity,1.23,1.18
+FORGETFUL,DrillStrategy,Wasted,8,0
+FORGETFUL,DrillStrategy,Boredom,20.15,17.94
+FORGETFUL,DrillStrategy,S1,1,2
+FORGETFUL,DrillStrategy,S2,0,2
+FORGETFUL,DrillStrategy,S3,4,2
+FORGETFUL,DrillStrategy,S4,12,14
+FORGETFUL,DrillStrategy,S5,2,0
+FORGETFUL,SmartPracticeStrategy,Touched,20,20
+FORGETFUL,SmartPracticeStrategy,Coverage,1,1
+FORGETFUL,SmartPracticeStrategy,Rep Rate,0.8,0.8
+FORGETFUL,SmartPracticeStrategy,Velocity,1.69,1.75
+FORGETFUL,SmartPracticeStrategy,Wasted,0,0
+FORGETFUL,SmartPracticeStrategy,Boredom,0.93,1.04
+FORGETFUL,SmartPracticeStrategy,S1,1,1
+FORGETFUL,SmartPracticeStrategy,S2,19,19
+FORGETFUL,SmartPracticeStrategy,S3,0,0
+POWER_LAW,ReviewStrategy,Touched,20,20
+POWER_LAW,ReviewStrategy,Coverage,1,1
+POWER_LAW,ReviewStrategy,Rep Rate,0.8,0.8
+POWER_LAW,ReviewStrategy,Velocity,5,5
+POWER_LAW,ReviewStrategy,Wasted,0,0
+POWER_LAW,ReviewStrategy,Boredom,0.4,2.34
+POWER_LAW,ReviewStrategy,S1,20,20
+POWER_LAW,DrillStrategy,Touched,6,4
+POWER_LAW,DrillStrategy,Coverage,0.3,0.2
+POWER_LAW,DrillStrategy,Rep Rate,0.94,0.96
+POWER_LAW,DrillStrategy,Velocity,2.5,4.35
+POWER_LAW,DrillStrategy,Wasted,0,0
+POWER_LAW,DrillStrategy,Boredom,10.94,7.96
+POWER_LAW,DrillStrategy,S0,3,0
+POWER_LAW,DrillStrategy,S1,1,3
+POWER_LAW,DrillStrategy,S3,1,1
+POWER_LAW,DrillStrategy,S4,1,0
+POWER_LAW,SmartPracticeStrategy,Touched,20,20
+POWER_LAW,SmartPracticeStrategy,Coverage,1,1
+POWER_LAW,SmartPracticeStrategy,Rep Rate,0.8,0.8
+POWER_LAW,SmartPracticeStrategy,Velocity,4.55,4.76
+POWER_LAW,SmartPracticeStrategy,Wasted,0,0
+POWER_LAW,SmartPracticeStrategy,Boredom,0.31,0.4
+POWER_LAW,SmartPracticeStrategy,S1,18,19
+POWER_LAW,SmartPracticeStrategy,S2,2,1
+FAST_POWER_LAW,ReviewStrategy,Touched,20,20
+FAST_POWER_LAW,ReviewStrategy,Coverage,1,1
+FAST_POWER_LAW,ReviewStrategy,Rep Rate,0.8,0.8
+FAST_POWER_LAW,ReviewStrategy,Velocity,5,5
+FAST_POWER_LAW,ReviewStrategy,Wasted,0,0
+FAST_POWER_LAW,ReviewStrategy,Boredom,0.5,5.28
+FAST_POWER_LAW,ReviewStrategy,S1,20,20
+FAST_POWER_LAW,DrillStrategy,Touched,8,8
+FAST_POWER_LAW,DrillStrategy,Coverage,0.4,0.4
+FAST_POWER_LAW,DrillStrategy,Rep Rate,0.92,0.92
+FAST_POWER_LAW,DrillStrategy,Velocity,2.22,3.33
+FAST_POWER_LAW,DrillStrategy,Wasted,10,0
+FAST_POWER_LAW,DrillStrategy,Boredom,10.51,10.21
+FAST_POWER_LAW,DrillStrategy,S0,1,0
+FAST_POWER_LAW,DrillStrategy,S1,1,4
+FAST_POWER_LAW,DrillStrategy,S3,1,0
+FAST_POWER_LAW,DrillStrategy,S4,4,4
+FAST_POWER_LAW,DrillStrategy,S5,1,0
+FAST_POWER_LAW,SmartPracticeStrategy,Touched,20,20
+FAST_POWER_LAW,SmartPracticeStrategy,Coverage,1,1
+FAST_POWER_LAW,SmartPracticeStrategy,Rep Rate,0.8,0.8
+FAST_POWER_LAW,SmartPracticeStrategy,Velocity,3.85,4.35
+FAST_POWER_LAW,SmartPracticeStrategy,Wasted,0,0
+FAST_POWER_LAW,SmartPracticeStrategy,Boredom,0.56,0.44
+FAST_POWER_LAW,SmartPracticeStrategy,S1,14,17
+FAST_POWER_LAW,SmartPracticeStrategy,S2,6,3

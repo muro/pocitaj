@@ -25,6 +25,6 @@ data class FactMastery(
     val avgDurationMs: Long = 0
 ) {
     init {
-        require(strength in 0..5) { "Strength must be between 0 and 5, but was $strength" }
+        require(strength in 0..10) { "Strength must be between 0 and 10, but was $strength" }
     }
 }

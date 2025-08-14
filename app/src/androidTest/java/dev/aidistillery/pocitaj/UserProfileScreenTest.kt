@@ -3,14 +3,17 @@ package dev.aidistillery.pocitaj
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToString
+import androidx.test.espresso.Espresso
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.aidistillery.pocitaj.data.ExerciseAttempt
 import dev.aidistillery.pocitaj.data.FactMastery
@@ -122,6 +125,9 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
             Curriculum.SubtractionFrom5.getAllPossibleFactIds().forEach { factId ->
                 globals.factMasteryDao.upsert(FactMastery(factId, 2, 5, 0))
             }
+            Curriculum.MultiplicationTableLevel(3).getAllPossibleFactIds().forEach { factId ->
+                globals.factMasteryDao.upsert(FactMastery(factId, 3, 3, 0))
+            }
         }
 
         // 2. Verify Initial State (Default User)
@@ -169,6 +175,18 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
             .performVerifiedClick("User Profile icon")
         composeTestRule.onNodeWithText("Bob").performClick()
         composeTestRule.waitForIdle()
+
+        // Verify progress report
+        composeTestRule.onNodeWithContentDescription("My Progress" /*R.string.progress_button*/).performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("progress_report_list")
+            .performScrollToNode(hasTestTag("operation_card_MULTIPLICATION"))
+        composeTestRule.onNodeWithTag("operation_card_MULTIPLICATION").assertIsDisplayed()
+        print(composeTestRule.onRoot().printToString())
+        composeTestRule.onNodeWithTag("cell_MULTIPLICATION_2_3_3").assertIsDisplayed()
+
+        print(composeTestRule.onRoot().printToString())
+        Espresso.pressBack()
 
         // 7. Verify Bob's State
         openOperationCard("-")

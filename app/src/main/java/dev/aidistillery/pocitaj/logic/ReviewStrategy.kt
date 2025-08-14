@@ -76,6 +76,9 @@ import kotlin.time.Clock
 class ReviewStrategy(
     private val level: Level,
     private val userMastery: MutableMap<String, FactMastery>,
+    private val reviewStrength: Int,
+    private val targetStrength: Int,
+    private val activeUserId: Long,
     private val clock: Clock = Clock.System
 ) : ExerciseProvider {
 
@@ -84,7 +87,7 @@ class ReviewStrategy(
     }
 
     companion object {
-        private const val MAX_STRENGTH = 5
+        private const val MAX_STRENGTH = 10
 
         // Defines the ideal time gap in milliseconds before a fact should be reviewed again.
         private val idealIntervals = mapOf(
@@ -152,20 +155,34 @@ class ReviewStrategy(
         return candidates.keys.firstOrNull()?.let { exerciseFromFactId(it) }
     }
 
-    override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean) {
+    override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): FactMastery? {
         val factId = exercise.getFactId()
+        val mastery = userMastery[factId] ?: FactMastery(factId, activeUserId, 0, 0)
         val now = clock.now().toEpochMilliseconds()
-        val mastery = userMastery[factId] ?: FactMastery(factId, 1, 0, 0)
+        val duration = exercise.timeTakenMillis?.toLong() ?: 0L
 
-        val newStrength = if (wasCorrect) {
-            (mastery.strength + 1).coerceAtMost(MAX_STRENGTH)
+        val newAvgDuration = if (mastery.avgDurationMs > 0) {
+            (mastery.avgDurationMs * 0.8 + duration * 0.2).toLong()
         } else {
-            1 // Reset strength on failure
+            duration
         }
 
-        userMastery[factId] = mastery.copy(
+        val newStrength = if (wasCorrect) {
+            when (exercise.speedBadge) {
+                SpeedBadge.GOLD -> targetStrength
+                SpeedBadge.SILVER, SpeedBadge.BRONZE -> (mastery.strength - 1).coerceAtLeast(reviewStrength)
+                else -> mastery.strength
+            }
+        } else {
+            1 // Reset to 1 on failure
+        }
+
+        val newMastery = mastery.copy(
             strength = newStrength,
-            lastTestedTimestamp = now
+            lastTestedTimestamp = now,
+            avgDurationMs = newAvgDuration
         )
+        userMastery[factId] = newMastery
+        return newMastery
     }
 }

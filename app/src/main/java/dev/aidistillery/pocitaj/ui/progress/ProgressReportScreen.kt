@@ -301,6 +301,7 @@ fun FactCell(factProgress: FactProgress?, result: Int, cellSize: androidx.compos
         modifier = Modifier
             .size(cellSize)
             .background(color, shape = RoundedCornerShape(4.dp))
+            .testTag("cell_${factProgress?.factId}_${factProgress?.mastery?.strength}")
             .border(
                 1.dp,
                 Color.LightGray,

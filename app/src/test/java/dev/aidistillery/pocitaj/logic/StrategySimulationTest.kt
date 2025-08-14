@@ -70,8 +70,8 @@ class StrategySimulationTest {
         override fun getSuccessProbability(context: SimulationContext) = 0.9
         // Speed is linked to accuracy. 90% accuracy = 90% of the way to Gold speed.
         override fun getAttemptDuration(context: SimulationContext): Long {
-            val threshold = getSpeedThreshold(Operation.ADDITION, 1, 1)
-            return (threshold * (1.0 - 0.9) * 2).toLong() // (1 - accuracy) * 2 -> Bronze/Silver
+            // 50% gold, otherwise silver or bronze
+            return (Random.nextDouble() * getSpeedThreshold(Operation.ADDITION, 1, 1).toDouble()).toLong()
         }
     }
 
@@ -81,10 +81,9 @@ class StrategySimulationTest {
             (0.5 + (context.attempts * 0.1)).coerceAtMost(1.0)
 
         override fun getAttemptDuration(context: SimulationContext): Long {
-            val accuracy = getSuccessProbability(context)
+            // increase speed over time, gold (= 0.5 * threshold) after strength 4:
             val threshold = getSpeedThreshold(Operation.ADDITION, 1, 1)
-            // As accuracy approaches 1.0, duration approaches the Gold threshold (threshold * 0.5)
-            return (threshold * (1.0 - accuracy) * 2.0).coerceAtLeast(threshold * 0.5).toLong()
+            return (threshold * (2.0 / context.strength.toDouble())).toLong()
         }
     }
 
@@ -103,7 +102,7 @@ class StrategySimulationTest {
         override fun getAttemptDuration(context: SimulationContext): Long {
             val accuracy = getSuccessProbability(context)
             val threshold = getSpeedThreshold(Operation.ADDITION, 1, 1)
-            return (threshold * (1.0 - accuracy) * 3.0).coerceAtLeast(threshold * 0.5).toLong()
+            return (threshold * (1.0 - accuracy) * 3.0).coerceAtLeast(threshold * 0.4).toLong()
         }
     }
 
@@ -127,7 +126,7 @@ class StrategySimulationTest {
         override fun getAttemptDuration(context: SimulationContext): Long {
             val accuracy = getSuccessProbability(context)
             val threshold = getSpeedThreshold(Operation.ADDITION, 1, 1)
-            return (threshold * (1.0 - accuracy) * 2.5).coerceAtLeast(threshold * 0.5).toLong()
+            return (threshold * (1.0 - accuracy) * 2.5).coerceAtLeast(threshold * 0.4).toLong()
         }
 
         override fun recordAttempt(context: SimulationContext, wasCorrect: Boolean) {
@@ -338,7 +337,10 @@ class StrategySimulationTest {
                 ReviewStrategy(
                     l,
                     m,
-                    c
+                    reviewStrength = 5,
+                    targetStrength = 6,
+                    activeUserId = 1L, // Assuming user 1 for simulation
+                    clock = c
                 )
             } to 0),
             "DrillStrategy" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
@@ -346,15 +348,17 @@ class StrategySimulationTest {
                     l,
                     m,
                     4,
-                    c
+                    activeUserId = 1L, // Assuming user 1 for simulation
+                    clock = c
                 )
             } to 20),
             "SmartPractice" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
                 SmartPracticeStrategy(
                     listOf(l),
                     m,
-                    Random.Default,
-                    c
+                    activeUserId = 1L, // Assuming user 1 for simulation
+                    random = Random.Default,
+                    clock = c
                 )
             } to 0)
         )

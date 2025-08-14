@@ -30,14 +30,17 @@ class AdaptiveExerciseSource(
         exerciseProvider = when {
             level != null && level.strategy == ExerciseStrategy.REVIEW -> ReviewStrategy(
                 level,
-                userMastery.toMutableMap()
+                userMastery.toMutableMap(),
+                reviewStrength = 5, // Temporary default
+                targetStrength = 6,  // Temporary default
+                activeUserId = activeUserManager.activeUser.id
             )
 
-            level != null -> DrillStrategy(level, userMastery.toMutableMap())
+            level != null -> DrillStrategy(level, userMastery.toMutableMap(), activeUserId = activeUserManager.activeUser.id)
             else -> {
                 val filteredCurriculum =
                     Curriculum.getAllLevels().filter { it.operation == config.operation }
-                SmartPracticeStrategy(filteredCurriculum, userMastery.toMutableMap())
+                SmartPracticeStrategy(filteredCurriculum, userMastery.toMutableMap(), activeUserId = activeUserManager.activeUser.id)
             }
         }
     }
@@ -79,7 +82,7 @@ class AdaptiveExerciseSource(
 
     override suspend fun recordAttempt(exercise: Exercise, submittedAnswer: Int, durationMs: Long) {
         val wasCorrect = exercise.equation.getExpectedResult() == submittedAnswer
-        exerciseProvider?.recordAttempt(exercise, wasCorrect)
+        val newMastery = exerciseProvider?.recordAttempt(exercise, wasCorrect)
 
         withContext(Dispatchers.IO) {
             val attempt = ExerciseAttempt(
@@ -94,35 +97,9 @@ class AdaptiveExerciseSource(
             )
             exerciseAttemptDao.insert(attempt)
 
-            val factId = exercise.getFactId()
-            val currentMastery = factMasteryDao.getFactMastery(activeUserManager.activeUser.id, factId)
-            val currentStrength = currentMastery?.strength ?: 0
-            val currentAvgDuration = currentMastery?.avgDurationMs ?: 0L
-
-            val newStrength = if (wasCorrect) {
-                currentStrength + 1
-            } else {
-                0 // Reset to 0 on incorrect
+            newMastery?.let {
+                factMasteryDao.upsert(it)
             }
-
-            val newAvgDuration = if (wasCorrect) {
-                if (currentAvgDuration == 0L) {
-                    durationMs // This is the first correct answer
-                } else {
-                    (EWMA_ALPHA * durationMs + (1 - EWMA_ALPHA) * currentAvgDuration).toLong()
-                }
-            } else {
-                currentAvgDuration // No change on incorrect
-            }
-
-            val newMastery = FactMastery(
-                factId = factId,
-                userId = activeUserManager.activeUser.id,
-                strength = newStrength.coerceAtMost(5), // Cap at 5 (mastered)
-                lastTestedTimestamp = System.currentTimeMillis(),
-                avgDurationMs = newAvgDuration
-            )
-            factMasteryDao.upsert(newMastery)
         }
     }
 }

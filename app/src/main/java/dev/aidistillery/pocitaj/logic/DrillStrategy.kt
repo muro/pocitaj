@@ -52,21 +52,12 @@ class DrillStrategy(
     private val level: Level,
     private val userMastery: MutableMap<String, FactMastery>,
     private val workingSetSize: Int = 4,
+    private val activeUserId: Long,
     private val clock: Clock = Clock.System
 ) : ExerciseProvider {
 
     internal val workingSet = mutableListOf<String>()
     private val allFactsInLevel = level.getAllPossibleFactIds()
-    private val consecutiveCorrectAnswers = mutableMapOf<String, Int>()
-
-    companion object {
-        private const val CONSECUTIVE_ANSWERS_FOR_PROMOTION = 2
-
-        // To ensure that L2 -> L3 promotion happens in a separate session, we require
-        // a minimum time gap between reviews. 5 minutes is a practical proxy for a
-        // "different session" in a mobile app context.
-        private const val MIN_SESSION_SPACING_MS = 5 * 60 * 1000
-    }
 
     init {
         require(allFactsInLevel.isNotEmpty()) { "Level cannot be empty" }
@@ -74,7 +65,7 @@ class DrillStrategy(
     }
 
     private fun getMastery(factId: String): FactMastery {
-        return userMastery[factId] ?: FactMastery(factId, 1, 0, 0)
+        return userMastery[factId] ?: FactMastery(factId, activeUserId, 0, 0)
     }
 
     private fun updateWorkingSet() {
@@ -119,51 +110,45 @@ class DrillStrategy(
         return exerciseFromFactId(factId)
     }
 
-    override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean) {
+    override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): FactMastery? {
         val factId = exercise.getFactId()
         val mastery = getMastery(factId)
+        val now = clock.now().toEpochMilliseconds()
+        val duration = exercise.timeTakenMillis?.toLong() ?: 0L
 
-        if (wasCorrect) {
-            consecutiveCorrectAnswers[factId] = (consecutiveCorrectAnswers[factId] ?: 0) + 1
-            var newStrength = mastery.strength
-
-            if (mastery.strength < L2_MASTERY) {
-                if (consecutiveCorrectAnswers[factId]!! >= CONSECUTIVE_ANSWERS_FOR_PROMOTION) {
-                    newStrength = L2_MASTERY
-                    consecutiveCorrectAnswers[factId] = 0
-                } else {
-                    newStrength += 1
-                }
-            } else if (mastery.strength in L2_MASTERY until REPLACEABLE_MASTERY) {
-                newStrength += 1
-            } else if (mastery.strength == L3_MASTERY - 1) {
-                val lastTested = mastery.lastTestedTimestamp
-                val now = clock.now().toEpochMilliseconds()
-                if (now - lastTested > MIN_SESSION_SPACING_MS) {
-                    newStrength += 1
-                }
-            }
-
-            val newMastery = mastery.copy(
-                strength = newStrength.coerceAtMost(L3_MASTERY),
-                lastTestedTimestamp = clock.now().toEpochMilliseconds()
-            )
-            userMastery[factId] = newMastery
-
-            if (newMastery.strength >= REPLACEABLE_MASTERY) {
-                workingSet.remove(factId)
-                addNextWeakestFact()
-            }
-
-        } else { // Incorrect Answer
-            consecutiveCorrectAnswers[factId] = 0
-            userMastery[factId] =
-                mastery.copy(strength = 0, lastTestedTimestamp = clock.now().toEpochMilliseconds())
-
-            // Move the incorrect fact to the front of the working set for immediate repetition.
-            workingSet.remove(factId)
-            workingSet.add(0, factId)
+        val newAvgDuration = if (mastery.avgDurationMs > 0) {
+            (mastery.avgDurationMs * 0.8 + duration * 0.2).toLong()
+        } else {
+            duration
         }
+
+        val newStrength = if (wasCorrect) {
+            val speedBadge = exercise.speedBadge
+            val currentStrength = mastery.strength
+
+            when (currentStrength) {
+                0, 1 -> currentStrength + 1 // Always advance for accuracy at low levels
+                2 -> if (speedBadge >= SpeedBadge.BRONZE) 3 else 2
+                3 -> if (speedBadge >= SpeedBadge.SILVER) 4 else 3
+                4 -> if (speedBadge == SpeedBadge.GOLD) 5 else 4
+                else -> currentStrength // Stays at 5 if already mastered
+            }
+        } else {
+            1 // Reset to 1 on failure
+        }
+
+        val newMastery = mastery.copy(
+            strength = newStrength.coerceAtMost(L3_MASTERY),
+            lastTestedTimestamp = now,
+            avgDurationMs = newAvgDuration
+        )
+        userMastery[factId] = newMastery
+
+        if (newMastery.strength >= REPLACEABLE_MASTERY) {
+            workingSet.remove(factId)
+            addNextWeakestFact()
+        }
+        return newMastery
     }
 
     private fun addNextWeakestFact() {

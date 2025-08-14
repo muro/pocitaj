@@ -30,17 +30,26 @@ class ReviewStrategyTest {
     }
 
     private fun setupStrategy(
-        masteryMap: Map<String, FactMastery>,
-        level: Level = testLevel
+        masteryMap: MutableMap<String, FactMastery>,
+        level: Level = testLevel,
+        reviewStrength: Int = 5,
+        targetStrength: Int = 6,
+        userId: Long = 1L
     ): ReviewStrategy {
-        return ReviewStrategy(level, masteryMap.toMutableMap())
+        return ReviewStrategy(
+            level,
+            masteryMap,
+            reviewStrength = reviewStrength,
+            targetStrength = targetStrength,
+            activeUserId = userId
+        )
     }
 
     // --- getNextExercise Tests ---
 
     @Test
     fun `getNextExercise returns a fact when mastery is empty`() {
-        val userMastery = emptyMap<String, FactMastery>()
+        val userMastery = mutableMapOf<String, FactMastery>()
         val strategy = setupStrategy(userMastery)
         val exercise = strategy.getNextExercise()
         assertNotNull("Should return a non-null exercise even with no history", exercise)
@@ -53,7 +62,7 @@ class ReviewStrategyTest {
         val fiveMinutesAgo = now - 5 * 60 * 1000
         val overdueFactId = "ADDITION_1_1"
         val recentFactId = "ADDITION_1_2"
-        val userMastery = mapOf(
+        val userMastery = mutableMapOf(
             createMastery(overdueFactId, 1, oneWeekAgo),
             createMastery(recentFactId, 4, fiveMinutesAgo)
         )
@@ -72,50 +81,62 @@ class ReviewStrategyTest {
     // --- recordAttempt Tests ---
 
     @Test
-    fun `correct answer increases strength and updates timestamp`() {
-        // ARRANGE
-        val now = System.currentTimeMillis()
-        val factId = "ADDITION_1_1"
-        val initialStrength = 2
-        val userMastery = mutableMapOf(
-            factId to FactMastery(factId, 1, initialStrength, now - 100000)
-        )
-        val strategy = ReviewStrategy(testLevel, userMastery)
-        val exercise = exerciseFromFactId(factId)
+    fun `incorrect answer resets strength to 1`() {
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 7, 100L))
+        val strategy = setupStrategy(userMastery)
+        val exercise = exerciseFromFactId("ADDITION_1_1")
 
-        // ACT
-        strategy.recordAttempt(exercise, wasCorrect = true)
+        strategy.recordAttempt(exercise, wasCorrect = false)
 
-        // ASSERT
-        val updatedMastery = userMastery[factId]!!
-        assertEquals(initialStrength + 1, updatedMastery.strength)
-        assertTrue(
-            "Timestamp should be updated to be very recent",
-            now - updatedMastery.lastTestedTimestamp < 1000
-        )
+        assertEquals("Strength should be reset to 1 on failure", 1, userMastery["ADDITION_1_1"]!!.strength)
     }
 
     @Test
-    fun `incorrect answer resets strength and updates timestamp`() {
-        // ARRANGE
-        val now = System.currentTimeMillis()
-        val factId = "ADDITION_1_1"
-        val userMastery = mutableMapOf(
-            factId to FactMastery(factId, 1, 5, now - 100000)
-        )
-        val strategy = ReviewStrategy(testLevel, userMastery)
-        val exercise = exerciseFromFactId(factId)
+    fun `correct answer with Gold speed promotes to targetStrength`() {
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 6, 100L))
+        val strategy = setupStrategy(userMastery, reviewStrength = 6, targetStrength = 7)
+        val exercise = exerciseFromFactId("ADDITION_1_1")
+        exercise.speedBadge = SpeedBadge.GOLD
 
-        // ACT
-        strategy.recordAttempt(exercise, wasCorrect = false)
+        strategy.recordAttempt(exercise, true)
 
-        // ASSERT
-        val updatedMastery = userMastery[factId]!!
-        assertEquals("Strength should be reset to 1 on failure", 1, updatedMastery.strength)
-        assertTrue(
-            "Timestamp should be updated to be very recent",
-            now - updatedMastery.lastTestedTimestamp < 1000
-        )
+        assertEquals("Strength should be promoted to targetStrength", 7, userMastery["ADDITION_1_1"]!!.strength)
+    }
+
+    @Test
+    fun `correct answer with Gold speed does not promote beyond targetStrength`() {
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 7, 100L))
+        val strategy = setupStrategy(userMastery, reviewStrength = 6, targetStrength = 7)
+        val exercise = exerciseFromFactId("ADDITION_1_1")
+        exercise.speedBadge = SpeedBadge.GOLD
+
+        strategy.recordAttempt(exercise, true)
+
+        assertEquals("Strength should not exceed targetStrength", 7, userMastery["ADDITION_1_1"]!!.strength)
+    }
+
+    @Test
+    fun `correct answer with Silver speed demotes strength by 1`() {
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 7, 100L))
+        val strategy = setupStrategy(userMastery, reviewStrength = 6, targetStrength = 7)
+        val exercise = exerciseFromFactId("ADDITION_1_1")
+        exercise.speedBadge = SpeedBadge.SILVER
+
+        strategy.recordAttempt(exercise, true)
+
+        assertEquals("Strength should be demoted by 1", 6, userMastery["ADDITION_1_1"]!!.strength)
+    }
+
+    @Test
+    fun `correct answer with Bronze speed does not demote below reviewStrength`() {
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 6, 100L))
+        val strategy = setupStrategy(userMastery, reviewStrength = 6, targetStrength = 7)
+        val exercise = exerciseFromFactId("ADDITION_1_1")
+        exercise.speedBadge = SpeedBadge.BRONZE
+
+        strategy.recordAttempt(exercise, true)
+
+        assertEquals("Strength should not go below reviewStrength", 6, userMastery["ADDITION_1_1"]!!.strength)
     }
 
     @Test(expected = IllegalArgumentException::class)

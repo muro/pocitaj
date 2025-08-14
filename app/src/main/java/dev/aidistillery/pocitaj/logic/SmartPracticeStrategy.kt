@@ -56,6 +56,7 @@ import kotlin.time.Clock
 class SmartPracticeStrategy(
     private val curriculum: List<Level>,
     private val userMastery: MutableMap<String, FactMastery>,
+    private val activeUserId: Long,
     private val random: Random = Random.Default,
     private val clock: Clock = Clock.System
 ) : ExerciseProvider {
@@ -91,21 +92,40 @@ class SmartPracticeStrategy(
         return exerciseFromFactId(factId)
     }
 
-    override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean) {
+    override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): FactMastery? {
         val factId = exercise.getFactId()
+        val mastery = userMastery[factId] ?: FactMastery(factId, activeUserId, 0, 0)
         val now = clock.now().toEpochMilliseconds()
-        val mastery = userMastery[factId] ?: FactMastery(factId, 1, 0, 0)
+        val duration = exercise.timeTakenMillis?.toLong() ?: 0L
 
-        val newStrength = if (wasCorrect) {
-            (mastery.strength + 1).coerceAtMost(MASTERY_STRENGTH)
+        val newAvgDuration = if (mastery.avgDurationMs > 0) {
+            (mastery.avgDurationMs * 0.8 + duration * 0.2).toLong()
         } else {
-            1 // Reset strength on failure
+            duration
         }
 
-        userMastery[factId] = mastery.copy(
-            strength = newStrength,
-            lastTestedTimestamp = now
+        val newStrength = if (wasCorrect) {
+            val speedBadge = exercise.speedBadge
+            val currentStrength = mastery.strength
+
+            when (currentStrength) {
+                0, 1 -> currentStrength + 1 // Always advance for accuracy at low levels
+                2 -> if (speedBadge >= SpeedBadge.BRONZE) 3 else 2
+                3 -> if (speedBadge >= SpeedBadge.SILVER) 4 else 3
+                4 -> if (speedBadge == SpeedBadge.GOLD) 5 else 4
+                else -> currentStrength // Stays at 5 if already mastered
+            }
+        } else {
+            1 // Reset to 1 on failure
+        }
+
+        val newMastery = mastery.copy(
+            strength = newStrength.coerceAtMost(MASTERY_STRENGTH),
+            lastTestedTimestamp = now,
+            avgDurationMs = newAvgDuration
         )
+        userMastery[factId] = newMastery
+        return newMastery
     }
 
     private fun findWeakestFactIn(level: Level): String {
