@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -58,6 +60,11 @@ import dev.aidistillery.pocitaj.ui.components.AutoSizeText
 import dev.aidistillery.pocitaj.ui.components.PocitajScreen
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import dev.aidistillery.pocitaj.ui.theme.getGradientForOperation
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun ExerciseSetupScreen(
@@ -67,99 +74,176 @@ fun ExerciseSetupScreen(
     onProgressClicked: () -> Unit,
     onCreditsClicked: () -> Unit,
     onProfileClicked: () -> Unit,
+    onEnableDebugMode: () -> Unit,
+    debugMode: Boolean
 ) {
     var expandedOperation by remember { mutableStateOf<Operation?>(null) }
+    val secretTapState = rememberSecretTapState(onSecretActivated = onEnableDebugMode)
+
+    val displayedLevels = if (debugMode) {
+        operationLevels.map { opLevels ->
+            opLevels.copy(levelStatuses = opLevels.levelStatuses.map { it.copy(isUnlocked = true) })
+        }
+    } else {
+        operationLevels
+    }
 
     BackHandler(enabled = expandedOperation != null) {
         expandedOperation = null
     }
 
     PocitajScreen {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                IconButton(
-                    onClick = onProfileClicked,
-                    modifier = Modifier
-                        .testTag("user_profile_${activeUser.name}")
-                        .padding(end = 8.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val iconRes = UserAppearance.icons[activeUser.iconId]
-                    if (iconRes != null) {
+                    IconButton(
+                        onClick = onProfileClicked,
+                        modifier = Modifier
+                            .testTag("user_profile_${activeUser.name}")
+                            .padding(end = 8.dp)
+                    ) {
+                        val iconRes = UserAppearance.icons[activeUser.iconId]
+                        if (iconRes != null) {
+                            Icon(
+                                painter = painterResource(id = iconRes),
+                                contentDescription = stringResource(id = R.string.user_profile),
+                                tint = Color(activeUser.color)
+                            )
+                        }
+                    }
+                    Text(
+                        text = activeUser.name,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    IconButton(onClick = onProgressClicked) {
                         Icon(
-                            painter = painterResource(id = iconRes),
-                            contentDescription = stringResource(id = R.string.user_profile),
-                            tint = Color(activeUser.color)
+                            imageVector = Icons.Default.BarChart,
+                            contentDescription = stringResource(id = R.string.progress_button),
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
+
                 Text(
-                    text = activeUser.name,
-                    color = MaterialTheme.colorScheme.onSurface
+                    stringResource(id = R.string.choose_your_challenge),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(top = 16.dp)
                 )
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = onProgressClicked) {
-                    Icon(
-                        imageVector = Icons.Default.BarChart,
-                        contentDescription = stringResource(id = R.string.progress_button),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
 
-            Text(
-                stringResource(id = R.string.choose_your_challenge),
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 16.dp)
-            )
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .testTag("operation_cards_container"),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(operationLevels) { operationState ->
-                    OperationCard(
-                        operationLevels = operationState,
-                        modifier = Modifier.testTag("operation_card_${operationState.operation.toSymbol()}"),
-                        expanded = expandedOperation == operationState.operation,
-                        onCardClicked = {
-                            expandedOperation = if (expandedOperation == operationState.operation) {
-                                null
-                            } else {
-                                operationState.operation
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("operation_cards_container"),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(displayedLevels) { operationState ->
+                        OperationCard(
+                            operationLevels = operationState,
+                            modifier = Modifier.testTag("operation_card_${operationState.operation.toSymbol()}"),
+                            expanded = expandedOperation == operationState.operation,
+                            onCardClicked = {
+                                expandedOperation =
+                                    if (expandedOperation == operationState.operation) {
+                                        null
+                                    } else {
+                                        operationState.operation
+                                    }
+                            },
+                            onStartClicked = { levelId ->
+                                onStartClicked(
+                                    operationState.operation,
+                                    10,
+                                    10,
+                                    levelId
+                                )
                             }
-                        },
-                        onStartClicked = { levelId -> onStartClicked(operationState.operation, 10, 10, levelId) }
-                    )
+                        )
 
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    IconButton(onClick = onCreditsClicked) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Credits",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                    }
                 }
             }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                IconButton(onClick = onCreditsClicked) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = "Credits",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .size(64.dp) // Invisible touch target
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { secretTapState.registerTap() }
                     )
-                }
+            )
+        }
+    }
+}
+
+private class SecretTapState(
+    private val requiredTaps: Int,
+    private val timeLimitMillis: Long,
+    private val onSecretActivated: () -> Unit
+) {
+    private var tapCount = 0
+    private var lastTapTime = 0L
+    private var resetJob: Job? = null
+    private val scope = CoroutineScope(Dispatchers.Main)
+
+    fun registerTap() {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastTapTime > timeLimitMillis) {
+            tapCount = 0
+        }
+        lastTapTime = currentTime
+        tapCount++
+
+        if (tapCount >= requiredTaps) {
+            onSecretActivated()
+            tapCount = 0
+        } else {
+            resetJob?.cancel()
+            resetJob = scope.launch {
+                delay(timeLimitMillis)
+                tapCount = 0
             }
         }
+    }
+}
+
+@Composable
+private fun rememberSecretTapState(
+    requiredTaps: Int = 7,
+    timeLimitMillis: Long = 3000,
+    onSecretActivated: () -> Unit
+): SecretTapState {
+    return remember {
+        SecretTapState(
+            requiredTaps = requiredTaps,
+            timeLimitMillis = timeLimitMillis,
+            onSecretActivated = onSecretActivated
+        )
     }
 }
 
@@ -353,7 +437,9 @@ fun PreviewExerciseSetupScreen() {
             onStartClicked = { _, _, _, _ -> },
             onProgressClicked = { },
             onCreditsClicked = { },
-            onProfileClicked = { }
+            onProfileClicked = { },
+            onEnableDebugMode = { },
+            debugMode = false
         )
     }
 }

@@ -51,7 +51,6 @@ import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.digitalink.Ink
 import com.google.mlkit.vision.digitalink.Ink.Point
 import com.google.mlkit.vision.digitalink.Ink.Stroke
-import dev.aidistillery.pocitaj.BuildConfig
 import dev.aidistillery.pocitaj.InkModelManager
 import dev.aidistillery.pocitaj.data.ExerciseConfig
 import dev.aidistillery.pocitaj.data.ExerciseSource
@@ -181,6 +180,7 @@ fun InkRecognitionBox(
 fun ExerciseScreen(
     exercise: Exercise,
     viewModel: ExerciseViewModel,
+    debugMode: Boolean,
     onAnswerSubmit: (String, Int) -> Unit
 ) {
     BackHandler {
@@ -282,24 +282,24 @@ fun ExerciseScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = "Recognized Text: ${recognizedText ?: "..."}",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+                if (debugMode) {
+                    Text(
+                        text = "Recognized Text: ${recognizedText ?: "..."}",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
 
-                Text(
-                    text = "Time: ${elapsedTimeMillis / 1000}s ${elapsedTimeMillis % 1000}ms",
-                    modifier = Modifier
-                        // .align(Alignment.TopEnd) // Align to top-right
-                        .padding(8.dp), // Add some padding
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+                    Text(
+                        text = "Time: ${elapsedTimeMillis / 1000}s ${elapsedTimeMillis % 1000}ms",
+                        modifier = Modifier
+                            // .align(Alignment.TopEnd) // Align to top-right
+                            .padding(8.dp), // Add some padding
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
 
-                if (BuildConfig.DEBUG) {
                     val workingSet by viewModel.workingSet.collectAsState()
                     if (workingSet.isNotEmpty()) {
                         Text(
@@ -360,6 +360,47 @@ fun PreviewExerciseScreen() {
     viewModel.startExercises(ExerciseConfig(Operation.SUBTRACTION, 12, 10))
 
     AppTheme {
-        ExerciseScreen(exercise, viewModel) { _: String, _: Int -> }
+        ExerciseScreen(exercise, viewModel, false) { _: String, _: Int -> }
+    }
+}
+
+@SuppressLint("ViewModelConstructorInComposable")
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
+@Composable
+fun PreviewExerciseScreenDebug() {
+    val equation: Equation = Subtraction(14, 2)
+    val exercise = Exercise(equation, equation.getExpectedResult())
+    val mockInkModelManager = object : InkModelManager {
+        override fun setModel(languageTag: String): String = "Model set"
+        override fun deleteActiveModel(): com.google.android.gms.tasks.Task<String?> =
+            Tasks.forResult(null)
+
+        override fun download(): com.google.android.gms.tasks.Task<String?> = Tasks.forResult(null)
+        override suspend fun recognizeInk(ink: Ink, hint: String): String = "12"
+    }
+    val mockExerciseSource = object : ExerciseSource {
+        override suspend fun initialize(config: ExerciseConfig) {}
+        override fun getNextExercise(): Exercise? = null
+        override suspend fun recordAttempt(
+            exercise: Exercise,
+            submittedAnswer: Int,
+            durationMs: Long
+        ) {
+        }
+    }
+    val viewModel = ExerciseViewModel(mockInkModelManager, mockExerciseSource)
+    viewModel.startExercises(ExerciseConfig(Operation.SUBTRACTION, 12, 10))
+
+    AppTheme {
+        ExerciseScreen(exercise, viewModel, true) { _: String, _: Int -> }
     }
 }

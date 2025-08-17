@@ -16,6 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -102,6 +105,7 @@ object Destinations {
 @Composable
 fun AppNavigation(restartApp: () -> Unit) {
     val navController = rememberNavController()
+    var debugMode by remember { mutableStateOf(false) }
     val exerciseViewModel: ExerciseViewModel = viewModel(factory = ExerciseViewModelFactory)
     val progressReportViewModel: ProgressReportViewModel =
         viewModel(factory = ProgressReportViewModelFactory)
@@ -158,7 +162,11 @@ fun AppNavigation(restartApp: () -> Unit) {
                 },
                 onProfileClicked = {
                     navController.navigate(Destinations.PROFILE_ROUTE)
-                }
+                },
+                onEnableDebugMode = {
+                    debugMode = true
+                },
+                debugMode = debugMode
             )
         }
         composable(
@@ -168,7 +176,11 @@ fun AppNavigation(restartApp: () -> Unit) {
             val exerciseState = uiState as? UiState.ExerciseScreen
             if (exerciseState != null) {
                 val exercise: Exercise = exerciseState.currentExercise
-                ExerciseScreen(exercise, exerciseViewModel) { answer: String, elapsedMs: Int ->
+                ExerciseScreen(
+                    exercise,
+                    exerciseViewModel,
+                    debugMode
+                ) { answer: String, elapsedMs: Int ->
                     exerciseViewModel.checkAnswer(answer, elapsedMs)
                 }
             }
