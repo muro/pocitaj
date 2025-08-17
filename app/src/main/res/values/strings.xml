@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Pocitaj</string>
+    <string name="app_name">Counting Cat</string>
 
     <!-- Level Titles -->
     <string name="level_sums_up_to_5">Sums up to 5</string>
