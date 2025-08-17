@@ -55,6 +55,36 @@ object Curriculum {
         }
     }
 
+    object SumsOver10 : Level {
+        override val id = "ADD_SUM_OVER_10"
+        override val operation = Operation.ADDITION
+        override val prerequisites: Set<String> = setOf(SumsUpTo10.id)
+        override val strategy = ExerciseStrategy.DRILL
+
+        override fun generateExercise(): Exercise {
+            // e.g. 9+x, 8+x, 7+x, 6+x
+            val op1 = Random.nextInt(6, 10)
+            // We want the sum to cross 10
+            val op2 = Random.nextInt(10 - op1 + 1, 10)
+            return if (Random.nextBoolean()) {
+                Exercise(Addition(op1, op2))
+            } else {
+                Exercise(Addition(op2, op1))
+            }
+        }
+
+        override fun getAllPossibleFactIds(): List<String> {
+            return (6..9).flatMap { op1 ->
+                (10 - op1 + 1 until 10).flatMap { op2 ->
+                    listOf(
+                        "${operation.name}_${op1}_${op2}",
+                        "${operation.name}_${op2}_${op1}"
+                    )
+                }
+            }
+        }
+    }
+
     object SumsUpTo20 : Level {
         override val id = "ADD_SUM_20"
         override val operation = Operation.ADDITION
@@ -127,10 +157,10 @@ object Curriculum {
         override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
-            // e.g. 9+x, 8+x, 7+x, 6+x
+            // one of: 9+1, 8+2, 7+3, 6+4, 5+5
             val op1 = Random.nextInt(6, 10)
             // We want the sum to cross 10
-            val op2 = Random.nextInt(10 - op1 + 1, 10)
+            val op2 = 10 - op1
             return if (Random.nextBoolean()) {
                 Exercise(Addition(op1, op2))
             } else {
@@ -431,6 +461,7 @@ object Curriculum {
         val additionLevels = listOf(
             SumsUpTo5,
             SumsUpTo10,
+            SumsOver10,
             SumsUpTo20,
             Doubles,
             NearDoubles,
