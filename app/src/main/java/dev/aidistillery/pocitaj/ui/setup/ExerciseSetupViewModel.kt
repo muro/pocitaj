@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import dev.aidistillery.pocitaj.App
+import dev.aidistillery.pocitaj.data.ActiveUserManager
 import dev.aidistillery.pocitaj.data.FactMasteryDao
 import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.data.User
@@ -12,6 +13,7 @@ import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.Level
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -28,46 +30,50 @@ data class OperationLevels(
 
 class ExerciseSetupViewModel(
     private val factMasteryDao: FactMasteryDao,
-    val activeUser: User
+    private val activeUserManager: ActiveUserManager
 ) : ViewModel() {
+
+    val activeUser: StateFlow<User> = activeUserManager.activeUserFlow
 
     companion object {
         private const val MASTERY_STRENGTH = 5
     }
 
     val operationLevels: StateFlow<List<OperationLevels>> =
-        factMasteryDao.getAllFactsForUser(activeUser.id)
-            .map { masteryList ->
-                val masteredFacts =
-                    masteryList.filter { it.strength >= MASTERY_STRENGTH }.map { it.factId }.toSet()
-                val allLevels = Curriculum.getAllLevels()
-                val masteredLevelIds = allLevels.filter { level ->
-                    level.getAllPossibleFactIds().all { it in masteredFacts }
-                }.map { it.id }.toSet()
+        activeUserManager.activeUserFlow.flatMapLatest { activeUser ->
+            factMasteryDao.getAllFactsForUser(activeUser.id)
+                .map { masteryList ->
+                    val masteredFacts =
+                        masteryList.filter { it.strength >= MASTERY_STRENGTH }.map { it.factId }
+                            .toSet()
+                    val allLevels = Curriculum.getAllLevels()
+                    val masteredLevelIds = allLevels.filter { level ->
+                        level.getAllPossibleFactIds().all { it in masteredFacts }
+                    }.map { it.id }.toSet()
 
-                allLevels.groupBy { it.operation }.map { (op, levels) ->
-                    val levelStates = levels.map { level ->
-                        val progress = level.getAllPossibleFactIds().let { facts ->
-                            if (facts.isEmpty()) 0f else facts.count { it in masteredFacts }
-                                .toFloat() / facts.size
+                    allLevels.groupBy { it.operation }.map { (op, levels) ->
+                        val levelStates = levels.map { level ->
+                            val progress = level.getAllPossibleFactIds().let { facts ->
+                                if (facts.isEmpty()) 0f else facts.count { it in masteredFacts }
+                                    .toFloat() / facts.size
+                            }
+                            val starRating = when {
+                                progress >= 1.0f -> 3
+                                progress > 0.9f -> 2
+                                progress > 0.6f -> 1
+                                else -> 0
+                            }
+                            val isUnlocked = level.prerequisites.all { it in masteredLevelIds }
+                            LevelStatus(level, isUnlocked, starRating)
                         }
-                        val starRating = when {
-                            progress >= 1.0f -> 3
-                            progress > 0.9f -> 2
-                            progress > 0.6f -> 1
-                            else -> 0
-                        }
-                        val isUnlocked = level.prerequisites.all { it in masteredLevelIds }
-                        LevelStatus(level, isUnlocked, starRating)
+                        OperationLevels(op, levelStates)
                     }
-                    OperationLevels(op, levelStates)
                 }
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList()
-            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 }
 
 object ExerciseSetupViewModelFactory : ViewModelProvider.Factory {
@@ -76,7 +82,7 @@ object ExerciseSetupViewModelFactory : ViewModelProvider.Factory {
         val globals = App.app.globals
         return ExerciseSetupViewModel(
             factMasteryDao = globals.factMasteryDao,
-            activeUser = globals.activeUser
+            activeUserManager = globals.activeUserManager
         ) as T
     }
 }

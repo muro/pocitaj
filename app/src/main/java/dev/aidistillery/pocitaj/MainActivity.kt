@@ -149,7 +149,6 @@ fun AppNavigation(restartApp: () -> Unit) {
             val operationLevels by exerciseSetupViewModel.operationLevels.collectAsState()
             ExerciseSetupScreen(
                 operationLevels = operationLevels,
-                activeUser = exerciseSetupViewModel.activeUser,
                 onStartClicked = { operation, count, difficulty, levelId ->
                     val config = ExerciseConfig(operation, difficulty, count, levelId)
                     exerciseViewModel.startExercises(config)
@@ -215,14 +214,12 @@ fun AppNavigation(restartApp: () -> Unit) {
             }
         }
         composable(route = Destinations.PROFILE_ROUTE) {
-            val users by userProfileViewModel.users.collectAsState()
-            val activeUser = exerciseSetupViewModel.activeUser
             UserProfileScreen(
-                users = users,
                 onUserSelected = { userId ->
                     userProfileViewModel.setActiveUser(userId)
                     restartApp()
-                }
+                },
+                onBack = { navController.navigateUp() }
             )
         }
     }

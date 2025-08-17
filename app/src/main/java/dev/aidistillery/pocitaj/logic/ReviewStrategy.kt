@@ -170,7 +170,10 @@ class ReviewStrategy(
         val newStrength = if (wasCorrect) {
             when (exercise.speedBadge) {
                 SpeedBadge.GOLD -> targetStrength
-                SpeedBadge.SILVER, SpeedBadge.BRONZE -> (mastery.strength - 1).coerceAtLeast(reviewStrength)
+                SpeedBadge.SILVER, SpeedBadge.BRONZE -> (mastery.strength - 1).coerceAtLeast(
+                    reviewStrength
+                )
+
                 else -> mastery.strength
             }
         } else {

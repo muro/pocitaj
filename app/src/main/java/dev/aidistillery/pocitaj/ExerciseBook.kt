@@ -1,6 +1,6 @@
 package dev.aidistillery.pocitaj
 
-import dev.aidistillery.pocitaj.data.DataStoreActiveUserManager
+import dev.aidistillery.pocitaj.data.ActiveUserManager
 import dev.aidistillery.pocitaj.data.ExerciseAttempt
 import dev.aidistillery.pocitaj.data.ExerciseAttemptDao
 import dev.aidistillery.pocitaj.data.ExerciseConfig
@@ -14,7 +14,7 @@ import kotlinx.coroutines.withContext
 // Each Exercise can be checked for correct solution
 class ExerciseBook(
     val exerciseAttemptDao: ExerciseAttemptDao,
-    val activeUserManager: DataStoreActiveUserManager
+    val activeUserManager: ActiveUserManager
 ) : ExerciseSource {
 
     private val exercises = mutableListOf<Exercise>()

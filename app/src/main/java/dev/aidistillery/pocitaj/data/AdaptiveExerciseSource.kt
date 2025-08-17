@@ -23,7 +23,8 @@ class AdaptiveExerciseSource(
 
     override suspend fun initialize(config: ExerciseConfig) {
         val userMastery =
-            factMasteryDao.getAllFactsForUser(activeUserManager.activeUser.id).first().associateBy { it.factId }
+            factMasteryDao.getAllFactsForUser(activeUserManager.activeUser.id).first()
+                .associateBy { it.factId }
         val level =
             config.levelId?.let { Curriculum.getAllLevels().find { level -> level.id == it } }
 
@@ -36,11 +37,20 @@ class AdaptiveExerciseSource(
                 activeUserId = activeUserManager.activeUser.id
             )
 
-            level != null -> DrillStrategy(level, userMastery.toMutableMap(), activeUserId = activeUserManager.activeUser.id)
+            level != null -> DrillStrategy(
+                level,
+                userMastery.toMutableMap(),
+                activeUserId = activeUserManager.activeUser.id
+            )
+
             else -> {
                 val filteredCurriculum =
                     Curriculum.getAllLevels().filter { it.operation == config.operation }
-                SmartPracticeStrategy(filteredCurriculum, userMastery.toMutableMap(), activeUserId = activeUserManager.activeUser.id)
+                SmartPracticeStrategy(
+                    filteredCurriculum,
+                    userMastery.toMutableMap(),
+                    activeUserId = activeUserManager.activeUser.id
+                )
             }
         }
     }

@@ -87,7 +87,11 @@ class ReviewStrategyTest {
 
         strategy.recordAttempt(exercise, wasCorrect = false)
 
-        assertEquals("Strength should be reset to 1 on failure", 1, userMastery["ADDITION_1_1"]!!.strength)
+        assertEquals(
+            "Strength should be reset to 1 on failure",
+            1,
+            userMastery["ADDITION_1_1"]!!.strength
+        )
     }
 
     @Test
@@ -99,7 +103,11 @@ class ReviewStrategyTest {
 
         strategy.recordAttempt(exercise, true)
 
-        assertEquals("Strength should be promoted to targetStrength", 7, userMastery["ADDITION_1_1"]!!.strength)
+        assertEquals(
+            "Strength should be promoted to targetStrength",
+            7,
+            userMastery["ADDITION_1_1"]!!.strength
+        )
     }
 
     @Test
@@ -111,7 +119,11 @@ class ReviewStrategyTest {
 
         strategy.recordAttempt(exercise, true)
 
-        assertEquals("Strength should not exceed targetStrength", 7, userMastery["ADDITION_1_1"]!!.strength)
+        assertEquals(
+            "Strength should not exceed targetStrength",
+            7,
+            userMastery["ADDITION_1_1"]!!.strength
+        )
     }
 
     @Test
@@ -135,7 +147,11 @@ class ReviewStrategyTest {
 
         strategy.recordAttempt(exercise, true)
 
-        assertEquals("Strength should not go below reviewStrength", 6, userMastery["ADDITION_1_1"]!!.strength)
+        assertEquals(
+            "Strength should not go below reviewStrength",
+            6,
+            userMastery["ADDITION_1_1"]!!.strength
+        )
     }
 
     @Test(expected = IllegalArgumentException::class)

@@ -35,6 +35,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,9 +50,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.aidistillery.pocitaj.R
 import dev.aidistillery.pocitaj.data.Operation
-import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.data.UserAppearance
 import dev.aidistillery.pocitaj.data.toSymbol
 import dev.aidistillery.pocitaj.logic.Curriculum
@@ -69,14 +70,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun ExerciseSetupScreen(
     operationLevels: List<OperationLevels>,
-    activeUser: User,
     onStartClicked: (operation: Operation, count: Int, difficulty: Int, levelId: String?) -> Unit,
     onProgressClicked: () -> Unit,
     onCreditsClicked: () -> Unit,
     onProfileClicked: () -> Unit,
     onEnableDebugMode: () -> Unit,
-    debugMode: Boolean
+    debugMode: Boolean,
+    viewModel: ExerciseSetupViewModel = viewModel(factory = ExerciseSetupViewModelFactory)
 ) {
+    val activeUser by viewModel.activeUser.collectAsState()
     var expandedOperation by remember { mutableStateOf<Operation?>(null) }
     val secretTapState = rememberSecretTapState(onSecretActivated = onEnableDebugMode)
 
@@ -419,6 +421,7 @@ fun PreviewExpandedOperationCard() {
 )
 @Composable
 fun PreviewExerciseSetupScreen() {
+    // TODO: This preview is broken, it needs a fake view model to provide the active user.
     val fakeOperationLevels = Operation.entries.map { op ->
         OperationLevels(
             operation = op,
@@ -433,7 +436,6 @@ fun PreviewExerciseSetupScreen() {
     AppTheme {
         ExerciseSetupScreen(
             operationLevels = fakeOperationLevels,
-            activeUser = User(7, "John Doe"),
             onStartClicked = { _, _, _, _ -> },
             onProgressClicked = { },
             onCreditsClicked = { },

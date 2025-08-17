@@ -177,7 +177,8 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle()
 
         // Verify progress report
-        composeTestRule.onNodeWithContentDescription("My Progress" /*R.string.progress_button*/).performClick()
+        composeTestRule.onNodeWithContentDescription("My Progress" /*R.string.progress_button*/)
+            .performClick()
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("progress_report_list")
             .performScrollToNode(hasTestTag("operation_card_MULTIPLICATION"))
@@ -336,5 +337,55 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 6. Click delete and verify the user is gone
         composeTestRule.onNodeWithText("Delete").performClick()
         composeTestRule.onNodeWithText("Grace").assertDoesNotExist()
+    }
+
+    @Test
+    fun whenUserIsActive_thenDeleteButtonIsDisabled() {
+        // 1. Set up two users, Alice and Bob
+        val alice = User(id = 2, name = "Alice")
+        runBlocking {
+            globals.userDao.insert(alice)
+            globals.userDao.insert(User(id = 3, name = "Bob"))
+        }
+
+        // 2. Make Alice the active user
+        runBlocking {
+            globals.activeUserManager.setActiveUser(alice)
+        }
+
+
+        // 3. Navigate to the profile screen
+        composeTestRule.onNodeWithContentDescription("User Profile").performClick()
+        composeTestRule.waitForIdle()
+
+        // 4. Verify that the delete button for Alice is disabled
+        composeTestRule.onNodeWithContentDescription("Delete Alice").assertIsNotEnabled()
+
+        // 5. Verify that the delete button for Bob is enabled
+        composeTestRule.onNodeWithContentDescription("Delete Bob").assertIsEnabled()
+    }
+
+    @Test
+    fun whenBackIsPressed_thenNavigatesToExerciseSetup() {
+        // 1. Set up a user
+        val alice = User(id = 2, name = "Alice")
+        runBlocking {
+            globals.userDao.insert(alice)
+            globals.activeUserManager.setActiveUser(alice)
+        }
+
+        // 2. Navigate to the profile screen
+        composeTestRule.onNodeWithContentDescription("User Profile").performClick()
+        composeTestRule.waitForIdle()
+
+        // 3. Click the back button
+        composeTestRule.onNodeWithContentDescription("Back").performClick()
+        composeTestRule.waitForIdle()
+
+        // 4. Verify that we are back on the ExerciseSetupScreen
+        verifyOnExerciseSetupScreen()
+
+        // 5. Verify that the active user is still Alice
+        composeTestRule.onNodeWithTag("user_profile_Alice").assertIsDisplayed()
     }
 }

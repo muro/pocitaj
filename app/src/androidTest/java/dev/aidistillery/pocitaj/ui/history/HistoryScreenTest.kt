@@ -99,7 +99,6 @@ class HistoryScreenTest : BaseExerciseUiTest() {
             }
         }
 
-
         // WHEN: The user navigates to the history screen
         composeTestRule.onNodeWithContentDescription("My Progress").performClick()
         composeTestRule.waitForIdle()

@@ -1,6 +1,7 @@
 package dev.aidistillery.pocitaj
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
@@ -58,17 +59,15 @@ abstract class BaseExerciseUiTest {
             }
             globals.activeUserManager.init()
         }
+        waitForAppToBeReady()
     }
 
-    @Before
+    // @Before
+    // Can't be @Before, as it could run before setup() above.
     fun waitForAppToBeReady() {
         // Wait for the loading screen to disappear and the setup screen to be visible.
         // The "Choose Your Challenge" title uniquely identifies the ExerciseSetupScreen.
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
-            composeTestRule
-                .onAllNodesWithText("Choose Your Challenge")
-                .fetchSemanticsNodes().size == 1
-        }
+        verifyOnExerciseSetupScreen()
     }
 
     @After
@@ -186,6 +185,15 @@ abstract class BaseExerciseUiTest {
             .assertDoesNotExist()
         composeTestRule.onNode(hasContentDescription(FeedbackType.UNRECOGNIZED.contentDescription))
             .assertDoesNotExist()
+    }
+
+    fun verifyOnExerciseSetupScreen() {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
+            composeTestRule.onAllNodesWithText("Choose Your Challenge")
+                .fetchSemanticsNodes().size == 1
+        }
+        print("verifyOnExerciseSetupScreen: Current active ID: ${globals.activeUser.id} and name ${globals.activeUser.name}")
+        composeTestRule.onNodeWithText("Choose Your Challenge").assertIsDisplayed()
     }
 }
 

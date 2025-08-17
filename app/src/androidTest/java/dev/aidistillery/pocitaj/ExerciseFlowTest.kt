@@ -96,10 +96,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle()
 
         // 7. Verify Navigation to Exercise Setup Screen
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onAllNodesWithText("Choose Your Challenge").fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        verifyOnExerciseSetupScreen()
     }
 
     @Test
@@ -126,10 +123,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         }
 
         Espresso.pressBack()
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onAllNodesWithText("Choose Your Challenge").fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        verifyOnExerciseSetupScreen()
     }
 
     @Test

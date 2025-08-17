@@ -68,10 +68,15 @@ class StrategySimulationTest {
     private class GoodStudent : StudentModel {
         override val name = "GOOD"
         override fun getSuccessProbability(context: SimulationContext) = 0.9
+
         // Speed is linked to accuracy. 90% accuracy = 90% of the way to Gold speed.
         override fun getAttemptDuration(context: SimulationContext): Long {
             // 50% gold, otherwise silver or bronze
-            return (Random.nextDouble() * getSpeedThreshold(Operation.ADDITION, 1, 1).toDouble()).toLong()
+            return (Random.nextDouble() * getSpeedThreshold(
+                Operation.ADDITION,
+                1,
+                1
+            ).toDouble()).toLong()
         }
     }
 
@@ -99,6 +104,7 @@ class StrategySimulationTest {
                 (1.0 - (exercisesSince * 0.03)).coerceAtLeast(0.0)
             }
         }
+
         override fun getAttemptDuration(context: SimulationContext): Long {
             val accuracy = getSuccessProbability(context)
             val threshold = getSpeedThreshold(Operation.ADDITION, 1, 1)

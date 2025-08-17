@@ -23,17 +23,22 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,34 +60,48 @@ import dev.aidistillery.pocitaj.data.ExerciseAttemptDao
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.data.UserAppearance
 import dev.aidistillery.pocitaj.data.UserDao
-import dev.aidistillery.pocitaj.ui.components.PocitajScreen
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.runBlocking
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreen(
-    users: List<User>,
     onUserSelected: (Long) -> Unit,
+    onBack: () -> Unit,
     initialShowAddUserDialog: Boolean = false,
     viewModel: UserProfileViewModel = viewModel(factory = UserProfileViewModelFactory)
 ) {
+    val users by viewModel.users.collectAsState()
+    val activeUser by viewModel.activeUser.collectAsState()
     var showAddUserDialog by remember { mutableStateOf(initialShowAddUserDialog) }
     var editingUser by remember { mutableStateOf<User?>(null) }
     var userToDelete by remember { mutableStateOf<User?>(null) }
 
-    PocitajScreen {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(id = R.string.user_profile)) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.back)
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            Text(
-                stringResource(id = R.string.user_profile),
-                color = MaterialTheme.colorScheme.primary
-            )
             LazyColumn(modifier = Modifier.testTag("user_profile_list")) {
                 items(users.filter { it.id != 1L }) { user ->
                     Row(
@@ -123,7 +142,7 @@ fun UserProfileScreen(
                         }
                         IconButton(
                             onClick = { userToDelete = user },
-                            enabled = user.id != 1L
+                            enabled = user.id != 1L && user.id != activeUser.id
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
@@ -381,7 +400,7 @@ class FakeUserDao : UserDao {
 
     override suspend fun getUserFlow(id: Long): User? = users[id]
 
-    override fun getAllUsers() = getAllUsersFlow()
+    override fun getAllUsers(): StateFlow<List<User>> = getAllUsersFlow()
 }
 
 class FakeExerciseAttemptDao : ExerciseAttemptDao {
@@ -401,15 +420,11 @@ class FakeExerciseAttemptDao : ExerciseAttemptDao {
 
 
 class FakeUserProfileViewModel(
-    userDao: UserDao,
-    exerciseAttemptDao: ExerciseAttemptDao
-) : UserProfileViewModel(userDao, exerciseAttemptDao) {
-    override val users: StateFlow<List<User>> = MutableStateFlow(
-        listOf(
-            User(id = 1, name = "Alice"),
-            User(id = 2, name = "Bob")
-        )
-    )
+    userDao: FakeUserDao,
+    exerciseAttemptDao: ExerciseAttemptDao,
+    activeUserManager: dev.aidistillery.pocitaj.data.ActiveUserManager
+) : UserProfileViewModel(userDao, exerciseAttemptDao, activeUserManager) {
+    override val users: StateFlow<List<User>> = userDao.getAllUsers()
 }
 
 @SuppressLint("ViewModelConstructorInComposable")
@@ -425,24 +440,33 @@ class FakeUserProfileViewModel(
 )
 @Composable
 fun UserProfileScreenPreview() {
+    val caleb = User(
+        id = 2,
+        name = "Caleb",
+        iconId = "bull",
+        color = UserAppearance.colors[2].toArgb()
+    )
+    val dora = User(
+        id = 3,
+        name = "Dora",
+        iconId = "owl",
+        color = UserAppearance.colors[4].toArgb()
+    )
+    val userDao = FakeUserDao()
+    runBlocking {
+        userDao.insert(caleb)
+        userDao.insert(dora)
+    }
+    val activeUserManager = dev.aidistillery.pocitaj.data.FakeActiveUserManager(caleb)
     AppTheme {
         UserProfileScreen(
-            users = listOf(
-                User(
-                    id = 2,
-                    name = "Caleb",
-                    iconId = "bull",
-                    color = UserAppearance.colors[2].toArgb()
-                ),
-                User(
-                    id = 3,
-                    name = "Dora",
-                    iconId = "owl",
-                    color = UserAppearance.colors[4].toArgb()
-                )
-            ),
             onUserSelected = {},
-            viewModel = FakeUserProfileViewModel(FakeUserDao(), FakeExerciseAttemptDao()),
+            onBack = {},
+            viewModel = FakeUserProfileViewModel(
+                userDao,
+                FakeExerciseAttemptDao(),
+                activeUserManager
+            ),
             initialShowAddUserDialog = false
         )
     }
@@ -461,25 +485,34 @@ fun UserProfileScreenPreview() {
 )
 @Composable
 fun UserProfileScreenAddUserDialogPreview() {
+    val alice = User(
+        id = 2,
+        name = "Alice",
+        iconId = "jellyfish",
+        color = UserAppearance.colors[5].toArgb()
+    )
+    val bob = User(
+        id = 3,
+        name = "Bob",
+        iconId = "starfish",
+        color = UserAppearance.colors[7].toArgb()
+    )
+    val userDao = FakeUserDao()
+    runBlocking {
+        userDao.insert(alice)
+        userDao.insert(bob)
+    }
+    val activeUserManager = dev.aidistillery.pocitaj.data.FakeActiveUserManager(alice)
     AppTheme {
         UserProfileScreen(
-            users = listOf(
-                User(
-                    id = 2,
-                    name = "Alice",
-                    iconId = "jellyfish",
-                    color = UserAppearance.colors[5].toArgb()
-                ),
-                User(
-                    id = 3,
-                    name = "Bob",
-                    iconId = "starfish",
-                    color = UserAppearance.colors[7].toArgb()
-                )
-            ),
             onUserSelected = {},
+            onBack = {},
             initialShowAddUserDialog = true,
-            viewModel = FakeUserProfileViewModel(FakeUserDao(), FakeExerciseAttemptDao())
+            viewModel = FakeUserProfileViewModel(
+                userDao,
+                FakeExerciseAttemptDao(),
+                activeUserManager
+            )
         )
     }
 }

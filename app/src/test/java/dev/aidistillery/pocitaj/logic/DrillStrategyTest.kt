@@ -169,7 +169,6 @@ class DrillStrategyTest {
 
     // --- Existing Tests for `recordAttempt` ---
 
-    
 
     @Test
     fun `incorrect answer to L2 fact demotes it to strength 1`() {
@@ -196,7 +195,11 @@ class DrillStrategyTest {
 
         // ASSERT
         assertNotNull("Should return a new mastery object", newMastery)
-        assertEquals("The new mastery should be assigned to the correct user", testUserId, newMastery!!.userId)
+        assertEquals(
+            "The new mastery should be assigned to the correct user",
+            testUserId,
+            newMastery!!.userId
+        )
     }
 
     @Test
@@ -208,7 +211,11 @@ class DrillStrategyTest {
 
         strategy.recordAttempt(exercise, true)
 
-        assertEquals("Strength should not increase without the required speed", 2, userMastery["ADDITION_1_1"]!!.strength)
+        assertEquals(
+            "Strength should not increase without the required speed",
+            2,
+            userMastery["ADDITION_1_1"]!!.strength
+        )
     }
 
     @Test
@@ -220,7 +227,11 @@ class DrillStrategyTest {
 
         strategy.recordAttempt(exercise, true)
 
-        assertEquals("Strength should advance to 3 with a Bronze badge", 3, userMastery["ADDITION_1_1"]!!.strength)
+        assertEquals(
+            "Strength should advance to 3 with a Bronze badge",
+            3,
+            userMastery["ADDITION_1_1"]!!.strength
+        )
     }
 
     @Test
