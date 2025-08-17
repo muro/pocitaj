@@ -3,42 +3,60 @@ package dev.aidistillery.pocitaj.ui.progress
 import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import dev.aidistillery.pocitaj.R
 import dev.aidistillery.pocitaj.data.ExerciseAttempt
 import dev.aidistillery.pocitaj.data.Operation
-import dev.aidistillery.pocitaj.ui.components.PocitajScreen
 import dev.aidistillery.pocitaj.ui.history.HistoryScreen
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ProgressContainerScreen(
     factProgressByOperation: Map<Operation, List<FactProgress>>,
     levelProgressByOperation: Map<Operation, Map<String, LevelProgress>>,
     history: Map<String, List<ExerciseAttempt>>,
+    onBack: () -> Unit,
     initialPage: Int = 0
 ) {
-    PocitajScreen {
-        val pagerState = rememberPagerState(pageCount = { 2 }, initialPage = initialPage)
-        val coroutineScope = rememberCoroutineScope()
+    val pagerState = rememberPagerState(pageCount = { 2 }, initialPage = initialPage)
+    val coroutineScope = rememberCoroutineScope()
 
-        Column {
-            Spacer(modifier = Modifier.height(32.dp))
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(id = R.string.progress_title)) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(id = R.string.back)
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(modifier = Modifier.padding(paddingValues)) {
             TabRow(selectedTabIndex = pagerState.currentPage) {
                 Tab(
                     text = { Text(stringResource(id = R.string.progress_tab)) },
@@ -94,7 +112,8 @@ fun ProgressContainerScreenPreview() {
         ProgressContainerScreen(
             factProgressByOperation = emptyMap(),
             levelProgressByOperation = emptyMap(),
-            history = emptyMap()
+            history = emptyMap(),
+            onBack = {}
         )
     }
 }
@@ -116,6 +135,7 @@ fun ProgressContainerScreenHistoryPreview() {
             factProgressByOperation = emptyMap(),
             levelProgressByOperation = emptyMap(),
             history = emptyMap(),
+            onBack = {},
             initialPage = 1
         )
     }

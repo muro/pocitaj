@@ -201,7 +201,8 @@ fun AppNavigation(restartApp: () -> Unit) {
             ProgressContainerScreen(
                 factProgressByOperation = factProgressByOperation,
                 levelProgressByOperation = levelProgressByOperation,
-                history = history
+                history = history,
+                onBack = { navController.navigateUp() }
             )
         }
         composable(route = Destinations.HISTORY_ROUTE) {
