@@ -267,10 +267,14 @@ fun GridCell(text: String, size: androidx.compose.ui.unit.Dp) {
     Box(
         modifier = Modifier
             .size(size)
-            .padding(4.dp),
+            .padding(1.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = text, style = MaterialTheme.typography.bodySmall)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            fontSize = with(LocalDensity.current) { (size / 3).toSp() }
+        )
     }
 }
 
@@ -319,7 +323,7 @@ fun FactCell(factProgress: FactProgress?, result: Int, cellSize: androidx.compos
                     includeFontPadding = false
                 )
             ),
-            modifier = Modifier.padding(4.dp)
+            modifier = Modifier.padding(1.dp)
         )
         if (badgeColor != null) {
             Canvas(modifier = Modifier.fillMaxSize()) {
@@ -338,6 +342,7 @@ fun FactCell(factProgress: FactProgress?, result: Int, cellSize: androidx.compos
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_NO,
     showBackground = true,
+    device = "id:small_phone",
     name = "Light Mode"
 )
 @Preview(
@@ -438,6 +443,7 @@ fun EmptyProgressReportScreenPreview() {
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_NO,
     showBackground = true,
+    widthDp = 300,
     name = "Light Mode"
 )
 @Preview(
