@@ -26,6 +26,8 @@ ksp = "2.2.0-2.0.2"
 mockk = "1.14.5"
 coroutinesTest = "1.10.2"
 turbine = "1.2.1"
+robolectric = "4.15.1"
+androidxTestCore = "1.7.0"
 
 [libraries]
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
@@ -63,6 +65,8 @@ mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "moc
 coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest"}
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.1" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
 
 [plugins]
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }

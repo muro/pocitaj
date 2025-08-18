@@ -109,7 +109,9 @@ fun ExerciseSetupScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onProfileClicked),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(

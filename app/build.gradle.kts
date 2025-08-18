@@ -47,6 +47,9 @@ android {
         unitTests.all {
             it.jvmArgs("-XX:+EnableDynamicAgentLoading")
         }
+        unitTests {
+            isIncludeAndroidResources = true
+        }
     }
     tasks.withType<Test> {
         //timeout.set(Duration.ofSeconds(10))
@@ -105,6 +108,9 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.turbine)
+    testImplementation(libs.compose.ui.test.junit4)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.ext.junit.ktx)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.espresso.contrib)
