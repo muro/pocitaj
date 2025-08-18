@@ -12,8 +12,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -66,12 +71,25 @@ fun StartupScreen(error: String?, onRetry: () -> Unit) {
                     color = MaterialTheme.colorScheme.onBackground
                 )
             } else {
-                Text(stringResource(id = R.string.error), color = MaterialTheme.colorScheme.error)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(error)
+                Image(
+                    painter = painterResource(id = R.drawable.worrying),
+                    contentDescription = null,
+                    modifier = Modifier.size(128.dp)
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    error,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = onRetry) {
-                    Text(stringResource(id = R.string.retry))
+                IconButton(onClick = onRetry) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = stringResource(id = R.string.retry),
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
         }
@@ -92,5 +110,22 @@ fun StartupScreen(error: String?, onRetry: () -> Unit) {
 fun PreviewStartupScreen() {
     AppTheme {
         StartupScreen(error = null) {}
+    }
+}
+
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
+@Composable
+fun PreviewStartupScreenWithError() {
+    AppTheme {
+        StartupScreen(error = "Something went wrong. This is a longer error message to see how it wraps.") {}
     }
 }
