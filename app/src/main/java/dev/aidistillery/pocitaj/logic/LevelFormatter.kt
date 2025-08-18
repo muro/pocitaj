@@ -14,6 +14,7 @@ fun getLevelDisplayName(levelId: String): Int {
         // Addition
         "ADD_SUM_5" -> R.string.level_sums_up_to_5
         "ADD_SUM_10" -> R.string.level_sums_up_to_10
+        "ADD_SUM_OVER_10" -> R.string.level_sums_over_10
         "ADD_SUM_20" -> R.string.level_sums_up_to_20
         "ADD_DOUBLES" -> R.string.level_doubles
         "ADD_NEAR_DOUBLES" -> R.string.level_near_doubles
@@ -41,7 +42,8 @@ fun formatLevel(level: Level): LevelRepresentation {
     return when (level.id) {
         // Addition
         "ADD_SUM_5" -> LevelRepresentation("2+3")
-        "ADD_SUM_10" -> LevelRepresentation("7+2")
+        "ADD_SUM_10" -> LevelRepresentation("6+3")
+        "ADD_SUM_OVER_10" -> LevelRepresentation("7+5")
         "ADD_SUM_20" -> LevelRepresentation("8+9")
         "ADD_DOUBLES" -> LevelRepresentation("🐾+🐾")
         "ADD_NEAR_DOUBLES" -> LevelRepresentation("🐾🐾.")

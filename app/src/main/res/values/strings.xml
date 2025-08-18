@@ -4,6 +4,7 @@
     <!-- Level Titles -->
     <string name="level_sums_up_to_5">Sums up to 5</string>
     <string name="level_sums_up_to_10">Sums up to 10</string>
+    <string name="level_sums_over_10">Sums over 10</string>
     <string name="level_sums_up_to_20">Sums up to 20</string>
     <string name="level_doubles">Doubles</string>
     <string name="level_near_doubles">Near Doubles</string>
