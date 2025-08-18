@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
@@ -48,6 +50,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.aidistillery.pocitaj.R
 import dev.aidistillery.pocitaj.logic.SpeedBadge
 import dev.aidistillery.pocitaj.ui.components.PocitajScreen
@@ -240,11 +243,17 @@ fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
                 )
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Text(
+                BasicText(
                     text = result.equation,
                     style = MaterialTheme.typography.headlineMedium,
-                    color = textColor,
-                    modifier = Modifier.weight(1f)
+                    color = { textColor },
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    autoSize = TextAutoSize.StepBased(
+                        minFontSize = 8.sp,
+                        maxFontSize = 50.sp,
+                        stepSize = 2.sp // The size difference between each step
+                    )
                 )
                 Text(
                     text = String.format(Locale.US, "%.1fs", result.elapsedMs / 1000.0),
@@ -300,7 +309,14 @@ fun SpeedBadgeIndicator(badge: SpeedBadge, modifier: Modifier = Modifier) {
 @Composable
 fun PreviewResultCard() {
     AppTheme {
-        ResultCard(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT, 123, SpeedBadge.SILVER))
+        ResultCard(
+            ResultDescription(
+                "123 + 456 = 579",
+                ResultStatus.CORRECT,
+                123,
+                SpeedBadge.SILVER
+            )
+        )
     }
 }
 
