@@ -11,7 +11,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -193,20 +192,24 @@ fun ResultsList(results: List<ResultDescription>, modifier: Modifier = Modifier)
     }
 }
 
-@Preview(showBackground = true)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    name = "Light Mode"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode Small Phone",
+    device = "id:small_phone"
+)
 @Composable
 fun PreviewResultsList() {
     val results = ArrayList<ResultDescription>()
     results.add(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT, 1000, SpeedBadge.GOLD))
     results.add(ResultDescription("3 + 3 ≠ 5", ResultStatus.INCORRECT, 2100, SpeedBadge.SILVER))
-    results.add(
-        ResultDescription(
-            "3 + 3 = ?",
-            ResultStatus.NOT_RECOGNIZED,
-            3511,
-            SpeedBadge.BRONZE
-        )
-    )
+    results.add(ResultDescription("123 + 456 = 579", ResultStatus.CORRECT, 123, SpeedBadge.BRONZE))
+    results.add(ResultDescription("1 + 2 = 4", ResultStatus.INCORRECT, 123, SpeedBadge.NONE))
 
     AppTheme {
         ResultsList(results)
@@ -224,15 +227,15 @@ fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
             Row(
                 modifier = Modifier
                     .padding(8.dp)
-                    .height(IntrinsicSize.Min),
+                    .height(64.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Image(
                     painter = painterResource(
                         when (result.status) {
-                            ResultStatus.CORRECT -> R.drawable.cat_heart
-                            ResultStatus.INCORRECT -> R.drawable.cat_cry
-                            ResultStatus.NOT_RECOGNIZED -> R.drawable.cat_big_eyes
+                            ResultStatus.CORRECT -> R.drawable.excited_face
+                            ResultStatus.INCORRECT -> R.drawable.sad_face
+                            ResultStatus.NOT_RECOGNIZED -> R.drawable.confused_face
                         }
                     ),
                     contentDescription = "Result Status",
@@ -240,6 +243,7 @@ fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
                         .padding(horizontal = 8.dp)
                         .fillMaxHeight()
                         .aspectRatio(1f)
+                        .width(16.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
 
