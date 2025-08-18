@@ -1,5 +1,6 @@
 package dev.aidistillery.pocitaj.ui.theme
 
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 val primaryLight = Color(0xFF0277BD)
@@ -73,6 +74,34 @@ val surfaceContainerLowDark = Color(0xFF1E1B13)
 val surfaceContainerDark = Color(0xFF222017)
 val surfaceContainerHighDark = Color(0xFF2D2A21)
 val surfaceContainerHighestDark = Color(0xFF38352B)
+
+val speedBadgeGold = Brush.verticalGradient(
+    colors = listOf(
+        Color(0xFFF3C32A),
+        Color(0xFFF7CE45),
+        Color(0xFFFDF5D6),
+        Color(0xFFF7CE45),
+        Color(0xFFF3C32A)
+    )
+)
+val speedBadgeSilver = Brush.verticalGradient(
+    colors = listOf(
+        Color(0xFFB6B6B6),
+        Color(0xFFD1D1D1),
+        Color(0xFFF5F5F5),
+        Color(0xFFD1D1D1),
+        Color(0xFFB6B6B6)
+    )
+)
+val speedBadgeBronze = Brush.verticalGradient(
+    colors = listOf(
+        Color(0xFFB37B40),
+        Color(0xFFC58E56),
+        Color(0xFFEAD8C7),
+        Color(0xFFC58E56),
+        Color(0xFFB37B40)
+    )
+)
 
 
 

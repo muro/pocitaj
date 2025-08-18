@@ -210,6 +210,7 @@ fun PreviewResultsList() {
     results.add(ResultDescription("3 + 3 ≠ 5", ResultStatus.INCORRECT, 2100, SpeedBadge.SILVER))
     results.add(ResultDescription("123 + 456 = 579", ResultStatus.CORRECT, 123, SpeedBadge.BRONZE))
     results.add(ResultDescription("1 + 2 = 4", ResultStatus.INCORRECT, 123, SpeedBadge.NONE))
+    results.add(ResultDescription("2 + 2 = 4", ResultStatus.CORRECT, 1000, SpeedBadge.GOLD))
 
     AppTheme {
         ResultsList(results)
@@ -276,14 +277,14 @@ fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
 
 @Composable
 fun SpeedBadgeIndicator(badge: SpeedBadge, modifier: Modifier = Modifier) {
-    val badgeColor = when (badge) {
-        SpeedBadge.GOLD -> MaterialTheme.customColors.speedBadgeGold
-        SpeedBadge.SILVER -> MaterialTheme.customColors.speedBadgeSilver
-        SpeedBadge.BRONZE -> MaterialTheme.customColors.speedBadgeBronze
+    val badgeBrush = when (badge) {
+        SpeedBadge.GOLD -> dev.aidistillery.pocitaj.ui.theme.speedBadgeGold
+        SpeedBadge.SILVER -> dev.aidistillery.pocitaj.ui.theme.speedBadgeSilver
+        SpeedBadge.BRONZE -> dev.aidistillery.pocitaj.ui.theme.speedBadgeBronze
         SpeedBadge.NONE -> null
     }
 
-    if (badgeColor != null) {
+    if (badgeBrush != null) {
         Canvas(
             modifier = modifier
                 .width(36.dp)
@@ -295,7 +296,7 @@ fun SpeedBadgeIndicator(badge: SpeedBadge, modifier: Modifier = Modifier) {
                 lineTo(0f, 0f)
                 close()
             }
-            drawPath(path, color = badgeColor)
+            drawPath(path, brush = badgeBrush)
         }
     }
 }
