@@ -1,5 +1,6 @@
 package dev.aidistillery.pocitaj.ui.setup
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -52,7 +53,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.aidistillery.pocitaj.R
+import dev.aidistillery.pocitaj.data.ActiveUserManager
+import dev.aidistillery.pocitaj.data.FactMasteryDao
+import dev.aidistillery.pocitaj.data.FakeActiveUserManager
+import dev.aidistillery.pocitaj.data.FakeFactMasteryDao
 import dev.aidistillery.pocitaj.data.Operation
+import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.data.UserAppearance
 import dev.aidistillery.pocitaj.data.toSymbol
 import dev.aidistillery.pocitaj.logic.Curriculum
@@ -409,6 +415,7 @@ fun PreviewExpandedOperationCard() {
     }
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_NO,
     showBackground = true,
@@ -421,7 +428,6 @@ fun PreviewExpandedOperationCard() {
 )
 @Composable
 fun PreviewExerciseSetupScreen() {
-    // TODO: This preview is broken, it needs a fake view model to provide the active user.
     val fakeOperationLevels = Operation.entries.map { op ->
         OperationLevels(
             operation = op,
@@ -432,6 +438,14 @@ fun PreviewExerciseSetupScreen() {
             )
         )
     }
+    val activeUserManager = FakeActiveUserManager(
+        User(
+            7,
+            "John Doe"
+        )
+    )
+    val factMasteryDao = FakeFactMasteryDao()
+    val fakeViewModel = ExerciseSetupViewModel(factMasteryDao, activeUserManager)
 
     AppTheme {
         ExerciseSetupScreen(
@@ -441,7 +455,8 @@ fun PreviewExerciseSetupScreen() {
             onCreditsClicked = { },
             onProfileClicked = { },
             onEnableDebugMode = { },
-            debugMode = false
+            debugMode = false,
+            viewModel = fakeViewModel
         )
     }
 }

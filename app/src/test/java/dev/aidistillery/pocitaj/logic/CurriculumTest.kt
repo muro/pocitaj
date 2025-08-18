@@ -11,8 +11,8 @@ class CurriculumTest {
     @Test
     fun `getAllLevels returns correct number of levels`() {
         val levels = Curriculum.getAllLevels()
-        // 9 Addition + 6 Subtraction + 11 multiplication (2-12) + 9 division (2-10) + 8 mixed review
-        val expectedCount = 9 + 6 + 11 + 9 + 8
+        // 10 Addition + 6 Subtraction + 11 multiplication (2-12) + 9 division (2-10) + 8 mixed review
+        val expectedCount = 10 + 6 + 11 + 9 + 8
         assertEquals(expectedCount, levels.size)
     }
 

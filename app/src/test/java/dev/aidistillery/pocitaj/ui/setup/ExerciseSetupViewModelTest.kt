@@ -2,7 +2,8 @@ package dev.aidistillery.pocitaj.ui.setup
 
 import app.cash.turbine.test
 import dev.aidistillery.pocitaj.data.FactMastery
-import dev.aidistillery.pocitaj.data.FactMasteryDao
+import dev.aidistillery.pocitaj.data.FakeActiveUserManager
+import dev.aidistillery.pocitaj.data.FakeFactMasteryDao
 import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.logic.Curriculum
@@ -43,22 +44,13 @@ class ExerciseSetupViewModelTest {
 
     private lateinit var fakeDao: FakeFactMasteryDao
     private lateinit var viewModel: ExerciseSetupViewModel
-
-    class FakeFactMasteryDao : FactMasteryDao {
-        private val flow = MutableStateFlow<List<FactMastery>>(emptyList())
-        suspend fun emit(value: List<FactMastery>) {
-            flow.emit(value)
-        }
-
-        override fun getAllFactsForUser(userId: Long) = flow.asStateFlow()
-        override suspend fun getFactMastery(userId: Long, factId: String): FactMastery? = null
-        override suspend fun upsert(factMastery: FactMastery) {}
-    }
+    private lateinit var fakeActiveUserManager: FakeActiveUserManager
 
     @Before
     fun setup() {
         fakeDao = FakeFactMasteryDao()
-        viewModel = ExerciseSetupViewModel(fakeDao, User(id = 1, name = "Test User"))
+        fakeActiveUserManager = FakeActiveUserManager()
+        viewModel = ExerciseSetupViewModel(fakeDao, fakeActiveUserManager)
     }
 
     @Test

@@ -3,6 +3,7 @@ package dev.aidistillery.pocitaj.data
 import dev.aidistillery.pocitaj.logic.Curriculum
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -18,20 +19,6 @@ class AdaptiveExerciseSourceTest {
     private lateinit var activeUserManager: FakeActiveUserManager
 
     // --- Test Doubles ---
-
-    class FakeActiveUserManager(private val userDao: FakeUserDao) : ActiveUserManager {
-        override lateinit var activeUser: User
-        override suspend fun init() {
-            activeUser = userDao.getUser(1L) ?: run {
-                val newId = userDao.insert(User(id = 1, name = "Default User"))
-                userDao.getUser(newId)!!
-            }
-        }
-
-        override suspend fun setActiveUser(user: User) {
-            activeUser = user
-        }
-    }
 
     class FakeFactMasteryDao : FactMasteryDao {
         private val facts = mutableMapOf<String, FactMastery>()
@@ -95,7 +82,12 @@ class AdaptiveExerciseSourceTest {
         factMasteryDao = FakeFactMasteryDao()
         exerciseAttemptDao = FakeExerciseAttemptDao()
         userDao = FakeUserDao()
-        activeUserManager = FakeActiveUserManager(userDao)
+        activeUserManager = FakeActiveUserManager(
+            User(
+                7,
+                "John Doe"
+            )
+        )
         runBlocking {
             activeUserManager.init()
         }

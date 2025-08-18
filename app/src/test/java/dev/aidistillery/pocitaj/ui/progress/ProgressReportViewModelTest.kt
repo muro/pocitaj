@@ -6,6 +6,7 @@ import dev.aidistillery.pocitaj.data.FactMasteryDao
 import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.Curriculum.SumsUpTo5
+import dev.aidistillery.pocitaj.data.FakeFactMasteryDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -42,28 +43,6 @@ class ProgressReportViewModelTest {
     // 1. Use the MainDispatcherRule to control the Main dispatcher
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
-
-    // 2. Create a fake DAO with a controllable flow
-    class FakeFactMasteryDao : FactMasteryDao {
-        private val flow = MutableStateFlow<List<FactMastery>>(emptyList())
-
-        // This function lets our test push new values to the flow
-        suspend fun emit(value: List<FactMastery>) {
-            flow.emit(value)
-        }
-
-        override fun getAllFactsForUser(userId: Long): Flow<List<FactMastery>> = flow
-        override suspend fun getFactMastery(
-            userId: Long,
-            factId: String
-        ): FactMastery? {
-            TODO("Not yet implemented")
-        }
-
-        override suspend fun upsert(factMastery: FactMastery) {
-            TODO("Not yet implemented")
-        }
-    }
 
     @Test
     fun `flows emit correct progress data`() = runTest {
