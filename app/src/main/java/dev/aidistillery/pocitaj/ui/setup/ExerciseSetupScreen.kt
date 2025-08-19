@@ -52,9 +52,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.aidistillery.pocitaj.BuildConfig
 import dev.aidistillery.pocitaj.R
-import dev.aidistillery.pocitaj.data.ActiveUserManager
-import dev.aidistillery.pocitaj.data.FactMasteryDao
 import dev.aidistillery.pocitaj.data.FakeActiveUserManager
 import dev.aidistillery.pocitaj.data.FakeFactMasteryDao
 import dev.aidistillery.pocitaj.data.Operation
@@ -186,28 +185,31 @@ fun ExerciseSetupScreen(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Text(
+                        text = "v${BuildConfig.VERSION_NAME}",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                        modifier = Modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = { secretTapState.registerTap() }
+                        )
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
                     IconButton(onClick = onCreditsClicked) {
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = "Credits",
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
             }
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .size(64.dp) // Invisible touch target
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = { secretTapState.registerTap() }
-                    )
-            )
-        }
+            }
     }
 }
 

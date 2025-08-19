@@ -11,6 +11,7 @@ import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.Level
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -39,6 +40,7 @@ class ExerciseSetupViewModel(
         private const val MASTERY_STRENGTH = 5
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val operationLevels: StateFlow<List<OperationLevels>> =
         activeUserManager.activeUserFlow.flatMapLatest { activeUser ->
             factMasteryDao.getAllFactsForUser(activeUser.id)

@@ -1,3 +1,6 @@
+import Versioning
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
@@ -5,6 +8,18 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.aboutLibraries)
 }
+
+val (appVersionCode, appVersionName) = Versioning.getVersionInfo()
+
+val keystorePropsFile = rootProject.file("app/keystore.properties")
+val keystoreProps = Properties()
+// Use a try-catch block to avoid build failures if the file is missing (e.g., on a CI server)
+try {
+    keystoreProps.load(keystorePropsFile.inputStream())
+} catch (e: Exception) {
+    println("keystore.properties file not found, skipping signing configuration.")
+}
+
 
 android {
     namespace = "dev.aidistillery.pocitaj"
@@ -15,19 +30,36 @@ android {
         minSdk = 28
         //noinspection OldTargetApi
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
+
+        buildConfigField("String", "VERSION_NAME", "\"${appVersionName}\"")
 
         testInstrumentationRunner = "dev.aidistillery.pocitaj.PocitajTestRunner"
     }
-
+    signingConfigs {
+        create("release") {
+            // Only configure signing if the properties file was found
+            if (keystorePropsFile.exists()) {
+                keyAlias = keystoreProps["keyAlias"] as String
+                keyPassword = keystoreProps["keyPassword"] as String
+                storeFile = file(keystoreProps["storeFile"] as String)
+                storePassword = keystoreProps["storePassword"] as String
+            }
+        }
+    }
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -59,6 +91,16 @@ android {
             exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         }
     }
+    tasks.register("printVersion") {
+        doLast {
+            // Call the function from your Versioning object
+            val (code, name) = Versioning.getVersionInfo()
+
+            // Print the results to the console
+            println("Version Code: $code")
+            println("Version Name: $name")
+        }
+    }
     kotlin {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
@@ -69,6 +111,12 @@ android {
         resources {
             excludes.add("META-INF/LICENSE.md")
             excludes.add("META-INF/LICENSE-notice.md")
+        }
+        jniLibs {
+            keepDebugSymbols.add("*/arm64-v8a/*.so")
+            keepDebugSymbols.add("*/armeabi-v7a/*.so")
+            keepDebugSymbols.add("*/x86/*.so")
+            keepDebugSymbols.add("*/x86_64/*.so")
         }
     }
 }
