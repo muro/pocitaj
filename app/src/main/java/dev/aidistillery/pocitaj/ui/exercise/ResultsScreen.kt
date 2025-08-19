@@ -8,6 +8,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -219,10 +220,30 @@ fun PreviewResultsList() {
 
 @Composable
 fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
+    val borderOffset = 80f
     val textColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val borderModifier = if (result.status == ResultStatus.INCORRECT) {
+        Modifier.border(
+            width = 2.dp,
+            brush = Brush.linearGradient(
+                colors = listOf(
+                    Color(0xFF8A2BE2),
+                    Color(0xFFFFA500),
+                    Color.Transparent
+                ),
+                start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                end = androidx.compose.ui.geometry.Offset(2 * borderOffset, borderOffset)
+            ),
+            shape = MaterialTheme.shapes.medium
+        )
+    } else {
+        Modifier
+    }
 
     Card(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .then(borderModifier)
     ) {
         Box {
             Row(
@@ -241,7 +262,7 @@ fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
                     ),
                     contentDescription = "Result Status",
                     modifier = Modifier
-                        .padding(horizontal = 8.dp)
+                        .padding(horizontal = 4.dp)
                         .fillMaxHeight()
                         .aspectRatio(1f)
                         .width(16.dp)
@@ -268,7 +289,7 @@ fun ResultCard(result: ResultDescription, modifier: Modifier = Modifier) {
                 )
             }
             SpeedBadgeIndicator(
-                badge = result.speedBadge,
+                badge = if (result.status == ResultStatus.CORRECT) result.speedBadge else SpeedBadge.NONE,
                 modifier = Modifier.align(Alignment.TopEnd)
             )
         }
