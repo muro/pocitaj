@@ -37,7 +37,7 @@ class HistoryScreenTest : BaseExerciseUiTest() {
         runBlocking {
             exerciseAttemptDao.insert(
                 ExerciseAttempt(
-                    problemText = "2 + 2",
+                    problemText = "2 + 2 = ?",
                     submittedAnswer = 4,
                     wasCorrect = true,
                     correctAnswer = 4,
@@ -49,7 +49,7 @@ class HistoryScreenTest : BaseExerciseUiTest() {
             )
             exerciseAttemptDao.insert(
                 ExerciseAttempt(
-                    problemText = "3 + 3",
+                    problemText = "3 + 3 = ?",
                     submittedAnswer = 5,
                     wasCorrect = false,
                     correctAnswer = 6,

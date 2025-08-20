@@ -115,7 +115,7 @@ fun HistoryItem(attempt: ExerciseAttempt) {
             )
             Spacer(modifier = Modifier.width(8.dp).testTag("history_exercise_text"))
             Text(
-                text = "${attempt.problemText} = ${attempt.submittedAnswer}",
+                text = attempt.toHistoryString(),
                 color = MaterialTheme.colorScheme.onSurface
             )
         }

@@ -318,7 +318,7 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         setExercises(exercises2)
 
         // 7. Click the "Do Again" button
-        composeTestRule.onNodeWithText("Do Again").performClick()
+        composeTestRule.onNodeWithContentDescription("Replay Level").performClick()
         composeTestRule.waitForIdle()
 
         // 8. Answer the next two questions
@@ -342,16 +342,11 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         composeTestRule.onNodeWithText("History").performClick()
         composeTestRule.waitForIdle()
 
-        // 11. Verify that all four attempts are in the history
-//        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
-//            composeTestRule.onAllNodesWithText("Results").fetchSemanticsNodes().isNotEmpty()
-//        }
-
         composeTestRule.onAllNodesWithTag("history_exercise_text").assertCountEquals(4)
-//        composeTestRule.onNodeWithText("1 + 1 = 2").assertIsDisplayed()
-//        composeTestRule.onNodeWithText("2 + 2 = 4").assertIsDisplayed()
-//        composeTestRule.onNodeWithText("3 + 3 = 6").assertIsDisplayed()
-//        composeTestRule.onNodeWithText("4 + 4 = 8").assertIsDisplayed()
+        composeTestRule.onNodeWithText("1 + 1 = 2").assertIsDisplayed()
+        composeTestRule.onNodeWithText("2 + 2 = 4").assertIsDisplayed()
+        composeTestRule.onNodeWithText("3 + 3 = 6").assertIsDisplayed()
+        composeTestRule.onNodeWithText("4 + 4 = 8").assertIsDisplayed()
     }
 }
 

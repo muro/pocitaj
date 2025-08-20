@@ -36,6 +36,14 @@ class HistoryViewModel(
     }
 }
 
+/**
+ * Formats an ExerciseAttempt into a display-ready string for the history screen.
+ * It correctly handles different equation types, including those with missing operands.
+ */
+fun ExerciseAttempt.toHistoryString(): String {
+    return problemText.replace("?", submittedAnswer.toString())
+}
+
 object HistoryViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
