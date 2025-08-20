@@ -248,15 +248,16 @@ fun ExerciseScreen(
             ) {
                 // Animated content for the exercise question text
                 AnimatedContent(
-                    targetState = exercise.equation.question(), // Animate when the exercise question changes
+                    // This correctly doesn't animate when the answer was unrecognized.
+                    targetState = exercise, // Animate when the exercise object changes
                     transitionSpec = {
                         // Vertical slide + fade for normal mode
                         (slideInVertically(animationSpec = tween(transitionDuration)) { height -> height } + fadeIn(animationSpec = tween(transitionDuration))) togetherWith
                                 (slideOutVertically(animationSpec = tween(transitionDuration)) { height -> -height } + fadeOut(animationSpec = tween(transitionDuration)))
                     }
-                ) { targetText -> // The target state (new exercise question)
+                ) { targetExercise -> // The target state (new exercise object)
                     AutoSizeText(
-                        text = targetText,
+                        text = targetExercise.equation.question(),
                         color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.displayLarge,
                         textAlign = TextAlign.Center,
