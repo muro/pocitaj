@@ -54,6 +54,7 @@ class ExerciseViewModel(
     private var exercisesRemaining: Int = 0
     private val exerciseHistory = mutableListOf<Exercise>()
     private var currentLevelId: String? = null
+    private var currentExerciseConfig: ExerciseConfig? = null
 
     private val _uiState = MutableStateFlow<UiState>(UiState.ExerciseSetup)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -76,6 +77,7 @@ class ExerciseViewModel(
 
     fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
         viewModelScope.launch {
+            currentExerciseConfig = exerciseConfig
             currentLevelId = exerciseConfig.levelId
             exerciseSource.initialize(exerciseConfig)
             exerciseHistory.clear()
@@ -202,6 +204,15 @@ class ExerciseViewModel(
     fun onSummaryDone() {
         viewModelScope.launch {
             _navigationEvents.emit(NavigationEvent.NavigateBackToHome)
+        }
+    }
+
+    fun restartExercises() {
+        viewModelScope.launch {
+            currentExerciseConfig?.let {
+                startExercises(it)
+                _navigationEvents.emit(NavigationEvent.NavigateToExercise(it.operation.name))
+            }
         }
     }
 

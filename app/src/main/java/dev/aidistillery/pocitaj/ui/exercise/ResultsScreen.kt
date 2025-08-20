@@ -28,6 +28,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -81,7 +82,7 @@ data class ResultDescription(
 )
 
 @Composable
-fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit) {
+fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit, onDoAgain: () -> Unit) {
     PocitajScreen {
         Column(
             modifier = Modifier
@@ -105,6 +106,14 @@ fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit) {
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(onClick = onDoAgain) {
+                    Icon(
+                        imageVector = Icons.Default.Replay,
+                        contentDescription = stringResource(id = R.string.replay_level),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
             ResultsList(
@@ -396,6 +405,6 @@ fun PreviewResultsScreen() {
         )
     }
     AppTheme {
-        ResultsScreen(results) {}
+        ResultsScreen(results, onDone = {}, onDoAgain = {})
     }
 }

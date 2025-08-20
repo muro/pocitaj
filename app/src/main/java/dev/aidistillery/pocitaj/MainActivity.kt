@@ -119,7 +119,9 @@ fun AppNavigation(restartApp: () -> Unit) {
         exerciseViewModel.navigationEvents.collect { event ->
             when (event) {
                 is NavigationEvent.NavigateToExercise -> {
-                    navController.navigate(Destinations.exerciseDetailRoute(event.type))
+                    navController.navigate(Destinations.exerciseDetailRoute(event.type)) {
+                        popUpTo(Destinations.HOME_ROUTE)
+                    }
                 }
 
                 is NavigationEvent.NavigateToSummary -> {
@@ -188,9 +190,11 @@ fun AppNavigation(restartApp: () -> Unit) {
             val uiState by exerciseViewModel.uiState.collectAsState()
             val summaryState = uiState as? UiState.SummaryScreen
             if (summaryState != null) {
-                ResultsScreen(summaryState.results) {
-                    exerciseViewModel.onSummaryDone()
-                }
+                ResultsScreen(
+                    results = summaryState.results,
+                    onDone = { exerciseViewModel.onSummaryDone() },
+                    onDoAgain = { exerciseViewModel.restartExercises() }
+                )
             }
         }
         composable(route = Destinations.PROGRESS_ROUTE) {

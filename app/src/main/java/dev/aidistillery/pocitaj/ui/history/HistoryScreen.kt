@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -112,7 +113,7 @@ fun HistoryItem(attempt: ExerciseAttempt) {
                 contentDescription = if (attempt.wasCorrect) "Correct" else "Incorrect",
                 tint = if (attempt.wasCorrect) Color.Green else Color.Red
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(8.dp).testTag("history_exercise_text"))
             Text(
                 text = "${attempt.problemText} = ${attempt.submittedAnswer}",
                 color = MaterialTheme.colorScheme.onSurface

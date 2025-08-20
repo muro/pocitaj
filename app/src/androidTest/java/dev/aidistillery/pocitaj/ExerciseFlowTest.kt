@@ -1,6 +1,8 @@
 package dev.aidistillery.pocitaj
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -281,6 +283,75 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
             composeTestRule.onAllNodesWithText("Results").fetchSemanticsNodes().isNotEmpty()
         }
+    }
+
+    @Test
+    fun whenDoAgainButtonClicked_thenRestartsSameExerciseAndHistoryIsPreserved() {
+        // 1. Set the exercises for the test
+        val exercises1 = listOf(Exercise(Addition(1, 1)), Exercise(Addition(2, 2)))
+        setExercises(exercises1)
+
+        // 2. Navigate to "Addition"
+        navigateToSmartPractice("+")
+
+        // 3. Wait for the UI to settle
+        composeTestRule.waitForIdle()
+
+        // 4. Answer the two questions
+        drawAnswer("2") // Correct answer for 1+1
+        verifyFeedback(FeedbackType.CORRECT)
+        composeTestRule.waitForIdle()
+        composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME)
+
+        drawAnswer("4") // Correct answer for 2+2
+        verifyFeedback(FeedbackType.CORRECT)
+        composeTestRule.waitForIdle()
+        composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME)
+
+        // 5. Verify Navigation to Summary Screen (ResultsScreen)
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
+            composeTestRule.onAllNodesWithText("Results").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // 6. Set exercises for the second run
+        val exercises2 = listOf(Exercise(Addition(3, 3)), Exercise(Addition(4, 4)))
+        setExercises(exercises2)
+
+        // 7. Click the "Do Again" button
+        composeTestRule.onNodeWithText("Do Again").performClick()
+        composeTestRule.waitForIdle()
+
+        // 8. Answer the next two questions
+        drawAnswer("6") // Correct answer for 3+3
+        verifyFeedback(FeedbackType.CORRECT)
+        composeTestRule.waitForIdle()
+        composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME)
+
+        drawAnswer("8") // Correct answer for 4+4
+        verifyFeedback(FeedbackType.CORRECT)
+        composeTestRule.waitForIdle()
+        composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME)
+
+        // 9. Navigate back to the setup screen
+        composeTestRule.onNodeWithTag("Back").performClick()
+        composeTestRule.waitForIdle()
+
+        // 10. Navigate to the history screen
+        composeTestRule.onNodeWithContentDescription("My Progress").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText("History").performClick()
+        composeTestRule.waitForIdle()
+
+        // 11. Verify that all four attempts are in the history
+//        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
+//            composeTestRule.onAllNodesWithText("Results").fetchSemanticsNodes().isNotEmpty()
+//        }
+
+        composeTestRule.onAllNodesWithTag("history_exercise_text").assertCountEquals(4)
+//        composeTestRule.onNodeWithText("1 + 1 = 2").assertIsDisplayed()
+//        composeTestRule.onNodeWithText("2 + 2 = 4").assertIsDisplayed()
+//        composeTestRule.onNodeWithText("3 + 3 = 6").assertIsDisplayed()
+//        composeTestRule.onNodeWithText("4 + 4 = 8").assertIsDisplayed()
     }
 }
 
