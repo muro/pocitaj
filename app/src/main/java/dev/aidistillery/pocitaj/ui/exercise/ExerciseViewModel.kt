@@ -123,7 +123,7 @@ class ExerciseViewModel(
                 // This means that if the user makes an unrecognized attempt and then a correct attempt, both
                 // entries in the history will show the correct answer.
                 // To fix this, we should store a copy of the exercise at the time of the attempt.
-                exerciseHistory.add(exercise)
+                exerciseHistory.add(exercise.copy())
                 if (intAnswer != null) {
                     exerciseSource.recordAttempt(exercise, intAnswer, elapsedMs.toLong())
                 }

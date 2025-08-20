@@ -172,4 +172,35 @@ class ExerciseViewModelTest {
         // THEN: The history should be empty
         assertTrue(viewModel.resultsList().isEmpty())
     }
+
+    @Test
+    fun `history preserves state of multiple attempts on same question`() = runTest {
+        // GIVEN: An exercise is presented
+        val exercise = Exercise(Addition(7, 7))
+        coEvery { exerciseSource.getNextExercise() } returns exercise andThen null
+
+        viewModel.startExercises(ExerciseConfig(Operation.ADDITION, 10, 1))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // WHEN: The user makes an unrecognized attempt, then a correct attempt
+        viewModel.checkAnswer("xyz", 1000) // Unrecognized
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.checkAnswer("14", 1500) // Correct
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.onFeedbackAnimationFinished()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // THEN: The results list should contain two distinct entries
+        val results = viewModel.resultsList()
+        assertEquals(2, results.size)
+
+        // Verify the first attempt (unrecognized)
+        assertEquals("7 + 7 = ?", results[0].equation)
+        assertEquals(ResultStatus.NOT_RECOGNIZED, results[0].status)
+
+        // Verify the second attempt (correct)
+        assertEquals("7 + 7 = 14", results[1].equation)
+        assertEquals(ResultStatus.CORRECT, results[1].status)
+    }
 }
