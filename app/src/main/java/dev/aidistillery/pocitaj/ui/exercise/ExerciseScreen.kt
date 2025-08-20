@@ -191,18 +191,17 @@ fun ExerciseScreen(
         val answerResult by viewModel.answerResult.collectAsState()
         val recognizedText by viewModel.recognizedText.collectAsState()
         var showResultImage by remember { mutableStateOf(false) }
-        val debug by viewModel.showDebug.collectAsState()
 
         var elapsedTimeMillis by remember { mutableIntStateOf(0) }
         var finalElapsedTimeMillis by remember { mutableIntStateOf(0) }
 
-        val catDuration = if (debug) {
+        val catDuration = if (debugMode) {
             MaterialTheme.motion.debug
         } else {
             MaterialTheme.motion.long
         }
 
-        val fadeDuration = if (debug) {
+        val fadeDuration = if (debugMode) {
             MaterialTheme.motion.debug
         } else {
             MaterialTheme.motion.medium

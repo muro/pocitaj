@@ -96,7 +96,7 @@ data class Motion(
     val short: Int = 150,
     val medium: Int = 300,
     val long: Int = 500,
-    val debug: Int = 2000
+    val debug: Int = 1000
 )
 
 private val defaultMotion = Motion()
@@ -137,6 +137,7 @@ fun AppTheme(
     }
 }
 
+@Suppress("UnusedReceiverParameter")
 val MaterialTheme.customColors: CustomColors
     @Composable
     @ReadOnlyComposable

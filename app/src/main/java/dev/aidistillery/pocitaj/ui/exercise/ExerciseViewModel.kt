@@ -43,13 +43,8 @@ sealed class NavigationEvent {
 }
 
 class ExerciseViewModel(
-    private val inkModelManager: InkModelManager,
-    private val exerciseSource: ExerciseSource
+    private val inkModelManager: InkModelManager, private val exerciseSource: ExerciseSource
 ) : ViewModel() {
-    companion object {
-        const val DEBUG_TAP_THRESHOLD = 5
-    }
-
     private var currentExercise: Exercise? = null
     private var exercisesRemaining: Int = 0
     private val exerciseHistory = mutableListOf<Exercise>()
@@ -64,10 +59,6 @@ class ExerciseViewModel(
 
     private val _navigationEvents = MutableSharedFlow<NavigationEvent>()
     val navigationEvents: SharedFlow<NavigationEvent> = _navigationEvents.asSharedFlow()
-
-    private val _showDebug = MutableStateFlow(false)
-    val showDebug: StateFlow<Boolean> = _showDebug.asStateFlow()
-    private var tapCount = 0
 
     private val _recognizedText = MutableStateFlow<String?>(null)
     val recognizedText: StateFlow<String?> = _recognizedText.asStateFlow()
@@ -190,13 +181,9 @@ class ExerciseViewModel(
     fun resultsList(): List<ResultDescription> {
         return exerciseHistory.map { exercise ->
             ResultDescription(
-                exercise.equationString(),
-                ResultStatus.fromBooleanPair(
-                    exercise.solved,
-                    exercise.correct()
-                ),
-                exercise.timeTakenMillis ?: 0,
-                exercise.speedBadge
+                exercise.equationString(), ResultStatus.fromBooleanPair(
+                    exercise.solved, exercise.correct()
+                ), exercise.timeTakenMillis ?: 0, exercise.speedBadge
             )
         }
     }
@@ -222,13 +209,6 @@ class ExerciseViewModel(
             advanceToNextExercise()
         }
     }
-
-    fun onSecretAreaTapped() {
-        tapCount++
-        if (tapCount >= DEBUG_TAP_THRESHOLD) {
-            _showDebug.value = true
-        }
-    }
 }
 
 object ExerciseViewModelFactory : ViewModelProvider.Factory {
@@ -236,8 +216,7 @@ object ExerciseViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
         val globals = App.app.globals
         return ExerciseViewModel(
-            inkModelManager = globals.inkModelManager,
-            exerciseSource = globals.exerciseSource
+            inkModelManager = globals.inkModelManager, exerciseSource = globals.exerciseSource
         ) as T
     }
 }
