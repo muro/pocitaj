@@ -201,7 +201,7 @@ fun ExerciseScreen(
             MaterialTheme.motion.long
         }
 
-        val fadeDuration = if (debugMode) {
+        val transitionDuration = if (debugMode) {
             MaterialTheme.motion.debug
         } else {
             MaterialTheme.motion.medium
@@ -248,10 +248,9 @@ fun ExerciseScreen(
                 AnimatedContent(
                     targetState = exercise.equation.question(), // Animate when the exercise question changes
                     transitionSpec = {
-                        // Fade in the new text and fade out the old text
-                        fadeIn(animationSpec = tween(fadeDuration)) togetherWith fadeOut(
-                            animationSpec = tween(fadeDuration)
-                        )
+                        // Vertical slide + fade for normal mode
+                        (slideInVertically(animationSpec = tween(transitionDuration)) { height -> height } + fadeIn(animationSpec = tween(transitionDuration))) togetherWith
+                                (slideOutVertically(animationSpec = tween(transitionDuration)) { height -> -height } + fadeOut(animationSpec = tween(transitionDuration)))
                     }
                 ) { targetText -> // The target state (new exercise question)
                     AutoSizeText(
