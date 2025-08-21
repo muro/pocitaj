@@ -1,4 +1,3 @@
-import Versioning
 import java.util.Properties
 
 plugins {
@@ -27,7 +26,7 @@ android {
 
     defaultConfig {
         applicationId = "dev.aidistillery.pocitaj"
-        minSdk = 28
+        minSdk = 24
         //noinspection OldTargetApi
         targetSdk = 35
         versionCode = appVersionCode
