@@ -1,7 +1,7 @@
 package dev.aidistillery.pocitaj
 
 import com.google.android.gms.tasks.Task
-import com.google.mlkit.vision.digitalink.Ink
+import com.google.mlkit.vision.digitalink.recognition.Ink
 
 interface InkModelManager {
     /** Sets the model for a given language tag. */

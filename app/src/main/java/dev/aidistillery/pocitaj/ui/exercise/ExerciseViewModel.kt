@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.google.mlkit.vision.digitalink.Ink
+import com.google.mlkit.vision.digitalink.recognition.Ink
 import dev.aidistillery.pocitaj.App
 import dev.aidistillery.pocitaj.BuildConfig
 import dev.aidistillery.pocitaj.InkModelManager

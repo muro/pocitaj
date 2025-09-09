@@ -2,7 +2,7 @@ package dev.aidistillery.pocitaj
 
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
-import com.google.mlkit.vision.digitalink.Ink
+import com.google.mlkit.vision.digitalink.recognition.Ink
 
 object FakeInkModelManager : InkModelManager {
     var recognitionResult = "123"

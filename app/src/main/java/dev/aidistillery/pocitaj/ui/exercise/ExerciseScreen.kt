@@ -50,9 +50,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.gms.tasks.Tasks
-import com.google.mlkit.vision.digitalink.Ink
-import com.google.mlkit.vision.digitalink.Ink.Point
-import com.google.mlkit.vision.digitalink.Ink.Stroke
+import com.google.mlkit.vision.digitalink.recognition.Ink
+import com.google.mlkit.vision.digitalink.recognition.Ink.Point
+import com.google.mlkit.vision.digitalink.recognition.Ink.Stroke
 import dev.aidistillery.pocitaj.InkModelManager
 import dev.aidistillery.pocitaj.data.ExerciseConfig
 import dev.aidistillery.pocitaj.data.ExerciseSource

@@ -6,11 +6,13 @@ import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.common.model.DownloadConditions
 import com.google.mlkit.common.model.RemoteModelManager
-import com.google.mlkit.vision.digitalink.DigitalInkRecognition
-import com.google.mlkit.vision.digitalink.DigitalInkRecognitionModel
-import com.google.mlkit.vision.digitalink.DigitalInkRecognitionModelIdentifier
-import com.google.mlkit.vision.digitalink.DigitalInkRecognizer
-import com.google.mlkit.vision.digitalink.DigitalInkRecognizerOptions
+import com.google.mlkit.vision.digitalink.recognition.DigitalInkRecognition
+import com.google.mlkit.vision.digitalink.recognition.DigitalInkRecognitionModel
+import com.google.mlkit.vision.digitalink.recognition.DigitalInkRecognitionModelIdentifier
+import com.google.mlkit.vision.digitalink.recognition.DigitalInkRecognizer
+import com.google.mlkit.vision.digitalink.recognition.DigitalInkRecognizerOptions
+import com.google.mlkit.vision.digitalink.recognition.Ink
+import com.google.mlkit.vision.digitalink.recognition.RecognitionContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -21,7 +23,7 @@ class ModelManager : InkModelManager {
     private val remoteModelManager = RemoteModelManager.getInstance()
 
     override suspend fun recognizeInk(
-        ink: com.google.mlkit.vision.digitalink.Ink,
+        ink: Ink,
         hint: String
     ): String =
         suspendCoroutine { continuation ->
@@ -33,8 +35,7 @@ class ModelManager : InkModelManager {
 
             recognizer!!.recognize(
                 ink,
-                com.google.mlkit.vision.digitalink.RecognitionContext.builder()
-                    .setPreContext("1234").build()
+                RecognitionContext.builder().setPreContext("1234").build()
             )
                 .addOnSuccessListener { result ->
                     // on rare occasions, the recognized text includes a space on the start
