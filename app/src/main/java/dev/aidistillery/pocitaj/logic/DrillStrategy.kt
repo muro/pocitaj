@@ -65,7 +65,7 @@ class DrillStrategy(
     }
 
     private fun getMastery(factId: String): FactMastery {
-        return userMastery[factId] ?: FactMastery(factId, activeUserId, 0, 0)
+        return userMastery[factId] ?: FactMastery(factId, activeUserId, 3, 0)
     }
 
     private fun updateWorkingSet() {
