@@ -64,6 +64,7 @@ import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.formatLevel
 import dev.aidistillery.pocitaj.ui.components.AutoSizeText
 import dev.aidistillery.pocitaj.ui.components.PocitajScreen
+import dev.aidistillery.pocitaj.ui.components.StarRatingDisplay
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import dev.aidistillery.pocitaj.ui.theme.getGradientForOperation
 import kotlinx.coroutines.CoroutineScope
@@ -162,6 +163,7 @@ fun ExerciseSetupScreen(
                             operationLevels = operationState,
                             modifier = Modifier.testTag("operation_card_${operationState.operation.toSymbol()}"),
                             expanded = expandedOperation == operationState.operation,
+                            debugMode = debugMode,
                             onCardClicked = {
                                 expandedOperation =
                                     if (expandedOperation == operationState.operation) {
@@ -265,6 +267,7 @@ fun OperationCard(
     operationLevels: OperationLevels,
     modifier: Modifier = Modifier,
     expanded: Boolean,
+    debugMode: Boolean,
     onCardClicked: () -> Unit,
     onStartClicked: (levelId: String?) -> Unit,
 ) {
@@ -335,7 +338,8 @@ fun OperationCard(
                                     LevelTile(
                                         levelStatus = levelstatus,
                                         onClick = { onStartClicked(levelstatus.level.id) },
-                                        modifier = Modifier.weight(1f)
+                                        modifier = Modifier.weight(1f),
+                                        debugMode = debugMode
                                     )
                                 }
                                 if (row.size == 1) {
@@ -351,11 +355,12 @@ fun OperationCard(
 }
 
 @Composable
-fun LevelTile(levelStatus: LevelStatus, onClick: () -> Unit, modifier: Modifier = Modifier) {
+
+fun LevelTile(levelStatus: LevelStatus, onClick: () -> Unit, modifier: Modifier = Modifier, debugMode: Boolean) {
     Card(
         modifier = modifier
             .aspectRatio(1f)
-            .testTag("${levelStatus.level.id}-${levelStatus.starRating}_stars")
+            .testTag("${levelStatus.level.id}-${(levelStatus.progress * 100).toInt()}_progress")
             .clickable(enabled = levelStatus.isUnlocked, onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
@@ -376,10 +381,16 @@ fun LevelTile(levelStatus: LevelStatus, onClick: () -> Unit, modifier: Modifier 
                 modifier = Modifier.testTag("level_${levelStatus.level.id}")
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "🌟".repeat(levelStatus.starRating) + "☆".repeat(3 - levelStatus.starRating),
-                fontSize = 20.sp
+            StarRatingDisplay(
+                progress = levelStatus.progress,
+                emptyStarColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
             )
+            if (debugMode) {
+                Text(
+                    "${(levelStatus.progress * 100).toInt()}%",
+                    style = MaterialTheme.typography.labelSmall,
+                )
+            }
         }
     }
 }
@@ -387,25 +398,25 @@ fun LevelTile(levelStatus: LevelStatus, onClick: () -> Unit, modifier: Modifier 
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_NO,
     showBackground = true,
-    name = "Light Mode"
+    name = "Light Mode",
 )
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_YES,
     showBackground = true,
-    name = "Dark Mode"
+    name = "Dark Mode",
 )
 @Composable
 fun PreviewExpandedOperationCard() {
     val operationLevels = OperationLevels(
         operation = Operation.ADDITION,
         levelStatuses = listOf(
-            LevelStatus(Curriculum.SumsUpTo5, isUnlocked = true, starRating = 3),
-            LevelStatus(Curriculum.SumsUpTo10, isUnlocked = true, starRating = 1),
-            LevelStatus(Curriculum.SumsUpTo20, isUnlocked = false, starRating = 0),
+            LevelStatus(Curriculum.SumsUpTo5, isUnlocked = true, progress = 1f),
+            LevelStatus(Curriculum.SumsUpTo10, isUnlocked = true, progress = 0.5f),
+            LevelStatus(Curriculum.SumsUpTo20, isUnlocked = false, progress = 0f),
             LevelStatus(
                 level = Curriculum.getAllLevels().find { it.id == "ADD_REVIEW_1" }!!,
                 isUnlocked = true,
-                starRating = 2
+                progress = 0.73f
             )
         )
     )
@@ -413,6 +424,34 @@ fun PreviewExpandedOperationCard() {
         OperationCard(
             operationLevels = operationLevels,
             expanded = true,
+            debugMode = false,
+            onCardClicked = { },
+            onStartClicked = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewExpandedOperationCardDebugMode() {
+    val operationLevels = OperationLevels(
+        operation = Operation.ADDITION,
+        levelStatuses = listOf(
+            LevelStatus(Curriculum.SumsUpTo5, isUnlocked = true, progress = 1f),
+            LevelStatus(Curriculum.SumsUpTo10, isUnlocked = true, progress = 0.5f),
+            LevelStatus(Curriculum.SumsUpTo20, isUnlocked = false, progress = 0f),
+            LevelStatus(
+                level = Curriculum.getAllLevels().find { it.id == "ADD_REVIEW_1" }!!,
+                isUnlocked = true,
+                progress = 0.73f
+            )
+        )
+    )
+    AppTheme {
+        OperationCard(
+            operationLevels = operationLevels,
+            expanded = true,
+            debugMode = true,
             onCardClicked = { },
             onStartClicked = {}
         )
@@ -436,9 +475,9 @@ fun PreviewExerciseSetupScreen() {
         OperationLevels(
             operation = op,
             levelStatuses = listOf(
-                LevelStatus(Curriculum.SumsUpTo5, isUnlocked = true, starRating = 3),
-                LevelStatus(Curriculum.SumsUpTo10, isUnlocked = true, starRating = 1),
-                LevelStatus(Curriculum.SumsUpTo20, isUnlocked = false, starRating = 0)
+                LevelStatus(Curriculum.SumsUpTo5, isUnlocked = true, progress = 1f),
+                LevelStatus(Curriculum.SumsUpTo10, isUnlocked = true, progress = 0.53f),
+                LevelStatus(Curriculum.SumsUpTo20, isUnlocked = false, progress = 0f)
             )
         )
     }

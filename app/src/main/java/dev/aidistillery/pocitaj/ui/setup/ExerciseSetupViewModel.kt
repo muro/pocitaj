@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.stateIn
 data class LevelStatus(
     val level: Level,
     val isUnlocked: Boolean,
-    val starRating: Int
+    val progress: Float
 )
 
 data class OperationLevels(
@@ -45,28 +45,33 @@ class ExerciseSetupViewModel(
         activeUserManager.activeUserFlow.flatMapLatest { activeUser ->
             factMasteryDao.getAllFactsForUser(activeUser.id)
                 .map { masteryList ->
-                    val masteredFacts =
-                        masteryList.filter { it.strength >= MASTERY_STRENGTH }.map { it.factId }
-                            .toSet()
+                    val masteryMap = masteryList.associateBy { it.factId }
                     val allLevels = Curriculum.getAllLevels()
+
+                    // Determine mastered levels for unlocking prerequisites
                     val masteredLevelIds = allLevels.filter { level ->
-                        level.getAllPossibleFactIds().all { it in masteredFacts }
+                        val factsInLevel = level.getAllPossibleFactIds()
+                        if (factsInLevel.isEmpty()) return@filter true
+                        val masteredFactCount = factsInLevel.count { factId ->
+                            masteryMap[factId]?.strength ?: 0 >= MASTERY_STRENGTH
+                        }
+                        masteredFactCount == factsInLevel.size
                     }.map { it.id }.toSet()
 
                     allLevels.groupBy { it.operation }.map { (op, levels) ->
                         val levelStates = levels.map { level ->
-                            val progress = level.getAllPossibleFactIds().let { facts ->
-                                if (facts.isEmpty()) 0f else facts.count { it in masteredFacts }
-                                    .toFloat() / facts.size
-                            }
-                            val starRating = when {
-                                progress >= 1.0f -> 3
-                                progress > 0.9f -> 2
-                                progress > 0.6f -> 1
-                                else -> 0
+                            val factsInLevel = level.getAllPossibleFactIds()
+                            val progress = if (factsInLevel.isEmpty()) {
+                                0f
+                            } else {
+                                val totalStrength = factsInLevel.sumOf { factId ->
+                                    masteryMap[factId]?.strength ?: 0
+                                }
+                                val maxPossibleStrength = factsInLevel.size * MASTERY_STRENGTH
+                                totalStrength.toFloat() / maxPossibleStrength
                             }
                             val isUnlocked = level.prerequisites.all { it in masteredLevelIds }
-                            LevelStatus(level, isUnlocked, starRating)
+                            LevelStatus(level, isUnlocked, progress)
                         }
                         OperationLevels(op, levelStates)
                     }

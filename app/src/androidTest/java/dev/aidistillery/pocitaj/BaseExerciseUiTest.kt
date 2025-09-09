@@ -111,7 +111,7 @@ abstract class BaseExerciseUiTest {
 
         // Explicitly scroll the parent list to bring the button into view
         composeTestRule.onNodeWithTag("operation_card_-")
-            .performScrollToNode(matcher = hasTestTag("SUB_REVIEW_1-3_stars"))
+            .performScrollToNode(matcher = hasTestTag("SUB_REVIEW_1-100_progress"))
 
         // Click on the first "Review" button found
         composeTestRule.onAllNodesWithText("🧶")[0].performVerifiedClick("Review button")

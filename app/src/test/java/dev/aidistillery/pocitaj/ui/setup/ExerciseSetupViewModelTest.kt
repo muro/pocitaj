@@ -63,25 +63,38 @@ class ExerciseSetupViewModelTest {
             val initialState = awaitItem()
             val initialAddLevels =
                 initialState.find { it.operation == Operation.ADDITION }!!.levelStatuses
-            assertEquals(0, initialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.starRating)
+            assertEquals(0f, initialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.progress)
             assertTrue(initialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.isUnlocked)
             // TODO: Re-enable and fix these assertions. With the removal of the prerequisite
             // system, these tests need to be rewritten to assert that all levels are unlocked.
             // assertFalse(initialAddLevels.find { it.level.id == "ADD_SUM_10" }!!.isUnlocked)
 
-            // 2. Simulate mastering the first level
-            val masteredFacts = Curriculum.SumsUpTo5.getAllPossibleFactIds().map {
-                FactMastery(it, 1, 5, 0)
+            // 2. Simulate partial progress
+            val allFacts = Curriculum.SumsUpTo5.getAllPossibleFactIds()
+            val masteredFacts = allFacts.take(allFacts.size / 2).map {
+                FactMastery(it, 1, 2, 0) // Master half the facts to strength 2
             }
             fakeDao.emit(masteredFacts)
 
-            // 3. New state: First level is mastered, second is unlocked
+            val partialState = awaitItem()
+            val partialAddLevels =
+                partialState.find { it.operation == Operation.ADDITION }!!.levelStatuses
+            val expectedProgress = (allFacts.size / 2 * 2).toFloat() / (allFacts.size * 5)
+            assertEquals(expectedProgress, partialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.progress, 0.001f)
+
+
+            // 3. Simulate mastering the first level completely
+            val allMasteredFacts = Curriculum.SumsUpTo5.getAllPossibleFactIds().map {
+                FactMastery(it, 1, 5, 0)
+            }
+            fakeDao.emit(allMasteredFacts)
+
+            // 4. New state: First level is mastered, second is unlocked
             val updatedState = awaitItem()
             val updatedAddLevels =
                 updatedState.find { it.operation == Operation.ADDITION }!!.levelStatuses
-            assertEquals(3, updatedAddLevels.find { it.level.id == "ADD_SUM_5" }!!.starRating)
+            assertEquals(1f, updatedAddLevels.find { it.level.id == "ADD_SUM_5" }!!.progress, 0.001f)
             assertTrue(updatedAddLevels.find { it.level.id == "ADD_SUM_10" }!!.isUnlocked)
-            // assertFalse(updatedAddLevels.find { it.level.id == "ADD_SUM_20" }!!.isUnlocked)
         }
     }
 }

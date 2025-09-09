@@ -132,7 +132,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 2. Verify Initial State (Default User)
         openOperationCard("-")
-        composeTestRule.onNodeWithTag("${Curriculum.SubtractionFrom5.id}-0_stars")
+        composeTestRule.onNodeWithTag("${Curriculum.SubtractionFrom5.id}-0_progress")
             .assertIsDisplayed()
 
         // 3. Switch to Alice
@@ -145,7 +145,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 4. Verify Alice's State
         openOperationCard("-")
         composeTestRule.onNodeWithTag("user_profile_Alice").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("${Curriculum.SubtractionFrom5.id}-3_stars")
+        composeTestRule.onNodeWithTag("${Curriculum.SubtractionFrom5.id}-100_progress")
             .assertIsDisplayed()
 
         // 5. Start an Exercise as Alice
@@ -191,7 +191,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 7. Verify Bob's State
         openOperationCard("-")
-        composeTestRule.onNodeWithTag("${Curriculum.SubtractionFrom5.id}-0_stars")
+        composeTestRule.onNodeWithTag("${Curriculum.SubtractionFrom5.id}-0_progress")
             .assertIsDisplayed()
     }
 
