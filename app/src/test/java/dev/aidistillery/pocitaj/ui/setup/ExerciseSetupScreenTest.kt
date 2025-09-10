@@ -3,7 +3,6 @@ package dev.aidistillery.pocitaj.ui.setup
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import dev.aidistillery.pocitaj.MainActivity
@@ -11,7 +10,6 @@ import dev.aidistillery.pocitaj.TestApp
 import dev.aidistillery.pocitaj.data.User
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule

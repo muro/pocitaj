@@ -2,15 +2,12 @@ package dev.aidistillery.pocitaj.ui.progress
 
 import app.cash.turbine.test
 import dev.aidistillery.pocitaj.data.FactMastery
-import dev.aidistillery.pocitaj.data.FactMasteryDao
+import dev.aidistillery.pocitaj.data.FakeFactMasteryDao
 import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.Curriculum.SumsUpTo5
-import dev.aidistillery.pocitaj.data.FakeFactMasteryDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -133,7 +130,7 @@ class ProgressReportViewModelTest {
     }
 
     @Test
-    fun `levelProgress_updatesForHalfAndFullMastery`() = runTest {
+    fun `level progress updates for half and full mastery`() = runTest {
         // ARRANGE
         val fakeDao = FakeFactMasteryDao()
         val viewModel = ProgressReportViewModel(fakeDao, 1)

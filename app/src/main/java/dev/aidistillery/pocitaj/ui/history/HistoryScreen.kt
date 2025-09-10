@@ -113,7 +113,11 @@ fun HistoryItem(attempt: ExerciseAttempt) {
                 contentDescription = if (attempt.wasCorrect) "Correct" else "Incorrect",
                 tint = if (attempt.wasCorrect) Color.Green else Color.Red
             )
-            Spacer(modifier = Modifier.width(8.dp).testTag("history_exercise_text"))
+            Spacer(
+                modifier = Modifier
+                    .width(8.dp)
+                    .testTag("history_exercise_text")
+            )
             Text(
                 text = attempt.toHistoryString(),
                 color = MaterialTheme.colorScheme.onSurface

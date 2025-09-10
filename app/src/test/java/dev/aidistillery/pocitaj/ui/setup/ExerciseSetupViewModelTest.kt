@@ -5,12 +5,9 @@ import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.FakeActiveUserManager
 import dev.aidistillery.pocitaj.data.FakeFactMasteryDao
 import dev.aidistillery.pocitaj.data.Operation
-import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.logic.Curriculum
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -80,7 +77,11 @@ class ExerciseSetupViewModelTest {
             val partialAddLevels =
                 partialState.find { it.operation == Operation.ADDITION }!!.levelStatuses
             val expectedProgress = (allFacts.size / 2 * 2).toFloat() / (allFacts.size * 5)
-            assertEquals(expectedProgress, partialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.progress, 0.001f)
+            assertEquals(
+                expectedProgress,
+                partialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.progress,
+                0.001f
+            )
 
 
             // 3. Simulate mastering the first level completely
@@ -93,7 +94,11 @@ class ExerciseSetupViewModelTest {
             val updatedState = awaitItem()
             val updatedAddLevels =
                 updatedState.find { it.operation == Operation.ADDITION }!!.levelStatuses
-            assertEquals(1f, updatedAddLevels.find { it.level.id == "ADD_SUM_5" }!!.progress, 0.001f)
+            assertEquals(
+                1f,
+                updatedAddLevels.find { it.level.id == "ADD_SUM_5" }!!.progress,
+                0.001f
+            )
             assertTrue(updatedAddLevels.find { it.level.id == "ADD_SUM_10" }!!.isUnlocked)
         }
     }

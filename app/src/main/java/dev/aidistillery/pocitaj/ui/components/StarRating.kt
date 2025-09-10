@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlin.math.round
 import kotlin.math.roundToInt
 
 @Composable
@@ -121,12 +120,19 @@ private fun createStarWithPoints(size: Size): Pair<Path, List<Path>> {
     val pointTopRight = createPointPath(centerX, centerY, p4, i2, i1)
     val pointTop = createPointPath(centerX, centerY, p1, i1, i5)
 
-    val pointPaths = listOf(pointTopLeft, pointBottomLeft, pointBottomRight, pointTopRight, pointTop)
+    val pointPaths =
+        listOf(pointTopLeft, pointBottomLeft, pointBottomRight, pointTopRight, pointTop)
 
     return Pair(fullStarPath, pointPaths)
 }
 
-private fun createPointPath(cx: Float, cy: Float, p: Pair<Float, Float>, i1: Pair<Float, Float>, i2: Pair<Float, Float>): Path {
+private fun createPointPath(
+    cx: Float,
+    cy: Float,
+    p: Pair<Float, Float>,
+    i1: Pair<Float, Float>,
+    i2: Pair<Float, Float>
+): Path {
     return Path().apply {
         moveTo(cx, cy)
         lineTo(i2.first, i2.second)

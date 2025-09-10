@@ -252,8 +252,12 @@ fun ExerciseScreen(
                     targetState = exercise, // Animate when the exercise object changes
                     transitionSpec = {
                         // Vertical slide + fade for normal mode
-                        (slideInVertically(animationSpec = tween(transitionDuration)) { height -> height } + fadeIn(animationSpec = tween(transitionDuration))) togetherWith
-                                (slideOutVertically(animationSpec = tween(transitionDuration)) { height -> -height } + fadeOut(animationSpec = tween(transitionDuration)))
+                        (slideInVertically(animationSpec = tween(transitionDuration)) { height -> height } + fadeIn(
+                            animationSpec = tween(transitionDuration)
+                        )) togetherWith
+                                (slideOutVertically(animationSpec = tween(transitionDuration)) { height -> -height } + fadeOut(
+                                    animationSpec = tween(transitionDuration)
+                                ))
                     }
                 ) { targetExercise -> // The target state (new exercise object)
                     AutoSizeText(

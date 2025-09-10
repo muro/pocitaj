@@ -211,7 +211,7 @@ fun ExerciseSetupScreen(
                     }
                 }
             }
-            }
+        }
     }
 }
 
@@ -337,10 +337,9 @@ fun OperationCard(
                                 for (levelstatus in row) {
                                     LevelTile(
                                         levelStatus = levelstatus,
-                                        onClick = { onStartClicked(levelstatus.level.id) },
                                         modifier = Modifier.weight(1f),
                                         debugMode = debugMode
-                                    )
+                                    ) { onStartClicked(levelstatus.level.id) }
                                 }
                                 if (row.size == 1) {
                                     Spacer(Modifier.weight(1f))
@@ -356,7 +355,12 @@ fun OperationCard(
 
 @Composable
 
-fun LevelTile(levelStatus: LevelStatus, onClick: () -> Unit, modifier: Modifier = Modifier, debugMode: Boolean) {
+fun LevelTile(
+    levelStatus: LevelStatus,
+    modifier: Modifier = Modifier,
+    debugMode: Boolean,
+    onClick: () -> Unit
+) {
     Card(
         modifier = modifier
             .aspectRatio(1f)
