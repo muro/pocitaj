@@ -215,10 +215,10 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         val factMasteryDao = globals.factMasteryDao
         runBlocking {
             Curriculum.SubtractionFrom5.getAllPossibleFactIds().forEach { factId ->
-                factMasteryDao.upsert(FactMastery(factId, 1, 5, 0))
+                factMasteryDao.upsert(FactMastery(factId, 1, "", 5, 0))
             }
             Curriculum.SubtractionFrom10.getAllPossibleFactIds().forEach { factId ->
-                factMasteryDao.upsert(FactMastery(factId, 1, 5, 0))
+                factMasteryDao.upsert(FactMastery(factId, 1, "", 5, 0))
             }
         }
 

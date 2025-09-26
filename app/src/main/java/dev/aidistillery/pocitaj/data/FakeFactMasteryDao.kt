@@ -11,6 +11,10 @@ class FakeFactMasteryDao : FactMasteryDao {
         return flow
     }
 
+    override suspend fun getFactMastery(userId: Long, factId: String, level: String): FactMastery? {
+        return facts.find { it.userId == userId && it.factId == factId && it.level == level }
+    }
+
     override suspend fun getFactMastery(userId: Long, factId: String): FactMastery? {
         return facts.find { it.userId == userId && it.factId == factId }
     }

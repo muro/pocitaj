@@ -65,7 +65,7 @@ class DrillStrategy(
     }
 
     private fun getMastery(factId: String): FactMastery {
-        return userMastery[factId] ?: FactMastery(factId, activeUserId, 3, 0)
+        return userMastery[factId] ?: FactMastery(factId, activeUserId, "", 3, 0)
     }
 
     private fun updateWorkingSet() {
@@ -110,7 +110,7 @@ class DrillStrategy(
         return exerciseFromFactId(factId)
     }
 
-    override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): FactMastery? {
+    override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): Pair<FactMastery?, String> {
         val factId = exercise.getFactId()
         val mastery = getMastery(factId)
         val now = clock.now().toEpochMilliseconds()
@@ -148,7 +148,7 @@ class DrillStrategy(
             workingSet.remove(factId)
             addNextWeakestFact()
         }
-        return newMastery
+        return newMastery to level.id
     }
 
     private fun addNextWeakestFact() {

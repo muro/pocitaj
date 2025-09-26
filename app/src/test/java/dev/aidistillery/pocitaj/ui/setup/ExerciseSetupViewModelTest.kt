@@ -69,7 +69,7 @@ class ExerciseSetupViewModelTest {
             // 2. Simulate partial progress
             val allFacts = Curriculum.SumsUpTo5.getAllPossibleFactIds()
             val masteredFacts = allFacts.take(allFacts.size / 2).map {
-                FactMastery(it, 1, 2, 0) // Master half the facts to strength 2
+                FactMastery(it, 1, "", 2, 0) // Master half the facts to strength 2
             }
             fakeDao.emit(masteredFacts)
 
@@ -86,7 +86,7 @@ class ExerciseSetupViewModelTest {
 
             // 3. Simulate mastering the first level completely
             val allMasteredFacts = Curriculum.SumsUpTo5.getAllPossibleFactIds().map {
-                FactMastery(it, 1, 5, 0)
+                FactMastery(it, 1, "", 5, 0)
             }
             fakeDao.emit(allMasteredFacts)
 

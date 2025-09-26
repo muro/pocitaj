@@ -6,7 +6,7 @@ import androidx.room.Index
 
 @Entity(
     tableName = "fact_mastery",
-    primaryKeys = ["factId", "userId"],
+    primaryKeys = ["factId", "userId", "level"],
     foreignKeys = [
         ForeignKey(
             entity = User::class,
@@ -20,6 +20,7 @@ import androidx.room.Index
 data class FactMastery(
     val factId: String,
     val userId: Long,
+    val level: String,
     val strength: Int = 0,
     val lastTestedTimestamp: Long,
     val avgDurationMs: Long = 0

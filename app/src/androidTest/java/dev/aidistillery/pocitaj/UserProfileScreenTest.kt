@@ -123,10 +123,10 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
             globals.userDao.insert(User(id = 2, name = "Alice"))
             globals.userDao.insert(User(id = 3, name = "Bob"))
             Curriculum.SubtractionFrom5.getAllPossibleFactIds().forEach { factId ->
-                globals.factMasteryDao.upsert(FactMastery(factId, 2, 5, 0))
+                globals.factMasteryDao.upsert(FactMastery(factId, 2, "", 5, 0))
             }
             Curriculum.MultiplicationTableLevel(3).getAllPossibleFactIds().forEach { factId ->
-                globals.factMasteryDao.upsert(FactMastery(factId, 3, 3, 0))
+                globals.factMasteryDao.upsert(FactMastery(factId, 3, "", 3, 0))
             }
         }
 

@@ -23,6 +23,7 @@ class AdaptiveExerciseSourceTest {
         private val facts = mutableMapOf<String, FactMastery>()
         private val flow = MutableStateFlow<List<FactMastery>>(emptyList())
         override fun getAllFactsForUser(userId: Long) = flow.asStateFlow()
+        override suspend fun getFactMastery(userId: Long, factId: String, level: String) = facts[factId]
         override suspend fun getFactMastery(userId: Long, factId: String) = facts[factId]
         override suspend fun upsert(factMastery: FactMastery) {
             facts[factMastery.factId] = factMastery

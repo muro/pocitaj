@@ -359,29 +359,31 @@ fun ProgressReportScreenPreview() {
         // Create some fake mastery data for a more realistic preview
         val fakeMasteredFacts = mapOf(
             // Addition
-            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 5, 0, 1000), // Mastered, Gold
-            "ADDITION_2_3" to FactMastery("ADDITION_2_3", 1, 3, 0, 3000), // Learning
-            "ADDITION_3_4" to FactMastery("ADDITION_3_4", 1, 1, 0, 5000), // Struggling
-            "ADDITION_8_8" to FactMastery("ADDITION_8_8", 1, 5, 0, 4000), // Mastered, Bronze
-            "ADDITION_9_1" to FactMastery("ADDITION_9_1", 1, 2, 0, 6000), // Struggling
+            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 5, 0, 1000), // Mastered, Gold
+            "ADDITION_2_3" to FactMastery("ADDITION_2_3", 1, "", 3, 0, 3000), // Learning
+            "ADDITION_3_4" to FactMastery("ADDITION_3_4", 1, "", 1, 0, 5000), // Struggling
+            "ADDITION_8_8" to FactMastery("ADDITION_8_8", 1, "", 5, 0, 4000), // Mastered, Bronze
+            "ADDITION_9_1" to FactMastery("ADDITION_9_1", 1, "", 2, 0, 6000), // Struggling
 
             // Multiplication
             "MULTIPLICATION_2_5" to FactMastery(
                 "MULTIPLICATION_2_5",
                 1,
+                "",
                 5,
                 0,
                 500
             ),  // Mastered, Gold
-            "MULTIPLICATION_5_2" to FactMastery("MULTIPLICATION_5_2", 1, 3, 0, 2000), // Learning
+            "MULTIPLICATION_5_2" to FactMastery("MULTIPLICATION_5_2", 1, "", 3, 0, 2000), // Learning
             "MULTIPLICATION_10_1" to FactMastery(
                 "MULTIPLICATION_10_1",
                 1,
+                "",
                 5,
                 0,
                 2500
             ),// Mastered, Silver
-            "MULTIPLICATION_3_7" to FactMastery("MULTIPLICATION_3_7", 1, 1, 0, 4000), // Struggling
+            "MULTIPLICATION_3_7" to FactMastery("MULTIPLICATION_3_7", 1, "", 1, 0, 4000), // Struggling
         )
 
         val factProgressByOperation = allLevels
@@ -459,6 +461,7 @@ fun MultiplicationReportPreview() {
             "MULTIPLICATION_2_2" to FactMastery(
                 "MULTIPLICATION_2_2",
                 1,
+                "",
                 5,
                 0,
                 500
@@ -466,6 +469,7 @@ fun MultiplicationReportPreview() {
             "MULTIPLICATION_2_3" to FactMastery(
                 "MULTIPLICATION_2_3",
                 1,
+                "",
                 5,
                 0,
                 2000
@@ -473,6 +477,7 @@ fun MultiplicationReportPreview() {
             "MULTIPLICATION_3_2" to FactMastery(
                 "MULTIPLICATION_3_2",
                 1,
+                "",
                 5,
                 0,
                 2800
@@ -480,12 +485,13 @@ fun MultiplicationReportPreview() {
             "MULTIPLICATION_3_3" to FactMastery(
                 "MULTIPLICATION_3_3",
                 1,
+                "",
                 5,
                 0,
                 4000
             ), // Mastered, Slow
-            "MULTIPLICATION_4_4" to FactMastery("MULTIPLICATION_4_4", 1, 3, 0, 0),    // Learning
-            "MULTIPLICATION_5_5" to FactMastery("MULTIPLICATION_5_5", 1, 1, 0, 0),    // Weak
+            "MULTIPLICATION_4_4" to FactMastery("MULTIPLICATION_4_4", 1, "", 3, 0, 0),    // Learning
+            "MULTIPLICATION_5_5" to FactMastery("MULTIPLICATION_5_5", 1, "", 1, 0, 0),    // Weak
         )
 
         val multiplicationLevels = Curriculum.getLevelsFor(Operation.MULTIPLICATION)

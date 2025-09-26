@@ -92,9 +92,9 @@ class SmartPracticeStrategy(
         return exerciseFromFactId(factId)
     }
 
-    override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): FactMastery? {
+    override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): Pair<FactMastery?, String> {
         val factId = exercise.getFactId()
-        val mastery = userMastery[factId] ?: FactMastery(factId, activeUserId, 0, 0)
+        val mastery = userMastery[factId] ?: FactMastery(factId, activeUserId, "", 0, 0)
         val now = clock.now().toEpochMilliseconds()
         val duration = exercise.timeTakenMillis?.toLong() ?: 0L
 
@@ -125,7 +125,7 @@ class SmartPracticeStrategy(
             avgDurationMs = newAvgDuration
         )
         userMastery[factId] = newMastery
-        return newMastery
+        return newMastery to (findCurrentLevel().id)
     }
 
     private fun findWeakestFactIn(level: Level): String {

@@ -155,9 +155,9 @@ class ReviewStrategy(
         return candidates.keys.firstOrNull()?.let { exerciseFromFactId(it) }
     }
 
-    override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): FactMastery? {
+    override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): Pair<FactMastery?, String> {
         val factId = exercise.getFactId()
-        val mastery = userMastery[factId] ?: FactMastery(factId, activeUserId, 0, 0)
+        val mastery = userMastery[factId] ?: FactMastery(factId, activeUserId, "", 0, 0)
         val now = clock.now().toEpochMilliseconds()
         val duration = exercise.timeTakenMillis?.toLong() ?: 0L
 
@@ -186,6 +186,6 @@ class ReviewStrategy(
             avgDurationMs = newAvgDuration
         )
         userMastery[factId] = newMastery
-        return newMastery
+        return newMastery to level.id
     }
 }

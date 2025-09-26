@@ -43,6 +43,7 @@ class FactMasteryDaoTest {
         val factMastery = FactMastery(
             factId = "ADDITION_5_3",
             userId = userId,
+            level = "",
             strength = 3,
             lastTestedTimestamp = System.currentTimeMillis()
         )

@@ -19,7 +19,7 @@ enum class ExerciseStrategy {
  */
 interface ExerciseProvider {
     fun getNextExercise(): Exercise?
-    fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): FactMastery?
+    fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): Pair<FactMastery?, String>
 }
 
 /**

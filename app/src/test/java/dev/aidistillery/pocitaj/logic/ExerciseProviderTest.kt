@@ -25,9 +25,9 @@ class ExerciseProviderTest {
     fun `provider picks from weakest facts`() {
         val curriculum = Curriculum.getAllLevels()
         val userMastery = mutableMapOf(
-            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 3, 0),
-            "ADDITION_1_2" to FactMastery("ADDITION_1_2", 1, 1, 0), // Weakest
-            "ADDITION_1_3" to FactMastery("ADDITION_1_3", 1, 4, 0)
+            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 3, 0),
+            "ADDITION_1_2" to FactMastery("ADDITION_1_2", 1, "", 1, 0), // Weakest
+            "ADDITION_1_3" to FactMastery("ADDITION_1_3", 1, "", 4, 0)
         )
 
         val provider = SmartPracticeStrategy(curriculum, userMastery, 1L, random = Random(123))
@@ -42,14 +42,15 @@ class ExerciseProviderTest {
     fun `provider uses lastTestedTimestamp as a tie-breaker`() {
         val curriculum = Curriculum.getAllLevels()
         val userMastery = mutableMapOf(
-            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 1, 1000L),
+            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 1, 1000L),
             "ADDITION_1_2" to FactMastery(
                 "ADDITION_1_2",
                 1,
+                "",
                 1,
                 500L
             ), // Weakest (same strength, older timestamp)
-            "ADDITION_1_3" to FactMastery("ADDITION_1_3", 1, 2, 1500L)
+            "ADDITION_1_3" to FactMastery("ADDITION_1_3", 1, "", 2, 1500L)
         )
 
         val provider = SmartPracticeStrategy(curriculum, userMastery, 1L, random = Random(123))
@@ -64,7 +65,7 @@ class ExerciseProviderTest {
         val curriculum = Curriculum.getAllLevels()
         val level1Facts = curriculum[0].getAllPossibleFactIds()
         val userMastery = level1Facts.associateWith { factId ->
-            FactMastery(factId, 1, 5, 0) // Strength 5 = mastered
+            FactMastery(factId, 1, "", 5, 0) // Strength 5 = mastered
         }.toMutableMap()
 
         val provider = SmartPracticeStrategy(curriculum, userMastery, 1L, random = Random(123))
@@ -79,7 +80,7 @@ class ExerciseProviderTest {
         val curriculum = Curriculum.getAllLevels()
         val level1Facts = curriculum[0].getAllPossibleFactIds()
         val userMastery = level1Facts.associateWith { factId ->
-            FactMastery(factId, 1, 5, 0) // Mastered
+            FactMastery(factId, 1, "", 5, 0) // Mastered
         }.toMutableMap()
 
         // By providing a Random generator that always returns a high value,
@@ -116,7 +117,7 @@ class ExerciseProviderTest {
         val userMastery = mutableMapOf<String, FactMastery>()
         // Create 7 unmastered facts
         for (i in 0..6) {
-            userMastery["ADDITION_1_$i"] = FactMastery("ADDITION_1_$i", 1, i % 5, 0)
+            userMastery["ADDITION_1_$i"] = FactMastery("ADDITION_1_$i", 1, "", i % 5, 0)
         }
 
         val provider = SmartPracticeStrategy(curriculum, userMastery, 1L, random = Random(123))
@@ -152,10 +153,10 @@ class ExerciseProviderTest {
         val userMastery = mutableMapOf<String, FactMastery>()
         // Create 4 unmastered facts
         for (i in 0..3) {
-            userMastery["ADDITION_1_$i"] = FactMastery("ADDITION_1_$i", 1, 0, 0)
+            userMastery["ADDITION_1_$i"] = FactMastery("ADDITION_1_$i", 1, "", 0, 0)
         }
         // Create 1 mastered fact
-        userMastery["ADDITION_1_4"] = FactMastery("ADDITION_1_4", 1, 5, 0)
+        userMastery["ADDITION_1_4"] = FactMastery("ADDITION_1_4", 1, "", 5, 0)
 
         val provider = SmartPracticeStrategy(curriculum, userMastery, 1L, random = Random(123))
         val workingSet = mutableSetOf<String>()
@@ -176,7 +177,7 @@ class ExerciseProviderTest {
         // Master the first level
         val level1Facts = curriculum[0].getAllPossibleFactIds()
         level1Facts.forEach { factId ->
-            userMastery[factId] = FactMastery(factId, 1, 5, 0)
+            userMastery[factId] = FactMastery(factId, 1, "", 5, 0)
         }
 
         val provider = SmartPracticeStrategy(curriculum, userMastery, 1L, random = Random(123))

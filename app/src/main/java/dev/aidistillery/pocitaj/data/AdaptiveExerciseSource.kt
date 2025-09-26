@@ -24,6 +24,7 @@ class AdaptiveExerciseSource(
     override suspend fun initialize(config: ExerciseConfig) {
         val userMastery =
             factMasteryDao.getAllFactsForUser(activeUserManager.activeUser.id).first()
+                .filter { it.level.isEmpty() }
                 .associateBy { it.factId }
         val level =
             config.levelId?.let { Curriculum.getAllLevels().find { level -> level.id == it } }
@@ -92,7 +93,7 @@ class AdaptiveExerciseSource(
 
     override suspend fun recordAttempt(exercise: Exercise, submittedAnswer: Int, durationMs: Long) {
         val wasCorrect = exercise.equation.getExpectedResult() == submittedAnswer
-        val newMastery = exerciseProvider?.recordAttempt(exercise, wasCorrect)
+        val (newMastery, level) = exerciseProvider?.recordAttempt(exercise, wasCorrect) ?: return
 
         withContext(Dispatchers.IO) {
             val attempt = ExerciseAttempt(
@@ -108,7 +109,7 @@ class AdaptiveExerciseSource(
             exerciseAttemptDao.insert(attempt)
 
             newMastery?.let {
-                factMasteryDao.upsert(it)
+                factMasteryDao.upsert(it, level)
             }
         }
     }

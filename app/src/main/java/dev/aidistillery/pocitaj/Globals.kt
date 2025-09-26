@@ -25,7 +25,7 @@ interface Globals {
 class ProductionGlobals(private val context: Context) : Globals {
     private val database: AppDatabase by lazy {
         Room.databaseBuilder(context, AppDatabase::class.java, "pocitaj-db")
-            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3)
             .build()
     }
     override val userDao: UserDao by lazy { database.userDao() }

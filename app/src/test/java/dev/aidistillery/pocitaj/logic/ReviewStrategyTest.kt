@@ -25,7 +25,7 @@ class ReviewStrategyTest {
         strength: Int,
         lastTested: Long
     ): Pair<String, FactMastery> {
-        return factId to FactMastery(factId, 1, strength, lastTested)
+        return factId to FactMastery(factId, 1, "", strength, lastTested)
     }
 
     private fun setupStrategy(
@@ -81,7 +81,7 @@ class ReviewStrategyTest {
 
     @Test
     fun `incorrect answer resets strength to 1`() {
-        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 7, 100L))
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 7, 100L))
         val strategy = setupStrategy(userMastery)
         val exercise = exerciseFromFactId("ADDITION_1_1")
 
@@ -96,7 +96,7 @@ class ReviewStrategyTest {
 
     @Test
     fun `correct answer with Gold speed promotes to targetStrength`() {
-        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 6, 100L))
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 6, 100L))
         val strategy = setupStrategy(userMastery, reviewStrength = 6, targetStrength = 7)
         val exercise = exerciseFromFactId("ADDITION_1_1")
         exercise.speedBadge = SpeedBadge.GOLD
@@ -112,7 +112,7 @@ class ReviewStrategyTest {
 
     @Test
     fun `correct answer with Gold speed does not promote beyond targetStrength`() {
-        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 7, 100L))
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 7, 100L))
         val strategy = setupStrategy(userMastery, reviewStrength = 6, targetStrength = 7)
         val exercise = exerciseFromFactId("ADDITION_1_1")
         exercise.speedBadge = SpeedBadge.GOLD
@@ -128,7 +128,7 @@ class ReviewStrategyTest {
 
     @Test
     fun `correct answer with Silver speed demotes strength by 1`() {
-        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 7, 100L))
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 7, 100L))
         val strategy = setupStrategy(userMastery, reviewStrength = 6, targetStrength = 7)
         val exercise = exerciseFromFactId("ADDITION_1_1")
         exercise.speedBadge = SpeedBadge.SILVER
@@ -140,7 +140,7 @@ class ReviewStrategyTest {
 
     @Test
     fun `correct answer with Bronze speed does not demote below reviewStrength`() {
-        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 6, 100L))
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 6, 100L))
         val strategy = setupStrategy(userMastery, reviewStrength = 6, targetStrength = 7)
         val exercise = exerciseFromFactId("ADDITION_1_1")
         exercise.speedBadge = SpeedBadge.BRONZE

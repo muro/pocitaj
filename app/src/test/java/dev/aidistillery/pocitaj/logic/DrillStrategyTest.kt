@@ -27,7 +27,7 @@ class DrillStrategyTest {
         strength: Int,
         lastTested: Long
     ): Pair<String, FactMastery> {
-        return factId to FactMastery(factId, 1, strength, lastTested)
+        return factId to FactMastery(factId, 1, "", strength, lastTested)
     }
 
     private fun setupStrategy(
@@ -172,7 +172,7 @@ class DrillStrategyTest {
 
     @Test
     fun `incorrect answer to L2 fact demotes it to strength 1`() {
-        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 4, 100L))
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 4, 100L))
         val strategy = setupStrategy(userMastery, setSize = 1)
         assertEquals(listOf("ADDITION_1_1"), strategy.workingSet)
         val exercise = exerciseFromFactId("ADDITION_1_1")
@@ -191,7 +191,7 @@ class DrillStrategyTest {
         val exercise = exerciseFromFactId("ADDITION_1_1")
 
         // ACT
-        val newMastery = strategy.recordAttempt(exercise, wasCorrect = true)
+        val (newMastery, _) = strategy.recordAttempt(exercise, wasCorrect = true)
 
         // ASSERT
         assertNotNull("Should return a new mastery object", newMastery)
@@ -204,7 +204,7 @@ class DrillStrategyTest {
 
     @Test
     fun `strength 2 to 3 does not happen if speed is too slow`() {
-        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 2, 100L))
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 2, 100L))
         val strategy = setupStrategy(userMastery)
         val exercise = exerciseFromFactId("ADDITION_1_1")
         exercise.speedBadge = SpeedBadge.NONE // Too slow
@@ -220,7 +220,7 @@ class DrillStrategyTest {
 
     @Test
     fun `strength 2 to 3 requires bronze badge`() {
-        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, 2, 100L))
+        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 2, 100L))
         val strategy = setupStrategy(userMastery)
         val exercise = exerciseFromFactId("ADDITION_1_1")
         exercise.speedBadge = SpeedBadge.BRONZE
@@ -238,7 +238,7 @@ class DrillStrategyTest {
     fun `get next exercise serves random L3 facts when all facts are mastered`() {
         // ARRANGE: A user who has mastered every fact in the level.
         val userMastery = testLevel.getAllPossibleFactIds().associateWith {
-            FactMastery(it, 1, 5, System.currentTimeMillis())
+            FactMastery(it, 1, "", 5, System.currentTimeMillis())
         }.toMutableMap()
         val strategy = setupStrategy(userMastery)
 

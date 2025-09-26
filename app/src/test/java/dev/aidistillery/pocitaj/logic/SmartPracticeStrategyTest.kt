@@ -20,8 +20,8 @@ class SmartPracticeStrategyTest {
     @Test
     fun `isLevelMastered returns true when all facts are at mastery strength`() {
         val userMastery = mutableMapOf(
-            "ADD_1_1" to FactMastery("ADD_1_1", 1, 5, 0),
-            "ADD_1_2" to FactMastery("ADD_1_2", 1, 5, 0)
+            "ADD_1_1" to FactMastery("ADD_1_1", 1, "", 5, 0),
+            "ADD_1_2" to FactMastery("ADD_1_2", 1, "", 5, 0)
         )
         val strategy = SmartPracticeStrategy(listOf(level1), userMastery, 1L)
         assertTrue(strategy.isLevelMastered(level1))
@@ -30,8 +30,8 @@ class SmartPracticeStrategyTest {
     @Test
     fun `isLevelMastered returns false when a fact is not at mastery strength`() {
         val userMastery = mutableMapOf(
-            "ADD_1_1" to FactMastery("ADD_1_1", 1, 5, 0),
-            "ADD_1_2" to FactMastery("ADD_1_2", 1, 4, 0) // Not mastered
+            "ADD_1_1" to FactMastery("ADD_1_1", 1, "", 5, 0),
+            "ADD_1_2" to FactMastery("ADD_1_2", 1, "", 4, 0) // Not mastered
         )
         val strategy = SmartPracticeStrategy(listOf(level1), userMastery, 1L)
         assertFalse(strategy.isLevelMastered(level1))
@@ -40,7 +40,7 @@ class SmartPracticeStrategyTest {
     @Test
     fun `isLevelMastered returns false when a fact is missing from mastery map`() {
         val userMastery = mutableMapOf(
-            "ADD_1_1" to FactMastery("ADD_1_1", 1, 5, 0)
+            "ADD_1_1" to FactMastery("ADD_1_1", 1, "", 5, 0)
             // ADD_1_2 is missing
         )
         val strategy = SmartPracticeStrategy(listOf(level1), userMastery, 1L)
@@ -60,8 +60,8 @@ class SmartPracticeStrategyTest {
             override val prerequisites = setOf("LEVEL_1")
         }
         val userMastery = mutableMapOf(
-            "ADD_1_1" to FactMastery("ADD_1_1", 1, 5, 0),
-            "ADD_1_2" to FactMastery("ADD_1_2", 1, 5, 0)
+            "ADD_1_1" to FactMastery("ADD_1_1", 1, "", 5, 0),
+            "ADD_1_2" to FactMastery("ADD_1_2", 1, "", 5, 0)
         )
         val strategy = SmartPracticeStrategy(listOf(level1, level2), userMastery, 1L)
         assertTrue(strategy.isLevelUnlocked(level2))
@@ -74,8 +74,8 @@ class SmartPracticeStrategyTest {
             override val prerequisites = setOf("LEVEL_1")
         }
         val userMastery = mutableMapOf(
-            "ADD_1_1" to FactMastery("ADD_1_1", 1, 5, 0),
-            "ADD_1_2" to FactMastery("ADD_1_2", 1, 4, 0) // Not mastered
+            "ADD_1_1" to FactMastery("ADD_1_1", 1, "", 5, 0),
+            "ADD_1_2" to FactMastery("ADD_1_2", 1, "", 4, 0) // Not mastered
         )
         val strategy = SmartPracticeStrategy(listOf(level1, level2), userMastery, 1L)
         assertFalse(strategy.isLevelUnlocked(level2))
