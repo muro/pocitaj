@@ -334,12 +334,12 @@ fun OperationCard(
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                for (levelstatus in row) {
+                                for (levelStatus in row) {
                                     LevelTile(
-                                        levelStatus = levelstatus,
+                                        levelStatus = levelStatus,
                                         modifier = Modifier.weight(1f),
                                         debugMode = debugMode
-                                    ) { onStartClicked(levelstatus.level.id) }
+                                    ) { onStartClicked(levelStatus.level.id) }
                                 }
                                 if (row.size == 1) {
                                     Spacer(Modifier.weight(1f))
