@@ -3,12 +3,11 @@ package dev.aidistillery.pocitaj
 import android.app.Application
 
 open class App : Application() {
-    open val globals: Globals by lazy {
-        ProductionGlobals(this)
-    }
+    open lateinit var globals: Globals
 
     override fun onCreate() {
         super.onCreate()
+        globals = ProductionGlobals(this)
         app = this
     }
 

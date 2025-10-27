@@ -268,7 +268,8 @@ fun ExerciseScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(312.dp)
-                            .wrapContentHeight(align = Alignment.CenterVertically),
+                            .wrapContentHeight(align = Alignment.CenterVertically)
+                            .testTag("exercise_question"),
                     )
                 }
 

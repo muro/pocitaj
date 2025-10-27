@@ -1,7 +1,10 @@
 package dev.aidistillery.pocitaj
 
 class TestApp : App() {
-    override val globals: Globals by lazy {
-        TestGlobals(this)
+    override lateinit var globals: Globals
+
+    override fun onCreate() {
+        super.onCreate()
+        globals = TestGlobals(this)
     }
 }

@@ -65,7 +65,10 @@ class AdaptiveExerciseSourceMasteryTest {
 
         // ACT: Get the first exercise and answer it correctly via the ViewModel
         val uiState = viewModel.uiState.value
-        assertTrue("UI state should be ExerciseScreen", uiState is UiState.ExerciseScreen)
+        assertTrue(
+            "UI state should be ExerciseScreen, but was $uiState",
+            uiState is UiState.ExerciseScreen
+        )
         val exercise = (uiState as UiState.ExerciseScreen).currentExercise
         val factId = exercise.getFactId()
         val correctAnswer = exercise.equation.getExpectedResult().toString()

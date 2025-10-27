@@ -48,6 +48,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -353,8 +355,9 @@ fun OperationCard(
     }
 }
 
-@Composable
+val StarRatingKey = SemanticsPropertyKey<Int>("StarRating")
 
+@Composable
 fun LevelTile(
     levelStatus: LevelStatus,
     modifier: Modifier = Modifier,
@@ -364,6 +367,10 @@ fun LevelTile(
     Card(
         modifier = modifier
             .aspectRatio(1f)
+            .testTag("leveltile_${levelStatus.level.id}")
+            .semantics {
+                set(StarRatingKey, (100 * levelStatus.progress).toInt())
+            }
             .testTag("${levelStatus.level.id}-${(levelStatus.progress * 100).toInt()}_progress")
             .clickable(enabled = levelStatus.isUnlocked, onClick = onClick),
         shape = RoundedCornerShape(12.dp),

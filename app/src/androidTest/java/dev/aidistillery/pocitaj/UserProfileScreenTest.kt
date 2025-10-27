@@ -22,6 +22,7 @@ import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.logic.Addition
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.Exercise
+import junit.framework.TestCase
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -132,8 +133,10 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 2. Verify Initial State (Default User)
         openOperationCard("-")
-        composeTestRule.onNodeWithTag("${Curriculum.SubtractionFrom5.id}-0_progress")
-            .assertIsDisplayed()
+
+        val levelId = Curriculum.SubtractionFrom5.id
+        composeTestRule.onNodeWithTag("leveltile_${levelId}").assertIsDisplayed()
+        TestCase.assertEquals(getProgress(levelId), 0)
 
         // 3. Switch to Alice
         composeTestRule.onNodeWithContentDescription("User Profile")
@@ -145,8 +148,9 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 4. Verify Alice's State
         openOperationCard("-")
         composeTestRule.onNodeWithTag("user_profile_Alice").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("${Curriculum.SubtractionFrom5.id}-100_progress")
+        composeTestRule.onNodeWithTag("leveltile_${levelId}")
             .assertIsDisplayed()
+        TestCase.assertEquals(getProgress(levelId), 100)
 
         // 5. Start an Exercise as Alice
         setExercises(listOf(Exercise(Addition(1, 4))))
@@ -191,8 +195,8 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 7. Verify Bob's State
         openOperationCard("-")
-        composeTestRule.onNodeWithTag("${Curriculum.SubtractionFrom5.id}-0_progress")
-            .assertIsDisplayed()
+        composeTestRule.onNodeWithTag("leveltile_${levelId}").assertIsDisplayed()
+        TestCase.assertEquals(getProgress(levelId), 0)
     }
 
     @Test

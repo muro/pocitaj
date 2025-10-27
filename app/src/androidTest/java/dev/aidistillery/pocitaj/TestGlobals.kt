@@ -10,7 +10,7 @@ import dev.aidistillery.pocitaj.data.FakeActiveUserManager
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.data.UserDao
 
-class TestGlobals(private val context: Context) : Globals {
+open class TestGlobals(private val context: Context) : Globals {
     private val database: AppDatabase by lazy {
         Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
     }

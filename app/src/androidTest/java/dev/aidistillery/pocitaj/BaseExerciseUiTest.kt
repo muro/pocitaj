@@ -11,11 +11,15 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.printToLog
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.logic.Exercise
+import dev.aidistillery.pocitaj.ui.setup.StarRatingKey
+import junit.framework.TestCase
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -49,9 +53,10 @@ abstract class BaseExerciseUiTest {
     lateinit var globals: TestGlobals
 
     @Before
-    fun setup() {
+    open fun setup() {
         val application =
             InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        application.globals = TestGlobals(application)
         globals = application.globals as TestGlobals
         runBlocking {
             if (globals.userDao.getUser(1) == null) {
@@ -110,8 +115,10 @@ abstract class BaseExerciseUiTest {
         openOperationCard(operationSymbol)
 
         // Explicitly scroll the parent list to bring the button into view
+        val levelId = "SUB_REVIEW_1"
         composeTestRule.onNodeWithTag("operation_card_-")
-            .performScrollToNode(matcher = hasTestTag("SUB_REVIEW_1-100_progress"))
+            .performScrollToNode(matcher = hasTestTag("leveltile_${levelId}")) // -100_progress"))
+        TestCase.assertEquals(getProgress(levelId), 100)
 
         // Click on the first "Review" button found
         composeTestRule.onAllNodesWithText("🧶")[0].performVerifiedClick("Review button")
@@ -194,6 +201,59 @@ abstract class BaseExerciseUiTest {
         }
         print("verifyOnExerciseSetupScreen: Current active ID: ${globals.activeUser.id} and name ${globals.activeUser.name}")
         composeTestRule.onNodeWithText("Choose Your Challenge").assertIsDisplayed()
+    }
+
+    private fun getCorrectAnswer(question: String): String {
+        val parts = question.replace("?", "").trim().split(" ")
+        val a = parts[0].toInt()
+        val op = parts[1]
+        val b = parts[2].toInt()
+
+        return when (op) {
+            "+" -> (a + b).toString()
+            "-" -> (a - b).toString()
+            "×" -> (a * b).toString()
+            "÷" -> (a / b).toString()
+            else -> throw IllegalArgumentException("Unknown operator: $op")
+        }
+    }
+
+    fun getProgress(levelId: String): Int {
+        val nodeInteraction = composeTestRule.onNodeWithTag("leveltile_${levelId}")
+        nodeInteraction.assertIsDisplayed()
+
+        val semanticsNode = nodeInteraction.fetchSemanticsNode()
+        return semanticsNode.config[StarRatingKey]
+    }
+
+    fun answerAllQuestionsCorrectly(operationSymbol: String, levelId: String) {
+        //openOperationCard(operationSymbol)
+        composeTestRule.onNodeWithTag("leveltile_${levelId}").performClick()
+
+        composeTestRule.onRoot().printToLog("whenLevelCompletedCorrectly_thenStarRatingIncreases")
+
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
+            composeTestRule
+                .onAllNodesWithTag("InkCanvas")
+                .fetchSemanticsNodes().size == 1
+        }
+
+        while (composeTestRule.onAllNodesWithTag("InkCanvas").fetchSemanticsNodes().isNotEmpty()) {
+            val questionText = composeTestRule.onNodeWithTag("exercise_question")
+                .fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.Text].first()
+                .toString()
+            val correctAnswer = getCorrectAnswer(questionText)
+            drawAnswer(correctAnswer)
+            verifyFeedback(FeedbackType.CORRECT)
+            composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME)
+            composeTestRule.waitForIdle()
+        }
+
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT) {
+            composeTestRule.onAllNodesWithText("Results").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("Back").performClick()
+        verifyOnExerciseSetupScreen()
     }
 }
 
