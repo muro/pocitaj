@@ -55,7 +55,7 @@ class AdaptiveExerciseSourceMasteryTest {
         }
 
         activeUserManager = FakeActiveUserManager(User(id = 1, name = "Test User"))
-        exerciseSource = AdaptiveExerciseSource(factMasteryDao, exerciseAttemptDao, activeUserManager)
+        exerciseSource = AdaptiveExerciseSource(factMasteryDao, exerciseAttemptDao, activeUserManager, testDispatcher)
         viewModel = ExerciseViewModel(mockk(relaxed = true), exerciseSource)
     }
 
@@ -93,9 +93,9 @@ class AdaptiveExerciseSourceMasteryTest {
         assertTrue("Mastery info should have been saved for the fact", factMasteryEntries.isNotEmpty())
         assertEquals("Two entries should be created (global and per-level)", 2, factMasteryEntries.size)
         
-        // Both global and per-level entries should have their strength increased to 1
+        // Both global and per-level entries should have their strength increased to 4 - the state after answering 1st time correctly
         factMasteryEntries.forEach {
-            assertEquals("Strength should be updated to 1", 1, it.strength)
+            assertEquals("Strength should be updated to 4", 4, it.strength)
         }
     }
 }

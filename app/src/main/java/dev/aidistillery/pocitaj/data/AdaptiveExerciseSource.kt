@@ -12,14 +12,16 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.lang.reflect.Field
 
+import kotlinx.coroutines.CoroutineDispatcher
+
 class AdaptiveExerciseSource(
     private val factMasteryDao: FactMasteryDao,
     private val exerciseAttemptDao: ExerciseAttemptDao,
-    private val activeUserManager: ActiveUserManager
+    private val activeUserManager: ActiveUserManager,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ExerciseSource {
 
     private var exerciseProvider: ExerciseProvider? = null
-    private val EWMA_ALPHA = 0.2
 
     override suspend fun initialize(config: ExerciseConfig) {
         val userMastery =
@@ -95,7 +97,7 @@ class AdaptiveExerciseSource(
         val wasCorrect = exercise.equation.getExpectedResult() == submittedAnswer
         val (newMastery, level) = exerciseProvider?.recordAttempt(exercise, wasCorrect) ?: return
 
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             val attempt = ExerciseAttempt(
                 userId = activeUserManager.activeUser.id,
                 timestamp = System.currentTimeMillis(),
