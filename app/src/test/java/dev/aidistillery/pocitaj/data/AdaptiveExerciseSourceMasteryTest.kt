@@ -4,14 +4,17 @@ import androidx.room.Room
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.ui.exercise.ExerciseViewModel
 import dev.aidistillery.pocitaj.ui.exercise.UiState
+import dev.aidistillery.pocitaj.ui.progress.MainDispatcherRule
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -31,11 +34,17 @@ class AdaptiveExerciseSourceMasteryTest {
     private lateinit var exerciseSource: AdaptiveExerciseSource
     private lateinit var viewModel: ExerciseViewModel
 
+    @get:Rule
+    val dispatcherRule = MainDispatcherRule()
+
     @Before
     fun setup() {
+        val testDispatcher = dispatcherRule.testDispatcher
+
         val context = RuntimeEnvironment.getApplication()
         db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
             .allowMainThreadQueries()
+            .setQueryExecutor(testDispatcher.asExecutor())
             .build()
         factMasteryDao = db.factMasteryDao()
         exerciseAttemptDao = db.exerciseAttemptDao()
@@ -74,6 +83,8 @@ class AdaptiveExerciseSourceMasteryTest {
         val correctAnswer = exercise.equation.getExpectedResult().toString()
 
         viewModel.checkAnswer(correctAnswer, 1000)
+
+        testScheduler.advanceUntilIdle()
 
         // ASSERT: Verify that the database was updated correctly
         val allMastery = factMasteryDao.getAllFactsForUser(1).first()
