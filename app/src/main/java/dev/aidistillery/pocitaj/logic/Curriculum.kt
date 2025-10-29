@@ -157,25 +157,15 @@ object Curriculum {
         override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
-            // one of: 9+1, 8+2, 7+3, 6+4, 5+5
-            val op1 = Random.nextInt(6, 10)
-            // We want the sum to cross 10
-            val op2 = 10 - op1
-            return if (Random.nextBoolean()) {
-                Exercise(Addition(op1, op2))
-            } else {
-                Exercise(Addition(op2, op1))
-            }
+            val exercises = (1..9).map { it to (10 - it) }
+            val (op1, op2) = exercises.random()
+            return Exercise(Addition(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (6..9).flatMap { op1 ->
-                (10 - op1 + 1 until 10).flatMap { op2 ->
-                    listOf(
-                        "${operation.name}_${op1}_${op2}",
-                        "${operation.name}_${op2}_${op1}"
-                    )
-                }
+            return (1..9).mapNotNull { op1 ->
+                val op2 = 10 - op1
+                if (op2 > 0) "${operation.name}_${op1}_${op2}" else null
             }
         }
     }

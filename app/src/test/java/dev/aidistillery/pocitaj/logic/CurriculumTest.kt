@@ -17,6 +17,96 @@ class CurriculumTest {
     }
 
     @Test
+    fun `SumsOver10 generates exercises that cross 10`() {
+        val level = Curriculum.SumsOver10
+        repeat(100) {
+            val exercise = level.generateExercise()
+            val (op, op1, op2) = exercise.equation.getFact()
+            assertEquals("Operation must be addition", Operation.ADDITION, op)
+            assertTrue("Sum must be > 10 for $op1 + $op2", op1 + op2 > 10)
+        }
+    }
+
+    @Test
+    fun `TwoDigitAdditionNoCarry generates correct exercises`() {
+        val level = Curriculum.TwoDigitAdditionNoCarry
+        repeat(100) {
+            val exercise = level.generateExercise()
+            val (op, op1, op2) = exercise.equation.getFact()
+            assertEquals("Operation must be addition", Operation.ADDITION, op)
+            assertTrue(
+                "Sum of units must be < 10 for $op1 + $op2",
+                (op1 % 10) + (op2 % 10) < 10
+            )
+        }
+    }
+
+    @Test
+    fun `TwoDigitAdditionWithCarry generates correct exercises`() {
+        val level = Curriculum.TwoDigitAdditionWithCarry
+        repeat(100) {
+            val exercise = level.generateExercise()
+            val (op, op1, op2) = exercise.equation.getFact()
+            assertEquals("Operation must be addition", Operation.ADDITION, op)
+            assertTrue(
+                "Sum of units must be >= 10 for $op1 + $op2",
+                (op1 % 10) + (op2 % 10) >= 10
+            )
+            assertTrue("Total sum must be < 100 for $op1 + $op2", op1 + op2 < 100)
+        }
+    }
+
+    @Test
+    fun `TwoDigitSubtractionNoBorrow generates correct exercises`() {
+        val level = Curriculum.TwoDigitSubtractionNoBorrow
+        repeat(100) {
+            val exercise = level.generateExercise()
+            val (op, op1, op2) = exercise.equation.getFact()
+            assertEquals("Operation must be subtraction", Operation.SUBTRACTION, op)
+            assertTrue(
+                "op1 unit must be >= op2 unit for $op1 - $op2",
+                (op1 % 10) >= (op2 % 10)
+            )
+        }
+    }
+
+    @Test
+    fun `TwoDigitSubtractionWithBorrow generates correct exercises`() {
+        val level = Curriculum.TwoDigitSubtractionWithBorrow
+        repeat(100) {
+            val exercise = level.generateExercise()
+            val (op, op1, op2) = exercise.equation.getFact()
+            assertEquals("Operation must be subtraction", Operation.SUBTRACTION, op)
+            assertTrue(
+                "op1 unit must be < op2 unit for $op1 - $op2",
+                (op1 % 10) < (op2 % 10)
+            )
+        }
+    }
+
+    @Test
+    fun `Making10s generates sums of 10`() {
+        val level = Curriculum.Making10s
+        repeat(20) { // Only a few pairs exist, 20 is plenty
+            val exercise = level.generateExercise()
+            val (op, op1, op2) = exercise.equation.getFact()
+            assertEquals("Operation must be addition", Operation.ADDITION, op)
+            assertEquals("Sum must be 10 for $op1 + $op2", 10, op1 + op2)
+        }
+    }
+
+    @Test
+    fun `Doubles generates exercises with identical operands`() {
+        val level = Curriculum.Doubles
+        repeat(100) {
+            val exercise = level.generateExercise()
+            val (op, op1, op2) = exercise.equation.getFact()
+            assertEquals("Operation must be addition", Operation.ADDITION, op)
+            assertEquals("Operands must be equal for $op1 + $op2", op1, op2)
+        }
+    }
+
+    @Test
     fun `MultiplicationTableLevel generates correct exercises`() {
         val table = 7
         val level =
