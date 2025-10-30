@@ -193,7 +193,8 @@ fun AppNavigation(restartApp: () -> Unit) {
                 ResultsScreen(
                     results = summaryState.results,
                     onDone = { exerciseViewModel.onSummaryDone() },
-                    onDoAgain = { exerciseViewModel.restartExercises() }
+                    onDoAgain = { exerciseViewModel.restartExercises() },
+                    onProgressClicked = { navController.navigate(Destinations.PROGRESS_ROUTE) }
                 )
             }
         }

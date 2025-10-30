@@ -28,6 +28,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -82,7 +83,12 @@ data class ResultDescription(
 )
 
 @Composable
-fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit, onDoAgain: () -> Unit) {
+fun ResultsScreen(
+    results: List<ResultDescription>,
+    onDone: () -> Unit,
+    onDoAgain: () -> Unit,
+    onProgressClicked: () -> Unit
+) {
     PocitajScreen {
         Column(
             modifier = Modifier
@@ -111,6 +117,13 @@ fun ResultsScreen(results: List<ResultDescription>, onDone: () -> Unit, onDoAgai
                     Icon(
                         imageVector = Icons.Default.Replay,
                         contentDescription = stringResource(id = R.string.replay_level),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                IconButton(onClick = onProgressClicked) {
+                    Icon(
+                        imageVector = Icons.Default.BarChart,
+                        contentDescription = stringResource(id = R.string.progress_button),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -405,6 +418,6 @@ fun PreviewResultsScreen() {
         )
     }
     AppTheme {
-        ResultsScreen(results, onDone = {}, onDoAgain = {})
+        ResultsScreen(results, onDone = {}, onDoAgain = {}, onProgressClicked = {})
     }
 }
