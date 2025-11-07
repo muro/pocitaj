@@ -16,17 +16,17 @@ object Curriculum {
         override val operation = Operation.ADDITION
         override val prerequisites: Set<String> = emptySet()
         override val strategy = ExerciseStrategy.DRILL
-        private const val max_sum = 5
+        private const val MAX_SUM = 5
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, max_sum + 1)
-            val op2 = Random.nextInt(0, max_sum - op1 + 1)
+            val op1 = Random.nextInt(0, MAX_SUM + 1)
+            val op2 = Random.nextInt(0, MAX_SUM - op1 + 1)
             return Exercise(Addition(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..max_sum).flatMap { op1 ->
-                (0..max_sum - op1).map { op2 ->
+            return (0..MAX_SUM).flatMap { op1 ->
+                (0..MAX_SUM - op1).map { op2 ->
                     "${operation.name}_${op1}_${op2}"
                 }
             }
@@ -38,17 +38,17 @@ object Curriculum {
         override val operation = Operation.ADDITION
         override val prerequisites: Set<String> = setOf(SumsUpTo5.id)
         override val strategy = ExerciseStrategy.DRILL
-        private const val max_sum = 10
+        private const val MAX_SUM = 10
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, max_sum + 1)
-            val op2 = Random.nextInt(0, max_sum - op1 + 1)
+            val op1 = Random.nextInt(0, MAX_SUM + 1)
+            val op2 = Random.nextInt(0, MAX_SUM - op1 + 1)
             return Exercise(Addition(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..max_sum).flatMap { op1 ->
-                (0..max_sum - op1).map { op2 ->
+            return (0..MAX_SUM).flatMap { op1 ->
+                (0..MAX_SUM - op1).map { op2 ->
                     "${operation.name}_${op1}_${op2}"
                 }
             }
@@ -90,17 +90,17 @@ object Curriculum {
         override val operation = Operation.ADDITION
         override val prerequisites: Set<String> = setOf(SumsUpTo10.id)
         override val strategy = ExerciseStrategy.DRILL
-        private const val max_sum = 20
+        private const val MAX_SUM = 20
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, max_sum + 1)
-            val op2 = Random.nextInt(0, max_sum - op1 + 1)
+            val op1 = Random.nextInt(0, MAX_SUM + 1)
+            val op2 = Random.nextInt(0, MAX_SUM - op1 + 1)
             return Exercise(Addition(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..max_sum).flatMap { op1 ->
-                (0..max_sum - op1).map { op2 ->
+            return (0..MAX_SUM).flatMap { op1 ->
+                (0..MAX_SUM - op1).map { op2 ->
                     "${operation.name}_${op1}_${op2}"
                 }
             }
@@ -255,16 +255,16 @@ object Curriculum {
         override val operation = Operation.SUBTRACTION
         override val prerequisites: Set<String> = emptySet()
         override val strategy = ExerciseStrategy.DRILL
-        private const val max_minuend = 5
+        private const val MAX_MINUEND = 5
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, max_minuend + 1)
+            val op1 = Random.nextInt(0, MAX_MINUEND + 1)
             val op2 = Random.nextInt(0, op1 + 1)
             return Exercise(Subtraction(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..max_minuend).flatMap { op1 ->
+            return (0..MAX_MINUEND).flatMap { op1 ->
                 (0..op1).map { op2 ->
                     "${operation.name}_${op1}_${op2}"
                 }
@@ -277,16 +277,16 @@ object Curriculum {
         override val operation = Operation.SUBTRACTION
         override val prerequisites: Set<String> = setOf(SubtractionFrom5.id)
         override val strategy = ExerciseStrategy.DRILL
-        private const val max_minuend = 10
+        private const val MAX_MINUEND = 10
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, max_minuend + 1)
+            val op1 = Random.nextInt(0, MAX_MINUEND + 1)
             val op2 = Random.nextInt(0, op1 + 1)
             return Exercise(Subtraction(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..max_minuend).flatMap { op1 ->
+            return (0..MAX_MINUEND).flatMap { op1 ->
                 (0..op1).map { op2 ->
                     "${operation.name}_${op1}_${op2}"
                 }
@@ -299,16 +299,16 @@ object Curriculum {
         override val operation = Operation.SUBTRACTION
         override val prerequisites: Set<String> = setOf(SubtractionFrom10.id)
         override val strategy = ExerciseStrategy.DRILL
-        private const val max_minuend = 20
+        private const val MAX_MINUEND = 20
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, max_minuend + 1)
+            val op1 = Random.nextInt(0, MAX_MINUEND + 1)
             val op2 = Random.nextInt(0, op1 + 1)
             return Exercise(Subtraction(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..max_minuend).flatMap { op1 ->
+            return (0..MAX_MINUEND).flatMap { op1 ->
                 (0..op1).map { op2 ->
                     "${operation.name}_${op1}_${op2}"
                 }
