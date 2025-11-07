@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
-import com.mikepenz.aboutlibraries.ui.compose.android.rememberLibraries
+import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.m3.chipColors
 import com.mikepenz.aboutlibraries.ui.compose.m3.libraryColors
@@ -28,7 +28,7 @@ import dev.aidistillery.pocitaj.ui.theme.AppTheme
 
 @Composable
 fun CreditsScreen(onNavigateUp: () -> Unit) {
-    val libraries by rememberLibraries()
+    val libraries by produceLibraries()
     CreditsScreenContent(
         libraries = libraries,
         onNavigateUp = onNavigateUp

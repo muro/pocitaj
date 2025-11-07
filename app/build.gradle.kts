@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
     alias(libs.plugins.aboutLibraries)
+    alias(libs.plugins.aboutlibraries.android)
 }
 
 val (appVersionCode, appVersionName) = Versioning.getVersionInfo()
@@ -15,7 +16,7 @@ val keystoreProps = Properties()
 // Use a try-catch block to avoid build failures if the file is missing (e.g., on a CI server)
 try {
     keystoreProps.load(keystorePropsFile.inputStream())
-} catch (e: Exception) {
+} catch (_: Exception) {
     println("keystore.properties file not found, skipping signing configuration.")
 }
 
@@ -172,9 +173,6 @@ ksp {
 }
 
 aboutLibraries {
-    android {
-        registerAndroidTasks = true
-    }
     collect {
         configPath = file("licenses")
     }
