@@ -336,6 +336,56 @@ class StrategySimulationTest {
     }
 
     @Test
+    fun a_forgetful_student_struggles_with_drill_strategy() {
+        val runs = 10
+        val strategyProvider = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
+            DrillStrategy(l, m, 4, 1L, c)
+        }
+        val averageStrength = (1..runs).map {
+            runStrategySimulation(testLevel, 100, 20, ForgetfulStudent(), strategyProvider)
+        }.map {
+            val totalStrength = it.finalStrengthDistribution.entries.sumOf { e -> e.key * e.value }
+            val totalFacts = it.finalStrengthDistribution.values.sum()
+            if (totalFacts > 0) totalStrength.toDouble() / totalFacts else 0.0
+        }.average()
+
+        assertTrue("Average strength should be less than 3.8, but was $averageStrength", averageStrength < 3.8)
+    }
+
+    @Test
+    fun an_improving_student_shows_progress_with_drill_strategy() {
+        val runs = 10
+        val strategyProvider = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
+            DrillStrategy(l, m, 4, 1L, c)
+        }
+        val averageStrength = (1..runs).map {
+            runStrategySimulation(testLevel, 100, 20, ImprovingStudent(), strategyProvider)
+        }.map {
+            val totalStrength = it.finalStrengthDistribution.entries.sumOf { e -> e.key * e.value }
+            val totalFacts = it.finalStrengthDistribution.values.sum()
+            if (totalFacts > 0) totalStrength.toDouble() / totalFacts else 0.0
+        }.average()
+
+        assertTrue("Average strength should be greater than 4, but was $averageStrength", averageStrength > 4.0)
+    }
+
+    @Test
+    fun a_perfect_student_masters_the_level_quickly_with_drill_strategy() {
+        val runs = 10
+        val strategyProvider = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
+            DrillStrategy(l, m, 4, 1L, c)
+        }
+        val results = (1..runs).map {
+            runStrategySimulation(testLevel, 100, 20, PerfectStudent(), strategyProvider)
+        }
+        val averageCoverage = results.map { it.coverage }.average()
+        val averageBoredom = results.map { it.boredomScore }.average()
+
+        assertTrue("Coverage should be 100%", averageCoverage == 1.0)
+        assertTrue("Boredom score should be low", averageBoredom < 10.0)
+    }
+
+    @Test
     fun compare_all_strategies_and_students() {
         val iterations = 100
         val strategies = mapOf(
