@@ -7,6 +7,8 @@ import dev.aidistillery.pocitaj.logic.ExerciseProvider
 import dev.aidistillery.pocitaj.logic.ExerciseStrategy
 import dev.aidistillery.pocitaj.logic.ReviewStrategy
 import dev.aidistillery.pocitaj.logic.SmartPracticeStrategy
+import dev.aidistillery.pocitaj.logic.TwoDigitAdditionDrillStrategy
+import dev.aidistillery.pocitaj.logic.TwoDigitAdditionLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -26,12 +28,17 @@ class AdaptiveExerciseSource(
     override suspend fun initialize(config: ExerciseConfig) {
         val userMastery =
             factMasteryDao.getAllFactsForUser(activeUserManager.activeUser.id).first()
-                .filter { it.level.isEmpty() }
                 .associateBy { it.factId }
         val level =
             config.levelId?.let { Curriculum.getAllLevels().find { level -> level.id == it } }
 
         exerciseProvider = when {
+            level is TwoDigitAdditionLevel -> TwoDigitAdditionDrillStrategy(
+                level,
+                userMastery.toMutableMap(),
+                activeUserId = activeUserManager.activeUser.id
+            )
+
             level != null && level.strategy == ExerciseStrategy.REVIEW -> ReviewStrategy(
                 level,
                 userMastery.toMutableMap(),

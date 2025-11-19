@@ -191,63 +191,8 @@ object Curriculum {
         }
     }
 
-    object TwoDigitAdditionNoCarry : Level {
-        override val id = "ADD_TWO_DIGIT_NO_CARRY"
-        override val operation = Operation.ADDITION
-        override val prerequisites: Set<String> = setOf(AddingTens.id)
-        override val strategy = ExerciseStrategy.DRILL
-
-        override fun generateExercise(): Exercise {
-            var op1: Int
-            var op2: Int
-            do {
-                op1 = Random.nextInt(10, 100)
-                op2 = Random.nextInt(10, 100)
-            } while ((op1 % 10) + (op2 % 10) >= 10 || op1 + op2 >= 100)
-            return Exercise(Addition(op1, op2))
-        }
-
-        override fun getAllPossibleFactIds(): List<String> {
-            return (10..99).flatMap { op1 ->
-                (10..99).mapNotNull { op2 ->
-                    if ((op1 % 10) + (op2 % 10) < 10 && op1 + op2 < 100) {
-                        "${operation.name}_${op1}_${op2}"
-                    } else {
-                        null
-                    }
-                }
-            }
-        }
-    }
-
-    object TwoDigitAdditionWithCarry : Level {
-        override val id = "ADD_TWO_DIGIT_CARRY"
-        override val operation = Operation.ADDITION
-        override val prerequisites: Set<String> = setOf(TwoDigitAdditionNoCarry.id)
-        override val strategy = ExerciseStrategy.DRILL
-
-        override fun generateExercise(): Exercise {
-            var op1: Int
-            var op2: Int
-            do {
-                op1 = Random.nextInt(10, 100)
-                op2 = Random.nextInt(10, 100)
-            } while ((op1 % 10) + (op2 % 10) < 10 || op1 + op2 >= 100)
-            return Exercise(Addition(op1, op2))
-        }
-
-        override fun getAllPossibleFactIds(): List<String> {
-            return (10..99).flatMap { op1 ->
-                (10..99).mapNotNull { op2 ->
-                    if ((op1 % 10) + (op2 % 10) >= 10 && op1 + op2 < 100) {
-                        "${operation.name}_${op1}_${op2}"
-                    } else {
-                        null
-                    }
-                }
-            }
-        }
-    }
+    object TwoDigitAdditionNoCarry : TwoDigitAdditionLevel("ADD_TWO_DIGIT_NO_CARRY", withCarry = false)
+    object TwoDigitAdditionWithCarry : TwoDigitAdditionLevel("ADD_TWO_DIGIT_CARRY", withCarry = true)
 
     // --- Subtraction ---
     object SubtractionFrom5 : Level {

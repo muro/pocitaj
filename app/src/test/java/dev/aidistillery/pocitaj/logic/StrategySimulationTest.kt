@@ -454,6 +454,149 @@ class StrategySimulationTest {
             }
         }
     }
+
+    @Test
+    fun compare_two_digit_strategies() {
+        val iterations = 100
+        val twoDigitAdditionLevel = TwoDigitAdditionLevel("ADD_TWO_DIGIT_CARRY", withCarry = true)
+
+        val strategies = mapOf(
+            "TwoDigitDrill" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
+                TwoDigitAdditionDrillStrategy(
+                    l as TwoDigitAdditionLevel,
+                    m,
+                    4,
+                    activeUserId = 1L, // Assuming user 1 for simulation
+                    clock = c
+                )
+            } to 20)
+        )
+        val students = listOf(
+            PerfectStudent(),
+            ImprovingStudent(),
+            GoodStudent(),
+            ForgetfulStudent(),
+            PowerLawStudent(),
+            FastPowerLawStudent()
+        )
+
+        students.forEach { student ->
+            println("\n--- SIMULATION FOR STUDENT: ${student.name} (Two-Digit Addition) ---")
+            println("| Strategy              | Touched | Coverage | Rep Rate | Velocity | Wasted | Boredom | Final Strengths Distribution")
+            println("|-----------------------|---------|----------|----------|----------|--------|---------|--------------------------------")
+
+            strategies.forEach { (_, pair) ->
+                val (provider, sessionLength) = pair
+
+                // Pre-populate mastery for the underlying facts.
+                val userMastery = mutableMapOf<String, FactMastery>()
+                val onesFacts = (0..9).flatMap { i -> (0..9).map { j -> "ADD_ONES_${i}_${j}" } }
+                val tensFacts = (1..9).flatMap { i -> (1..9).map { j -> "ADD_TENS_${i}_${j}" } }
+                (onesFacts + tensFacts).forEach { factId ->
+                    userMastery[factId] = FactMastery(factId, 1L, "", 1, 0)
+                }
+
+                val result =
+                    runStrategySimulation(twoDigitAdditionLevel, iterations, sessionLength, student, provider)
+
+                val distString = result.finalStrengthDistribution.entries.sortedBy { it.key }
+                    .joinToString(", ") { "S${it.key}:${it.value}" }
+
+                println(
+                    "| ${result.strategyName.padEnd(21)} | " +
+                            "${result.uniqueFactsShown.toString().padEnd(7)} | " +
+                            "${"%.0f%%".format(result.coverage * 100).padEnd(8)} | " +
+                            "${"%.0f%%".format(result.repetitionRate * 100).padEnd(8)} | " +
+                            "${"%.2f".format(result.learningVelocity).padEnd(8)} | " +
+                            "${result.wastedRepetitions.toString().padEnd(6)} | " +
+                            "${"%.2f".format(result.boredomScore).padEnd(7)} | " +
+                            distString
+                )
+                assertTrue("Should always touch at least one fact", result.uniqueFactsShown > 0)
+            }
+        }
+    }
+
+    @Test
+    fun compare_two_digit_vs_single_digit() {
+        val iterations = 200 // Increased iterations to see fuller progress
+        
+        val twoDigitStrategyFactory = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
+            TwoDigitAdditionDrillStrategy(
+                l as TwoDigitAdditionLevel,
+                m,
+                4,
+                activeUserId = 1L,
+                clock = c
+            )
+        }
+
+        val standardDrillFactory = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
+            DrillStrategy(l, m, 4, activeUserId = 1L, clock = c)
+        }
+
+        val strategies = mapOf(
+            "TwoDigit (Carry)" to (TwoDigitAdditionLevel("ADD_TWO_DIGIT_CARRY", withCarry = true) to twoDigitStrategyFactory),
+            "SumsOver10" to (Curriculum.SumsOver10 to standardDrillFactory)
+        )
+        
+        val students = listOf(
+            PerfectStudent(),
+            GoodStudent(),
+            ForgetfulStudent()
+        )
+
+        println("\n=== COMPARISON: Two-Digit vs. Single-Digit Level ===")
+        
+        students.forEach { student ->
+            println("\n--- Student: ${student.name} ---")
+            println("| Level (Strategy)    | Unique Facts | Final Coverage | Mastery (S5) Count | Avg Reps/Fact |")
+            println("|---------------------|--------------|----------------|--------------------|---------------|")
+
+            strategies.forEach { (name, pair) ->
+                val (level, factory) = pair
+                
+                // Reset mastery
+                val userMastery = mutableMapOf<String, FactMastery>()
+                
+                // Pre-populate mastery for TwoDigit to ensure fair comparison (since it relies on underlying facts)
+                if (level is TwoDigitAdditionLevel) {
+                     val ones = (0..9).flatMap { i -> (0..9).map { j -> "ADD_ONES_${i}_${j}" } }
+                     val tens = (1..9).flatMap { i -> (1..9).map { j -> "ADD_TENS_${i}_${j}" } }
+                     (ones + tens).forEach { fid -> 
+                         userMastery[fid] = FactMastery(fid, 1L, "", 1, 0) 
+                     }
+                } else {
+                     // For standard levels, we can pre-populate all facts to 1 (Strength 1) to track coverage of the *whole* level.
+                     level.getAllPossibleFactIds().forEach { fid ->
+                         userMastery[fid] = FactMastery(fid, 1L, "", 1, 0)
+                     }
+                }
+
+                val result = runStrategySimulation(level, iterations, 20, student, factory) // 20 session length is dummy here
+
+                val totalFacts = if (level is TwoDigitAdditionLevel) {
+                    // Approx 100 components
+                    val ones = (0..9).flatMap { i -> (0..9).map { j -> "ADD_ONES_${i}_${j}" } }
+                    val tens = (1..9).flatMap { i -> (1..9).map { j -> "ADD_TENS_${i}_${j}" } }
+                    (ones + tens).size
+                } else {
+                    level.getAllPossibleFactIds().size
+                }
+                
+                val masteredCount = result.finalStrengthDistribution[5] ?: 0
+                val coveragePct = (result.uniqueFactsShown.toDouble() / totalFacts) * 100
+                
+                println(
+                    "| ${name.padEnd(19)} | " +
+                    "${result.uniqueFactsShown.toString().padEnd(12)} | " +
+                    "${"%.0f%%".format(coveragePct).padEnd(14)} | " +
+                    "${masteredCount.toString().padEnd(18)} | " +
+                    "${"%.1f".format(iterations.toDouble() / result.uniqueFactsShown).padEnd(13)} |"
+                )
+            }
+        }
+    }
 }
 
 private fun exerciseFromFactId(factId: String): Exercise {
