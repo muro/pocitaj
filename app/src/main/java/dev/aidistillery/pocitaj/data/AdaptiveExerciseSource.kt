@@ -4,17 +4,13 @@ import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.DrillStrategy
 import dev.aidistillery.pocitaj.logic.Exercise
 import dev.aidistillery.pocitaj.logic.ExerciseProvider
-import dev.aidistillery.pocitaj.logic.ExerciseStrategy
-import dev.aidistillery.pocitaj.logic.ReviewStrategy
 import dev.aidistillery.pocitaj.logic.SmartPracticeStrategy
-import dev.aidistillery.pocitaj.logic.TwoDigitAdditionDrillStrategy
-import dev.aidistillery.pocitaj.logic.TwoDigitAdditionLevel
+import dev.aidistillery.pocitaj.logic.createStrategy
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.lang.reflect.Field
-
-import kotlinx.coroutines.CoroutineDispatcher
 
 class AdaptiveExerciseSource(
     private val factMasteryDao: FactMasteryDao,
@@ -32,36 +28,19 @@ class AdaptiveExerciseSource(
         val level =
             config.levelId?.let { Curriculum.getAllLevels().find { level -> level.id == it } }
 
-        exerciseProvider = when {
-            level is TwoDigitAdditionLevel -> TwoDigitAdditionDrillStrategy(
-                level,
+        exerciseProvider = if (level != null) {
+            level.createStrategy(
+                userMastery.toMutableMap(),
+                activeUserManager.activeUser.id
+            )
+        } else {
+            val filteredCurriculum =
+                Curriculum.getAllLevels().filter { it.operation == config.operation }
+            SmartPracticeStrategy(
+                filteredCurriculum,
                 userMastery.toMutableMap(),
                 activeUserId = activeUserManager.activeUser.id
             )
-
-            level != null && level.strategy == ExerciseStrategy.REVIEW -> ReviewStrategy(
-                level,
-                userMastery.toMutableMap(),
-                reviewStrength = 5, // Temporary default
-                targetStrength = 6,  // Temporary default
-                activeUserId = activeUserManager.activeUser.id
-            )
-
-            level != null -> DrillStrategy(
-                level,
-                userMastery.toMutableMap(),
-                activeUserId = activeUserManager.activeUser.id
-            )
-
-            else -> {
-                val filteredCurriculum =
-                    Curriculum.getAllLevels().filter { it.operation == config.operation }
-                SmartPracticeStrategy(
-                    filteredCurriculum,
-                    userMastery.toMutableMap(),
-                    activeUserId = activeUserManager.activeUser.id
-                )
-            }
         }
     }
 

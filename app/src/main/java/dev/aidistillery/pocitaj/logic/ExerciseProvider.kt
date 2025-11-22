@@ -40,3 +40,28 @@ internal fun exerciseFromFactId(factId: String): Exercise {
     }
     return Exercise(equation)
 }
+
+fun Level.createStrategy(
+    userMastery: MutableMap<String, FactMastery>,
+    activeUserId: Long,
+    clock: kotlin.time.Clock = kotlin.time.Clock.System
+): ExerciseProvider {
+    return when {
+        this is TwoDigitAdditionLevel -> TwoDigitAdditionDrillStrategy(
+            this, userMastery, activeUserId = activeUserId, clock = clock
+        )
+
+        this.strategy == ExerciseStrategy.REVIEW -> ReviewStrategy(
+            this,
+            userMastery,
+            reviewStrength = 5,
+            targetStrength = 6,
+            activeUserId = activeUserId,
+            clock = clock
+        )
+
+        else -> DrillStrategy(
+            this, userMastery, activeUserId = activeUserId, clock = clock
+        )
+    }
+}

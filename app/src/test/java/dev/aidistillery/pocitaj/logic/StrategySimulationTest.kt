@@ -597,6 +597,48 @@ class StrategySimulationTest {
             }
         }
     }
+
+    @Test
+    fun compare_every_level_across_students() {
+        val levels = Curriculum.getAllLevels()
+        val students = listOf(
+            PerfectStudent(),
+            ImprovingStudent(),
+            GoodStudent(),
+            ForgetfulStudent(),
+            PowerLawStudent(),
+            FastPowerLawStudent()
+        )
+        val checkpoints = listOf(10, 20, 50, 100)
+
+        println("\n=== Strategy Test Suite: Level Completion Comparison ===")
+        println("| Level | Student | # Facts | @10 | @20 | @50 | @100 |")
+        println("|---|---|---|---|---|---|---|")
+
+        levels.forEach { level ->
+            val totalFacts = level.getAllPossibleFactIds().size
+
+            students.forEach { student ->
+                val rates = checkpoints.map { iterations ->
+                    val strategyProvider =
+                        { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
+                            l.createStrategy(m, 1L, c)
+                        }
+                    val result =
+                        runStrategySimulation(level, iterations, 20, student, strategyProvider)
+                    val masteredCount = result.finalStrengthDistribution[5] ?: 0
+                    (masteredCount.toDouble() / totalFacts) * 100
+                }
+
+                println(
+                    "| ${level.id.padEnd(20)} | " +
+                            "${student.name.padEnd(15)} | " +
+                            "${totalFacts.toString().padEnd(5)} | " +
+                            rates.joinToString(" | ") { "%.0f%%".format(it).padEnd(4) } + " |"
+                )
+            }
+        }
+    }
 }
 
 private fun exerciseFromFactId(factId: String): Exercise {
