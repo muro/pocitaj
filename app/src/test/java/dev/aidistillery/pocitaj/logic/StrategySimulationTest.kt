@@ -145,7 +145,8 @@ class StrategySimulationTest {
             learningFloors[context.factId] = newFloor
 
             val newStrength = if (wasCorrect) {
-                (currentStrength + 0.1).coerceAtMost(0.95)
+                // Learning: Close the gap to 1.0 by 20%
+                currentStrength + (1.0 - currentStrength) * 0.2
             } else {
                 // Penalty for incorrect answer cannot go below the new, higher floor.
                 (currentStrength - 0.1).coerceAtLeast(newFloor)
