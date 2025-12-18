@@ -27,7 +27,7 @@ android {
 
     defaultConfig {
         applicationId = "dev.aidistillery.pocitaj"
-        minSdk = 24
+        minSdk = 26
         //noinspection OldTargetApi
         targetSdk = 35
         versionCode = appVersionCode
