@@ -125,6 +125,7 @@ class StrategySimulationTest {
             } else {
                 val timeSince = (context.currentPosition - context.lastSeenPosition).toDouble()
                 // The probability of recall decays exponentially over time.
+                // TODO: this is untested - add a test before changing to pure kotlin
                 Math.pow(context.recallStrength, timeSince)
             }
         }
