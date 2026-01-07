@@ -10,7 +10,8 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
-private const val ENABLE_DETAILED_LOGGING = false
+// trick to avoid warning about condition always false / true when used.
+private val ENABLE_DETAILED_LOGGING = "false".toBoolean()
 
 /**
  * A powerful simulation harness to test and compare the long-term behavior of different
