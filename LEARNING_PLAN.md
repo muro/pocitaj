@@ -40,7 +40,7 @@
 
 * **Action:** Create a clear, motivating 0-3 star rating system for each level.
 * **Details:**
-    * The star rating is a direct reflection of the level's mastery progress bar.
+    * The star rating is a direct reflection of the level's mastery progress bar. The progress is determined by the sum of all fact strengths compared to the maximum possible strength.
     * **1 Star:** Awarded for >60% mastery.
     * **2 Stars:** Awarded for >90% mastery.
     * **3 Stars:** Awarded for 100% mastery.
