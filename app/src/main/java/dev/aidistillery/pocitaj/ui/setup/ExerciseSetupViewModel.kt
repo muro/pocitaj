@@ -31,7 +31,7 @@ data class OperationLevels(
 
 class ExerciseSetupViewModel(
     private val factMasteryDao: FactMasteryDao,
-    private val activeUserManager: ActiveUserManager
+    activeUserManager: ActiveUserManager
 ) : ViewModel() {
 
     val activeUser: StateFlow<User> = activeUserManager.activeUserFlow

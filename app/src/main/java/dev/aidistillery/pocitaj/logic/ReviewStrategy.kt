@@ -87,8 +87,6 @@ class ReviewStrategy(
     }
 
     companion object {
-        private const val MAX_STRENGTH = 10
-
         // Defines the ideal time gap in milliseconds before a fact should be reviewed again.
         private val idealIntervals = mapOf(
             0 to 10 * 1000L,                      // 10 seconds

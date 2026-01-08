@@ -28,8 +28,8 @@ data class LevelProgress(
 )
 
 class ProgressReportViewModel(
-    private val factMasteryDao: FactMasteryDao,
-    private val activeUserId: Long
+    factMasteryDao: FactMasteryDao,
+    activeUserId: Long
 ) : ViewModel() {
 
     private val allFactsByOperation = Curriculum.getAllLevels()
