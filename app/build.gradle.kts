@@ -82,6 +82,17 @@ android {
         unitTests {
             isIncludeAndroidResources = true
         }
+        managedDevices {
+            localDevices {
+                // "create" is usually sufficient now, or "register"
+                create("pixel9api35") {
+                    // The device class is implied as ManagedVirtualDevice
+                    device = "Pixel 9"
+                    apiLevel = 35
+                    systemImageSource = "google_apis_playstore"
+                }
+            }
+        }
     }
     tasks.withType<Test> {
         //timeout.set(Duration.ofSeconds(10))
