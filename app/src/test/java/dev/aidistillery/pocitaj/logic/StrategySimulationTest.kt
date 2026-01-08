@@ -5,6 +5,7 @@ import dev.aidistillery.pocitaj.data.Operation
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.math.pow
 import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
@@ -127,7 +128,7 @@ class StrategySimulationTest {
                 val timeSince = (context.currentPosition - context.lastSeenPosition).toDouble()
                 // The probability of recall decays exponentially over time.
                 // TODO: this is untested - add a test before changing to pure kotlin
-                Math.pow(context.recallStrength, timeSince)
+                context.recallStrength.pow(timeSince)
             }
         }
 
