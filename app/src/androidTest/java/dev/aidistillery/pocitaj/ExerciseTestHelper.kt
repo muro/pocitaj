@@ -23,7 +23,7 @@ class ExerciseTestHelper(viewModelStoreOwner: ViewModelStoreOwner) {
         )[ExerciseViewModel::class.java]
     }
 
-    suspend fun startExercise(level: Level, exercises: List<Exercise>? = null) {
+    fun startExercise(level: Level, exercises: List<Exercise>? = null) {
         exercises?.let {
             (globals.exerciseSource as ExerciseBook).loadSession(it)
         }
@@ -44,7 +44,7 @@ class ExerciseTestHelper(viewModelStoreOwner: ViewModelStoreOwner) {
         }
     }
 
-    suspend fun submitAnswer(answer: String, elapsedMs: Int = 1000) {
+    fun submitAnswer(answer: String, elapsedMs: Int = 1000) {
         viewModel.checkAnswer(answer, elapsedMs)
     }
 

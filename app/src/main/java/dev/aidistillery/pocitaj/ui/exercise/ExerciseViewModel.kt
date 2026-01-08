@@ -139,7 +139,7 @@ class ExerciseViewModel(
         if (!BuildConfig.DEBUG) {
             return
         }
-        (exerciseSource as? AdaptiveExerciseSource)?._getWorkingSetForDebug()?.let {
+        (exerciseSource as? AdaptiveExerciseSource)?.getWorkingSetForDebug()?.let {
             _workingSet.value = it
         }
     }

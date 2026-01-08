@@ -53,7 +53,7 @@ class AdaptiveExerciseSource(
      * This is not intended for production use.
      */
     @Suppress("UNCHECKED_CAST")
-    fun _getWorkingSetForDebug(): List<String> {
+    fun getWorkingSetForDebug(): List<String> {
         if (exerciseProvider !is DrillStrategy) {
             return emptyList()
         }
