@@ -1,16 +1,16 @@
 Some of the more advanced levels, like 2 digit addition with or without carry, have a lot of
-associated feats. If we
+associated facts. If we
 were to drill all of them to level 5, it would be very repetitive and boring. Instead, we will not
 create the full list
-of feats, but rather dynamically generate exercise to advance.
+of facts, but rather dynamically generate exercise to advance.
 We will split the problem into tens and ones, e.g. 23+47 is ADD_TENS_2_4 and ADD_ONES_3_7 (it's also
 part of "with carry").
-The strategy can no longer get a full list of feats, but rather a dynamic set of exercises. These
+The strategy can no longer get a full list of facts, but rather a dynamic set of exercises. These
 exercises aim to train
-mastery of ADD_TENS_2_4 and similar. Every exercise increases or resets mastery of the two feats.
+mastery of ADD_TENS_2_4 and similar. Every exercise increases or resets mastery of the two facts.
 
 The drill strategy still needs to keep track of the working set, which still contains individual
-feats. We do a workaround,
+facts. We do a workaround,
 where we use tokens such as ADD_23_47 in the working set, which encode the two underlying facts -
 ADD_TENS_2_4 and ADD_ONES_3_7.
 These ephemeral tokens are created when we initialize or update the working set, based on a
@@ -18,7 +18,7 @@ selection of ADD_TENS and ADD_ONES from
 the fact mastery.`
 It would quickly get boring if we then only showed 23+47 to the student, so instead, we will
 generate related facts whenever
-this feat is chosen from the working set - we will then choose one of those related facts either
+this fact is chosen from the working set - we will then choose one of those related facts either
 randomly or weighted random
 based on mastery. The generated exercises will be used to train either the ones or the tens (based
 on the exercise we chose) of the underlying facts.
