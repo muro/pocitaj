@@ -15,7 +15,7 @@ where we use tokens such as ADD_23_47 in the working set, which encode the two u
 ADD_TENS_2_4 and ADD_ONES_3_7.
 These ephemeral tokens are created when we initialize or update the working set, based on a
 selection of ADD_TENS and ADD_ONES from
-the fact mastery.
+the fact mastery.`
 It would quickly get boring if we then only showed 23+47 to the student, so instead, we will
 generate related facts whenever
 this feat is chosen from the working set - we will then choose one of those related facts either

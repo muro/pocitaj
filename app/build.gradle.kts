@@ -82,6 +82,7 @@ android {
         unitTests {
             isIncludeAndroidResources = true
         }
+        @Suppress("UnstableApiUsage")
         managedDevices {
             localDevices {
                 // run test with: ./gradlew pixel9api35DebugAndroidTest
