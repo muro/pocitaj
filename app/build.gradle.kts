@@ -84,12 +84,13 @@ android {
         }
         managedDevices {
             localDevices {
-                // "create" is usually sufficient now, or "register"
+                // run test with: ./gradlew pixel9api35DebugAndroidTest
+                // it's not any faster right now though.
                 create("pixel9api35") {
                     // The device class is implied as ManagedVirtualDevice
                     device = "Pixel 9"
                     apiLevel = 35
-                    systemImageSource = "google_apis_playstore"
+                    systemImageSource = "google-atd"  //    google_apis"
                 }
             }
         }
