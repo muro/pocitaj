@@ -146,7 +146,7 @@ fun UserProfileScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete ${user.name}",
+                                contentDescription = stringResource(R.string.delete, user.name),
                                 tint = MaterialTheme.colorScheme.secondary
                             )
                         }

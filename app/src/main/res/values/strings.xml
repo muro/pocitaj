@@ -18,8 +18,6 @@
     <string name="level_subtracting_tens">Subtracting Tens</string>
     <string name="level_two_digit_subtraction_no_borrow">2-Digit Subtraction (No Borrow)</string>
     <string name="level_two_digit_subtraction_with_borrow">2-Digit Subtraction (With Borrow)</string>
-    <string name="level_multiplication_tables_0_1_2_5_10">Multiplication Tables (0, 1, 2, 5, 10)</string>
-    <string name="level_division_by_2_5_10">Division by 2, 5, 10</string>
     <string name="unknown_level">Unknown Level</string>
     <string name="review_level">Review</string>
 
@@ -38,8 +36,6 @@
     <string name="practice_smart">Smart Practice</string>
     <string name="no_facts_to_display">No facts to display for this level.</string>
     <string name="loading">Loading…</string>
-    <string name="error">Error:</string>
-    <string name="done">Done</string>
     <string name="retry">Retry</string>
     <string name="results_title">Results</string>
     <string name="navigate_back">Back</string>
@@ -49,7 +45,7 @@
     <string name="user_name">User Name</string>
     <string name="add">Add</string>
     <string name="cancel">Cancel</string>
-    <string name="delete">Delete</string>
+    <string name="delete">Delete %s</string>
     <string name="progress_title">Progress</string>
     <string name="back">Back</string>
     <string name="replay_level">Replay Level</string>
