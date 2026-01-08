@@ -53,7 +53,7 @@ class ExerciseSetupViewModel(
                         val factsInLevel = level.getAllPossibleFactIds()
                         if (factsInLevel.isEmpty()) return@filter true
                         val masteredFactCount = factsInLevel.count { factId ->
-                            masteryMap[factId]?.strength ?: 0 >= MASTERY_STRENGTH
+                            (masteryMap[factId]?.strength ?: 0) >= MASTERY_STRENGTH
                         }
                         masteredFactCount == factsInLevel.size
                     }.map { it.id }.toSet()

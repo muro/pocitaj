@@ -138,9 +138,9 @@ class DrillStrategyTest {
     @Test
     fun `initial working set handles fewer facts than set size available to drill`() {
         // ARRANGE: A level with 10 facts, but 8 are already mastered.
-        val userMastery = (3..10).map {
+        val userMastery = (3..10).associate {
             createMastery("ADDITION_1_$it", 5, 1000L) // Mastered
-        }.toMap().toMutableMap()
+        }.toMutableMap()
         userMastery.putAll(
             mapOf(
                 createMastery("ADDITION_1_1", 1, 100L), // L1

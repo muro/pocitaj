@@ -41,13 +41,13 @@ use caml case instead. Always use the latest dependency version.
 ## Code style
 
 Add imports at the top of the file.
-Plase ViewModel factories into the same file as the ViewModel.
+Place ViewModel factories into the same file as the ViewModel.
 Ensure all source files end with a single newline character.
 Simple is better than complex - avoid creating additional tiny classes, if the functionality can
 be included in an existing fitting place.
 Prefer short, single-word names with clear purpose - avoid multi-word obtuse names, or explaining
 names such as AppContainerFactoryManager.
-Your target audience are exprerienced expert programmers that have the experience to avoid too many
+Your target audience are experienced expert programmers that have the experience to avoid too many
 interacting objects, too many objects to collaborate on simple tasks. They choose well-understood
 and powerful core of the language, staying true to the language's style. e.g. in C++, they would use
 the STL, but avoid template metaprogramming, boost, exceptions, functors. They might use a macro

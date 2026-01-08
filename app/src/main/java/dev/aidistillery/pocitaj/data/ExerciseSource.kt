@@ -18,13 +18,6 @@ data class ExerciseConfig(
     val strategy: ExerciseStrategy = ExerciseStrategy.SMART_PRACTICE
 )
 
-enum class ExerciseType(val id: String) {
-    ADDITION("addition"),
-    SUBTRACTION("subtraction"),
-    MULTIPLICATION("multiplication"),
-    DIVISION("division")
-}
-
 interface ExerciseSource {
     suspend fun initialize(config: ExerciseConfig)
     fun getNextExercise(): Exercise?
