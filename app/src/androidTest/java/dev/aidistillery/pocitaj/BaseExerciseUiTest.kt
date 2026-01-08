@@ -117,7 +117,7 @@ abstract class BaseExerciseUiTest {
         // Explicitly scroll the parent list to bring the button into view
         val levelId = "SUB_REVIEW_1"
         composeTestRule.onNodeWithTag("operation_card_-")
-            .performScrollToNode(matcher = hasTestTag("leveltile_${levelId}")) // -100_progress"))
+            .performScrollToNode(matcher = hasTestTag("level_tile_${levelId}")) // -100_progress"))
         TestCase.assertEquals(getProgress(levelId), 100)
 
         // Click on the first "Review" button found
@@ -219,7 +219,7 @@ abstract class BaseExerciseUiTest {
     }
 
     fun getProgress(levelId: String): Int {
-        val nodeInteraction = composeTestRule.onNodeWithTag("leveltile_${levelId}")
+        val nodeInteraction = composeTestRule.onNodeWithTag("level_tile_${levelId}")
         nodeInteraction.assertIsDisplayed()
 
         val semanticsNode = nodeInteraction.fetchSemanticsNode()
@@ -228,7 +228,7 @@ abstract class BaseExerciseUiTest {
 
     fun answerAllQuestionsCorrectly(operationSymbol: String, levelId: String) {
         //openOperationCard(operationSymbol)
-        composeTestRule.onNodeWithTag("leveltile_${levelId}").performClick()
+        composeTestRule.onNodeWithTag("level_tile_${levelId}").performClick()
 
         composeTestRule.onRoot().printToLog("whenLevelCompletedCorrectly_thenStarRatingIncreases")
 

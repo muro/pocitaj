@@ -17,7 +17,7 @@ class LevelCompletionTest : AdaptiveExerciseUiTest() {
         openOperationCard("×")
         val level = Curriculum.MultiplicationTableLevel(3)
         val levelId = level.id
-        composeTestRule.onNodeWithTag("leveltile_${levelId}").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("level_tile_${levelId}").assertIsDisplayed()
         assertEquals(0, getProgress(levelId))
 
         answerAllQuestionsCorrectly("×", levelId)
@@ -25,7 +25,7 @@ class LevelCompletionTest : AdaptiveExerciseUiTest() {
         openOperationCard("×")
         val progress = getProgress(levelId)
         assertTrue("Progress should be greater than 0, but was $progress", progress > 0)
-        composeTestRule.onNodeWithTag("leveltile_${levelId}").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("level_tile_${levelId}").assertIsDisplayed()
     }
 
     @Test
@@ -39,7 +39,7 @@ class LevelCompletionTest : AdaptiveExerciseUiTest() {
 
         // ACT 1: Open the screen and verify the initial state is correct
         openOperationCard("×")
-        composeTestRule.onNodeWithTag("leveltile_${levelId}").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("level_tile_${levelId}").assertIsDisplayed()
         val initialProgress = getProgress(levelId)
         assertEquals("Pre-condition failed: Initial progress should be 59%", 59, initialProgress)
 
@@ -48,7 +48,7 @@ class LevelCompletionTest : AdaptiveExerciseUiTest() {
 
         // ASSERT: Verify the final state has crossed the threshold
         openOperationCard("×") // Re-open the card to refresh the UI with final progress
-        composeTestRule.onNodeWithTag("leveltile_${levelId}").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("level_tile_${levelId}").assertIsDisplayed()
         val finalProgress = getProgress(levelId)
         assertTrue("Post-condition failed: Final progress should be > 60%", finalProgress > 60)
 

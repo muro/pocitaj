@@ -135,7 +135,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         openOperationCard("-")
 
         val levelId = Curriculum.SubtractionFrom5.id
-        composeTestRule.onNodeWithTag("leveltile_${levelId}").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("level_tile_${levelId}").assertIsDisplayed()
         TestCase.assertEquals(getProgress(levelId), 0)
 
         // 3. Switch to Alice
@@ -148,7 +148,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 4. Verify Alice's State
         openOperationCard("-")
         composeTestRule.onNodeWithTag("user_profile_Alice").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("leveltile_${levelId}")
+        composeTestRule.onNodeWithTag("level_tile_${levelId}")
             .assertIsDisplayed()
         TestCase.assertEquals(getProgress(levelId), 100)
 
@@ -195,7 +195,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 7. Verify Bob's State
         openOperationCard("-")
-        composeTestRule.onNodeWithTag("leveltile_${levelId}").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("level_tile_${levelId}").assertIsDisplayed()
         TestCase.assertEquals(getProgress(levelId), 0)
     }
 

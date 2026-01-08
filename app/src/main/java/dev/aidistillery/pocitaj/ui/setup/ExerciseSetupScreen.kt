@@ -324,7 +324,9 @@ fun OperationCard(
                             containerColor = MaterialTheme.colorScheme.surface,
                             contentColor = MaterialTheme.colorScheme.onSurface
                         ),
-                        modifier = Modifier.fillMaxWidth().height(64.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(64.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Lightbulb,
@@ -374,7 +376,7 @@ fun LevelTile(
     Card(
         modifier = modifier
             .aspectRatio(1f)
-            .testTag("leveltile_${levelStatus.level.id}")
+            .testTag("level_tile_${levelStatus.level.id}")
             .semantics {
                 set(StarRatingKey, (100 * levelStatus.progress).toInt())
             }
