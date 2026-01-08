@@ -29,15 +29,11 @@ class StartupViewModel(
             val modelDownload = async {
                 downloadModel()
             }
-            val sourceCreation = async {
-                createExerciseSource()
-            }
             val userManagerInitialization = async {
                 globals.activeUserManager.init()
             }
 
             val modelDownloaded = modelDownload.await()
-            sourceCreation.await()
             userManagerInitialization.await()
 
             if (modelDownloaded) {
@@ -63,10 +59,6 @@ class StartupViewModel(
                     continuation.resume(false)
                 }
         }
-    }
-
-    private suspend fun createExerciseSource() {
-        // No-op. The exercise source is now initialized in the Globals container.
     }
 }
 
