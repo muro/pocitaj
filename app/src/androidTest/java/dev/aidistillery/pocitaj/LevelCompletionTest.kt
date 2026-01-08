@@ -61,6 +61,7 @@ class LevelCompletionTest : AdaptiveExerciseUiTest() {
      * Helper function to programmatically set the mastery progress for a given level
      * by directly manipulating the FactMasteryDao.
      */
+    @Suppress("SameParameterValue")
     private fun setMasteryProgress(level: Level, progress: Float) {
         runBlocking {
             val facts = level.getAllPossibleFactIds()

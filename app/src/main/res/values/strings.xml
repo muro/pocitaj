@@ -49,4 +49,8 @@
     <string name="progress_title">Progress</string>
     <string name="back">Back</string>
     <string name="replay_level">Replay Level</string>
+    <string name="correct_answer_image">Correct Answer Image</string>
+    <string name="incorrect_answer_image">Incorrect Answer Image</string>
+    <string name="unrecognized_answer_image">Unrecognized Answer Image</string>
+    <string name="teacher_image">Teacher Image</string>
 </resources>

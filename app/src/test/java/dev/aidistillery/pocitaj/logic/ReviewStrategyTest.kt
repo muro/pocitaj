@@ -96,9 +96,10 @@ class ReviewStrategyTest {
 
     @Test
     fun `correct answer with Gold speed promotes to targetStrength`() {
-        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 6, 100L))
+        val userMastery =
+            mutableMapOf("ADDITION_1_2" to FactMastery("ADDITION_1_2", 1, "", 6, 100L))
         val strategy = setupStrategy(userMastery, reviewStrength = 6, targetStrength = 7)
-        val exercise = exerciseFromFactId("ADDITION_1_1")
+        val exercise = exerciseFromFactId("ADDITION_1_2")
         exercise.speedBadge = SpeedBadge.GOLD
 
         strategy.recordAttempt(exercise, true)
@@ -106,7 +107,7 @@ class ReviewStrategyTest {
         assertEquals(
             "Strength should be promoted to targetStrength",
             7,
-            userMastery["ADDITION_1_1"]!!.strength
+            userMastery["ADDITION_1_2"]!!.strength
         )
     }
 

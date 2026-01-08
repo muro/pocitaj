@@ -28,6 +28,7 @@ class DataStoreActiveUserManager(
 ) : ActiveUserManager {
 
     override lateinit var activeUser: User
+        @Suppress("EmptyMethod")
         private set
 
     private val _activeUserFlow = MutableStateFlow<User?>(null)

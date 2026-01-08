@@ -21,7 +21,7 @@ generate related facts whenever
 this feat is chosen from the working set - we will then choose one of those related facts either
 randomly or weighted random
 based on mastery. The generated exercises will be used to train either the ones or the tens (based
-on the exercise we chose) of the underlying feacts.
+on the exercise we chose) of the underlying facts.
 Thus, when we create the exercise out of the token from the working set, we create exercises like
 23+47, 25+46, 33+57, 83+17,
 29+44 and similar. They all match either the ONES or TENS from the working set token ADD_23_47. We

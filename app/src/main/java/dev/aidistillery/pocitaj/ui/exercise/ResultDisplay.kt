@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.aidistillery.pocitaj.R
 
@@ -32,20 +33,13 @@ fun ResultDisplay(
         exit = fadeOut(),
         modifier = modifier
     ) {
-        val resultImageRes = when (answerResult) {
-            is AnswerResult.Correct -> R.drawable.excited
-            is AnswerResult.Incorrect -> R.drawable.sad
-            is AnswerResult.Unrecognized -> R.drawable.confused
-            is AnswerResult.ShowCorrection -> R.drawable.teacher
-            else -> null
-        }
+        val (resultImageRes, contentDesc) = when (answerResult) {
+            is AnswerResult.Correct -> R.drawable.excited to R.string.correct_answer_image
+            is AnswerResult.Incorrect -> R.drawable.sad to R.string.incorrect_answer_image
+            is AnswerResult.Unrecognized -> R.drawable.confused to R.string.unrecognized_answer_image
+            is AnswerResult.ShowCorrection -> R.drawable.teacher to R.string.teacher_image
 
-        val contentDesc = when (answerResult) {
-            is AnswerResult.Correct -> "Correct Answer Image"
-            is AnswerResult.Incorrect -> "Incorrect Answer Image"
-            is AnswerResult.Unrecognized -> "Unrecognized Answer Image"
-            is AnswerResult.ShowCorrection -> "Teacher Image"
-            else -> null
+            else -> null to null
         }
 
         if (resultImageRes != null && contentDesc != null) {
@@ -58,7 +52,7 @@ fun ResultDisplay(
                 val baseSize = 200.dp
                 Image(
                     painter = painterResource(id = resultImageRes),
-                    contentDescription = contentDesc,
+                    contentDescription = stringResource(contentDesc),
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.size(baseSize * imageScale)
                 )
