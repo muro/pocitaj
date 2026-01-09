@@ -32,7 +32,7 @@ class AdaptiveExerciseSourceTest {
     }
 
     class FakeExerciseAttemptDao : ExerciseAttemptDao {
-        val attempts = mutableListOf<ExerciseAttempt>()
+        private val attempts = mutableListOf<ExerciseAttempt>()
         override suspend fun insert(attempt: ExerciseAttempt) {
             attempts.add(attempt)
         }
@@ -45,6 +45,7 @@ class AdaptiveExerciseSourceTest {
         }
     }
 
+    @Suppress("RedundantNullableReturnType")
     class FakeUserDao : UserDao {
         private val users = mutableMapOf<Long, User>()
         private var nextId = 1L
@@ -124,8 +125,7 @@ class AdaptiveExerciseSourceTest {
         val config = ExerciseConfig(
             operation = Operation.SUBTRACTION,
             difficulty = 10,
-            count = 5,
-            levelId = null // No specific level
+            count = 5
         )
 
         // ACT

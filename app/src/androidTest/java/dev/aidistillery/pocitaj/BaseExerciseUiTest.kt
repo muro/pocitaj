@@ -199,7 +199,6 @@ abstract class BaseExerciseUiTest {
             composeTestRule.onAllNodesWithText("Choose Your Challenge")
                 .fetchSemanticsNodes().size == 1
         }
-        print("verifyOnExerciseSetupScreen: Current active ID: ${globals.activeUser.id} and name ${globals.activeUser.name}")
         composeTestRule.onNodeWithText("Choose Your Challenge").assertIsDisplayed()
     }
 
@@ -226,6 +225,7 @@ abstract class BaseExerciseUiTest {
         return semanticsNode.config[StarRatingKey]
     }
 
+    @Suppress("unused")
     fun answerAllQuestionsCorrectly(operationSymbol: String, levelId: String) {
         //openOperationCard(operationSymbol)
         composeTestRule.onNodeWithTag("level_tile_${levelId}").performClick()

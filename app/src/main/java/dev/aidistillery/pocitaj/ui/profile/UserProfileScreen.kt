@@ -193,6 +193,7 @@ fun UserProfileScreen(
     }
 }
 
+@Suppress("AssignedValueIsNeverRead")
 @Composable
 fun AddUserDialog(
     onDismiss: () -> Unit,
@@ -466,8 +467,7 @@ fun UserProfileScreenPreview() {
                 userDao,
                 FakeExerciseAttemptDao(),
                 activeUserManager
-            ),
-            initialShowAddUserDialog = false
+            )
         )
     }
 }

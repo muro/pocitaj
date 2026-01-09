@@ -155,7 +155,8 @@ class ReviewStrategy(
 
     override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): Pair<FactMastery?, String> {
         val factId = exercise.getFactId()
-        val mastery = userMastery[factId] ?: FactMastery(factId, activeUserId, "", 0, 0)
+        val mastery =
+            userMastery[factId] ?: FactMastery(factId, activeUserId, "", lastTestedTimestamp = 0)
         val now = clock.now().toEpochMilliseconds()
         val duration = exercise.timeTakenMillis?.toLong() ?: 0L
 

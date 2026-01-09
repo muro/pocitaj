@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
  * @param style The text style to be applied to the text.
  */
 @Composable
+@Suppress("AssignedValueIsNeverRead")
 fun AutoSizeText(
     text: String,
     modifier: Modifier = Modifier,

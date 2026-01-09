@@ -2,7 +2,7 @@ package dev.aidistillery.pocitaj.logic
 
 data class Exercise(
     val equation: Equation,
-    var submittedSolution: Int? = null,
+    private var submittedSolution: Int? = null,
     var solved: Boolean = false,
     var timeTakenMillis: Int? = null,
     var speedBadge: SpeedBadge = SpeedBadge.NONE

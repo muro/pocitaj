@@ -343,7 +343,7 @@ class StrategySimulationTest {
     fun a_forgetful_student_struggles_with_drill_strategy() {
         val runs = 10
         val strategyProvider = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-            DrillStrategy(l, m, 4, 1L, c)
+            DrillStrategy(l, m, activeUserId = 1L, clock = c)
         }
         val averageStrength = (1..runs).map {
             runStrategySimulation(testLevel, 100, 20, ForgetfulStudent(), strategyProvider)
@@ -360,7 +360,7 @@ class StrategySimulationTest {
     fun an_improving_student_shows_progress_with_drill_strategy() {
         val runs = 10
         val strategyProvider = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-            DrillStrategy(l, m, 4, 1L, c)
+            DrillStrategy(l, m, activeUserId = 1L, clock = c)
         }
         val averageStrength = (1..runs).map {
             runStrategySimulation(testLevel, 100, 20, ImprovingStudent(), strategyProvider)
@@ -377,7 +377,7 @@ class StrategySimulationTest {
     fun a_perfect_student_masters_the_level_quickly_with_drill_strategy() {
         val runs = 10
         val strategyProvider = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-            DrillStrategy(l, m, 4, 1L, c)
+            DrillStrategy(l, m, activeUserId = 1L, clock = c)
         }
         val results = (1..runs).map {
             runStrategySimulation(testLevel, 100, 20, PerfectStudent(), strategyProvider)
@@ -407,7 +407,6 @@ class StrategySimulationTest {
                 DrillStrategy(
                     l,
                     m,
-                    4,
                     activeUserId = 1L, // Assuming user 1 for simulation
                     clock = c
                 )
@@ -469,7 +468,6 @@ class StrategySimulationTest {
                 TwoDigitAdditionDrillStrategy(
                     l as TwoDigitAdditionLevel,
                     m,
-                    4,
                     activeUserId = 1L, // Assuming user 1 for simulation
                     clock = c
                 )
@@ -529,14 +527,13 @@ class StrategySimulationTest {
             TwoDigitAdditionDrillStrategy(
                 l as TwoDigitAdditionLevel,
                 m,
-                4,
                 activeUserId = 1L,
                 clock = c
             )
         }
 
         val standardDrillFactory = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-            DrillStrategy(l, m, 4, activeUserId = 1L, clock = c)
+            DrillStrategy(l, m, activeUserId = 1L, clock = c)
         }
 
         val strategies = mapOf(
@@ -645,6 +642,8 @@ class StrategySimulationTest {
     }
 }
 
+// TODO: possibly delete
+@Suppress("unused")
 private fun exerciseFromFactId(factId: String): Exercise {
     val parts = factId.split("_")
     val operation = Operation.valueOf(parts[0])

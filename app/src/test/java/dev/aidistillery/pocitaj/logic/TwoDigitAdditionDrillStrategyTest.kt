@@ -28,7 +28,8 @@ class TwoDigitAdditionDrillStrategyTest {
         )
 
         // ACT: Create the TwoDigitAdditionDrillStrategy.
-        val strategy = TwoDigitAdditionDrillStrategy(twoDigitAdditionLevel, userMastery, 4, 1L)
+        val strategy =
+            TwoDigitAdditionDrillStrategy(twoDigitAdditionLevel, userMastery, activeUserId = 1L)
 
         // ASSERT: The working set should contain ephemeral tokens, sorted by weakness.
         assertEquals(4, strategy.workingSet.size)
@@ -43,7 +44,8 @@ class TwoDigitAdditionDrillStrategyTest {
             createMastery("ADD_TENS_1_2", 1, 100L),
             createMastery("ADD_ONES_2_1", 2, 200L)
         )
-        val strategy = TwoDigitAdditionDrillStrategy(twoDigitAdditionLevel, userMastery, 4, 1L)
+        val strategy =
+            TwoDigitAdditionDrillStrategy(twoDigitAdditionLevel, userMastery, activeUserId = 1L)
         strategy.workingSet.clear()
         strategy.workingSet.add("ADD_ONES_2_1_ADD_TENS_1_2")
 
@@ -66,7 +68,8 @@ class TwoDigitAdditionDrillStrategyTest {
             createMastery("ADD_TENS_1_2", 1, 100L),
             createMastery("ADD_ONES_2_1", 2, 200L)
         )
-        val strategy = TwoDigitAdditionDrillStrategy(twoDigitAdditionLevel, userMastery, 4, 1L)
+        val strategy =
+            TwoDigitAdditionDrillStrategy(twoDigitAdditionLevel, userMastery, activeUserId = 1L)
         val exercise = Exercise(TwoDigitAddition(12, 21, "ADD_ONES_2_1_ADD_TENS_1_2"))
 
         // ACT

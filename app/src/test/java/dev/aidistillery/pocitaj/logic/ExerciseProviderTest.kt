@@ -153,7 +153,8 @@ class ExerciseProviderTest {
         val userMastery = mutableMapOf<String, FactMastery>()
         // Create 4 unmastered facts
         for (i in 0..3) {
-            userMastery["ADDITION_1_$i"] = FactMastery("ADDITION_1_$i", 1, "", 0, 0)
+            userMastery["ADDITION_1_$i"] =
+                FactMastery("ADDITION_1_$i", 1, "", lastTestedTimestamp = 0)
         }
         // Create 1 mastered fact
         userMastery["ADDITION_1_4"] = FactMastery("ADDITION_1_4", 1, "", 5, 0)

@@ -14,7 +14,7 @@ import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.data.UserDao
 
 object FakeInkModelManager : InkModelManager {
-    var recognitionResult = "123"
+    private var recognitionResult = "123"
 
     override fun setModel(languageTag: String): String {
         return "fake model set"
@@ -50,6 +50,7 @@ class TestGlobals(private val context: Context) : Globals {
     override val activeUser: User
         get() = activeUserManager.activeUser
 
+    @Suppress("unused")
     fun reset() {
         activeUserManager.reset()
         database.clearAllTables()

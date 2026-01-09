@@ -246,7 +246,6 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
             globals.userDao.insert(
                 User(
                     name = "Caleb",
-                    iconId = "alligator",
                     color = 0xFFF44336.toInt()
                 )
             )

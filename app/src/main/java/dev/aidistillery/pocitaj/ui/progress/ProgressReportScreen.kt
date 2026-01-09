@@ -490,8 +490,20 @@ fun MultiplicationReportPreview() {
                 0,
                 4000
             ), // Mastered, Slow
-            "MULTIPLICATION_4_4" to FactMastery("MULTIPLICATION_4_4", 1, "", 3, 0, 0),    // Learning
-            "MULTIPLICATION_5_5" to FactMastery("MULTIPLICATION_5_5", 1, "", 1, 0, 0),    // Weak
+            "MULTIPLICATION_4_4" to FactMastery(
+                "MULTIPLICATION_4_4",
+                1,
+                "",
+                3,
+                lastTestedTimestamp = 0
+            ),    // Learning
+            "MULTIPLICATION_5_5" to FactMastery(
+                "MULTIPLICATION_5_5",
+                1,
+                "",
+                1,
+                lastTestedTimestamp = 0
+            ),    // Weak
         )
 
         val multiplicationLevels = Curriculum.getLevelsFor(Operation.MULTIPLICATION)

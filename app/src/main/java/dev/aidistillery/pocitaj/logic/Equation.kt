@@ -16,7 +16,7 @@ interface Equation {
     fun getFact(): Triple<Operation, Int, Int>
 }
 
-data class Addition(val a: Int, val b: Int) : Equation {
+data class Addition(private val a: Int, private val b: Int) : Equation {
     override fun question(): String = String.format(Locale.ENGLISH, "%d + %d = ?", a, b)
     override fun getExpectedResult(): Int = a + b
     override fun getQuestionAsSolved(submittedSolution: Int?): String {
@@ -30,7 +30,7 @@ data class Addition(val a: Int, val b: Int) : Equation {
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.ADDITION, a, b)
 }
 
-data class Subtraction(val a: Int, val b: Int) : Equation {
+data class Subtraction(private val a: Int, private val b: Int) : Equation {
     override fun question(): String = String.format(Locale.ENGLISH, "%d - %d = ?", a, b)
     override fun getExpectedResult(): Int = a - b
     override fun getQuestionAsSolved(submittedSolution: Int?): String {
@@ -60,7 +60,7 @@ data class Multiplication(val a: Int, val b: Int) : Equation {
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.MULTIPLICATION, a, b)
 }
 
-data class MissingAddend(val a: Int, val result: Int) : Equation {
+data class MissingAddend(private val a: Int, private val result: Int) : Equation {
     private val b: Int = result - a // The missing operand
 
     override fun question(): String = String.format(Locale.ENGLISH, "%d + ? = %d", a, result)
@@ -82,7 +82,7 @@ data class MissingAddend(val a: Int, val result: Int) : Equation {
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.ADDITION, a, b)
 }
 
-data class MissingSubtrahend(val a: Int, val result: Int) : Equation {
+data class MissingSubtrahend(private val a: Int, private val result: Int) : Equation {
     private val b: Int = a - result // The missing operand
 
     override fun question(): String = String.format(Locale.ENGLISH, "%d - ? = %d", a, result)
