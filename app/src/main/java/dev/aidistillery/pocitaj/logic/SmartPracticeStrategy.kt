@@ -106,9 +106,7 @@ class SmartPracticeStrategy(
 
         val newStrength = if (wasCorrect) {
             val speedBadge = exercise.speedBadge
-            val currentStrength = mastery.strength
-
-            when (currentStrength) {
+            when (val currentStrength = mastery.strength) {
                 0, 1 -> currentStrength + 1 // Always advance for accuracy at low levels
                 2 -> if (speedBadge >= SpeedBadge.BRONZE) 3 else 2
                 3 -> if (speedBadge >= SpeedBadge.SILVER) 4 else 3
