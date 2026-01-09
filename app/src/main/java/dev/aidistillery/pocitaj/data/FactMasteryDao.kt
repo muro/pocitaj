@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FactMasteryDao {
-    @Suppress("unused")
     @Query("SELECT * FROM fact_mastery WHERE userId = :userId")
+    @Suppress("RedundantSuppression", "unused")
     fun getAllFactsForUser(userId: Long): Flow<List<FactMastery>>
 
     @Query("SELECT * FROM fact_mastery WHERE factId = :factId AND userId = :userId AND level = :level")

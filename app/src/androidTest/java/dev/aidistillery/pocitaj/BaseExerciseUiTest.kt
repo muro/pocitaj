@@ -225,7 +225,7 @@ abstract class BaseExerciseUiTest {
         return semanticsNode.config[StarRatingKey]
     }
 
-    @Suppress("unused")
+    @Suppress("RedundantSuppression", "unused")
     fun answerAllQuestionsCorrectly(operationSymbol: String, levelId: String) {
         //openOperationCard(operationSymbol)
         composeTestRule.onNodeWithTag("level_tile_${levelId}").performClick()

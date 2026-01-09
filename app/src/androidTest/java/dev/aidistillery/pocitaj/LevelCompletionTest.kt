@@ -68,7 +68,7 @@ class LevelCompletionTest : AdaptiveExerciseUiTest() {
             // First, clear any existing mastery for this level to start fresh
             for (factId in facts) {
                 globals.factMasteryDao.upsert(
-                    FactMastery(factId = factId, userId = 1, strength = 0, level = "", lastTestedTimestamp = 100)
+                    FactMastery(factId = factId, userId = 1, level = "", lastTestedTimestamp = 100)
                 )
             }
 

@@ -98,6 +98,7 @@ fun InkRecognitionBox(
         )
     )
 
+    @Suppress("AssignedValueIsNeverRead")
     Box(
         modifier = modifier
             .fillMaxWidth()

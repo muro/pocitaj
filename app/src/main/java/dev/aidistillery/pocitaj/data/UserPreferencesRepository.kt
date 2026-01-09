@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
 
-@Suppress("unused", "unused")
+@Suppress("unused")
 class UserPreferencesRepository(private val context: Context) {
 
     private object Keys {
