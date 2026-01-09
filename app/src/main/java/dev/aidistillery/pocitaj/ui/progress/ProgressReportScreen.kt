@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.UiComposable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalDensity
@@ -48,6 +49,7 @@ import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import dev.aidistillery.pocitaj.ui.theme.customColors
 
 @Composable
+@UiComposable
 fun ProgressReportScreen(
     factProgressByOperation: Map<Operation, List<FactProgress>>,
     levelProgressByOperation: Map<Operation, Map<String, LevelProgress>>
@@ -112,6 +114,7 @@ private fun getOperationTitle(operation: Operation): String {
 }
 
 @Composable
+@UiComposable
 fun OperationProgress(
     operation: Operation,
     factProgress: List<FactProgress>,
@@ -145,6 +148,7 @@ fun OperationProgress(
 }
 
 @Composable
+@UiComposable
 fun LevelProgressList(levelProgress: Map<String, LevelProgress>) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         levelProgress.forEach { (levelId, progress) ->
@@ -184,6 +188,7 @@ private fun mapFactsToCoords(facts: List<FactProgress>): List<Triple<Int, Int, F
 }
 
 @Composable
+@UiComposable
 fun StandardGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>, operation: Operation) {
     val maxOp1 = factsWithCoords.maxOfOrNull { it.first } ?: 0
     val maxOp2 = factsWithCoords.maxOfOrNull { it.second } ?: 0
@@ -192,7 +197,6 @@ fun StandardGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>, operatio
     val opValues = (2..maxOperand).toList()
     val factsMap = factsWithCoords.associateBy { Pair(it.first, it.second) }
 
-    @Suppress("UnusedBoxWithConstraintsScope")
     BoxWithConstraints {
         val spacing = 4.dp
         val totalSpacing = spacing * opValues.size
@@ -228,12 +232,12 @@ fun StandardGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>, operatio
 }
 
 @Composable
+@UiComposable
 fun DivisionGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>) {
     val divisors = factsWithCoords.map { it.second }.distinct().sorted()
     val multipliers = (2..10).toList()
     val factsMap = factsWithCoords.associateBy { Pair(it.first, it.second) }
 
-    @Suppress("UnusedBoxWithConstraintsScope")
     BoxWithConstraints {
         val spacing = 4.dp
         val totalSpacing = spacing * divisors.size
@@ -264,6 +268,7 @@ fun DivisionGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>) {
 }
 
 @Composable
+@UiComposable
 fun GridCell(text: String, size: androidx.compose.ui.unit.Dp) {
     Box(
         modifier = Modifier
@@ -280,6 +285,7 @@ fun GridCell(text: String, size: androidx.compose.ui.unit.Dp) {
 }
 
 @Composable
+@UiComposable
 fun FactCell(factProgress: FactProgress?, result: Int, cellSize: androidx.compose.ui.unit.Dp) {
     val strength = factProgress?.mastery?.strength ?: 0
     val speedBadge = factProgress?.speedBadge ?: SpeedBadge.NONE
