@@ -198,6 +198,7 @@ fun StandardGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>, operatio
         val totalSpacing = spacing * opValues.size
         val cellSize = (maxWidth - totalSpacing) / (opValues.size + 1)
 
+        @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         Column(verticalArrangement = Arrangement.spacedBy(spacing)) {
             // Header
             Row(horizontalArrangement = Arrangement.spacedBy(spacing)) {
@@ -239,6 +240,7 @@ fun DivisionGrid(factsWithCoords: List<Triple<Int, Int, FactProgress>>) {
         val totalSpacing = spacing * divisors.size
         val cellSize = (maxWidth - totalSpacing) / (divisors.size + 1)
 
+        @Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
         Column(verticalArrangement = Arrangement.spacedBy(spacing)) {
             // Header
             Row(horizontalArrangement = Arrangement.spacedBy(spacing)) {
