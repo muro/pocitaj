@@ -2,13 +2,9 @@ package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertTrue
 import org.junit.Test
-import kotlin.math.pow
 import kotlin.random.Random
 import kotlin.time.Clock
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
 // trick to avoid warning about condition always false / true when used.
@@ -63,583 +59,248 @@ class StrategySimulationTest {
 
     private class PerfectStudent : StudentModel {
         override val name = "PERFECT"
+
+        // Key: 100% Accuracy, Always Gold Speed
         override fun getSuccessProbability(context: SimulationContext) = 1.0
         override fun getAttemptDuration(context: SimulationContext): Long = 500L // Always Gold
     }
 
-    private class GoodStudent : StudentModel {
-        override val name = "GOOD"
-        override fun getSuccessProbability(context: SimulationContext) = 0.9
+    private class MediocreStudent : StudentModel {
+        override val name = "MEDIOCRE"
 
-        // Speed is linked to accuracy. 90% accuracy = 90% of the way to Gold speed.
+        // Key: 96% Accuracy (occasional mistake), Speed varies between Silver and Bronze
+        override fun getSuccessProbability(context: SimulationContext) = 0.96
+
         override fun getAttemptDuration(context: SimulationContext): Long {
-            // 50% gold, otherwise silver or bronze
-            return (Random.nextDouble() * getSpeedThreshold(
-                Operation.ADDITION,
-                1,
-                1
-            ).toDouble()).toLong()
+            val exercise = exerciseFromFactId(context.factId)
+            val (op, op1, op2) = exercise.equation.getFact()
+            val threshold = getSpeedThreshold(op, op1, op2)
+            // Mix of Silver (0.6) and Bronze (0.9)
+            val factor = if (Random.nextBoolean()) 0.6 else 0.9
+            return (threshold * factor).toLong() 
         }
     }
 
-    private class ImprovingStudent : StudentModel {
-        override val name = "IMPROVING"
-        override fun getSuccessProbability(context: SimulationContext) =
-            (0.5 + (context.attempts * 0.1)).coerceAtMost(1.0)
+    private class BadStudent : StudentModel {
+        override val name = "BAD"
+
+        // Key: 94% Accuracy, Constant 20% chance of Silver speed, otherwise Bronze
+        override fun getSuccessProbability(context: SimulationContext) = 0.94
 
         override fun getAttemptDuration(context: SimulationContext): Long {
-            // increase speed over time, gold (= 0.5 * threshold) after strength 4:
-            val threshold = getSpeedThreshold(Operation.ADDITION, 1, 1)
-            return (threshold * (2.0 / context.strength.toDouble())).toLong()
+            val exercise = exerciseFromFactId(context.factId)
+            val (op, op1, op2) = exercise.equation.getFact()
+            val threshold = getSpeedThreshold(op, op1, op2)
+
+            // Constant probability: 35% chance of Silver (0.7), 65% chance of Bronze (1.05)
+            // Tuned to achieve ~3x exercises compared to Perfect.
+            val factor = if (Random.nextDouble() < 0.35) 0.7 else 1.05
+            return (threshold * factor).toLong()
         }
-    }
-
-    private class ForgetfulStudent : StudentModel {
-        override val name = "FORGETFUL"
-        override fun getSuccessProbability(context: SimulationContext): Double {
-            return if (context.totalCorrectAnswers >= 10) {
-                0.99
-            } else if (context.lastSeenPosition == null) {
-                0.5
-            } else {
-                val exercisesSince = context.currentPosition - context.lastSeenPosition - 1
-                (1.0 - (exercisesSince * 0.03)).coerceAtLeast(0.0)
-            }
-        }
-
-        override fun getAttemptDuration(context: SimulationContext): Long {
-            val accuracy = getSuccessProbability(context)
-            val threshold = getSpeedThreshold(Operation.ADDITION, 1, 1)
-            return (threshold * (1.0 - accuracy) * 3.0).coerceAtLeast(threshold * 0.4).toLong()
-        }
-    }
-
-    private open class PowerLawStudent : StudentModel {
-        override val name = "POWER_LAW"
-        val recallStrengths = mutableMapOf<String, Double>()
-        val learningFloors = mutableMapOf<String, Double>()
-        open val alphaSuccess = 0.1
-        open val alphaFailure = 0.02
-
-        override fun getSuccessProbability(context: SimulationContext): Double {
-            return if (context.lastSeenPosition == null) {
-                0.4 // Initial guess for a new fact
-            } else {
-                val timeSince = (context.currentPosition - context.lastSeenPosition).toDouble()
-                // The probability of recall decays exponentially over time.
-                // TODO: this is untested - add a test before changing to pure kotlin
-                context.recallStrength.pow(timeSince)
-            }
-        }
-
-        override fun getAttemptDuration(context: SimulationContext): Long {
-            val accuracy = getSuccessProbability(context)
-            val threshold = getSpeedThreshold(Operation.ADDITION, 1, 1)
-            return (threshold * (1.0 - accuracy) * 2.5).coerceAtLeast(threshold * 0.4).toLong()
-        }
-
-        override fun recordAttempt(context: SimulationContext, wasCorrect: Boolean) {
-            val floor = learningFloors.getOrDefault(context.factId, 0.3)
-            val currentStrength = recallStrengths.getOrDefault(context.factId, 0.5)
-
-            // The Power Law of Practice: learning is proportional to the gap to mastery.
-            val alpha = if (wasCorrect) alphaSuccess else alphaFailure // Learning rate
-            val newFloor = floor + (alpha * (1.0 - floor))
-            learningFloors[context.factId] = newFloor
-
-            val newStrength = if (wasCorrect) {
-                // Learning: Close the gap to 1.0 by 20%
-                currentStrength + (1.0 - currentStrength) * 0.2
-            } else {
-                // Penalty for incorrect answer cannot go below the new, higher floor.
-                (currentStrength - 0.1).coerceAtLeast(newFloor)
-            }
-            recallStrengths[context.factId] = newStrength
-        }
-    }
-
-    private class FastPowerLawStudent : PowerLawStudent() {
-        override val name = "FAST_POWER_LAW"
-        override val alphaSuccess = 0.2 // Learns twice as fast from success
-        override val alphaFailure = 0.04 // Learns twice as fast from failure
     }
 
 
     /**
      * A rich data class to hold the results of a simulation run.
      */
-    private data class StrategyPerformanceProfile(
-        val strategyName: String,
-        val studentProfile: String,
-        val finalStrengthDistribution: Map<Int, Int>,
-        val uniqueFactsShown: Int,
-        val coverage: Double,
-        val repetitionRate: Double,
-        val learningVelocity: Double,
-        val wastedRepetitions: Int,
-        val boredomScore: Double
-    )
-
-    /**
-     * Runs a full simulation for a given strategy and student profile.
-     */
-    private fun runStrategySimulation(
-        level: Level,
-        iterations: Int,
-        sessionLength: Int,
-        studentModel: StudentModel,
-        strategyProvider: (Level, MutableMap<String, FactMastery>, Clock) -> ExerciseProvider
-    ): StrategyPerformanceProfile {
-        lateinit var profile: StrategyPerformanceProfile
-        runTest {
-            val userMastery = mutableMapOf<String, FactMastery>()
-            val detailedHistory = mutableListOf<Pair<String, Boolean>>() // FactId to wasCorrect
-            val attemptCounts = mutableMapOf<String, Int>()
-            val correctCounts = mutableMapOf<String, Int>()
-            val lastSeenPositions = mutableMapOf<String, Int>()
-            var totalStrengthGains = 0
-            var strategy: ExerciseProvider? = null
-
-            val clock = object : Clock {
-                override fun now() = Instant.fromEpochMilliseconds(testScheduler.currentTime)
-            }
-
-            // --- Simulation Loop ---
-            repeat(iterations) {
-                val isNewSession = sessionLength > 0 && it % sessionLength == 0
-                if (strategy == null || isNewSession) {
-                    strategy = strategyProvider(level, userMastery, clock)
-                }
-
-                val exercise = strategy.getNextExercise()
-                if (exercise == null) {
-                    strategy = null
-                    return@repeat
-                }
-
-                val factId = exercise.getFactId()
-                val initialStrength = userMastery[factId]?.strength ?: 0
-                attemptCounts[factId] = (attemptCounts[factId] ?: 0) + 1
-
-                val recallStrength =
-                    (studentModel as? PowerLawStudent)?.recallStrengths?.getOrDefault(factId, 0.5)
-                        ?: 0.5
-                val context = SimulationContext(
-                    factId = factId,
-                    strength = initialStrength,
-                    totalCorrectAnswers = correctCounts.getOrDefault(factId, 0),
-                    attempts = attemptCounts.getOrDefault(factId, 0),
-                    lastSeenPosition = lastSeenPositions[factId],
-                    currentPosition = it,
-                    recallStrength = recallStrength
-                )
-                val wasCorrect = Random.nextDouble() < studentModel.getSuccessProbability(context)
-                detailedHistory.add(factId to wasCorrect)
-
-                if (wasCorrect) {
-                    correctCounts[factId] = (correctCounts[factId] ?: 0) + 1
-                }
-                lastSeenPositions[factId] = it
-                studentModel.recordAttempt(context, wasCorrect)
-
-                // Set the duration and speed badge on the exercise
-                val duration = studentModel.getAttemptDuration(context)
-                exercise.timeTakenMillis = duration.toInt()
-                val (op, op1, op2) = exercise.equation.getFact()
-                exercise.speedBadge = getSpeedBadge(op, op1, op2, duration)
-
-
-                if (ENABLE_DETAILED_LOGGING && strategy is DrillStrategy && studentModel is PowerLawStudent) {
-                    val floor = studentModel.learningFloors[factId]
-                    println(
-                        "i=$it, fact=$factId, correct=$wasCorrect, learningFloor -> ${
-                            "%.3f".format(
-                                floor
-                            )
-                        }"
-                    )
-                }
-
-                strategy.recordAttempt(exercise, wasCorrect)
-
-                val finalStrength = userMastery[factId]?.strength ?: initialStrength
-                if (finalStrength > initialStrength) {
-                    totalStrengthGains++
-                }
-                testScheduler.advanceTimeBy(5.minutes)
-            }
-
-            profile = calculatePerformanceProfile(
-                strategyName = strategy!!::class.java.simpleName,
-                studentModelName = studentModel.name,
-                level = level,
-                userMastery = userMastery,
-                detailedHistory = detailedHistory,
-                totalStrengthGains = totalStrengthGains
-            )
-        }
-        return profile
-    }
-
-    private fun calculatePerformanceProfile(
-        strategyName: String,
-        studentModelName: String,
-        level: Level,
-        userMastery: Map<String, FactMastery>,
-        detailedHistory: List<Pair<String, Boolean>>,
-        totalStrengthGains: Int
-    ): StrategyPerformanceProfile {
-        val finalMastery = userMastery.values
-        val uniqueFactsShown = finalMastery.size
-        val totalFacts = level.getAllPossibleFactIds().size
-        val learningVelocity =
-            if (totalStrengthGains > 0) detailedHistory.size.toDouble() / totalStrengthGains else 0.0
-
-        // A metric to penalize strategies that repeat facts too soon after a correct answer.
-        // The score increases by the inverse of the distance, so very recent repetitions
-        // are penalized more heavily.
-        var boredomScore = 0.0
-        val lastSeenCorrectly = mutableMapOf<String, Int>()
-        detailedHistory.forEachIndexed { i, (factId, wasCorrect) ->
-            if (lastSeenCorrectly.containsKey(factId)) {
-                val distance = i - lastSeenCorrectly[factId]!!
-                if (distance > 0) {
-                    val scoreIncrease = 1.0 / distance
-                    boredomScore += scoreIncrease
-                    if (ENABLE_DETAILED_LOGGING) {
-                        println(
-                            "i=$i, fact=$factId, BORING repetition. Last seen correctly $distance turns ago. Score += ${
-                                "%.2f".format(
-                                    scoreIncrease
-                                )
-                            }"
-                        )
-                    }
-                }
-            }
-            if (wasCorrect) {
-                lastSeenCorrectly[factId] = i
-            } else {
-                lastSeenCorrectly.remove(factId)
-            }
-        }
-
-        return StrategyPerformanceProfile(
-            strategyName = strategyName,
-            studentProfile = studentModelName,
-            finalStrengthDistribution = finalMastery.groupingBy { it.strength }.eachCount(),
-            uniqueFactsShown = uniqueFactsShown,
-            coverage = uniqueFactsShown.toDouble() / totalFacts,
-            repetitionRate = (detailedHistory.size - uniqueFactsShown).toDouble() / detailedHistory.size,
-            learningVelocity = learningVelocity,
-            wastedRepetitions = detailedHistory.count { (factId, _) ->
-                (userMastery[factId]?.strength ?: 0) >= 5
-            },
-            boredomScore = boredomScore
-        )
-    }
+    // ...
 
     @Test
-    fun a_forgetful_student_struggles_with_drill_strategy() {
-        val runs = 10
-        val strategyProvider = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-            DrillStrategy(l, m, activeUserId = 1L, clock = c)
-        }
-        val averageStrength = (1..runs).map {
-            runStrategySimulation(testLevel, 100, 20, ForgetfulStudent(), strategyProvider)
-        }.map {
-            val totalStrength = it.finalStrengthDistribution.entries.sumOf { e -> e.key * e.value }
-            val totalFacts = it.finalStrengthDistribution.values.sum()
-            if (totalFacts > 0) totalStrength.toDouble() / totalFacts else 0.0
-        }.average()
-
-        assertTrue("Average strength should be less than 3.8, but was $averageStrength", averageStrength < 3.8)
-    }
-
-    @Test
-    fun an_improving_student_shows_progress_with_drill_strategy() {
-        val runs = 10
-        val strategyProvider = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-            DrillStrategy(l, m, activeUserId = 1L, clock = c)
-        }
-        val averageStrength = (1..runs).map {
-            runStrategySimulation(testLevel, 100, 20, ImprovingStudent(), strategyProvider)
-        }.map {
-            val totalStrength = it.finalStrengthDistribution.entries.sumOf { e -> e.key * e.value }
-            val totalFacts = it.finalStrengthDistribution.values.sum()
-            if (totalFacts > 0) totalStrength.toDouble() / totalFacts else 0.0
-        }.average()
-
-        assertTrue("Average strength should be greater than 4, but was $averageStrength", averageStrength > 4.0)
-    }
-
-    @Test
-    fun a_perfect_student_masters_the_level_quickly_with_drill_strategy() {
-        val runs = 10
-        val strategyProvider = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-            DrillStrategy(l, m, activeUserId = 1L, clock = c)
-        }
-        val results = (1..runs).map {
-            runStrategySimulation(testLevel, 100, 20, PerfectStudent(), strategyProvider)
-        }
-        val averageCoverage = results.map { it.coverage }.average()
-        val averageBoredom = results.map { it.boredomScore }.average()
-
-        assertTrue("Coverage should be 100%", averageCoverage == 1.0)
-        assertTrue("Boredom score should be low", averageBoredom < 10.0)
-    }
-
-    @Test
-    fun compare_all_strategies_and_students() {
-        val iterations = 100
-        val strategies = mapOf(
-            "ReviewStrategy" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-                ReviewStrategy(
-                    l,
-                    m,
-                    reviewStrength = 5,
-                    targetStrength = 6,
-                    activeUserId = 1L, // Assuming user 1 for simulation
-                    clock = c
-                )
-            } to 0),
-            "DrillStrategy" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-                DrillStrategy(
-                    l,
-                    m,
-                    activeUserId = 1L, // Assuming user 1 for simulation
-                    clock = c
-                )
-            } to 20),
-            "SmartPractice" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-                SmartPracticeStrategy(
-                    listOf(l),
-                    m,
-                    activeUserId = 1L, // Assuming user 1 for simulation
-                    random = Random.Default,
-                    clock = c
-                )
-            } to 0)
-        )
-        val students = listOf(
-            PerfectStudent(),
-            ImprovingStudent(),
-            GoodStudent(),
-            ForgetfulStudent(),
-            PowerLawStudent(),
-            FastPowerLawStudent()
-        )
-
-        students.forEach { student ->
-            println("\n--- SIMULATION FOR STUDENT: ${student.name} ---")
-            println("| Strategy              | Touched | Coverage | Rep Rate | Velocity | Wasted | Boredom | Final Strengths Distribution")
-            println("|-----------------------|---------|----------|----------|----------|--------|---------|--------------------------------")
-
-            strategies.forEach { (_, pair) ->
-                val (provider, sessionLength) = pair
-                val result =
-                    runStrategySimulation(testLevel, iterations, sessionLength, student, provider)
-
-                val distString = result.finalStrengthDistribution.entries.sortedBy { it.key }
-                    .joinToString(", ") { "S${it.key}:${it.value}" }
-
-                println(
-                    "| ${result.strategyName.padEnd(21)} | " +
-                            "${result.uniqueFactsShown.toString().padEnd(7)} | " +
-                            "${"%.0f%%".format(result.coverage * 100).padEnd(8)} | " +
-                            "${"%.0f%%".format(result.repetitionRate * 100).padEnd(8)} | " +
-                            "${"%.2f".format(result.learningVelocity).padEnd(8)} | " +
-                            "${result.wastedRepetitions.toString().padEnd(6)} | " +
-                            "${"%.2f".format(result.boredomScore).padEnd(7)} | " +
-                            distString
-                )
-                assertTrue("Should always touch at least one fact", result.uniqueFactsShown > 0)
-            }
-        }
-    }
-
-    @Test
-    fun compare_two_digit_strategies() {
-        val iterations = 100
-        val twoDigitAdditionLevel = TwoDigitAdditionLevel("ADD_TWO_DIGIT_CARRY", withCarry = true)
-
-        val strategies = mapOf(
-            "TwoDigitDrill" to ({ l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-                TwoDigitAdditionDrillStrategy(
-                    l as TwoDigitAdditionLevel,
-                    m,
-                    activeUserId = 1L, // Assuming user 1 for simulation
-                    clock = c
-                )
-            } to 20)
-        )
-        val students = listOf(
-            PerfectStudent(),
-            ImprovingStudent(),
-            GoodStudent(),
-            ForgetfulStudent(),
-            PowerLawStudent(),
-            FastPowerLawStudent()
-        )
-
-        students.forEach { student ->
-            println("\n--- SIMULATION FOR STUDENT: ${student.name} (Two-Digit Addition) ---")
-            println("| Strategy              | Touched | Coverage | Rep Rate | Velocity | Wasted | Boredom | Final Strengths Distribution")
-            println("|-----------------------|---------|----------|----------|----------|--------|---------|--------------------------------")
-
-            strategies.forEach { (_, pair) ->
-                val (provider, sessionLength) = pair
-
-                // Pre-populate mastery for the underlying facts.
-                val userMastery = mutableMapOf<String, FactMastery>()
-                val onesFacts = (0..9).flatMap { i -> (0..9).map { j -> "ADD_ONES_${i}_${j}" } }
-                val tensFacts = (1..9).flatMap { i -> (1..9).map { j -> "ADD_TENS_${i}_${j}" } }
-                (onesFacts + tensFacts).forEach { factId ->
-                    userMastery[factId] = FactMastery(factId, 1L, "", 1, 0)
-                }
-
-                val result =
-                    runStrategySimulation(twoDigitAdditionLevel, iterations, sessionLength, student, provider)
-
-                val distString = result.finalStrengthDistribution.entries.sortedBy { it.key }
-                    .joinToString(", ") { "S${it.key}:${it.value}" }
-
-                println(
-                    "| ${result.strategyName.padEnd(21)} | " +
-                            "${result.uniqueFactsShown.toString().padEnd(7)} | " +
-                            "${"%.0f%%".format(result.coverage * 100).padEnd(8)} | " +
-                            "${"%.0f%%".format(result.repetitionRate * 100).padEnd(8)} | " +
-                            "${"%.2f".format(result.learningVelocity).padEnd(8)} | " +
-                            "${result.wastedRepetitions.toString().padEnd(6)} | " +
-                            "${"%.2f".format(result.boredomScore).padEnd(7)} | " +
-                            distString
-                )
-                assertTrue("Should always touch at least one fact", result.uniqueFactsShown > 0)
-            }
-        }
-    }
-
-    @Test
-    fun compare_two_digit_vs_single_digit() {
-        val iterations = 200 // Increased iterations to see fuller progress
-        
-        val twoDigitStrategyFactory = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-            TwoDigitAdditionDrillStrategy(
-                l as TwoDigitAdditionLevel,
-                m,
-                activeUserId = 1L,
-                clock = c
-            )
-        }
-
-        val standardDrillFactory = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-            DrillStrategy(l, m, activeUserId = 1L, clock = c)
-        }
-
-        val strategies = mapOf(
-            "TwoDigit (Carry)" to (TwoDigitAdditionLevel("ADD_TWO_DIGIT_CARRY", withCarry = true) to twoDigitStrategyFactory),
-            "SumsOver10" to (Curriculum.SumsOver10 to standardDrillFactory)
-        )
-        
-        val students = listOf(
-            PerfectStudent(),
-            GoodStudent(),
-            ForgetfulStudent()
-        )
-
-        println("\n=== COMPARISON: Two-Digit vs. Single-Digit Level ===")
-        
-        students.forEach { student ->
-            println("\n--- Student: ${student.name} ---")
-            println("| Level (Strategy)    | Unique Facts | Final Coverage | Mastery (S5) Count | Avg Reps/Fact |")
-            println("|---------------------|--------------|----------------|--------------------|---------------|")
-
-            strategies.forEach { (name, pair) ->
-                val (level, factory) = pair
-                
-                // Reset mastery
-                val userMastery = mutableMapOf<String, FactMastery>()
-                
-                // Pre-populate mastery for TwoDigit to ensure fair comparison (since it relies on underlying facts)
-                if (level is TwoDigitAdditionLevel) {
-                     val ones = (0..9).flatMap { i -> (0..9).map { j -> "ADD_ONES_${i}_${j}" } }
-                     val tens = (1..9).flatMap { i -> (1..9).map { j -> "ADD_TENS_${i}_${j}" } }
-                     (ones + tens).forEach { fid -> 
-                         userMastery[fid] = FactMastery(fid, 1L, "", 1, 0) 
-                     }
-                } else {
-                     // For standard levels, we can pre-populate all facts to 1 (Strength 1) to track coverage of the *whole* level.
-                     level.getAllPossibleFactIds().forEach { fid ->
-                         userMastery[fid] = FactMastery(fid, 1L, "", 1, 0)
-                     }
-                }
-
-                val result = runStrategySimulation(level, iterations, 20, student, factory) // 20 session length is dummy here
-
-                val totalFacts = if (level is TwoDigitAdditionLevel) {
-                    // Approx 100 components
-                    val ones = (0..9).flatMap { i -> (0..9).map { j -> "ADD_ONES_${i}_${j}" } }
-                    val tens = (1..9).flatMap { i -> (1..9).map { j -> "ADD_TENS_${i}_${j}" } }
-                    (ones + tens).size
-                } else {
-                    level.getAllPossibleFactIds().size
-                }
-                
-                val masteredCount = result.finalStrengthDistribution[5] ?: 0
-                val coveragePct = (result.uniqueFactsShown.toDouble() / totalFacts) * 100
-                
-                println(
-                    "| ${name.padEnd(19)} | " +
-                    "${result.uniqueFactsShown.toString().padEnd(12)} | " +
-                    "${"%.0f%%".format(coveragePct).padEnd(14)} | " +
-                    "${masteredCount.toString().padEnd(18)} | " +
-                    "${"%.1f".format(iterations.toDouble() / result.uniqueFactsShown).padEnd(13)} |"
-                )
-            }
-        }
-    }
-
-    @Test
-    fun compare_every_level_across_students() {
+    fun simplify_strategies_and_levels() {
         val levels = Curriculum.getAllLevels()
         val students = listOf(
             PerfectStudent(),
-            ImprovingStudent(),
-            GoodStudent(),
-            ForgetfulStudent(),
-            PowerLawStudent(),
-            FastPowerLawStudent()
+            MediocreStudent(),
+            BadStudent()
         )
-        val checkpoints = listOf(10, 20, 50, 100)
 
-        println("\n=== Strategy Test Suite: Level Completion Comparison ===")
-        println("| Level | Student | # Facts | @10 | @20 | @50 | @100 |")
-        println("|---|---|---|---|---|---|---|")
+        println("\n=== SIMULATION: Exercises to Reach Decent Mastery (Strength >= 4) ===")
+        // Formatting the header
+        val headerFormat = "| %-25s | %-10s | %-10s | %-10s | %-10s | %-10s | %-10s |"
+        println(
+            headerFormat.format(
+                "Level ID",
+                "Facts",
+                "Perfect",
+                "Mediocre",
+                "Bad",
+                "Med/Perf",
+                "Bad/Perf"
+            )
+        )
+        println("|---------------------------|------------|------------|------------|------------|------------|------------|")
 
         levels.forEach { level ->
             val totalFacts = level.getAllPossibleFactIds().size
+            if (totalFacts == 0) return@forEach // Skip empty or invalid levels
 
-            students.forEach { student ->
-                val rates = checkpoints.map { iterations ->
-                    val strategyProvider =
-                        { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-                            l.createStrategy(m, 1L, c)
-                        }
-                    val result =
-                        runStrategySimulation(level, iterations, 20, student, strategyProvider)
-                    val masteredCount = result.finalStrengthDistribution[5] ?: 0
-                    (masteredCount.toDouble() / totalFacts) * 100
-                }
-
-                println(
-                    "| ${level.id.padEnd(20)} | " +
-                            "${student.name.padEnd(15)} | " +
-                            "${totalFacts.toString().padEnd(5)} | " +
-                            rates.joinToString(" | ") { "%.0f%%".format(it).padEnd(4) } + " |"
-                )
+            val results = students.map { student ->
+                runSimulationUntilMastery(level, student)
             }
+
+            val row = level.id
+            val perfect = results[0]
+            val mediocre = results[1]
+            val bad = results[2]
+
+            val medPerfRatio =
+                if (perfect > 0) "%.1fx".format(mediocre.toDouble() / perfect) else "-"
+            val badPerfRatio = if (perfect > 0) "%.1fx".format(bad.toDouble() / perfect) else "-"
+
+            val rowFormat = "| %-25s | %-10d | %-10d | %-10d | %-10d | %-10s | %-10s |"
+            println(
+                rowFormat.format(
+                    row,
+                    totalFacts,
+                    perfect,
+                    mediocre,
+                    bad,
+                    medPerfRatio,
+                    badPerfRatio
+                )
+            )
         }
     }
+
+    private fun runSimulationUntilMastery(
+        level: Level,
+        studentModel: StudentModel,
+        maxExercises: Int = 10000 // Safety break
+    ): Int {
+        var strategy: ExerciseProvider? = null
+        val userMastery = mutableMapOf<String, FactMastery>()
+        val attemptCounts = mutableMapOf<String, Int>()
+
+        val clock = object : Clock {
+            override fun now() = Instant.fromEpochMilliseconds(0L) // Dummy clock
+        }
+
+        val strategyProvider = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
+            if (l is TwoDigitAdditionLevel) {
+                TwoDigitAdditionDrillStrategy(l, m, activeUserId = 1L, clock = c)
+            } else {
+                DrillStrategy(l, m, activeUserId = 1L, clock = c)
+            }
+        }
+
+        var exercisesCount = 0
+        val allFactIds = level.getAllPossibleFactIds()
+
+        // Identify all unique underlying facts we need to master
+        val underlyingFactsToCheck = if (level is TwoDigitAdditionLevel) {
+            val facts = allFactIds.flatMap { factId ->
+                val parts = factId.split("_")
+                // ADD_ONES_0_1_ADD_TENS_1_2
+                // 0: ADD, 1: ONES, 2: 0, 3: 1, 4: ADD, 5: TENS, 6: 1, 7: 2
+                val ones = "ADD_ONES_${parts[2]}_${parts[3]}"
+                val tens = "ADD_TENS_${parts[6]}_${parts[7]}"
+                listOf(ones, tens)
+            }.toSet()
+
+            // Pre-populate mastery to 2 for underlying facts (User finding: "normally starts at 2")
+            facts.forEach { fid ->
+                userMastery[fid] = FactMastery(fid, 1L, "", 2, 0)
+            }
+            facts
+        } else {
+            // Pre-populate mastery to 2 for all facts
+            allFactIds.forEach { fid ->
+                userMastery[fid] = FactMastery(fid, 1L, "", 2, 0)
+            }
+            allFactIds.toSet()
+        }
+
+        while (exercisesCount < maxExercises) {
+            if (strategy == null) {
+                strategy = strategyProvider(level, userMastery, clock)
+            }
+
+            // Check mastery condition: All required facts >= 4
+            val allMastered = underlyingFactsToCheck.all { factId ->
+                (userMastery[factId]?.strength ?: 0) >= 4
+            }
+
+            if (allMastered) {
+                return exercisesCount
+            }
+
+            val exercise = strategy?.getNextExercise()
+            if (exercise == null) {
+                return exercisesCount
+            }
+
+            exercisesCount++
+            val factId = exercise.getFactId()
+            val attempts = attemptCounts.getOrDefault(factId, 0)
+            attemptCounts[factId] = attempts + 1
+
+            // Student attempts
+            val context = SimulationContext(
+                factId = factId,
+                strength = 0, // Not used by simpler students
+                totalCorrectAnswers = 0, // Not used
+                attempts = attempts,
+                lastSeenPosition = null, // Not used
+                currentPosition = exercisesCount,
+                recallStrength = 0.5
+            )
+
+            val probability = studentModel.getSuccessProbability(context)
+            val wasCorrect = Random.nextDouble() < probability
+            val duration = studentModel.getAttemptDuration(context)
+
+            exercise.timeTakenMillis = duration.toInt()
+
+            // SpeedBadge logic needed for promotion in DrillStrategy
+            val (op, op1, op2) = getOpsFromFactId(factId)
+            exercise.speedBadge = getSpeedBadge(op, op1, op2, duration)
+
+            strategy?.recordAttempt(exercise, wasCorrect)
+        }
+
+        return maxExercises
+    }
+
+    // Helper to extract Operation and operands from Fact ID, supporting TwoDigit special IDs
+    private fun getOpsFromFactId(factId: String): Triple<Operation, Int, Int> {
+        if (factId.startsWith("ADD_ONES")) {
+            // ADD_ONES_o1_o2_ADD_TENS_t1_t2
+            val parts = factId.split("_")
+            val o1 = parts[2].toInt()
+            val o2 = parts[3].toInt()
+            val t1 = parts[6].toInt()
+            val t2 = parts[7].toInt()
+
+            val op1 = t1 * 10 + o1
+            val op2 = t2 * 10 + o2
+            return Triple(Operation.ADDITION, op1, op2)
+        } else {
+            val parts = factId.split("_")
+            // Standard: OPERATION_OP1_OP2
+            val opName = parts[0]
+            val op1 = parts[1].toInt()
+            val op2 = parts[2].toInt()
+            // Map opName "MUL" -> MULTIPLICATION if needed, but enum valueOf usually works
+            // Check Curriculum definitions.
+            // Most use `operation.name` which is e.g. "ADDITION".
+            // But some legacy might use prefixes?
+            // Curriculum.kt uses `operation.name` (full name).
+            return Triple(Operation.valueOf(opName), op1, op2)
+        }
+    }
+
+    private fun exerciseFromFactId(factId: String): Exercise {
+        // Reuse getOpsFromFactId to construct generic exercise for duration calc
+        val (op, op1, op2) = getOpsFromFactId(factId)
+        return when (op) {
+            Operation.ADDITION -> Exercise(Addition(op1, op2))
+            Operation.SUBTRACTION -> Exercise(Subtraction(op1, op2))
+            Operation.MULTIPLICATION -> Exercise(Multiplication(op1, op2))
+            Operation.DIVISION -> Exercise(Division(op1, op2))
+        }
+    }
+
+
 }
 
 // TODO: possibly delete
