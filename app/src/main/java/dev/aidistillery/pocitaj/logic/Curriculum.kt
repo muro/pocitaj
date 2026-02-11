@@ -39,16 +39,21 @@ object Curriculum {
         override val prerequisites: Set<String> = setOf(SumsUpTo5.id)
         override val strategy = ExerciseStrategy.DRILL
         private const val MAX_SUM = 10
+        private const val MIN_SUM = 6
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, MAX_SUM + 1)
-            val op2 = Random.nextInt(0, MAX_SUM - op1 + 1)
+            // Pick a target sum between 6 and 10
+            val targetSum = Random.nextInt(MIN_SUM, MAX_SUM + 1)
+            // Pick op1 such that op2 is valid (>= 0)
+            val op1 = Random.nextInt(0, targetSum + 1)
+            val op2 = targetSum - op1
             return Exercise(Addition(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..MAX_SUM).flatMap { op1 ->
-                (0..MAX_SUM - op1).map { op2 ->
+            return (MIN_SUM..MAX_SUM).flatMap { sum ->
+                (0..sum).map { op1 ->
+                    val op2 = sum - op1
                     "${operation.name}_${op1}_${op2}"
                 }
             }
@@ -58,7 +63,7 @@ object Curriculum {
     object SumsOver10 : Level {
         override val id = "ADD_SUM_OVER_10"
         override val operation = Operation.ADDITION
-        override val prerequisites: Set<String> = setOf(SumsUpTo10.id)
+        override val prerequisites: Set<String> = setOf(Making10s.id, NearDoubles.id)
         override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
@@ -88,19 +93,26 @@ object Curriculum {
     object SumsUpTo20 : Level {
         override val id = "ADD_SUM_20"
         override val operation = Operation.ADDITION
-        override val prerequisites: Set<String> = setOf(SumsUpTo10.id)
+        override val prerequisites: Set<String> = setOf(SumsOver10.id)
         override val strategy = ExerciseStrategy.DRILL
         private const val MAX_SUM = 20
+        private const val MIN_SUM = 11
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, MAX_SUM + 1)
-            val op2 = Random.nextInt(0, MAX_SUM - op1 + 1)
+            // Pick a target sum between 11 and 20
+            val targetSum = Random.nextInt(MIN_SUM, MAX_SUM + 1)
+            // Pick op1 such that op2 is valid (>= 0)
+            // op2 = targetSum - op1
+            // So op1 <= targetSum
+            val op1 = Random.nextInt(0, targetSum + 1)
+            val op2 = targetSum - op1
             return Exercise(Addition(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..MAX_SUM).flatMap { op1 ->
-                (0..MAX_SUM - op1).map { op2 ->
+            return (MIN_SUM..MAX_SUM).flatMap { sum ->
+                (0..sum).map { op1 ->
+                    val op2 = sum - op1
                     "${operation.name}_${op1}_${op2}"
                 }
             }
@@ -396,11 +408,11 @@ object Curriculum {
         val additionLevels = listOf(
             SumsUpTo5,
             SumsUpTo10,
-            SumsOver10,
-            SumsUpTo20,
             Doubles,
             NearDoubles,
             Making10s,
+            SumsOver10,
+            SumsUpTo20,
             AddingTens,
             TwoDigitAdditionNoCarry,
             TwoDigitAdditionWithCarry
