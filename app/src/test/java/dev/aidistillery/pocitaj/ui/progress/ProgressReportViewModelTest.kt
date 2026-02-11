@@ -101,6 +101,8 @@ class ProgressReportViewModelTest {
             FactMastery("ADDITION_1_1", 1, "", 5, 5), // Mastered
             FactMastery("ADDITION_1_3", 1, "", 5, 5), // Mastered
             FactMastery("ADDITION_3_1", 1, "", 5, 5), // Mastered
+            FactMastery("ADDITION_3_3", 1, "", 5, 5), // Mastered (Sum 6 -> SumsUpTo10)
+            FactMastery("ADDITION_4_4", 1, "", 5, 5), // Mastered (Sum 8 -> SumsUpTo10)
         )
 
         // ACT & ASSERT for levelProgressByOperation
