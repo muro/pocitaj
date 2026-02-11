@@ -44,6 +44,40 @@ data class Subtraction(private val a: Int, private val b: Int) : Equation {
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.SUBTRACTION, a, b)
 }
 
+data class TwoDigitEquation(
+    private val op1: Int,
+    private val op2: Int,
+    private val operation: Operation,
+    private val factId: String
+) : Equation {
+    override fun question(): String = when (operation) {
+        Operation.ADDITION -> String.format(Locale.ENGLISH, "%d + %d = ?", op1, op2)
+        Operation.SUBTRACTION -> String.format(Locale.ENGLISH, "%d - %d = ?", op1, op2)
+        else -> throw IllegalArgumentException("Unsupported operation for TwoDigitEquation")
+    }
+
+    override fun getExpectedResult(): Int = when (operation) {
+        Operation.ADDITION -> op1 + op2
+        Operation.SUBTRACTION -> op1 - op2
+        else -> throw IllegalArgumentException("Unsupported operation for TwoDigitEquation")
+    }
+
+    override fun getQuestionAsSolved(submittedSolution: Int?): String {
+        return if (submittedSolution != null) {
+            when (operation) {
+                Operation.ADDITION -> question().replace("?", submittedSolution.toString())
+                Operation.SUBTRACTION -> String.format(Locale.ENGLISH, "%d - %d", op1, op2)
+                else -> throw IllegalArgumentException("Unsupported operation")
+            }
+        } else {
+            question()
+        }
+    }
+
+    override fun getFact(): Triple<Operation, Int, Int> = Triple(operation, op1, op2)
+    fun getFactId() = factId
+}
+
 data class Multiplication(val a: Int, val b: Int) : Equation {
     override fun question(): String =
         String.format(Locale.ENGLISH, "%d × %d = ?", a, b) // Using '×' for multiplication symbol

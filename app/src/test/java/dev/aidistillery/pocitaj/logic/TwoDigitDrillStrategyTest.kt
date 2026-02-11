@@ -1,11 +1,12 @@
 package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
+import dev.aidistillery.pocitaj.data.Operation
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class TwoDigitAdditionDrillStrategyTest {
+class TwoDigitDrillStrategyTest {
     private fun createMastery(
         factId: String,
         strength: Int,
@@ -27,9 +28,9 @@ class TwoDigitAdditionDrillStrategyTest {
             createMastery("ADD_ONES_9_9", 0, 200L) // Weakest
         )
 
-        // ACT: Create the TwoDigitAdditionDrillStrategy.
+        // ACT: Create the TwoDigitDrillStrategy.
         val strategy =
-            TwoDigitAdditionDrillStrategy(twoDigitAdditionLevel, userMastery, activeUserId = 1L)
+            TwoDigitDrillStrategy(twoDigitAdditionLevel, userMastery, activeUserId = 1L)
 
         // ASSERT: The working set should contain ephemeral tokens, sorted by weakness.
         assertEquals(4, strategy.workingSet.size)
@@ -45,7 +46,7 @@ class TwoDigitAdditionDrillStrategyTest {
             createMastery("ADD_ONES_2_1", 2, 200L)
         )
         val strategy =
-            TwoDigitAdditionDrillStrategy(twoDigitAdditionLevel, userMastery, activeUserId = 1L)
+            TwoDigitDrillStrategy(twoDigitAdditionLevel, userMastery, activeUserId = 1L)
         strategy.workingSet.clear()
         strategy.workingSet.add("ADD_ONES_2_1_ADD_TENS_1_2")
 
@@ -53,11 +54,13 @@ class TwoDigitAdditionDrillStrategyTest {
         val exercise = strategy.getNextExercise()
 
         // ASSERT
-        assertTrue(exercise?.equation is TwoDigitAddition)
-        val twoDigitAddition = exercise!!.equation as TwoDigitAddition
-        assertEquals(12, twoDigitAddition.op1)
-        assertEquals(21, twoDigitAddition.op2)
-        assertEquals("ADD_ONES_2_1_ADD_TENS_1_2", twoDigitAddition.getFactId())
+        assertTrue(exercise?.equation is TwoDigitEquation)
+        val twoDigitEquation = exercise!!.equation as TwoDigitEquation
+        val (op, op1, op2) = twoDigitEquation.getFact()
+        assertEquals(12, op1)
+        assertEquals(21, op2)
+        assertEquals(Operation.ADDITION, op)
+        assertEquals("ADD_ONES_2_1_ADD_TENS_1_2", twoDigitEquation.getFactId())
     }
 
     @Test
@@ -69,8 +72,9 @@ class TwoDigitAdditionDrillStrategyTest {
             createMastery("ADD_ONES_2_1", 2, 200L)
         )
         val strategy =
-            TwoDigitAdditionDrillStrategy(twoDigitAdditionLevel, userMastery, activeUserId = 1L)
-        val exercise = Exercise(TwoDigitAddition(12, 21, "ADD_ONES_2_1_ADD_TENS_1_2"))
+            TwoDigitDrillStrategy(twoDigitAdditionLevel, userMastery, activeUserId = 1L)
+        val exercise =
+            Exercise(TwoDigitEquation(12, 21, Operation.ADDITION, "ADD_ONES_2_1_ADD_TENS_1_2"))
 
         // ACT
         strategy.recordAttempt(exercise, wasCorrect = true)

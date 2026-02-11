@@ -235,15 +235,16 @@ object Curriculum {
         override val prerequisites: Set<String> = setOf(SubtractionFrom5.id)
         override val strategy = ExerciseStrategy.DRILL
         private const val MAX_MINUEND = 10
+        private const val MIN_MINUEND = 6
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, MAX_MINUEND + 1)
+            val op1 = Random.nextInt(MIN_MINUEND, MAX_MINUEND + 1)
             val op2 = Random.nextInt(0, op1 + 1)
             return Exercise(Subtraction(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..MAX_MINUEND).flatMap { op1 ->
+            return (MIN_MINUEND..MAX_MINUEND).flatMap { op1 ->
                 (0..op1).map { op2 ->
                     "${operation.name}_${op1}_${op2}"
                 }
@@ -257,15 +258,16 @@ object Curriculum {
         override val prerequisites: Set<String> = setOf(SubtractionFrom10.id)
         override val strategy = ExerciseStrategy.DRILL
         private const val MAX_MINUEND = 20
+        private const val MIN_MINUEND = 11
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, MAX_MINUEND + 1)
+            val op1 = Random.nextInt(MIN_MINUEND, MAX_MINUEND + 1)
             val op2 = Random.nextInt(0, op1 + 1)
             return Exercise(Subtraction(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..MAX_MINUEND).flatMap { op1 ->
+            return (MIN_MINUEND..MAX_MINUEND).flatMap { op1 ->
                 (0..op1).map { op2 ->
                     "${operation.name}_${op1}_${op2}"
                 }
@@ -294,63 +296,11 @@ object Curriculum {
         }
     }
 
-    object TwoDigitSubtractionNoBorrow : Level {
-        override val id = "SUB_TWO_DIGIT_NO_BORROW"
-        override val operation = Operation.SUBTRACTION
-        override val prerequisites: Set<String> = setOf(SubtractingTens.id)
-        override val strategy = ExerciseStrategy.DRILL
+    object TwoDigitSubtractionNoBorrow :
+        TwoDigitSubtractionLevel("SUB_TWO_DIGIT_NO_BORROW", withBorrow = false)
 
-        override fun generateExercise(): Exercise {
-            var op1: Int
-            var op2: Int
-            do {
-                op1 = Random.nextInt(11, 100)
-                op2 = Random.nextInt(10, op1)
-            } while ((op1 % 10) < (op2 % 10))
-            return Exercise(Subtraction(op1, op2))
-        }
-
-        override fun getAllPossibleFactIds(): List<String> {
-            return (11..99).flatMap { op1 ->
-                (10 until op1).mapNotNull { op2 ->
-                    if ((op1 % 10) >= (op2 % 10)) {
-                        "${operation.name}_${op1}_${op2}"
-                    } else {
-                        null
-                    }
-                }
-            }
-        }
-    }
-
-    object TwoDigitSubtractionWithBorrow : Level {
-        override val id = "SUB_TWO_DIGIT_BORROW"
-        override val operation = Operation.SUBTRACTION
-        override val prerequisites: Set<String> = setOf(TwoDigitSubtractionNoBorrow.id)
-        override val strategy = ExerciseStrategy.DRILL
-
-        override fun generateExercise(): Exercise {
-            var op1: Int
-            var op2: Int
-            do {
-                op1 = Random.nextInt(11, 100)
-                op2 = Random.nextInt(10, op1)
-            } while ((op1 % 10) >= (op2 % 10))
-            return Exercise(Subtraction(op1, op2))
-        }
-
-        override fun getAllPossibleFactIds(): List<String> {
-            return (11..99).flatMap { op1 ->
-                (10 until op1).mapNotNull { op2 ->
-                    if ((op1 % 10) < (op2 % 10)) {
-                        "${operation.name}_${op1}_${op2}"
-                    } else {
-                        null
-                    }
-                }
-            }
-        }
-    }
+    object TwoDigitSubtractionWithBorrow :
+        TwoDigitSubtractionLevel("SUB_TWO_DIGIT_BORROW", withBorrow = true)
 
 
     // --- Multiplication ---

@@ -140,8 +140,8 @@ class StrategySimulationTest {
 
         // Factory for Strategy
         val strategyProvider = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-            if (l is TwoDigitAdditionLevel) {
-                TwoDigitAdditionDrillStrategy(l, m, activeUserId = 1L, clock = c)
+            if (l is TwoDigitAdditionLevel || l is TwoDigitSubtractionLevel) {
+                TwoDigitDrillStrategy(l, m, activeUserId = 1L, clock = c)
             } else {
                 DrillStrategy(l, m, activeUserId = 1L, clock = c)
             }
@@ -199,6 +199,13 @@ class StrategySimulationTest {
                  val parts = factId.split("_")
                  val ones = "ADD_ONES_${parts[2]}_${parts[3]}" // e.g. ADD_ONES_3_4
                  val tens = "ADD_TENS_${parts[6]}_${parts[7]}" // e.g. ADD_TENS_1_2
+                listOf(ones, tens)
+            }.toSet()
+        } else if (level is TwoDigitSubtractionLevel) {
+            return allFactIds.flatMap { factId ->
+                val parts = factId.split("_")
+                val ones = "SUB_ONES_${parts[2]}_${parts[3]}"
+                val tens = "SUB_TENS_${parts[6]}_${parts[7]}"
                  listOf(ones, tens)
             }.toSet()
         } else {
@@ -228,6 +235,21 @@ class StrategySimulationTest {
                 val t1 = parts[6].toInt()
                 val t2 = parts[7].toInt()
                 return Triple(Operation.ADDITION, t1 * 10 + o1, t2 * 10 + o2)
+            } else if (factId.startsWith("SUB_ONES")) {
+                // SUB_ONES_o1_o2_SUB_TENS_t1_t2
+                val o1String = parts[2]
+                val o2 = parts[3].toInt()
+                val t1 = parts[6].toInt()
+                val t2 = parts[7].toInt()
+
+                // Note: o1String might be "14" (borrow) or "4" (no borrow)
+                // But for Speed Thresholds (simple heuristic), we can just treat it as 
+                // Subtraction with result around (t1-t2)*10 + (o1-o2).
+                // Let's just return dummy ops closer to the magnitude to get reasonable speed estimation?
+                // Actually, let's try to reconstruct exactly if needed, but for "Speed Threshold"
+                // `getSpeedThreshold` likely just uses magnitude.
+                val o1 = o1String.toInt()
+                return Triple(Operation.SUBTRACTION, t1 * 10 + o1, t2 * 10 + o2)
             } else {
                 // Standard: OPERATION_OP1_OP2
                 return Triple(Operation.valueOf(parts[0]), parts[1].toInt(), parts[2].toInt())
