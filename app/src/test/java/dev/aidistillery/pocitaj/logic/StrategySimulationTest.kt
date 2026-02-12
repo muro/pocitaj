@@ -204,18 +204,18 @@ class StrategySimulationTest {
     private fun getRequiredFactsForMastery(level: Level): Set<String> {
         val allFactIds = level.getAllPossibleFactIds()
 
-        if (level is TwoDigitComputationLevel) {
+        return if (level is TwoDigitComputationLevel) {
             // For TwoDigitComputationLevel, DrillStrategy manages mastery on the *underlying* single-digit facts (ones and tens),
             // not on the composite problem ID itself.
-            return allFactIds.flatMap { factId ->
+            allFactIds.flatMap { factId ->
                 val parts = factId.split("_")
                 // parts[0] is ADD or SUB
                 val ones = "${parts[0]}_ONES_${parts[2]}_${parts[3]}"
                 val tens = "${parts[0]}_TENS_${parts[6]}_${parts[7]}"
-                 listOf(ones, tens)
+                listOf(ones, tens)
             }.toSet()
         } else {
-            return allFactIds.toSet()
+            allFactIds.toSet()
         }
     }
 
