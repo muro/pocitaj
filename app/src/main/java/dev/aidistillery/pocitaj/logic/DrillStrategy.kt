@@ -53,7 +53,8 @@ class DrillStrategy(
     private val userMastery: MutableMap<String, FactMastery>,
     private val workingSetSize: Int = 4,
     private val activeUserId: Long,
-    private val clock: Clock = Clock.System
+    private val clock: Clock = Clock.System,
+    private val random: Random = Random.Default
 ) : ExerciseProvider {
 
     internal val workingSet = mutableListOf<String>()
@@ -87,7 +88,7 @@ class DrillStrategy(
                 l1Facts.map { it.factId } +
                         sortedL2Facts.map { it.factId } +
                         unseenFactIds +
-                        masteredFacts.shuffled().map { it.factId }
+                        masteredFacts.shuffled(random).map { it.factId }
                 ).distinct()
 
         workingSet.clear()
@@ -99,7 +100,7 @@ class DrillStrategy(
 
         var selectedIndex = workingSet.lastIndex
         for (i in 0 until workingSet.lastIndex) {
-            if (Random.nextDouble() < 0.5) {
+            if (random.nextDouble() < 0.5) {
                 selectedIndex = i
                 break
             }
@@ -163,7 +164,7 @@ class DrillStrategy(
             if (candidates.isNotEmpty()) {
                 var selectedIndex = candidates.lastIndex
                 for (i in 0 until candidates.lastIndex) {
-                    if (Random.nextDouble() < 0.5) {
+                    if (random.nextDouble() < 0.5) {
                         selectedIndex = i
                         break
                     }

@@ -60,7 +60,7 @@ class StrategySimulationTest {
     fun simplify_strategies_and_levels() {
         val levels = Curriculum.getAllLevels()
 
-        println("\n=== SIMULATION: Median of $RUNS_PER_LEVEL Runs (Strength >= 4) ===")
+        println("\n=== SIMULATION: (Strength >= 4) ===")
         val headerFormat = "| %-25s | %-10s | %-10s | %-13s |"
         println(headerFormat.format("Level ID", "Facts", "Perfect", "Mistaken/Perf"))
         println("|---------------------------|------------|------------|---------------|")
@@ -69,36 +69,21 @@ class StrategySimulationTest {
             val totalFacts = level.getAllPossibleFactIds().size
             if (totalFacts == 0) return@forEach
 
-            // Data collection buckets
-            val perfectScores = mutableListOf<Int>()
-            val mistakenScores = mutableListOf<Int>()
-            val mistakenRatios = mutableListOf<Double>()
-            var factsCountReported = 0
-            var uniqueQueriesReported = 0
+            val perfect = runSimulationUntilMastery(level, PerfectStudent())
+            val mistaken = runSimulationUntilMastery(level, MistakeProneStudent())
 
-            repeat(RUNS_PER_LEVEL) {
-                val perfect = runSimulationUntilMastery(level, PerfectStudent())
-                val mistaken = runSimulationUntilMastery(level, MistakeProneStudent())
-
-                factsCountReported = perfect.factsCount
-                uniqueQueriesReported = perfect.uniqueQueries
-                perfectScores.add(perfect.exerciseCount)
-                mistakenScores.add(mistaken.exerciseCount)
-                if (perfect.exerciseCount > 0) {
-                    mistakenRatios.add(mistaken.exerciseCount.toDouble() / perfect.exerciseCount)
-                }
-            }
-
-            // Calculate Stats (Median)
-            val medianPerfect = perfectScores.map { it.toDouble() }.median().toInt()
-            val medianMistaken = mistakenScores.map { it.toDouble() }.median().toInt()
-            val medianRatio = mistakenRatios.median()
+            val factsCountReported = perfect.factsCount
+            val uniqueQueriesReported = perfect.uniqueQueries
+            
+            val ratio = if (perfect.exerciseCount > 0) {
+                mistaken.exerciseCount.toDouble() / perfect.exerciseCount
+            } else 0.0
 
             // Verification Assertions
             // Perfect student: At least 1 exercise per fact.
             assertTrue(
                 "Level ${level.id}: Perfect student should take at least $factsCountReported exercises",
-                medianPerfect >= factsCountReported
+                perfect.exerciseCount >= factsCountReported
             )
 
             // Mistake Prone Logic:
@@ -108,11 +93,11 @@ class StrategySimulationTest {
             // We relax the assertion to ensure at least 50% of the theoretical penalty is observed.
             val expectedMistakes = kotlin.math.ceil(uniqueQueriesReported * 0.2).toInt()
             val expectedPenalty = (expectedMistakes * 0.5).toInt()
-            val expectedMin = medianPerfect + expectedPenalty
+            val expectedMin = perfect.exerciseCount + expectedPenalty
 
             assertTrue(
-                "Level ${level.id}: Mistaken student should take at least $expectedPenalty more exercises (Perfect: $medianPerfect, MST: $medianMistaken, Queries: $uniqueQueriesReported, TheoreticalMistakes: $expectedMistakes)",
-                medianMistaken >= expectedMin
+                "Level ${level.id}: Mistaken student should take at least $expectedPenalty more exercises (Perfect: ${perfect.exerciseCount}, MST: ${mistaken.exerciseCount}, Queries: $uniqueQueriesReported, TheoreticalMistakes: $expectedMistakes)",
+                mistaken.exerciseCount >= expectedMin
             )
 
             val rowFormat = "| %-25s | %-10d | %-10d | %-13s |"
@@ -120,8 +105,8 @@ class StrategySimulationTest {
                 rowFormat.format(
                     level.id,
                     factsCountReported,
-                    medianPerfect,
-                    "%.1fx".format(medianRatio)
+                    perfect.exerciseCount,
+                    "%.1fx".format(ratio)
                 )
             )
         }
@@ -137,6 +122,9 @@ class StrategySimulationTest {
         var strategy: ExerciseProvider? = null
         val userMastery = mutableMapOf<String, FactMastery>()
         val attemptCounts = mutableMapOf<String, Int>()
+        
+        // Fixed Seed Random for Reproducibility
+        val random = Random(12345)
 
         // Dummy clock
         val clock = object : Clock {
@@ -145,10 +133,11 @@ class StrategySimulationTest {
 
         // Factory for Strategy
         val strategyProvider = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
+            // Inject the SEEDED random instance into strategies
             if (l is TwoDigitComputationLevel) {
                 TwoDigitDrillStrategy(l, m, activeUserId = 1L, clock = c)
             } else {
-                DrillStrategy(l, m, activeUserId = 1L, clock = c)
+                DrillStrategy(l, m, activeUserId = 1L, clock = c, random = random)
             }
         }
 
@@ -183,6 +172,10 @@ class StrategySimulationTest {
 
             // 3. Simulate Student Attempt
             val probability = studentModel.getSuccessProbability(factId)
+            // Use local random for student simulation too, or passed random? 
+            // Student models are currently deterministic in this test (Perfect=1.0, Mistaken=Modulo).
+            // But if we had stochastic students, we should pass `random` to them too.
+            // For now, these are deterministic.
             val wasCorrect = Random.nextDouble() < probability
             val duration = studentModel.getAttemptDuration(factId)
 
@@ -218,21 +211,9 @@ class StrategySimulationTest {
             allFactIds.toSet()
         }
     }
-
-    private fun List<Double>.median(): Double {
-        if (isEmpty()) return 0.0
-        val sorted = sorted()
-        val middle = size / 2
-        return if (size % 2 == 1) {
-            sorted[middle]
-        } else {
-            (sorted[middle - 1] + sorted[middle]) / 2.0
-        }
-    }
     
     companion object {
         // --- Simulation Configuration ---
-        private const val RUNS_PER_LEVEL = 3
         private const val MASTERY_STRENGTH = 4
         private const val PERFECT_SPEED_MS = 500L
 
