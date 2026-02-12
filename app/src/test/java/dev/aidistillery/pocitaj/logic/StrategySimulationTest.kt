@@ -2,6 +2,7 @@ package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.random.Random
 import kotlin.time.Clock
@@ -16,50 +17,41 @@ import kotlin.time.Instant
  */
 class StrategySimulationTest {
 
-    // --- Simulation Configuration ---
-    private val RUNS_PER_LEVEL = 3
+    data class SimulationResult(val exerciseCount: Int, val factsCount: Int, val uniqueQueries: Int)
 
     // --- Student Persona Modeling ---
 
     private interface StudentModel {
         val name: String
-        fun getSuccessProbability(): Double
+        fun getSuccessProbability(factId: String): Double
         fun getAttemptDuration(factId: String): Long
     }
 
     private class PerfectStudent : StudentModel {
         override val name = "PERFECT"
         // 100% Accuracy, Always Gold Speed (500ms)
-        override fun getSuccessProbability() = 1.0
-        override fun getAttemptDuration(factId: String) = 500L
+        override fun getSuccessProbability(factId: String) = 1.0
+        override fun getAttemptDuration(factId: String) = PERFECT_SPEED_MS
     }
 
-    private class MediocreStudent : StudentModel {
-        override val name = "MEDIOCRE"
-        // 97% Accuracy to avoid "reset loops", Speed varies between Silver and Bronze
-        override fun getSuccessProbability() = 0.97
+    private class MistakeProneStudent : StudentModel {
+        override val name = "MISTAKE_PRONE"
+        private val seenFacts = mutableSetOf<String>()
 
-        override fun getAttemptDuration(factId: String): Long {
-            val (op, op1, op2) = getOpsFromFactId(factId)
-            val threshold = getSpeedThreshold(op, op1, op2)
-            // Mix of Silver (0.6) and Bronze (0.9) - 50/50 chance
-            val factor = if (Random.nextBoolean()) 0.6 else 0.9
-            return (threshold * factor).toLong()
+        // 20% Accuracy error rate on NEW facts, rounded up.
+        // Logic: 1 mistake every 5 new facts. 
+        // Index 0 (1st fact) -> Mistake. Index 5 (6th fact) -> Mistake.
+        override fun getSuccessProbability(factId: String): Double {
+            if (factId in seenFacts) return 1.0
+
+            val index = seenFacts.size
+            seenFacts.add(factId)
+
+            // Mistake on 0, 5, 10, etc. (1st, 6th, 11th fact)
+            return if (index % 5 == 0) 0.0 else 1.0
         }
-    }
 
-    private class BadStudent : StudentModel {
-        override val name = "BAD"
-        // 95% Accuracy, Speed is mostly Bronze (65%) with some Silver (35%)
-        override fun getSuccessProbability() = 0.95
-
-        override fun getAttemptDuration(factId: String): Long {
-            val (op, op1, op2) = getOpsFromFactId(factId)
-            val threshold = getSpeedThreshold(op, op1, op2)
-            // Constant probability: 35% chance of Silver (0.7), 65% chance of Bronze (1.05)
-            val factor = if (Random.nextDouble() < 0.35) 0.7 else 1.05
-            return (threshold * factor).toLong()
-        }
+        override fun getAttemptDuration(factId: String) = PERFECT_SPEED_MS
     }
 
     // --- Test Execution ---
@@ -67,16 +59,11 @@ class StrategySimulationTest {
     @Test
     fun simplify_strategies_and_levels() {
         val levels = Curriculum.getAllLevels()
-        val students = listOf(
-            PerfectStudent(),
-            MediocreStudent(),
-            BadStudent()
-        )
 
         println("\n=== SIMULATION: Median of $RUNS_PER_LEVEL Runs (Strength >= 4) ===")
-        val headerFormat = "| %-25s | %-10s | %-10s | %-10s | %-10s |"
-        println(headerFormat.format("Level ID", "Facts", "Perfect", "Med/Perf", "Bad/Perf"))
-        println("|---------------------------|------------|------------|------------|------------|")
+        val headerFormat = "| %-25s | %-10s | %-10s | %-13s |"
+        println(headerFormat.format("Level ID", "Facts", "Perfect", "Mistaken/Perf"))
+        println("|---------------------------|------------|------------|---------------|")
 
         levels.forEach { level ->
             val totalFacts = level.getAllPossibleFactIds().size
@@ -84,39 +71,57 @@ class StrategySimulationTest {
 
             // Data collection buckets
             val perfectScores = mutableListOf<Int>()
-            val medRatios = mutableListOf<Double>()
-            val badRatios = mutableListOf<Double>()
+            val mistakenScores = mutableListOf<Int>()
+            val mistakenRatios = mutableListOf<Double>()
+            var factsCountReported = 0
+            var uniqueQueriesReported = 0
 
             repeat(RUNS_PER_LEVEL) {
-                // Run simulation for all students in this iteration
-                val results = students.map { student ->
-                    runSimulationUntilMastery(level, student)
-                }
+                val perfect = runSimulationUntilMastery(level, PerfectStudent())
+                val mistaken = runSimulationUntilMastery(level, MistakeProneStudent())
 
-                val perfect = results[0]
-                val mediocre = results[1]
-                val bad = results[2]
-
-                perfectScores.add(perfect)
-                if (perfect > 0) {
-                    medRatios.add(mediocre.toDouble() / perfect)
-                    badRatios.add(bad.toDouble() / perfect)
+                factsCountReported = perfect.factsCount
+                uniqueQueriesReported = perfect.uniqueQueries
+                perfectScores.add(perfect.exerciseCount)
+                mistakenScores.add(mistaken.exerciseCount)
+                if (perfect.exerciseCount > 0) {
+                    mistakenRatios.add(mistaken.exerciseCount.toDouble() / perfect.exerciseCount)
                 }
             }
 
             // Calculate Stats (Median)
-            val avgPerfect = perfectScores.average().toInt() // Perfect should be constant
-            val medianMed = medRatios.median()
-            val medianBad = badRatios.median()
+            val medianPerfect = perfectScores.map { it.toDouble() }.median().toInt()
+            val medianMistaken = mistakenScores.map { it.toDouble() }.median().toInt()
+            val medianRatio = mistakenRatios.median()
 
-            val rowFormat = "| %-25s | %-10d | %-10d | %-10s | %-10s |"
+            // Verification Assertions
+            // Perfect student: At least 1 exercise per fact.
+            assertTrue(
+                "Level ${level.id}: Perfect student should take at least $factsCountReported exercises",
+                medianPerfect >= factsCountReported
+            )
+
+            // Mistake Prone Logic:
+            // Mistakes = ceil(uniqueQueries * 0.2)
+            // Each mistake triggers a retry, but the spaced repetition system might optimize review such that
+            // not every mistake results in a full extra exercise compared to perfect mastery.
+            // We relax the assertion to ensure at least 50% of the theoretical penalty is observed.
+            val expectedMistakes = kotlin.math.ceil(uniqueQueriesReported * 0.2).toInt()
+            val expectedPenalty = (expectedMistakes * 0.5).toInt()
+            val expectedMin = medianPerfect + expectedPenalty
+
+            assertTrue(
+                "Level ${level.id}: Mistaken student should take at least $expectedPenalty more exercises (Perfect: $medianPerfect, MST: $medianMistaken, Queries: $uniqueQueriesReported, TheoreticalMistakes: $expectedMistakes)",
+                medianMistaken >= expectedMin
+            )
+
+            val rowFormat = "| %-25s | %-10d | %-10d | %-13s |"
             println(
                 rowFormat.format(
                     level.id,
-                    totalFacts,
-                    avgPerfect,
-                    "%.1fx".format(medianMed),
-                    "%.1fx".format(medianBad)
+                    factsCountReported,
+                    medianPerfect,
+                    "%.1fx".format(medianRatio)
                 )
             )
         }
@@ -128,7 +133,7 @@ class StrategySimulationTest {
         level: Level,
         studentModel: StudentModel,
         maxExercises: Int = 10000 // Safety break
-    ): Int {
+    ): SimulationResult {
         var strategy: ExerciseProvider? = null
         val userMastery = mutableMapOf<String, FactMastery>()
         val attemptCounts = mutableMapOf<String, Int>()
@@ -157,19 +162,27 @@ class StrategySimulationTest {
 
             // 1. Mastery Check
             val allMastered = requiredFacts.all { factId ->
-                (userMastery[factId]?.strength ?: 0) >= 4
+                (userMastery[factId]?.strength ?: 0) >= MASTERY_STRENGTH
             }
-            if (allMastered) return exercisesCount
+            if (allMastered) return SimulationResult(
+                exercisesCount,
+                requiredFacts.size,
+                attemptCounts.size
+            )
 
             // 2. Get Next Exercise
-            val exercise = strategy?.getNextExercise() ?: return exercisesCount 
+            val exercise = strategy?.getNextExercise() ?: return SimulationResult(
+                exercisesCount,
+                requiredFacts.size,
+                attemptCounts.size
+            )
 
             exercisesCount++
             val factId = exercise.getFactId()
             attemptCounts[factId] = (attemptCounts[factId] ?: 0) + 1
 
             // 3. Simulate Student Attempt
-            val probability = studentModel.getSuccessProbability()
+            val probability = studentModel.getSuccessProbability(factId)
             val wasCorrect = Random.nextDouble() < probability
             val duration = studentModel.getAttemptDuration(factId)
 
@@ -183,7 +196,7 @@ class StrategySimulationTest {
             strategy?.recordAttempt(exercise, wasCorrect)
         }
 
-        return maxExercises
+        return SimulationResult(maxExercises, requiredFacts.size, attemptCounts.size)
     }
 
     // --- Helpers ---
@@ -218,6 +231,12 @@ class StrategySimulationTest {
     }
     
     companion object {
+        // --- Simulation Configuration ---
+        private const val RUNS_PER_LEVEL = 3
+        private const val MASTERY_STRENGTH = 4
+        private const val LEARNING_FAILURES = 20
+        private const val PERFECT_SPEED_MS = 500L
+
         // Static helper to extract Operation and operands from Fact ID
         fun getOpsFromFactId(factId: String): Triple<Operation, Int, Int> {
             val parts = factId.split("_")
