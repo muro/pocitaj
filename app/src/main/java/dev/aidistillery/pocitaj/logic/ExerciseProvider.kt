@@ -47,7 +47,7 @@ fun Level.createStrategy(
     clock: kotlin.time.Clock = kotlin.time.Clock.System
 ): ExerciseProvider {
     return when {
-        this is TwoDigitAdditionLevel || this is TwoDigitSubtractionLevel -> TwoDigitDrillStrategy(
+        this is TwoDigitComputationLevel -> TwoDigitDrillStrategy(
             this, userMastery, activeUserId = activeUserId, clock = clock
         )
 

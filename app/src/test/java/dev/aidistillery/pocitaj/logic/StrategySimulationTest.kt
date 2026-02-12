@@ -140,7 +140,7 @@ class StrategySimulationTest {
 
         // Factory for Strategy
         val strategyProvider = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-            if (l is TwoDigitAdditionLevel || l is TwoDigitSubtractionLevel) {
+            if (l is TwoDigitComputationLevel) {
                 TwoDigitDrillStrategy(l, m, activeUserId = 1L, clock = c)
             } else {
                 DrillStrategy(l, m, activeUserId = 1L, clock = c)
@@ -190,22 +190,15 @@ class StrategySimulationTest {
 
     private fun getRequiredFactsForMastery(level: Level): Set<String> {
         val allFactIds = level.getAllPossibleFactIds()
-        
-        if (level is TwoDigitAdditionLevel) {
-            // For TwoDigitAddition, DrillStrategy manages mastery on the *underlying* single-digit facts (ones and tens),
-            // not on the composite problem ID itself (e.g. ADD_ONES_3_4_...).
-            // We verify mastery by checking if all underlying facts are >= 4.
-            return allFactIds.flatMap { factId ->
-                 val parts = factId.split("_")
-                 val ones = "ADD_ONES_${parts[2]}_${parts[3]}" // e.g. ADD_ONES_3_4
-                 val tens = "ADD_TENS_${parts[6]}_${parts[7]}" // e.g. ADD_TENS_1_2
-                listOf(ones, tens)
-            }.toSet()
-        } else if (level is TwoDigitSubtractionLevel) {
+
+        if (level is TwoDigitComputationLevel) {
+            // For TwoDigitComputationLevel, DrillStrategy manages mastery on the *underlying* single-digit facts (ones and tens),
+            // not on the composite problem ID itself.
             return allFactIds.flatMap { factId ->
                 val parts = factId.split("_")
-                val ones = "SUB_ONES_${parts[2]}_${parts[3]}"
-                val tens = "SUB_TENS_${parts[6]}_${parts[7]}"
+                // parts[0] is ADD or SUB
+                val ones = "${parts[0]}_ONES_${parts[2]}_${parts[3]}"
+                val tens = "${parts[0]}_TENS_${parts[6]}_${parts[7]}"
                  listOf(ones, tens)
             }.toSet()
         } else {

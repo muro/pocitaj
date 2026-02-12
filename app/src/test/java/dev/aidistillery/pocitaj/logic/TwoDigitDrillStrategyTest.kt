@@ -18,7 +18,11 @@ class TwoDigitDrillStrategyTest {
     @Test
     fun `initial working set for two-digit addition is populated with ephemeral tokens`() {
         // ARRANGE: Define a two-digit addition level with carry.
-        val twoDigitAdditionLevel = TwoDigitAdditionLevel("ADD_TWO_DIGIT_CARRY", withCarry = true)
+        val twoDigitAdditionLevel = TwoDigitComputationLevel(
+            "ADD_TWO_DIGIT_CARRY",
+            Operation.ADDITION,
+            withRegrouping = true
+        )
 
         // Provide some initial mastery for the underlying "tens" and "ones" facts.
         val userMastery = mutableMapOf(
@@ -40,7 +44,11 @@ class TwoDigitDrillStrategyTest {
     @Test
     fun `getNextExercise for two-digit addition returns a valid exercise`() {
         // ARRANGE
-        val twoDigitAdditionLevel = TwoDigitAdditionLevel("ADD_TWO_DIGIT_CARRY", withCarry = true)
+        val twoDigitAdditionLevel = TwoDigitComputationLevel(
+            "ADD_TWO_DIGIT_CARRY",
+            Operation.ADDITION,
+            withRegrouping = true
+        )
         val userMastery = mutableMapOf(
             createMastery("ADD_TENS_1_2", 1, 100L),
             createMastery("ADD_ONES_2_1", 2, 200L)
@@ -66,7 +74,11 @@ class TwoDigitDrillStrategyTest {
     @Test
     fun `recordAttempt for two-digit addition updates underlying facts`() {
         // ARRANGE
-        val twoDigitAdditionLevel = TwoDigitAdditionLevel("ADD_TWO_DIGIT_CARRY", withCarry = true)
+        val twoDigitAdditionLevel = TwoDigitComputationLevel(
+            "ADD_TWO_DIGIT_CARRY",
+            Operation.ADDITION,
+            withRegrouping = true
+        )
         val userMastery = mutableMapOf(
             createMastery("ADD_TENS_1_2", 1, 100L),
             createMastery("ADD_ONES_2_1", 2, 200L)
@@ -82,5 +94,87 @@ class TwoDigitDrillStrategyTest {
         // ASSERT
         assertEquals(2, userMastery["ADD_TENS_1_2"]!!.strength)
         assertEquals(3, userMastery["ADD_ONES_2_1"]!!.strength)
+    }
+
+    @Test
+    fun `getNextExercise for two-digit subtraction no-borrow returnsValidExercise`() {
+        // ARRANGE
+        val level = TwoDigitComputationLevel(
+            "SUB_TWO_DIGIT_NO_BORROW",
+            Operation.SUBTRACTION,
+            withRegrouping = false
+        )
+        val userMastery = mutableMapOf<String, FactMastery>()
+        val strategy = TwoDigitDrillStrategy(level, userMastery, activeUserId = 1L)
+
+        strategy.workingSet.clear()
+        // Fact ID for 24 - 13:
+        // Ones: 4 - 3 (no borrow)
+        // Tens: 2 - 1 -> Effective tens 2, subtract 1.
+        // ID: SUB_ONES_4_3_SUB_TENS_2_1
+        strategy.workingSet.add("SUB_ONES_4_3_SUB_TENS_2_1")
+
+        // ACT
+        val exercise = strategy.getNextExercise()
+
+        // ASSERT
+        assertTrue(exercise?.equation is TwoDigitEquation)
+        val equation = exercise!!.equation as TwoDigitEquation
+        val (op, op1, op2) = equation.getFact()
+
+        // logic:
+        // op1Ones = 4, op2Ones = 3
+        // op1Tens = 2, op2Tens = 1
+        // op2 = 1*10 + 3 = 13
+        // op1 = 2*10 + 4 = 24
+        assertEquals(24, op1)
+        assertEquals(13, op2)
+        assertEquals(Operation.SUBTRACTION, op)
+    }
+
+    @Test
+    fun `getNextExercise for two-digit subtraction with borrow returnsValidExercise`() {
+        // ARRANGE
+        val level = TwoDigitComputationLevel(
+            "SUB_TWO_DIGIT_BORROW",
+            Operation.SUBTRACTION,
+            withRegrouping = true
+        )
+        val userMastery = mutableMapOf<String, FactMastery>()
+        val strategy = TwoDigitDrillStrategy(level, userMastery, activeUserId = 1L)
+
+        strategy.workingSet.clear()
+        // Fact ID for 24 - 19:
+        // Ones: 4 - 9 (borrow needed) -> 14 - 9
+        // Tens: 2 - 1 -> Effective tens of 24 becomes 1 after borrow.
+        // So we expect the fact ID to use the effective tens: 1.
+        // ID: SUB_ONES_14_9_SUB_TENS_1_1
+        strategy.workingSet.add("SUB_ONES_14_9_SUB_TENS_1_1")
+
+        // ACT
+        val exercise = strategy.getNextExercise()
+
+        // ASSERT
+        assertTrue(exercise?.equation is TwoDigitEquation)
+        val equation = exercise!!.equation as TwoDigitEquation
+        val (op, op1, op2) = equation.getFact()
+
+        // logic reconstruction:
+        // op1OnesOrTeens (parts[2]) = 14
+        // op2Ones (parts[3]) = 9
+        // op1TensEffective (parts[6]) = 1
+        // op2Tens (parts[7]) = 1
+        //
+        // op2 = 1*10 + 9 = 19
+        //
+        // isAddition = false.
+        // op1OnesOrTeens >= 10 (14 >= 10) -> True
+        // onesDigit = 14 - 10 = 4
+        // originalTens = 1 + 1 = 2
+        // op1 = 2*10 + 4 = 24
+
+        assertEquals(24, op1)
+        assertEquals(19, op2)
+        assertEquals(Operation.SUBTRACTION, op)
     }
 }

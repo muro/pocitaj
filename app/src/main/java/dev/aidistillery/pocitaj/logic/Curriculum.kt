@@ -203,8 +203,14 @@ object Curriculum {
         }
     }
 
-    object TwoDigitAdditionNoCarry : TwoDigitAdditionLevel("ADD_TWO_DIGIT_NO_CARRY", withCarry = false)
-    object TwoDigitAdditionWithCarry : TwoDigitAdditionLevel("ADD_TWO_DIGIT_CARRY", withCarry = true)
+    object TwoDigitAdditionNoCarry : TwoDigitComputationLevel(
+        "ADD_TWO_DIGIT_NO_CARRY",
+        Operation.ADDITION,
+        withRegrouping = false
+    )
+
+    object TwoDigitAdditionWithCarry :
+        TwoDigitComputationLevel("ADD_TWO_DIGIT_CARRY", Operation.ADDITION, withRegrouping = true)
 
     // --- Subtraction ---
     object SubtractionFrom5 : Level {
@@ -297,10 +303,18 @@ object Curriculum {
     }
 
     object TwoDigitSubtractionNoBorrow :
-        TwoDigitSubtractionLevel("SUB_TWO_DIGIT_NO_BORROW", withBorrow = false)
+        TwoDigitComputationLevel(
+            "SUB_TWO_DIGIT_NO_BORROW",
+            Operation.SUBTRACTION,
+            withRegrouping = false
+        )
 
     object TwoDigitSubtractionWithBorrow :
-        TwoDigitSubtractionLevel("SUB_TWO_DIGIT_BORROW", withBorrow = true)
+        TwoDigitComputationLevel(
+            "SUB_TWO_DIGIT_BORROW",
+            Operation.SUBTRACTION,
+            withRegrouping = true
+        )
 
 
     // --- Multiplication ---
