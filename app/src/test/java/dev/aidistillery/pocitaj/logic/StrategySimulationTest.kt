@@ -171,7 +171,7 @@ class StrategySimulationTest {
             )
 
             // 2. Get Next Exercise
-            val exercise = strategy?.getNextExercise() ?: return SimulationResult(
+            val exercise = strategy.getNextExercise() ?: return SimulationResult(
                 exercisesCount,
                 requiredFacts.size,
                 attemptCounts.size
@@ -193,7 +193,7 @@ class StrategySimulationTest {
             exercise.speedBadge = getSpeedBadge(op, op1, op2, duration)
 
             // 4. Record Result
-            strategy?.recordAttempt(exercise, wasCorrect)
+            strategy.recordAttempt(exercise, wasCorrect)
         }
 
         return SimulationResult(maxExercises, requiredFacts.size, attemptCounts.size)
@@ -234,7 +234,6 @@ class StrategySimulationTest {
         // --- Simulation Configuration ---
         private const val RUNS_PER_LEVEL = 3
         private const val MASTERY_STRENGTH = 4
-        private const val LEARNING_FAILURES = 20
         private const val PERFECT_SPEED_MS = 500L
 
         // Static helper to extract Operation and operands from Fact ID
