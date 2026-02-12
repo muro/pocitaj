@@ -294,51 +294,53 @@ object Curriculum {
         )
 
 
-    // --- Multiplication ---
-    class MultiplicationTableLevel(val table: Int) : Level {
-        override val id = "MUL_TABLE_$table"
-        override val operation = Operation.MULTIPLICATION
+    // --- Multiplication & Division Table Level ---
+    class TableLevel(
+        private val number: Int,
+        override val operation: Operation
+    ) : Level {
+        // ID format: MUL_TABLE_X or DIV_BY_X
+        override val id: String = if (operation == Operation.MULTIPLICATION) {
+            "MUL_TABLE_$number"
+        } else {
+            "DIV_BY_$number"
+        }
+
         override val prerequisites: Set<String> = emptySet()
         override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
-            var op1 = table
-            var op2 = Random.nextInt(2, 13)
-            if (Random.nextBoolean()) {
-                val temp = op1
-                op1 = op2
-                op2 = temp
+            return if (operation == Operation.MULTIPLICATION) {
+                var op1 = number
+                var op2 = Random.nextInt(2, 13)
+                // 50% chance to swap operands for commutativity
+                if (Random.nextBoolean()) {
+                    val temp = op1
+                    op1 = op2
+                    op2 = temp
+                }
+                Exercise(Multiplication(op1, op2))
+            } else {
+                // Division
+                val result = Random.nextInt(2, 11)
+                val op1 = number * result
+                Exercise(Division(op1, number))
             }
-            return Exercise(Multiplication(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            val facts = mutableSetOf<String>()
-            (2..12).forEach { op2 ->
-                facts.add("${operation.name}_${table}_${op2}")
-                facts.add("${operation.name}_${op2}_${table}")
-            }
-            return facts.toList()
-        }
-    }
-
-    // --- Division ---
-    class DivisionTableLevel(val divisor: Int) : Level {
-        override val id = "DIV_BY_$divisor"
-        override val operation = Operation.DIVISION
-        override val prerequisites: Set<String> = emptySet()
-        override val strategy = ExerciseStrategy.DRILL
-
-        override fun generateExercise(): Exercise {
-            val result = Random.nextInt(2, 11)
-            val op1 = divisor * result
-            return Exercise(Division(op1, divisor))
-        }
-
-        override fun getAllPossibleFactIds(): List<String> {
-            return (2..10).map { result ->
-                val op1 = divisor * result
-                "${operation.name}_${op1}_${divisor}"
+            return if (operation == Operation.MULTIPLICATION) {
+                val facts = mutableSetOf<String>()
+                (2..12).forEach { op2 ->
+                    facts.add("${operation.name}_${number}_${op2}")
+                    facts.add("${operation.name}_${op2}_${number}")
+                }
+                facts.toList()
+            } else {
+                (2..10).map { result ->
+                    val op1 = number * result
+                    "${operation.name}_${op1}_${number}"
+                }
             }
         }
     }
@@ -368,11 +370,12 @@ object Curriculum {
             TwoDigitSubtractionWithBorrow
         )
 
-        val multiplicationLevels = (2..12).map { MultiplicationTableLevel(it) }
-        val divisionLevels = (2..10).map { DivisionTableLevel(it) }
+        val multiplicationLevels = (2..12).map { TableLevel(it, Operation.MULTIPLICATION) }
+        val divisionLevels = (2..10).map { TableLevel(it, Operation.DIVISION) }
 
-        val mulTableMap = multiplicationLevels.associateBy { it.table }
-        val divTableMap = divisionLevels.associateBy { it.divisor }
+        val mulTableMap =
+            multiplicationLevels.associateBy { (it.id.removePrefix("MUL_TABLE_")).toInt() }
+        val divTableMap = divisionLevels.associateBy { (it.id.removePrefix("DIV_BY_")).toInt() }
 
         val mixedReviewLevels = listOf(
             MixedReviewLevel(

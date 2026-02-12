@@ -126,7 +126,8 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
             Curriculum.SubtractionFrom5.getAllPossibleFactIds().forEach { factId ->
                 globals.factMasteryDao.upsert(FactMastery(factId, 2, "", 5, 0))
             }
-            Curriculum.MultiplicationTableLevel(3).getAllPossibleFactIds().forEach { factId ->
+            Curriculum.TableLevel(3, Operation.MULTIPLICATION).getAllPossibleFactIds()
+                .forEach { factId ->
                 globals.factMasteryDao.upsert(FactMastery(factId, 3, "", 3, 0))
             }
         }

@@ -15,7 +15,7 @@ class LevelCompletionTest : AdaptiveExerciseUiTest() {
     @Test
     fun whenLevelCompletedCorrectly_thenProgressIncreases() {
         openOperationCard("×")
-        val level = Curriculum.MultiplicationTableLevel(3)
+        val level = Curriculum.TableLevel(3, dev.aidistillery.pocitaj.data.Operation.MULTIPLICATION)
         val levelId = level.id
         composeTestRule.onNodeWithTag("level_tile_${levelId}").assertIsDisplayed()
         assertEquals(0, getProgress(levelId))
@@ -31,7 +31,7 @@ class LevelCompletionTest : AdaptiveExerciseUiTest() {
     @Test
     fun whenProgressCrossesStarThreshold_thenNewStarIsAwarded() {
         // SETUP: Define the level we're testing
-        val level = Curriculum.MultiplicationTableLevel(4)
+        val level = Curriculum.TableLevel(4, dev.aidistillery.pocitaj.data.Operation.MULTIPLICATION)
         val levelId = level.id
 
         // ARRANGE: Programmatically set mastery to just below the 1-star threshold (59%)
