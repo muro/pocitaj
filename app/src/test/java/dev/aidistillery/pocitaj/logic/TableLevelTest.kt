@@ -8,7 +8,7 @@ import org.junit.Test
 class TableLevelTest {
     @Test
     fun `TableLevel multiplication generates correct exercise`() {
-        val level = Curriculum.TableLevel(3, Operation.MULTIPLICATION)
+        val level = Curriculum.TableLevel(Operation.MULTIPLICATION, 3)
         repeat(50) {
             val exercise = level.generateExercise()
             val equation = exercise.equation as Multiplication
@@ -26,7 +26,7 @@ class TableLevelTest {
 
     @Test
     fun `TableLevel division generates correct exercise`() {
-        val level = Curriculum.TableLevel(4, Operation.DIVISION)
+        val level = Curriculum.TableLevel(Operation.DIVISION, 4)
         repeat(50) {
             val exercise = level.generateExercise()
             val equation = exercise.equation as Division
@@ -46,7 +46,7 @@ class TableLevelTest {
 
     @Test
     fun `TableLevel facts match expected set for multiplication`() {
-        val level = Curriculum.TableLevel(5, Operation.MULTIPLICATION)
+        val level = Curriculum.TableLevel(Operation.MULTIPLICATION, 5)
         val facts = level.getAllPossibleFactIds().toSet()
 
         // 2..12 -> 11 pairs. Each pair generates 2 IDs (AxB and BxA)
@@ -59,7 +59,7 @@ class TableLevelTest {
 
     @Test
     fun `TableLevel facts match expected set for division`() {
-        val level = Curriculum.TableLevel(6, Operation.DIVISION)
+        val level = Curriculum.TableLevel(Operation.DIVISION, 6)
         val facts = level.getAllPossibleFactIds().toSet()
 
         // 2..10 -> 9 items. Each item generates 1 fact (Dividend / Divisor)

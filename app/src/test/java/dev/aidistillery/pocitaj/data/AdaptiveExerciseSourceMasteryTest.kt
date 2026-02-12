@@ -67,7 +67,7 @@ class AdaptiveExerciseSourceMasteryTest {
     @Test
     fun `correctly answering an exercise updates mastery in the database`() = runTest {
         // ARRANGE: Start a session for a specific level
-        val level = Curriculum.TableLevel(2, Operation.MULTIPLICATION)
+        val level = Curriculum.TableLevel(Operation.MULTIPLICATION, 2)
         val config = ExerciseConfig(Operation.MULTIPLICATION, 10, 1, level.id)
         viewModel.startExercises(config)
         testScheduler.advanceUntilIdle()

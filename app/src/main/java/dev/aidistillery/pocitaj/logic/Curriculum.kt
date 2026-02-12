@@ -9,56 +9,110 @@ import kotlin.random.Random
 object Curriculum {
 
     // --- Level Definitions ---
+    class RangeLevel(
+        override val id: String,
+        override val operation: Operation,
+        private val minRange: Int,
+        private val maxRange: Int,
+        override val prerequisites: Set<String> = emptySet(),
+        override val strategy: ExerciseStrategy = ExerciseStrategy.DRILL
+    ) : Level {
 
-    // --- Addition ---
-    object SumsUpTo5 : Level {
-        override val id = "ADD_SUM_5"
-        override val operation = Operation.ADDITION
+        override fun generateExercise(): Exercise {
+            // For ADDITION: minRange..maxRange is the target sum.
+            // For SUBTRACTION: minRange..maxRange is the minuend (op1).
+            // Mathematically, generating 'whole' in [min, max] and 'part' in [0, whole].
+            val whole = Random.nextInt(minRange, maxRange + 1)
+            val part = Random.nextInt(0, whole + 1)
+
+            return if (operation == Operation.ADDITION) {
+                Exercise(Addition(part, whole - part))
+            } else {
+                Exercise(Subtraction(whole, part))
+            }
+        }
+
+        override fun getAllPossibleFactIds(): List<String> {
+            return (minRange..maxRange).flatMap { whole ->
+                (0..whole).map { part ->
+                    if (operation == Operation.ADDITION) {
+                        "${operation.name}_${part}_${whole - part}"
+                    } else {
+                        "${operation.name}_${whole}_${part}"
+                    }
+                }
+            }
+        }
+    }
+
+    // --- Multiplication & Division Table Level ---
+    class TableLevel(
+        override val operation: Operation,
+        private val number: Int
+    ) : Level {
+        // ID format: MUL_TABLE_X or DIV_BY_X
+        override val id: String = if (operation == Operation.MULTIPLICATION) {
+            "MUL_TABLE_$number"
+        } else {
+            "DIV_BY_$number"
+        }
+
         override val prerequisites: Set<String> = emptySet()
         override val strategy = ExerciseStrategy.DRILL
-        private const val MAX_SUM = 5
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, MAX_SUM + 1)
-            val op2 = Random.nextInt(0, MAX_SUM - op1 + 1)
-            return Exercise(Addition(op1, op2))
+            return if (operation == Operation.MULTIPLICATION) {
+                var op1 = number
+                var op2 = Random.nextInt(2, 13)
+                // 50% chance to swap operands for commutativity
+                if (Random.nextBoolean()) {
+                    val temp = op1
+                    op1 = op2
+                    op2 = temp
+                }
+                Exercise(Multiplication(op1, op2))
+            } else {
+                // Division
+                val result = Random.nextInt(2, 11)
+                val op1 = number * result
+                Exercise(Division(op1, number))
+            }
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..MAX_SUM).flatMap { op1 ->
-                (0..MAX_SUM - op1).map { op2 ->
-                    "${operation.name}_${op1}_${op2}"
+            return if (operation == Operation.MULTIPLICATION) {
+                val facts = mutableSetOf<String>()
+                (2..12).forEach { op2 ->
+                    facts.add("${operation.name}_${number}_${op2}")
+                    facts.add("${operation.name}_${op2}_${number}")
+                }
+                facts.toList()
+            } else {
+                (2..10).map { result ->
+                    val op1 = number * result
+                    "${operation.name}_${op1}_${number}"
                 }
             }
         }
     }
 
-    object SumsUpTo10 : Level {
-        override val id = "ADD_SUM_10"
-        override val operation = Operation.ADDITION
-        override val prerequisites: Set<String> = setOf(SumsUpTo5.id)
-        override val strategy = ExerciseStrategy.DRILL
-        private const val MAX_SUM = 10
-        private const val MIN_SUM = 6
+    // --- Addition ---
+    val SumsUpTo5 = RangeLevel(
+        id = "ADD_SUM_5",
+        operation = Operation.ADDITION,
+        minRange = 0,
+        maxRange = 5
+    )
 
-        override fun generateExercise(): Exercise {
-            // Pick a target sum between 6 and 10
-            val targetSum = Random.nextInt(MIN_SUM, MAX_SUM + 1)
-            // Pick op1 such that op2 is valid (>= 0)
-            val op1 = Random.nextInt(0, targetSum + 1)
-            val op2 = targetSum - op1
-            return Exercise(Addition(op1, op2))
-        }
 
-        override fun getAllPossibleFactIds(): List<String> {
-            return (MIN_SUM..MAX_SUM).flatMap { sum ->
-                (0..sum).map { op1 ->
-                    val op2 = sum - op1
-                    "${operation.name}_${op1}_${op2}"
-                }
-            }
-        }
-    }
+    val SumsUpTo10 = RangeLevel(
+        id = "ADD_SUM_10",
+        operation = Operation.ADDITION,
+        minRange = 6,
+        maxRange = 10,
+        prerequisites = setOf(SumsUpTo5.id)
+    )
+
 
     object SumsOver10 : Level {
         override val id = "ADD_SUM_OVER_10"
@@ -90,34 +144,14 @@ object Curriculum {
         }
     }
 
-    object SumsUpTo20 : Level {
-        override val id = "ADD_SUM_20"
-        override val operation = Operation.ADDITION
-        override val prerequisites: Set<String> = setOf(SumsOver10.id)
-        override val strategy = ExerciseStrategy.DRILL
-        private const val MAX_SUM = 20
-        private const val MIN_SUM = 11
+    val SumsUpTo20 = RangeLevel(
+        id = "ADD_SUM_20",
+        operation = Operation.ADDITION,
+        minRange = 11,
+        maxRange = 20,
+        prerequisites = setOf(SumsOver10.id)
+    )
 
-        override fun generateExercise(): Exercise {
-            // Pick a target sum between 11 and 20
-            val targetSum = Random.nextInt(MIN_SUM, MAX_SUM + 1)
-            // Pick op1 such that op2 is valid (>= 0)
-            // op2 = targetSum - op1
-            // So op1 <= targetSum
-            val op1 = Random.nextInt(0, targetSum + 1)
-            val op2 = targetSum - op1
-            return Exercise(Addition(op1, op2))
-        }
-
-        override fun getAllPossibleFactIds(): List<String> {
-            return (MIN_SUM..MAX_SUM).flatMap { sum ->
-                (0..sum).map { op1 ->
-                    val op2 = sum - op1
-                    "${operation.name}_${op1}_${op2}"
-                }
-            }
-        }
-    }
 
     object Doubles : Level {
         override val id = "ADD_DOUBLES"
@@ -214,47 +248,26 @@ object Curriculum {
 
     // --- Subtraction ---
 
-    class SubtractionRangeLevel(
-        override val id: String,
-        private val minMinuend: Int,
-        private val maxMinuend: Int,
-        override val prerequisites: Set<String> = emptySet(),
-        override val strategy: ExerciseStrategy = ExerciseStrategy.DRILL
-    ) : Level {
-        override val operation = Operation.SUBTRACTION
-
-        override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(minMinuend, maxMinuend + 1)
-            val op2 = Random.nextInt(0, op1 + 1)
-            return Exercise(Subtraction(op1, op2))
-        }
-
-        override fun getAllPossibleFactIds(): List<String> {
-            return (minMinuend..maxMinuend).flatMap { op1 ->
-                (0..op1).map { op2 ->
-                    "${operation.name}_${op1}_${op2}"
-                }
-            }
-        }
-    }
-
-    val SubtractionFrom5 = SubtractionRangeLevel(
+    val SubtractionFrom5 = RangeLevel(
         id = "SUB_FROM_5",
-        minMinuend = 0,
-        maxMinuend = 5
+        operation = Operation.SUBTRACTION,
+        minRange = 0,
+        maxRange = 5
     )
 
-    val SubtractionFrom10 = SubtractionRangeLevel(
+    val SubtractionFrom10 = RangeLevel(
         id = "SUB_FROM_10",
-        minMinuend = 6,
-        maxMinuend = 10,
+        operation = Operation.SUBTRACTION,
+        minRange = 6,
+        maxRange = 10,
         prerequisites = setOf(SubtractionFrom5.id)
     )
 
-    val SubtractionFrom20 = SubtractionRangeLevel(
+    val SubtractionFrom20 = RangeLevel(
         id = "SUB_FROM_20",
-        minMinuend = 11,
-        maxMinuend = 20,
+        operation = Operation.SUBTRACTION,
+        minRange = 11,
+        maxRange = 20,
         prerequisites = setOf(SubtractionFrom10.id)
     )
 
@@ -293,58 +306,6 @@ object Curriculum {
             withRegrouping = true
         )
 
-
-    // --- Multiplication & Division Table Level ---
-    class TableLevel(
-        private val number: Int,
-        override val operation: Operation
-    ) : Level {
-        // ID format: MUL_TABLE_X or DIV_BY_X
-        override val id: String = if (operation == Operation.MULTIPLICATION) {
-            "MUL_TABLE_$number"
-        } else {
-            "DIV_BY_$number"
-        }
-
-        override val prerequisites: Set<String> = emptySet()
-        override val strategy = ExerciseStrategy.DRILL
-
-        override fun generateExercise(): Exercise {
-            return if (operation == Operation.MULTIPLICATION) {
-                var op1 = number
-                var op2 = Random.nextInt(2, 13)
-                // 50% chance to swap operands for commutativity
-                if (Random.nextBoolean()) {
-                    val temp = op1
-                    op1 = op2
-                    op2 = temp
-                }
-                Exercise(Multiplication(op1, op2))
-            } else {
-                // Division
-                val result = Random.nextInt(2, 11)
-                val op1 = number * result
-                Exercise(Division(op1, number))
-            }
-        }
-
-        override fun getAllPossibleFactIds(): List<String> {
-            return if (operation == Operation.MULTIPLICATION) {
-                val facts = mutableSetOf<String>()
-                (2..12).forEach { op2 ->
-                    facts.add("${operation.name}_${number}_${op2}")
-                    facts.add("${operation.name}_${op2}_${number}")
-                }
-                facts.toList()
-            } else {
-                (2..10).map { result ->
-                    val op1 = number * result
-                    "${operation.name}_${op1}_${number}"
-                }
-            }
-        }
-    }
-
     // --- Public API ---
 
     fun getAllLevels(): List<Level> {
@@ -370,8 +331,8 @@ object Curriculum {
             TwoDigitSubtractionWithBorrow
         )
 
-        val multiplicationLevels = (2..12).map { TableLevel(it, Operation.MULTIPLICATION) }
-        val divisionLevels = (2..10).map { TableLevel(it, Operation.DIVISION) }
+        val multiplicationLevels = (2..12).map { TableLevel(Operation.MULTIPLICATION, it) }
+        val divisionLevels = (2..10).map { TableLevel(Operation.DIVISION, it) }
 
         val mulTableMap =
             multiplicationLevels.associateBy { (it.id.removePrefix("MUL_TABLE_")).toInt() }
