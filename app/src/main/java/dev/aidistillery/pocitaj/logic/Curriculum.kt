@@ -213,21 +213,24 @@ object Curriculum {
         TwoDigitComputationLevel("ADD_TWO_DIGIT_CARRY", Operation.ADDITION, withRegrouping = true)
 
     // --- Subtraction ---
-    object SubtractionFrom5 : Level {
-        override val id = "SUB_FROM_5"
+
+    class SubtractionRangeLevel(
+        override val id: String,
+        private val minMinuend: Int,
+        private val maxMinuend: Int,
+        override val prerequisites: Set<String> = emptySet(),
+        override val strategy: ExerciseStrategy = ExerciseStrategy.DRILL
+    ) : Level {
         override val operation = Operation.SUBTRACTION
-        override val prerequisites: Set<String> = emptySet()
-        override val strategy = ExerciseStrategy.DRILL
-        private const val MAX_MINUEND = 5
 
         override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(0, MAX_MINUEND + 1)
+            val op1 = Random.nextInt(minMinuend, maxMinuend + 1)
             val op2 = Random.nextInt(0, op1 + 1)
             return Exercise(Subtraction(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (0..MAX_MINUEND).flatMap { op1 ->
+            return (minMinuend..maxMinuend).flatMap { op1 ->
                 (0..op1).map { op2 ->
                     "${operation.name}_${op1}_${op2}"
                 }
@@ -235,51 +238,25 @@ object Curriculum {
         }
     }
 
-    object SubtractionFrom10 : Level {
-        override val id = "SUB_FROM_10"
-        override val operation = Operation.SUBTRACTION
-        override val prerequisites: Set<String> = setOf(SubtractionFrom5.id)
-        override val strategy = ExerciseStrategy.DRILL
-        private const val MAX_MINUEND = 10
-        private const val MIN_MINUEND = 6
+    val SubtractionFrom5 = SubtractionRangeLevel(
+        id = "SUB_FROM_5",
+        minMinuend = 0,
+        maxMinuend = 5
+    )
 
-        override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(MIN_MINUEND, MAX_MINUEND + 1)
-            val op2 = Random.nextInt(0, op1 + 1)
-            return Exercise(Subtraction(op1, op2))
-        }
+    val SubtractionFrom10 = SubtractionRangeLevel(
+        id = "SUB_FROM_10",
+        minMinuend = 6,
+        maxMinuend = 10,
+        prerequisites = setOf(SubtractionFrom5.id)
+    )
 
-        override fun getAllPossibleFactIds(): List<String> {
-            return (MIN_MINUEND..MAX_MINUEND).flatMap { op1 ->
-                (0..op1).map { op2 ->
-                    "${operation.name}_${op1}_${op2}"
-                }
-            }
-        }
-    }
-
-    object SubtractionFrom20 : Level {
-        override val id = "SUB_FROM_20"
-        override val operation = Operation.SUBTRACTION
-        override val prerequisites: Set<String> = setOf(SubtractionFrom10.id)
-        override val strategy = ExerciseStrategy.DRILL
-        private const val MAX_MINUEND = 20
-        private const val MIN_MINUEND = 11
-
-        override fun generateExercise(): Exercise {
-            val op1 = Random.nextInt(MIN_MINUEND, MAX_MINUEND + 1)
-            val op2 = Random.nextInt(0, op1 + 1)
-            return Exercise(Subtraction(op1, op2))
-        }
-
-        override fun getAllPossibleFactIds(): List<String> {
-            return (MIN_MINUEND..MAX_MINUEND).flatMap { op1 ->
-                (0..op1).map { op2 ->
-                    "${operation.name}_${op1}_${op2}"
-                }
-            }
-        }
-    }
+    val SubtractionFrom20 = SubtractionRangeLevel(
+        id = "SUB_FROM_20",
+        minMinuend = 11,
+        maxMinuend = 20,
+        prerequisites = setOf(SubtractionFrom10.id)
+    )
 
     object SubtractingTens : Level {
         override val id = "SUB_TENS"
