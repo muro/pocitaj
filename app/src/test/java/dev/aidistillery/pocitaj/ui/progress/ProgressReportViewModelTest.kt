@@ -47,8 +47,8 @@ class ProgressReportViewModelTest {
         val fakeDao = FakeFactMasteryDao()
         val viewModel = ProgressReportViewModel(fakeDao, 1)
         val facts = listOf(
-            FactMastery("ADDITION_1_1", 1, "", 5, 5), // Mastered
-            FactMastery("MULTIPLICATION_2_3", 1, "", 3, 4) // Learning
+            FactMastery("1 + 1 = ?", 1, "", 5, 5), // Mastered
+            FactMastery("2 * 3 = ?", 1, "", 3, 4) // Learning
         )
 
         // ACT & ASSERT for factProgressByOperation
@@ -67,7 +67,7 @@ class ProgressReportViewModelTest {
             val additionFacts = updatedFactProgress[Operation.MULTIPLICATION]
             assertNotNull(additionFacts)
             assertEquals(121, additionFacts!!.size)
-            val masteredFact = additionFacts.find { it.factId == "MULTIPLICATION_2_3" }
+            val masteredFact = additionFacts.find { it.factId == "2 * 3 = ?" }
             assertNotNull(masteredFact)
             assertEquals(3, masteredFact!!.mastery!!.strength)
         }
@@ -98,11 +98,11 @@ class ProgressReportViewModelTest {
         val fakeDao = FakeFactMasteryDao()
         val viewModel = ProgressReportViewModel(fakeDao, 1)
         val facts = listOf(
-            FactMastery("ADDITION_1_1", 1, "", 5, 5), // Mastered
-            FactMastery("ADDITION_1_3", 1, "", 5, 5), // Mastered
-            FactMastery("ADDITION_3_1", 1, "", 5, 5), // Mastered
-            FactMastery("ADDITION_3_3", 1, "", 5, 5), // Mastered (Sum 6 -> SumsUpTo10)
-            FactMastery("ADDITION_4_4", 1, "", 5, 5), // Mastered (Sum 8 -> SumsUpTo10)
+            FactMastery("1 + 1 = ?", 1, "", 5, 5), // Mastered
+            FactMastery("1 + 3 = ?", 1, "", 5, 5), // Mastered
+            FactMastery("3 + 1 = ?", 1, "", 5, 5), // Mastered
+            FactMastery("3 + 3 = ?", 1, "", 5, 5), // Mastered (Sum 6 -> SumsUpTo10)
+            FactMastery("4 + 4 = ?", 1, "", 5, 5), // Mastered (Sum 8 -> SumsUpTo10)
         )
 
         // ACT & ASSERT for levelProgressByOperation

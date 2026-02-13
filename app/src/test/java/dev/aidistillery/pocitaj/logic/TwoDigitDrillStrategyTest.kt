@@ -25,20 +25,23 @@ class TwoDigitDrillStrategyTest {
         )
 
         // Provide some initial mastery for the underlying "tens" and "ones" facts.
+        // Logic: op1=19, op2=19 -> Ones: 9+9 (ADD_ONES_9_9). Tens: 1+1 (ADD_TENS_1_1).
         val userMastery = mutableMapOf(
             createMastery("ADD_TENS_2_4", 1, 100L),
             createMastery("ADD_ONES_3_7", 2, 200L),
-            createMastery("ADD_TENS_1_1", 5, 100L),
-            createMastery("ADD_ONES_9_9", 0, 200L) // Weakest
+            createMastery("ADD_TENS_1_1", 0, 100L),
+            createMastery("ADD_ONES_9_9", 0, 200L) // Weakest combination (Avg 0)
         )
 
         // ACT: Create the TwoDigitDrillStrategy.
         val strategy =
             TwoDigitDrillStrategy(twoDigitAdditionLevel, userMastery, activeUserId = 1L)
 
-        // ASSERT: The working set should contain ephemeral tokens, sorted by weakness.
+        // ASSERT: The working set should contain Semantic IDs.
+        // We expect "19 + 19 = ?" or similar based on weak components.
         assertEquals(4, strategy.workingSet.size)
-        assertTrue(strategy.workingSet.any { it.contains("ADD_ONES_9_9") })
+        // Check for 19+19
+        assertTrue(strategy.workingSet.any { it == "19 + 19 = ?" })
     }
 
     @Test
@@ -56,7 +59,7 @@ class TwoDigitDrillStrategyTest {
         val strategy =
             TwoDigitDrillStrategy(twoDigitAdditionLevel, userMastery, activeUserId = 1L)
         strategy.workingSet.clear()
-        strategy.workingSet.add("ADD_ONES_2_1_ADD_TENS_1_2")
+        strategy.workingSet.add("12 + 21 = ?")
 
         // ACT
         val exercise = strategy.getNextExercise()
@@ -68,7 +71,7 @@ class TwoDigitDrillStrategyTest {
         assertEquals(12, op1)
         assertEquals(21, op2)
         assertEquals(Operation.ADDITION, op)
-        assertEquals("ADD_ONES_2_1_ADD_TENS_1_2", twoDigitEquation.getFactId())
+        assertEquals("12 + 21 = ?", twoDigitEquation.getFactId())
     }
 
     @Test
@@ -86,7 +89,7 @@ class TwoDigitDrillStrategyTest {
         val strategy =
             TwoDigitDrillStrategy(twoDigitAdditionLevel, userMastery, activeUserId = 1L)
         val exercise =
-            Exercise(TwoDigitEquation(12, 21, Operation.ADDITION, "ADD_ONES_2_1_ADD_TENS_1_2"))
+            Exercise(TwoDigitEquation(12, 21, Operation.ADDITION, "12 + 21 = ?"))
         // Set a fast time to ensure a SpeedBadge (Gold/Silver) is earned, allowing promotion from Strength 2 -> 3
         exercise.solve(33, timeMillis = 500)
 
@@ -110,11 +113,8 @@ class TwoDigitDrillStrategyTest {
         val strategy = TwoDigitDrillStrategy(level, userMastery, activeUserId = 1L)
 
         strategy.workingSet.clear()
-        // Fact ID for 24 - 13:
-        // Ones: 4 - 3 (no borrow)
-        // Tens: 2 - 1 -> Effective tens 2, subtract 1.
-        // ID: SUB_ONES_4_3_SUB_TENS_2_1
-        strategy.workingSet.add("SUB_ONES_4_3_SUB_TENS_2_1")
+        // Fact ID for 24 - 13: 24 - 13 = ?
+        strategy.workingSet.add("24 - 13 = ?")
 
         // ACT
         val exercise = strategy.getNextExercise()
@@ -124,11 +124,6 @@ class TwoDigitDrillStrategyTest {
         val equation = exercise!!.equation as TwoDigitEquation
         val (op, op1, op2) = equation.getFact()
 
-        // logic:
-        // op1Ones = 4, op2Ones = 3
-        // op1Tens = 2, op2Tens = 1
-        // op2 = 1*10 + 3 = 13
-        // op1 = 2*10 + 4 = 24
         assertEquals(24, op1)
         assertEquals(13, op2)
         assertEquals(Operation.SUBTRACTION, op)
@@ -146,12 +141,9 @@ class TwoDigitDrillStrategyTest {
         val strategy = TwoDigitDrillStrategy(level, userMastery, activeUserId = 1L)
 
         strategy.workingSet.clear()
-        // Fact ID for 24 - 19:
-        // Ones: 4 - 9 (borrow needed) -> 14 - 9
-        // Tens: 2 - 1 -> Effective tens of 24 becomes 1 after borrow.
-        // So we expect the fact ID to use the effective tens: 1.
-        // ID: SUB_ONES_14_9_SUB_TENS_1_1
-        strategy.workingSet.add("SUB_ONES_14_9_SUB_TENS_1_1")
+        // Fact ID for 24 - 19: 24 - 19 = ?
+        strategy.workingSet.add("24 - 19 = ?")
+
 
         // ACT
         val exercise = strategy.getNextExercise()

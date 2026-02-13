@@ -36,9 +36,9 @@ object Curriculum {
             return (minRange..maxRange).flatMap { whole ->
                 (0..whole).map { part ->
                     if (operation == Operation.ADDITION) {
-                        "${operation.name}_${part}_${whole - part}"
+                        "$part + ${whole - part} = ?"
                     } else {
-                        "${operation.name}_${whole}_${part}"
+                        "$whole - $part = ?"
                     }
                 }
             }
@@ -83,14 +83,14 @@ object Curriculum {
             return if (operation == Operation.MULTIPLICATION) {
                 val facts = mutableSetOf<String>()
                 (2..12).forEach { op2 ->
-                    facts.add("${operation.name}_${number}_${op2}")
-                    facts.add("${operation.name}_${op2}_${number}")
+                    facts.add("$number * $op2 = ?")
+                    facts.add("$op2 * $number = ?")
                 }
                 facts.toList()
             } else {
                 (2..10).map { result ->
                     val op1 = number * result
-                    "${operation.name}_${op1}_${number}"
+                    "$op1 / $number = ?"
                 }
             }
         }
@@ -136,8 +136,8 @@ object Curriculum {
             return (6..9).flatMap { op1 ->
                 (10 - op1 + 1 until 10).flatMap { op2 ->
                     listOf(
-                        "${operation.name}_${op1}_${op2}",
-                        "${operation.name}_${op2}_${op1}"
+                        "$op1 + $op2 = ?",
+                        "$op2 + $op1 = ?"
                     )
                 }
             }
@@ -165,7 +165,7 @@ object Curriculum {
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (1..10).map { "${operation.name}_${it}_${it}" }
+            return (1..10).map { "$it + $it = ?" }
         }
     }
 
@@ -189,8 +189,8 @@ object Curriculum {
             return (1..9).flatMap { op1 ->
                 val op2 = op1 + 1
                 listOf(
-                    "${operation.name}_${op1}_${op2}",
-                    "${operation.name}_${op2}_${op1}"
+                    "$op1 + $op2 = ?",
+                    "$op2 + $op1 = ?"
                 )
             }
         }
@@ -203,15 +203,15 @@ object Curriculum {
         override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
-            val exercises = (1..9).map { it to (10 - it) }
-            val (op1, op2) = exercises.random()
-            return Exercise(Addition(op1, op2))
+            // Making 10s: 3 + ? = 10
+            val a = Random.nextInt(1, 10)
+            return Exercise(MissingAddend(a, 10))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            return (1..9).mapNotNull { op1 ->
-                val op2 = 10 - op1
-                if (op2 > 0) "${operation.name}_${op1}_${op2}" else null
+            // IDs: 1 + ? = 10, etc.
+            return (1..9).map { a ->
+                "$a + ? = 10"
             }
         }
     }
@@ -231,7 +231,7 @@ object Curriculum {
         override fun getAllPossibleFactIds(): List<String> {
             return (1..9).flatMap { op1 ->
                 (1..9).map { op2 ->
-                    "${operation.name}_${op1 * 10}_${op2 * 10}"
+                    "${op1 * 10} + ${op2 * 10} = ?"
                 }
             }
         }
@@ -286,7 +286,7 @@ object Curriculum {
         override fun getAllPossibleFactIds(): List<String> {
             return (2..9).flatMap { op1Tens ->
                 (1 until op1Tens).map { op2Tens ->
-                    "${operation.name}_${op1Tens * 10}_${op2Tens * 10}"
+                    "${op1Tens * 10} - ${op2Tens * 10} = ?"
                 }
             }
         }

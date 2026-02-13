@@ -7,7 +7,7 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [User::class, ExerciseAttempt::class, FactMastery::class], version = 3)
+@Database(entities = [User::class, ExerciseAttempt::class, FactMastery::class], version = 4)
 @TypeConverters(AppDatabase.Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
@@ -53,6 +53,48 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("DROP TABLE fact_mastery")
                 db.execSQL("ALTER TABLE fact_mastery_new RENAME TO fact_mastery")
                 db.execSQL("CREATE INDEX index_fact_mastery_userId_strength_lastTestedTimestamp ON fact_mastery (userId, strength, lastTestedTimestamp)")
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                val cursor = db.query("SELECT factId, userId, level FROM fact_mastery")
+                try {
+                    while (cursor.moveToNext()) {
+                        val oldId = cursor.getString(0)
+                        val userId = cursor.getLong(1)
+                        val level = cursor.getString(2)
+
+                        val newId = convertToSemanticId(oldId)
+                        if (newId != null && newId != oldId) {
+                            // Update the record
+                            // Note: updating PK might fail if conflicts exist, but mapping should be 1:1
+                            db.execSQL(
+                                "UPDATE fact_mastery SET factId = ? WHERE factId = ? AND userId = ? AND level = ?",
+                                arrayOf(newId, oldId, userId, level)
+                            )
+                        }
+                    }
+                } finally {
+                    cursor.close()
+                }
+            }
+
+            private fun convertToSemanticId(oldId: String): String? {
+                // ADDITION_3_5 -> 3 + 5 = ?
+                val standardRegex = Regex("""([A-Z]+)_(\d+)_(\d+)""")
+                standardRegex.matchEntire(oldId)?.let { match ->
+                    val (opName, a, b) = match.destructured
+                    return when (opName) {
+                        "ADDITION" -> "$a + $b = ?"
+                        "SUBTRACTION" -> "$a - $b = ?"
+                        "MULTIPLICATION" -> "$a * $b = ?"
+                        "DIVISION" -> "$a / $b = ?"
+                        else -> null
+                    }
+                }
+
+                return null
             }
         }
     }

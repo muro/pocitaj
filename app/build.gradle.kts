@@ -25,6 +25,12 @@ android {
     namespace = "dev.aidistillery.pocitaj"
     compileSdk = 36
 
+    sourceSets {
+        getByName("androidTest") {
+            assets.srcDir("$projectDir/schemas")
+        }
+    }
+
     defaultConfig {
         applicationId = "dev.aidistillery.pocitaj"
         minSdk = 26
@@ -178,6 +184,7 @@ dependencies {
     androidTestImplementation(libs.test.rules)
     androidTestImplementation(libs.compose.ui.test.junit4)
     androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.room.testing)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
 

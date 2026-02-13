@@ -5,7 +5,6 @@ import dev.aidistillery.pocitaj.data.ExerciseAttempt
 import dev.aidistillery.pocitaj.data.ExerciseAttemptDao
 import dev.aidistillery.pocitaj.data.ExerciseConfig
 import dev.aidistillery.pocitaj.data.ExerciseSource
-import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.logic.Exercise
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -40,8 +39,7 @@ class ExerciseBook(
                 userId = activeUserManager.activeUser.id,
                 timestamp = System.currentTimeMillis(),
                 problemText = exercise.equation.question(),
-                logicalOperation = exercise.getFactId()
-                    .split("_")[0].let { Operation.valueOf(it) },
+                logicalOperation = exercise.equation.getFact().first,
                 correctAnswer = exercise.equation.getExpectedResult(),
                 submittedAnswer = submittedAnswer,
                 wasCorrect = wasCorrect,

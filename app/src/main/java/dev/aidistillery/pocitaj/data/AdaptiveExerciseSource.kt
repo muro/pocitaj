@@ -88,7 +88,7 @@ class AdaptiveExerciseSource(
                 userId = activeUserManager.activeUser.id,
                 timestamp = System.currentTimeMillis(),
                 problemText = exercise.equation.question(),
-                logicalOperation = exercise.getFactId().split("_")[0].let { Operation.valueOf(it) },
+                logicalOperation = exercise.equation.getFact().first,
                 correctAnswer = exercise.equation.getExpectedResult(),
                 submittedAnswer = submittedAnswer,
                 wasCorrect = wasCorrect,

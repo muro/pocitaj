@@ -124,8 +124,8 @@ class SmartPracticeStrategy(
                 compareBy(
                     { userMastery[it]?.strength ?: 0 },
                     { userMastery[it]?.lastTestedTimestamp ?: 0L },
-                    { it.split("_")[1].toInt() },
-                    { it.split("_")[2].toInt() }
+                    { getFirstOperand(it) },
+                    { getSecondOperand(it) }
                 )
             ).take(WORKING_SET_SIZE)
         }
@@ -180,5 +180,14 @@ class SmartPracticeStrategy(
             val prerequisiteLevel = curriculum.find { it.id == prerequisiteId }
             prerequisiteLevel?.let { isLevelMastered(it) } ?: false
         }
+    }
+
+    private fun getFirstOperand(factId: String): Int {
+        return Regex("(\\d+)").find(factId)?.value?.toIntOrNull() ?: 0
+    }
+
+    private fun getSecondOperand(factId: String): Int {
+        // Find second number
+        return Regex("(\\d+)").findAll(factId).elementAtOrNull(1)?.value?.toIntOrNull() ?: 0
     }
 }

@@ -189,7 +189,8 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
             .performScrollToNode(hasTestTag("operation_card_MULTIPLICATION"))
         composeTestRule.onNodeWithTag("operation_card_MULTIPLICATION").assertIsDisplayed()
         print(composeTestRule.onRoot().printToString())
-        composeTestRule.onNodeWithTag("cell_MULTIPLICATION_2_3_3").assertIsDisplayed()
+        // TODO: the ?_3 suffix is the strength of the mastery - move to a nicer place in the string
+        composeTestRule.onNodeWithTag("cell_2 * 3 = ?_3").assertIsDisplayed()
 
         print(composeTestRule.onRoot().printToString())
         Espresso.pressBack()

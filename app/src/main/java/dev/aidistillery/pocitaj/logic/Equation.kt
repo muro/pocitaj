@@ -14,6 +14,9 @@ interface Equation {
     fun getQuestionAsSolved(submittedSolution: Int?): String
 
     fun getFact(): Triple<Operation, Int, Int>
+
+    // Unique identifier for mastery tracking
+    fun getFactId(): String
 }
 
 data class Addition(private val a: Int, private val b: Int) : Equation {
@@ -28,6 +31,7 @@ data class Addition(private val a: Int, private val b: Int) : Equation {
     }
 
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.ADDITION, a, b)
+    override fun getFactId(): String = "$a + $b = ?"
 }
 
 data class Subtraction(private val a: Int, private val b: Int) : Equation {
@@ -42,8 +46,10 @@ data class Subtraction(private val a: Int, private val b: Int) : Equation {
     }
 
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.SUBTRACTION, a, b)
+    override fun getFactId(): String = "$a - $b = ?"
 }
 
+// TODO: Move operation to first parameter? Also, why not just factId, can't it all be reconstructed?
 data class TwoDigitEquation(
     private val op1: Int,
     private val op2: Int,
@@ -51,6 +57,7 @@ data class TwoDigitEquation(
     private val factId: String
 ) : Equation {
     override fun question(): String = when (operation) {
+        // TODO: Use operation.toSymbol
         Operation.ADDITION -> String.format(Locale.ENGLISH, "%d + %d = ?", op1, op2)
         Operation.SUBTRACTION -> String.format(Locale.ENGLISH, "%d - %d = ?", op1, op2)
         else -> throw IllegalArgumentException("Unsupported operation for TwoDigitEquation")
@@ -65,6 +72,7 @@ data class TwoDigitEquation(
     override fun getQuestionAsSolved(submittedSolution: Int?): String {
         return if (submittedSolution != null) {
             when (operation) {
+                // TODO: Subtraction looks like a bug - it should do just the same as ADDITION.
                 Operation.ADDITION -> question().replace("?", submittedSolution.toString())
                 Operation.SUBTRACTION -> String.format(Locale.ENGLISH, "%d - %d", op1, op2)
                 else -> throw IllegalArgumentException("Unsupported operation")
@@ -75,7 +83,7 @@ data class TwoDigitEquation(
     }
 
     override fun getFact(): Triple<Operation, Int, Int> = Triple(operation, op1, op2)
-    fun getFactId() = factId
+    override fun getFactId() = factId
 }
 
 data class Multiplication(val a: Int, val b: Int) : Equation {
@@ -92,6 +100,9 @@ data class Multiplication(val a: Int, val b: Int) : Equation {
     }
 
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.MULTIPLICATION, a, b)
+
+    // Using '*' for ID consistency with programming/math standard, distinct from 'x' or '×'
+    override fun getFactId(): String = "$a * $b = ?"
 }
 
 data class MissingAddend(private val a: Int, private val result: Int) : Equation {
@@ -114,6 +125,7 @@ data class MissingAddend(private val a: Int, private val result: Int) : Equation
     }
 
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.ADDITION, a, b)
+    override fun getFactId(): String = "$a + ? = $result"
 }
 
 data class MissingSubtrahend(private val a: Int, private val result: Int) : Equation {
@@ -136,6 +148,7 @@ data class MissingSubtrahend(private val a: Int, private val result: Int) : Equa
     }
 
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.SUBTRACTION, a, b)
+    override fun getFactId(): String = "$a - ? = $result"
 }
 
 data class Division(val a: Int, val b: Int) : Equation {
@@ -150,4 +163,5 @@ data class Division(val a: Int, val b: Int) : Equation {
     }
 
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.DIVISION, a, b)
+    override fun getFactId(): String = "$a / $b = ?"
 }

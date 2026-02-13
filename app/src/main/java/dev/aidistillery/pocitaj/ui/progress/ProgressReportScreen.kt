@@ -167,19 +167,51 @@ fun LevelProgressList(levelProgress: Map<String, LevelProgress>) {
 
 
 private fun mapFactsToCoords(facts: List<FactProgress>): List<Triple<Int, Int, FactProgress>> {
+    val legacyRegex = Regex("""^[A-Z]+_(\d+)_(\d+)$""")
+
+    // TODO: these can probably be all merged
+    val multiplicationRegex = Regex("""^(\d+) \* (\d+) = \?$""")
+    val divisionRegex = Regex("""^(\d+) / (\d+) = \?$""")
+    val additionRegex = Regex("""^(\d+) \+ (\d+) = \?$""")
+    val subtractionRegex = Regex("""^(\d+) - (\d+) = \?$""")
+
     return facts.mapNotNull { factProgress ->
-        val parts = factProgress.factId.split('_')
-        if (parts.size == 3) {
-            val op1 = parts[1].toIntOrNull()
-            val op2 = parts[2].toIntOrNull()
-            if (op1 != null && op2 != null) {
-                Triple(op1, op2, factProgress)
-            } else {
-                null
-            }
-        } else {
-            null
+        val id = factProgress.factId
+
+        // 1. Try legacy format (e.g., MULTIPLICATION_2_3)
+        legacyRegex.matchEntire(id)?.let { match ->
+            val op1 = match.groupValues[1].toIntOrNull()
+            val op2 = match.groupValues[2].toIntOrNull()
+            if (op1 != null && op2 != null) return@mapNotNull Triple(op1, op2, factProgress)
         }
+
+        // 2. Try multiplication semantic ID
+        multiplicationRegex.matchEntire(id)?.let { match ->
+            val op1 = match.groupValues[1].toIntOrNull()
+            val op2 = match.groupValues[2].toIntOrNull()
+            if (op1 != null && op2 != null) return@mapNotNull Triple(op1, op2, factProgress)
+        }
+
+        // 3. Try division semantic ID
+        divisionRegex.matchEntire(id)?.let { match ->
+            val op1 = match.groupValues[1].toIntOrNull()
+            val op2 = match.groupValues[2].toIntOrNull()
+            if (op1 != null && op2 != null) return@mapNotNull Triple(op1, op2, factProgress)
+        }
+
+        // 4. Try addition/subtraction semantic IDs
+        additionRegex.matchEntire(id)?.let { match ->
+            val op1 = match.groupValues[1].toIntOrNull()
+            val op2 = match.groupValues[2].toIntOrNull()
+            if (op1 != null && op2 != null) return@mapNotNull Triple(op1, op2, factProgress)
+        }
+        subtractionRegex.matchEntire(id)?.let { match ->
+            val op1 = match.groupValues[1].toIntOrNull()
+            val op2 = match.groupValues[2].toIntOrNull()
+            if (op1 != null && op2 != null) return@mapNotNull Triple(op1, op2, factProgress)
+        }
+
+        null
     }
 }
 
@@ -361,31 +393,31 @@ fun ProgressReportScreenPreview() {
         // Create some fake mastery data for a more realistic preview
         val fakeMasteredFacts = mapOf(
             // Addition
-            "ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 5, 0, 1000), // Mastered, Gold
-            "ADDITION_2_3" to FactMastery("ADDITION_2_3", 1, "", 3, 0, 3000), // Learning
-            "ADDITION_3_4" to FactMastery("ADDITION_3_4", 1, "", 1, 0, 5000), // Struggling
-            "ADDITION_8_8" to FactMastery("ADDITION_8_8", 1, "", 5, 0, 4000), // Mastered, Bronze
-            "ADDITION_9_1" to FactMastery("ADDITION_9_1", 1, "", 2, 0, 6000), // Struggling
+            "1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 5, 0, 1000), // Mastered, Gold
+            "2 + 3 = ?" to FactMastery("2 + 3 = ?", 1, "", 3, 0, 3000), // Learning
+            "3 + 4 = ?" to FactMastery("3 + 4 = ?", 1, "", 1, 0, 5000), // Struggling
+            "8 + 8 = ?" to FactMastery("8 + 8 = ?", 1, "", 5, 0, 4000), // Mastered, Bronze
+            "9 + 1 = ?" to FactMastery("9 + 1 = ?", 1, "", 2, 0, 6000), // Struggling
 
             // Multiplication
-            "MULTIPLICATION_2_5" to FactMastery(
-                "MULTIPLICATION_2_5",
+            "2 * 5 = ?" to FactMastery(
+                "2 * 5 = ?",
                 1,
                 "",
                 5,
                 0,
                 500
             ),  // Mastered, Gold
-            "MULTIPLICATION_5_2" to FactMastery("MULTIPLICATION_5_2", 1, "", 3, 0, 2000), // Learning
-            "MULTIPLICATION_10_1" to FactMastery(
-                "MULTIPLICATION_10_1",
+            "5 * 2 = ?" to FactMastery("5 * 2 = ?", 1, "", 3, 0, 2000), // Learning
+            "10 * 1 = ?" to FactMastery(
+                "10 * 1 = ?",
                 1,
                 "",
                 5,
                 0,
                 2500
             ),// Mastered, Silver
-            "MULTIPLICATION_3_7" to FactMastery("MULTIPLICATION_3_7", 1, "", 1, 0, 4000), // Struggling
+            "3 * 7 = ?" to FactMastery("3 * 7 = ?", 1, "", 1, 0, 4000), // Struggling
         )
 
         val factProgressByOperation = allLevels
@@ -393,9 +425,17 @@ fun ProgressReportScreenPreview() {
             .mapValues { (op, levels) ->
                 levels.flatMap { it.getAllPossibleFactIds() }.distinct().map { factId ->
                     val mastery = fakeMasteredFacts[factId]
-                    val parts = factId.split('_')
-                    val op1 = parts.getOrNull(1)?.toIntOrNull() ?: 0
-                    val op2 = parts.getOrNull(2)?.toIntOrNull() ?: 0
+                    val factWithCoords = mapFactsToCoords(
+                        listOf(
+                            FactProgress(
+                                factId,
+                                mastery,
+                                SpeedBadge.NONE
+                            )
+                        )
+                    ).firstOrNull()
+                    val op1 = factWithCoords?.first ?: 0
+                    val op2 = factWithCoords?.second ?: 0
                     val speedBadge = getSpeedBadge(op, op1, op2, mastery?.avgDurationMs ?: 0L)
                     FactProgress(factId, mastery, speedBadge)
                 }
@@ -514,9 +554,17 @@ fun MultiplicationReportPreview() {
             .distinct()
             .map { factId ->
                 val mastery = fakeMasteredFacts[factId]
-                val parts = factId.split('_')
-                val op1 = parts.getOrNull(1)?.toIntOrNull() ?: 0
-                val op2 = parts.getOrNull(2)?.toIntOrNull() ?: 0
+                val factWithCoords = mapFactsToCoords(
+                    listOf(
+                        FactProgress(
+                            factId,
+                            mastery,
+                            SpeedBadge.NONE
+                        )
+                    )
+                ).firstOrNull()
+                val op1 = factWithCoords?.first ?: 0
+                val op2 = factWithCoords?.second ?: 0
                 val speedBadge =
                     getSpeedBadge(Operation.MULTIPLICATION, op1, op2, mastery?.avgDurationMs ?: 0L)
                 FactProgress(factId, mastery, speedBadge)

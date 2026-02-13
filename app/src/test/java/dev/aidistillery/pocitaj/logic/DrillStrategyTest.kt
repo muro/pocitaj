@@ -17,7 +17,7 @@ class DrillStrategyTest {
         override val prerequisites = emptySet<String>()
         override val strategy = ExerciseStrategy.DRILL
         override fun generateExercise() = Exercise(Addition(1, 1))
-        override fun getAllPossibleFactIds() = (1..10).map { "ADDITION_1_${it}" }
+        override fun getAllPossibleFactIds() = (1..10).map { "1 + $it = ?" }
     }
 
     // --- Helper Functions ---
@@ -45,11 +45,11 @@ class DrillStrategyTest {
     fun `initial working set prioritizes L1 facts`() {
         // ARRANGE: 5 L1 facts, more than the working set size of 4.
         val userMastery = mutableMapOf(
-            createMastery("ADDITION_1_1", 0, 100L),
-            createMastery("ADDITION_1_2", 1, 200L),
-            createMastery("ADDITION_1_3", 2, 50L),
-            createMastery("ADDITION_1_4", 0, 400L),
-            createMastery("ADDITION_1_5", 1, 300L)
+            createMastery("1 + 1 = ?", 0, 100L),
+            createMastery("1 + 2 = ?", 1, 200L),
+            createMastery("1 + 3 = ?", 2, 50L),
+            createMastery("1 + 4 = ?", 0, 400L),
+            createMastery("1 + 5 = ?", 1, 300L)
         )
         val strategy = setupStrategy(userMastery)
 
@@ -68,11 +68,11 @@ class DrillStrategyTest {
     fun `initial working set fills with L2 facts when L1 isn't enough`() {
         // ARRANGE: 2 L1 facts and 3 L2 facts.
         val userMastery = mutableMapOf(
-            createMastery("ADDITION_1_1", 0, 100L), // L1
-            createMastery("ADDITION_1_2", 1, 200L), // L1
-            createMastery("ADDITION_1_3", 3, 50L),  // L2 (oldest)
-            createMastery("ADDITION_1_4", 4, 400L), // L2
-            createMastery("ADDITION_1_5", 3, 150L)  // L2 (second oldest)
+            createMastery("1 + 1 = ?", 0, 100L), // L1
+            createMastery("1 + 2 = ?", 1, 200L), // L1
+            createMastery("1 + 3 = ?", 3, 50L),  // L2 (oldest)
+            createMastery("1 + 4 = ?", 4, 400L), // L2
+            createMastery("1 + 5 = ?", 3, 150L)  // L2 (second oldest)
         )
         val strategy = setupStrategy(userMastery)
 
@@ -83,21 +83,21 @@ class DrillStrategyTest {
         assertEquals("Working set should be the target size", 4, workingSet.size)
         assertTrue(
             "Must contain all L1 facts",
-            workingSet.containsAll(listOf("ADDITION_1_1", "ADDITION_1_2"))
+            workingSet.containsAll(listOf("1 + 1 = ?", "1 + 2 = ?"))
         )
         assertTrue(
             "Must contain the two oldest L2 facts",
-            workingSet.containsAll(listOf("ADDITION_1_3", "ADDITION_1_5"))
+            workingSet.containsAll(listOf("1 + 3 = ?", "1 + 5 = ?"))
         )
-        assertFalse("Should not contain the newest L2 fact", workingSet.contains("ADDITION_1_4"))
+        assertFalse("Should not contain the newest L2 fact", workingSet.contains("1 + 4 = ?"))
     }
 
     @Test
     fun `initial working set fills with unseen facts when L1 and L2 arent enough`() {
         // ARRANGE: 1 L1 fact and 1 L2 fact.
         val userMastery = mutableMapOf(
-            createMastery("ADDITION_1_1", 1, 100L), // L1
-            createMastery("ADDITION_1_2", 3, 200L)  // L2
+            createMastery("1 + 1 = ?", 1, 100L), // L1
+            createMastery("1 + 2 = ?", 3, 200L)  // L2
         )
         val strategy = setupStrategy(userMastery)
 
@@ -107,8 +107,8 @@ class DrillStrategyTest {
 
         // ASSERT
         assertEquals("Working set should be the target size", 4, workingSet.size)
-        assertTrue("Must contain the L1 fact", workingSet.contains("ADDITION_1_1"))
-        assertTrue("Must contain the L2 fact", workingSet.contains("ADDITION_1_2"))
+        assertTrue("Must contain the L1 fact", workingSet.contains("1 + 1 = ?"))
+        assertTrue("Must contain the L2 fact", workingSet.contains("1 + 2 = ?"))
         assertEquals("Should be filled with 2 unseen facts", 2, unseenFactsInSet.size)
     }
 
@@ -139,12 +139,12 @@ class DrillStrategyTest {
     fun `initial working set handles fewer facts than set size available to drill`() {
         // ARRANGE: A level with 10 facts, but 8 are already mastered.
         val userMastery = (3..10).associate {
-            createMastery("ADDITION_1_$it", 5, 1000L) // Mastered
+            createMastery("1 + $it = ?", 5, 1000L) // Mastered
         }.toMutableMap()
         userMastery.putAll(
             mapOf(
-                createMastery("ADDITION_1_1", 1, 100L), // L1
-                createMastery("ADDITION_1_2", 3, 200L)  // L2
+                createMastery("1 + 1 = ?", 1, 100L), // L1
+                createMastery("1 + 2 = ?", 3, 200L)  // L2
             )
         )
         val strategy = setupStrategy(userMastery)
@@ -157,7 +157,7 @@ class DrillStrategyTest {
         assertEquals("Working set should be full (2 unmastered + 2 mastered)", 4, workingSet.size)
         assertTrue(
             "Working set must contain the L1 and L2 facts",
-            workingSet.containsAll(listOf("ADDITION_1_1", "ADDITION_1_2"))
+            workingSet.containsAll(listOf("1 + 1 = ?", "1 + 2 = ?"))
         )
         assertEquals(
             "Working set should be filled with 2 mastered L3 facts",
@@ -172,14 +172,14 @@ class DrillStrategyTest {
 
     @Test
     fun `incorrect answer to L2 fact demotes it to strength 1`() {
-        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 4, 100L))
+        val userMastery = mutableMapOf("1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 4, 100L))
         val strategy = setupStrategy(userMastery, setSize = 1)
-        assertEquals(listOf("ADDITION_1_1"), strategy.workingSet)
-        val exercise = exerciseFromFactId("ADDITION_1_1")
+        assertEquals(listOf("1 + 1 = ?"), strategy.workingSet)
+        val exercise = exerciseFromFactId("1 + 1 = ?")
 
         strategy.recordAttempt(exercise, false)
 
-        assertEquals(1, userMastery["ADDITION_1_1"]!!.strength)
+        assertEquals(1, userMastery["1 + 1 = ?"]!!.strength)
     }
 
     @Test
@@ -188,7 +188,7 @@ class DrillStrategyTest {
         val userMastery = mutableMapOf<String, FactMastery>()
         val testUserId = 7L
         val strategy = setupStrategy(userMastery, userId = testUserId)
-        val exercise = exerciseFromFactId("ADDITION_1_1")
+        val exercise = exerciseFromFactId("1 + 1 = ?")
 
         // ACT
         val (newMastery, _) = strategy.recordAttempt(exercise, wasCorrect = true)
@@ -204,9 +204,9 @@ class DrillStrategyTest {
 
     @Test
     fun `strength 2 to 3 does not happen if speed is too slow`() {
-        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 2, 100L))
+        val userMastery = mutableMapOf("1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 2, 100L))
         val strategy = setupStrategy(userMastery)
-        val exercise = exerciseFromFactId("ADDITION_1_1")
+        val exercise = exerciseFromFactId("1 + 1 = ?")
         exercise.speedBadge = SpeedBadge.NONE // Too slow
 
         strategy.recordAttempt(exercise, true)
@@ -214,15 +214,15 @@ class DrillStrategyTest {
         assertEquals(
             "Strength should not increase without the required speed",
             2,
-            userMastery["ADDITION_1_1"]!!.strength
+            userMastery["1 + 1 = ?"]!!.strength
         )
     }
 
     @Test
     fun `strength 2 to 3 requires bronze badge`() {
-        val userMastery = mutableMapOf("ADDITION_1_1" to FactMastery("ADDITION_1_1", 1, "", 2, 100L))
+        val userMastery = mutableMapOf("1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 2, 100L))
         val strategy = setupStrategy(userMastery)
-        val exercise = exerciseFromFactId("ADDITION_1_1")
+        val exercise = exerciseFromFactId("1 + 1 = ?")
         exercise.speedBadge = SpeedBadge.BRONZE
 
         strategy.recordAttempt(exercise, true)
@@ -230,7 +230,7 @@ class DrillStrategyTest {
         assertEquals(
             "Strength should advance to 3 with a Bronze badge",
             3,
-            userMastery["ADDITION_1_1"]!!.strength
+            userMastery["1 + 1 = ?"]!!.strength
         )
     }
 
@@ -269,10 +269,10 @@ class DrillStrategyTest {
         // One of the L2 facts is old and ready to be mastered.
         // The "next weakest" fact is an unseen one.
         val userMastery = mutableMapOf(
-            createMastery("ADDITION_1_2", 0, 100L), // L1
-            createMastery("ADDITION_1_3", 1, 200L), // L1
-            createMastery("ADDITION_1_1", 4, 50L),  // L2 (oldest, will be mastered)
-            createMastery("ADDITION_1_4", 3, 400L)  // L2
+            createMastery("1 + 2 = ?", 0, 100L), // L1
+            createMastery("1 + 3 = ?", 1, 200L), // L1
+            createMastery("1 + 1 = ?", 4, 50L),  // L2 (oldest, will be mastered)
+            createMastery("1 + 4 = ?", 3, 400L)  // L2
         )
         val strategy = setupStrategy(userMastery)
         val initialWorkingSet = strategy.workingSet
@@ -280,19 +280,19 @@ class DrillStrategyTest {
         // Sanity-check the initial state
         assertTrue(
             "Fact to be mastered must be in the initial set",
-            initialWorkingSet.contains("ADDITION_1_1")
+            initialWorkingSet.contains("1 + 1 = ?")
         )
         assertEquals(4, initialWorkingSet.size)
 
         // ACT: Master the L2 fact
-        strategy.recordAttempt(exerciseFromFactId("ADDITION_1_1"), true)
+        strategy.recordAttempt(exerciseFromFactId("1 + 1 = ?"), true)
 
         // ASSERT
         val finalWorkingSet = strategy.workingSet
         val unseenFactsInSet = finalWorkingSet.filter { !userMastery.containsKey(it) }
 
         assertEquals("Working set should maintain its size", 4, finalWorkingSet.size)
-        assertFalse("Mastered fact should be removed", finalWorkingSet.contains("ADDITION_1_1"))
+        assertFalse("Mastered fact should be removed", finalWorkingSet.contains("1 + 1 = ?"))
         assertEquals(
             "A new, unseen fact should have been added to fill the space",
             1,

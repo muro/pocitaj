@@ -53,8 +53,8 @@ class TableLevelTest {
         // However, for op2 = table (5), 5x5 is generated twice but stored once in the Set.
         // So 10 * 2 + 1 = 21 facts expected.
         assertEquals(21, facts.size)
-        assertTrue(facts.contains("MULTIPLICATION_5_2"))
-        assertTrue(facts.contains("MULTIPLICATION_2_5"))
+        assertTrue(facts.contains("5 * 2 = ?"))
+        assertTrue(facts.contains("2 * 5 = ?"))
     }
 
     @Test
@@ -65,7 +65,7 @@ class TableLevelTest {
         // 2..10 -> 9 items. Each item generates 1 fact (Dividend / Divisor)
         // Total 9 facts expected.
         assertEquals(9, facts.size)
-        assertTrue(facts.contains("DIVISION_12_6")) // 12 / 6 = 2
-        assertTrue(facts.contains("DIVISION_60_6")) // 60 / 6 = 10
+        assertTrue(facts.contains("12 / 6 = ?")) // 12 / 6 = 2
+        assertTrue(facts.contains("60 / 6 = ?")) // 60 / 6 = 10
     }
 }

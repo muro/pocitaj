@@ -65,14 +65,12 @@ open class TwoDigitComputationLevel(
     }
 
     override fun getAllPossibleFactIds(): List<String> {
-        val factPrefix = if (operation == Operation.ADDITION) "ADD" else "SUB"
-
-        val onesFacts = if (operation == Operation.ADDITION) {
+        val onesPairs = if (operation == Operation.ADDITION) {
             (0..9).flatMap { o1 ->
                 (0..9).mapNotNull { o2 ->
                     val sum = o1 + o2
                     if ((withRegrouping && sum >= 10) || (!withRegrouping && sum < 10)) {
-                        "${factPrefix}_ONES_${o1}_${o2}"
+                        o1 to o2
                     } else null
                 }
             }
@@ -80,27 +78,33 @@ open class TwoDigitComputationLevel(
             if (withRegrouping) {
                 // Borrow: o1 < o2. Fact is HELD as 1{o1}, e.g. 14-7
                 // The stored fact uses "14" and "7".
+                // But for the final number, op1 has ones digit o1.
+                // Wait, logic in generateExercise: 
+                // if borrow, onesDigit = op1OnesOrTeens - 10.
+                // Actually, let's look at tens logic.
+
+                // Let's stick to generating valid (op1, op2) pairs that satisfy the condition.
                 (0..8).flatMap { o1 ->
                     (o1 + 1..9).map { o2 ->
-                        "${factPrefix}_ONES_${o1 + 10}_${o2}"
+                        o1 to o2 // o1 < o2, so requires borrow
                     }
                 }
             } else {
                 // No borrow: o1 >= o2
                 (0..9).flatMap { o1 ->
                     (0..o1).map { o2 ->
-                        "${factPrefix}_ONES_${o1}_${o2}"
+                        o1 to o2
                     }
                 }
             }
         }
 
-        val tensFacts = if (operation == Operation.ADDITION) {
+        val tensPairs = if (operation == Operation.ADDITION) {
             // Max tens sum is 8 if carrying (to avoid >100 result), 9 otherwise
             val maxTensSum = if (withRegrouping) 8 else 9
             (1..9).flatMap { t1 ->
                 (1..(maxTensSum - t1)).map { t2 ->
-                    "${factPrefix}_TENS_${t1}_${t2}"
+                    t1 to t2
                 }
             }
         } else { // SUBTRACTION
@@ -110,21 +114,31 @@ open class TwoDigitComputationLevel(
                 // Fact stores effective tens: SUB_TENS_{effT1}_{t2}
                 (1..8).flatMap { effT1 ->
                     (1..effT1).map { t2 ->
-                        "${factPrefix}_TENS_${effT1}_${t2}"
+                        // effT1 is what remains after borrow.
+                        // So original tens digit was effT1 + 1.
+                        (effT1 + 1) to t2
                     }
                 }
             } else {
                 // No borrow
                 (1..9).flatMap { t1 ->
                     (1..t1).map { t2 ->
-                        "${factPrefix}_TENS_${t1}_${t2}"
+                        t1 to t2
                     }
                 }
             }
         }
 
-        return onesFacts.flatMap { one ->
-            tensFacts.map { ten -> "${one}_${ten}" }
+        return onesPairs.flatMap { (o1, o2) ->
+            tensPairs.map { (t1, t2) ->
+                val op1 = t1 * 10 + o1
+                val op2 = t2 * 10 + o2
+                if (operation == Operation.ADDITION) {
+                    "$op1 + $op2 = ?"
+                } else {
+                    "$op1 - $op2 = ?"
+                }
+            }
         }
     }
 }

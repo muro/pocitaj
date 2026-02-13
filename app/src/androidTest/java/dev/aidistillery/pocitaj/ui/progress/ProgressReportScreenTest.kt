@@ -28,11 +28,11 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
             InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
         val factMasteryDao = application.globals.factMasteryDao
         runBlocking {
-            factMasteryDao.upsert(FactMastery("ADDITION_1_1", 1, "", 5, 0))
-            factMasteryDao.upsert(FactMastery("ADDITION_1_2", 1, "", 3, 0))
-            factMasteryDao.upsert(FactMastery("SUBTRACTION_2_1", 1, "", 1, 0))
-            factMasteryDao.upsert(FactMastery("SUBTRACTION_2_2", 1, "", 4, 0))
-            factMasteryDao.upsert(FactMastery("MULTIPLICATION_2_3", 1, "", 5, 0))
+            factMasteryDao.upsert(FactMastery("1 + 1 = ?", 1, "", 5, 0))
+            factMasteryDao.upsert(FactMastery("1 + 2 = ?", 1, "", 3, 0))
+            factMasteryDao.upsert(FactMastery("2 - 1 = ?", 1, "", 1, 0))
+            factMasteryDao.upsert(FactMastery("2 - 2 = ?", 1, "", 4, 0))
+            factMasteryDao.upsert(FactMastery("2 * 3 = ?", 1, "", 5, 0))
         }
 
         // WHEN: The user navigates to the progress report screen

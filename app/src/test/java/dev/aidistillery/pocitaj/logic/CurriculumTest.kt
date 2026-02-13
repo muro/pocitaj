@@ -130,11 +130,11 @@ class CurriculumTest {
 
         // The set logic handles duplicates, so we check for specific examples.
         assertEquals(21, factIds.size) // 11 pairs, 7x7 is not duplicated
-        assertTrue(factIds.contains("MULTIPLICATION_7_2"))
-        assertTrue(factIds.contains("MULTIPLICATION_2_7"))
-        assertTrue(factIds.contains("MULTIPLICATION_7_12"))
-        assertTrue(factIds.contains("MULTIPLICATION_12_7"))
-        assertTrue(factIds.contains("MULTIPLICATION_7_7"))
+        assertTrue(factIds.contains("7 * 2 = ?"))
+        assertTrue(factIds.contains("2 * 7 = ?"))
+        assertTrue(factIds.contains("7 * 12 = ?"))
+        assertTrue(factIds.contains("12 * 7 = ?"))
+        assertTrue(factIds.contains("7 * 7 = ?"))
     }
 
     @Test
@@ -158,9 +158,9 @@ class CurriculumTest {
         val factIds = level.getAllPossibleFactIds()
 
         assertEquals(9, factIds.size) // 2..10 for the result
-        assertTrue(factIds.contains("DIVISION_12_6"))
-        assertTrue(factIds.contains("DIVISION_30_6"))
-        assertTrue(factIds.contains("DIVISION_60_6"))
+        assertTrue(factIds.contains("12 / 6 = ?"))
+        assertTrue(factIds.contains("30 / 6 = ?"))
+        assertTrue(factIds.contains("60 / 6 = ?"))
     }
 
     @Test

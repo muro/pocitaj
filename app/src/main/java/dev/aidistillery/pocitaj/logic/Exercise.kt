@@ -46,7 +46,6 @@ data class Exercise(
     }
 
     fun getFactId(): String {
-        val (op, op1, op2) = equation.getFact()
-        return "${op.name}_${op1}_${op2}"
+        return equation.getFactId()
     }
 }
