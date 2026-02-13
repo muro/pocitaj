@@ -1,6 +1,7 @@
 package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.Operation
+import dev.aidistillery.pocitaj.data.toSymbol
 import java.util.Locale
 
 interface Equation {
@@ -51,17 +52,13 @@ data class Subtraction(private val a: Int, private val b: Int) : Equation {
 
 // TODO: Move operation to first parameter? Also, why not just factId, can't it all be reconstructed?
 data class TwoDigitEquation(
+    private val operation: Operation,
     private val op1: Int,
     private val op2: Int,
-    private val operation: Operation,
     private val factId: String
 ) : Equation {
-    override fun question(): String = when (operation) {
-        // TODO: Use operation.toSymbol
-        Operation.ADDITION -> String.format(Locale.ENGLISH, "%d + %d = ?", op1, op2)
-        Operation.SUBTRACTION -> String.format(Locale.ENGLISH, "%d - %d = ?", op1, op2)
-        else -> throw IllegalArgumentException("Unsupported operation for TwoDigitEquation")
-    }
+    override fun question(): String =
+        String.format(Locale.ENGLISH, "%d %s %d = ?", op1, operation.toSymbol(), op2)
 
     override fun getExpectedResult(): Int = when (operation) {
         Operation.ADDITION -> op1 + op2
@@ -71,12 +68,7 @@ data class TwoDigitEquation(
 
     override fun getQuestionAsSolved(submittedSolution: Int?): String {
         return if (submittedSolution != null) {
-            when (operation) {
-                // TODO: Subtraction looks like a bug - it should do just the same as ADDITION.
-                Operation.ADDITION -> question().replace("?", submittedSolution.toString())
-                Operation.SUBTRACTION -> String.format(Locale.ENGLISH, "%d - %d", op1, op2)
-                else -> throw IllegalArgumentException("Unsupported operation")
-            }
+            question().replace("?", submittedSolution.toString())
         } else {
             question()
         }

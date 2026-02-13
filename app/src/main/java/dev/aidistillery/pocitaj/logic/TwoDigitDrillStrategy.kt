@@ -66,7 +66,7 @@ class TwoDigitDrillStrategy(
 
         val (op1, op2) = parseFactId(factId) ?: return null
 
-        val equation = TwoDigitEquation(op1, op2, level.operation, factId)
+        val equation = TwoDigitEquation(level.operation, op1, op2, factId)
         return Exercise(equation)
     }
 
