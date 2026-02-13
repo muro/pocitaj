@@ -168,44 +168,21 @@ fun LevelProgressList(levelProgress: Map<String, LevelProgress>) {
 
 private fun mapFactsToCoords(facts: List<FactProgress>): List<Triple<Int, Int, FactProgress>> {
     val legacyRegex = Regex("""^[A-Z]+_(\d+)_(\d+)$""")
-
-    // TODO: these can probably be all merged
-    val multiplicationRegex = Regex("""^(\d+) \* (\d+) = \?$""")
-    val divisionRegex = Regex("""^(\d+) / (\d+) = \?$""")
-    val additionRegex = Regex("""^(\d+) \+ (\d+) = \?$""")
-    val subtractionRegex = Regex("""^(\d+) - (\d+) = \?$""")
+    // Matches "1 + 2 = ?", "10 * 10 = ?", etc.
+    val semanticRegex = Regex("""^(\d+) ([+*/-]) (\d+) = \?$""")
 
     return facts.mapNotNull { factProgress ->
         val id = factProgress.factId
 
-        // 1. Try legacy format (e.g., MULTIPLICATION_2_3)
+        // 1. Try semantic ID first (common case)
+        semanticRegex.matchEntire(id)?.let { match ->
+            val op1 = match.groupValues[1].toIntOrNull()
+            val op2 = match.groupValues[3].toIntOrNull()
+            if (op1 != null && op2 != null) return@mapNotNull Triple(op1, op2, factProgress)
+        }
+
+        // 2. Fallback to legacy format
         legacyRegex.matchEntire(id)?.let { match ->
-            val op1 = match.groupValues[1].toIntOrNull()
-            val op2 = match.groupValues[2].toIntOrNull()
-            if (op1 != null && op2 != null) return@mapNotNull Triple(op1, op2, factProgress)
-        }
-
-        // 2. Try multiplication semantic ID
-        multiplicationRegex.matchEntire(id)?.let { match ->
-            val op1 = match.groupValues[1].toIntOrNull()
-            val op2 = match.groupValues[2].toIntOrNull()
-            if (op1 != null && op2 != null) return@mapNotNull Triple(op1, op2, factProgress)
-        }
-
-        // 3. Try division semantic ID
-        divisionRegex.matchEntire(id)?.let { match ->
-            val op1 = match.groupValues[1].toIntOrNull()
-            val op2 = match.groupValues[2].toIntOrNull()
-            if (op1 != null && op2 != null) return@mapNotNull Triple(op1, op2, factProgress)
-        }
-
-        // 4. Try addition/subtraction semantic IDs
-        additionRegex.matchEntire(id)?.let { match ->
-            val op1 = match.groupValues[1].toIntOrNull()
-            val op2 = match.groupValues[2].toIntOrNull()
-            if (op1 != null && op2 != null) return@mapNotNull Triple(op1, op2, factProgress)
-        }
-        subtractionRegex.matchEntire(id)?.let { match ->
             val op1 = match.groupValues[1].toIntOrNull()
             val op2 = match.groupValues[2].toIntOrNull()
             if (op1 != null && op2 != null) return@mapNotNull Triple(op1, op2, factProgress)

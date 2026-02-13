@@ -54,14 +54,8 @@ class TwoDigitDrillStrategy(
 
     private fun parseFactId(factId: String): Pair<Int, Int>? {
         // "14 + 23 = ?" or "34 - 12 = ?"
-        // TODO: Simplify to a single regexp? Or is the operation check useful?
-        return if (level.operation == Operation.ADDITION) {
-            val match = Regex("""(\d+) \+ (\d+) = \?""").matchEntire(factId)
-            match?.destructured?.let { (a, b) -> a.toInt() to b.toInt() }
-        } else {
-            val match = Regex("""(\d+) - (\d+) = \?""").matchEntire(factId)
-            match?.destructured?.let { (a, b) -> a.toInt() to b.toInt() }
-        }
+        val match = Regex("""(\d+) [+-] (\d+) = \?""").matchEntire(factId)
+        return match?.destructured?.let { (a, b) -> a.toInt() to b.toInt() }
     }
 
     override fun getNextExercise(): Exercise? {
