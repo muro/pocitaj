@@ -99,29 +99,12 @@ class SmartPracticeStrategy(
         val now = clock.now().toEpochMilliseconds()
         val duration = exercise.timeTakenMillis?.toLong() ?: 0L
 
-        val newAvgDuration = if (mastery.avgDurationMs > 0) {
-            (mastery.avgDurationMs * 0.8 + duration * 0.2).toLong()
-        } else {
-            duration
-        }
-
-        val newStrength = if (wasCorrect) {
-            val speedBadge = exercise.speedBadge
-            when (val currentStrength = mastery.strength) {
-                0, 1 -> currentStrength + 1 // Always advance for accuracy at low levels
-                2 -> if (speedBadge >= SpeedBadge.BRONZE) 3 else 2
-                3 -> if (speedBadge >= SpeedBadge.SILVER) 4 else 3
-                4 -> if (speedBadge == SpeedBadge.GOLD) 5 else 4
-                else -> currentStrength // Stays at 5 if already mastered
-            }
-        } else {
-            1 // Reset to 1 on failure
-        }
-
-        val newMastery = mastery.copy(
-            strength = newStrength.coerceAtMost(MASTERY_STRENGTH),
-            lastTestedTimestamp = now,
-            avgDurationMs = newAvgDuration
+        val newMastery = SpacedRepetitionSystem.updateMastery(
+            currentMastery = mastery,
+            wasCorrect = wasCorrect,
+            durationMs = duration,
+            speedBadge = exercise.speedBadge,
+            clock = clock
         )
         userMastery[factId] = newMastery
         return newMastery to (findCurrentLevel().id)

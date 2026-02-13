@@ -87,6 +87,8 @@ class TwoDigitDrillStrategyTest {
             TwoDigitDrillStrategy(twoDigitAdditionLevel, userMastery, activeUserId = 1L)
         val exercise =
             Exercise(TwoDigitEquation(12, 21, Operation.ADDITION, "ADD_ONES_2_1_ADD_TENS_1_2"))
+        // Set a fast time to ensure a SpeedBadge (Gold/Silver) is earned, allowing promotion from Strength 2 -> 3
+        exercise.solve(33, timeMillis = 500)
 
         // ACT
         strategy.recordAttempt(exercise, wasCorrect = true)

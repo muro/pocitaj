@@ -100,22 +100,12 @@ class TwoDigitDrillStrategy(
         val now = clock.now().toEpochMilliseconds()
         val duration = exercise.timeTakenMillis?.toLong() ?: 0L
 
-        val newAvgDuration = if (mastery.avgDurationMs > 0) {
-            (mastery.avgDurationMs * 0.8 + duration * 0.2).toLong()
-        } else {
-            duration
-        }
-
-        val newStrength = if (wasCorrect) {
-            (mastery.strength + 1).coerceAtMost(5)
-        } else {
-            (mastery.strength - 1).coerceAtLeast(0)
-        }
-
-        return mastery.copy(
-            strength = newStrength,
-            lastTestedTimestamp = now,
-            avgDurationMs = newAvgDuration
+        return SpacedRepetitionSystem.updateMastery(
+            currentMastery = mastery,
+            wasCorrect = wasCorrect,
+            durationMs = duration,
+            speedBadge = exercise.speedBadge,
+            clock = clock
         )
     }
 }
