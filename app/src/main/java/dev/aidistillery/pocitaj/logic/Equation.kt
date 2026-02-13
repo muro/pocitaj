@@ -42,7 +42,7 @@ data class Subtraction(private val a: Int, private val b: Int) : Equation {
     override fun getFactId(): String = "$a - $b = ?"
 }
 
-// TODO: Move operation to first parameter? Also, why not just factId, can't it all be reconstructed?
+// TODO: why not just factId, can't it all be reconstructed?
 data class TwoDigitEquation(
     private val operation: Operation,
     private val op1: Int,
