@@ -2,9 +2,11 @@ package dev.aidistillery.pocitaj.ui.progress
 
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.FactMasteryDao
-import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.logic.Curriculum
-import dev.aidistillery.pocitaj.logic.TwoDigitDrillStrategy
+import dev.aidistillery.pocitaj.logic.ExerciseStrategy
+import dev.aidistillery.pocitaj.logic.Level
+import dev.aidistillery.pocitaj.logic.TwoDigitComputationLevel
+import dev.aidistillery.pocitaj.logic.createStrategy
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.filter
@@ -13,42 +15,69 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 
-class ProgressIntegrationTest {
+@RunWith(Parameterized::class)
+class ProgressIntegrationTest(private val level: Level) {
+
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters(name = "{0}")
+        fun data(): Collection<Level> {
+            return Curriculum.getAllLevels()
+        }
+    }
 
     @Test
-    fun `solving exercises naturally increases level progress`() = runBlocking {
-        // ARRANGE
+    fun `solving exercises increases level progress correctly`() = runBlocking {
         val activeUserId = 1L
-        val level = Curriculum.TwoDigitAdditionNoCarry
         val userMastery = mutableMapOf<String, FactMastery>()
-        val strategy = TwoDigitDrillStrategy(level, userMastery, activeUserId = activeUserId)
 
-        // ACT: Simulate user solving 30 exercises
-        repeat(30) {
+        // Use the factory to get the correct strategy for the level
+        val strategy = level.createStrategy(userMastery, activeUserId)
+
+        val allFactIds = level.getAllPossibleFactIds()
+        val totalFacts = allFactIds.size
+
+        // Target ~50% progress.
+        // - Baseline: Starting strength is 3. GOLD (+1) needs 2 hits to reach 5.
+        // - Standard Drill: masters 1 fact per 2 exercises (on average). 
+        //   First N exercises bring all to Strength 4. Next N/2 bring half to Strength 5.
+        //   So 1.5 * N exercises = 50% progress.
+        // - Two-Digit Drill: 1 ex = 2 component hits. Each component needs 2 hits.
+        //   So 1 exercise = 1 mastered component. N/2 ex = 50% progress.
+        // - Review: 1 ex = 1 mastered fact (promotes instantly to 6). So N/2 exercises = 50% progress.
+        val exercisesToSolve = when {
+            level is TwoDigitComputationLevel -> totalFacts / 2
+            level.strategy == ExerciseStrategy.REVIEW -> totalFacts / 2
+            else -> totalFacts + (totalFacts / 2)
+        }
+
+        // ACT: Solve exercises with GOLD speed (500ms)
+        repeat(exercisesToSolve) {
             val exercise = strategy.getNextExercise() ?: return@repeat
-            exercise.solve(exercise.equation.getExpectedResult(), 2000)
+            exercise.solve(exercise.equation.getExpectedResult(), 500)
             strategy.recordAttempt(exercise, wasCorrect = true)
         }
 
-        // Setup ViewModel AFTER exercises are solved so it captures the completed state
+        // Setup ViewModel
         val mockDao = mockk<FactMasteryDao> {
             every { getAllFactsForUser(activeUserId) } returns flowOf(userMastery.values.toList())
         }
         val viewModel = ProgressReportViewModel(mockDao, activeUserId)
 
         // ASSERT
+        // Filter to ensure we get a non-empty emission (ViewModel initial state is empty)
         val progressMap = viewModel.levelProgressByOperation.filter { it.isNotEmpty() }.first()
-        val levelProgress = progressMap[Operation.ADDITION]?.get(level.id)?.progress ?: 0f
+        val levelProgress = progressMap[level.operation]?.get(level.id)?.progress ?: 0f
 
-        // Strategy picks 2 weak Ones + 2 weak Tens -> generates 4 exercises.
-        // Each wave of 4 exercises masters those 4 components. Ratio is ~1.0.
-        val totalFacts = level.getAllPossibleFactIds().size
-        val expectedProgress = 30f / totalFacts
-        val tolerance = 0.1f
+        // Expectation: ~50% progress
+        val expectedProgress = 0.5f
+        val tolerance = 0.15f 
 
         assertTrue(
-            "Progress $levelProgress should be close to 30/$totalFacts",
+            "Level ${level.id}: Progress $levelProgress should be close to $expectedProgress (Solved $exercisesToSolve/$totalFacts)",
             levelProgress in (expectedProgress - tolerance)..(expectedProgress + tolerance)
         )
     }

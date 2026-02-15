@@ -140,7 +140,7 @@ object Curriculum {
                         "$op2 + $op1 = ?"
                     )
                 }
-            }
+            }.distinct() // we add both a+b and b+a, which for doubles is the same
         }
     }
 
