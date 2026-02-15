@@ -22,88 +22,86 @@ class TwoDigitDrillStrategy(
         return userMastery[factId] ?: FactMastery(factId, activeUserId, "", 3, 0)
     }
 
+
+    private fun getComponentFactIds(op1: Int, op2: Int): Pair<String, String> {
+        val prefix = if (level.operation == Operation.ADDITION) "ADD" else "SUB"
+        val o1 = op1 % 10
+        val o2 = op2 % 10
+        val t1 = op1 / 10
+        val t2 = op2 / 10
+        return "${prefix}_ONES_${o1}_${o2}" to "${prefix}_TENS_${t1}_${t2}"
+    }
+
     private fun updateWorkingSet() {
+        // Helper to find weakest facts
+        fun getWeakest(facts: List<String>, count: Int): List<String> = facts
+            .filter { getMastery(it).strength < 4 }
+            .ifEmpty { facts }
+            .sortedBy { getMastery(it).strength }
+            .take(count)
+
         val allFacts = level.getAllPossibleFactIds()
-        val sortedFacts = allFacts.sortedBy { factId ->
-            val (op1, op2) = parseFactId(factId) ?: return@sortedBy 0
+        val onesFacts = allFacts.filter { it.contains("_ONES_") }
+        val tensFacts = allFacts.filter { it.contains("_TENS_") }
 
-            val prefix = if (level.operation == Operation.ADDITION) "ADD" else "SUB"
-            // Decompose
-            val o1 = op1 % 10
-            val o2 = op2 % 10
-            val t1 = op1 / 10
-            val t2 = op2 / 10
-
-            // For subtraction, logic in Level was:
-            // "if Regrouping (Borrow): o1 < o2. Fact is HELD as 1{o1}, e.g. 14-7"
-            // "Fact stores effective tens: SUB_TENS_{effT1}_{t2}"
-            // This suggests I should match that logic if I want to use 'transient' mastery effectively.
-            // But since it's transient, consistency is key.
-            // Let's use a simpler consistent mapping for now:
-
-            // TODO: These should also get closer to the new equation strings.
-            // e.g.: "3 + 4" and "20 + 50" ?
-            val onesFactId = "${prefix}_ONES_${o1}_${o2}"
-            val tensFactId = "${prefix}_TENS_${t1}_${t2}"
-            
-            (getMastery(onesFactId).strength + getMastery(tensFactId).strength) / 2
+        if (onesFacts.all { getMastery(it).strength >= 4 } &&
+            tensFacts.all { getMastery(it).strength >= 4 }) {
+            workingSet.clear()
+            return
         }
+
+        val pickCount = kotlin.math.sqrt(workingSetSize.toDouble()).toInt().coerceAtLeast(1)
+        val weakOnes = getWeakest(onesFacts, pickCount)
+        val weakTens = getWeakest(tensFacts, pickCount)
+
         workingSet.clear()
-        workingSet.addAll(sortedFacts.take(workingSetSize))
+        // Cartesian product
+        for (ones in weakOnes) {
+            for (tens in weakTens) {
+                // Parse "PREFIX_TYPE_A_B"
+                val oParts = ones.split("_")
+                val tParts = tens.split("_")
+
+                val op1 = tParts[2].toInt() * 10 + oParts[2].toInt()
+                val op2 = tParts[3].toInt() * 10 + oParts[3].toInt()
+
+                val symbol = if (level.operation == Operation.ADDITION) "+" else "-"
+                workingSet.add("$op1 $symbol $op2 = ?")
+            }
+        }
     }
 
     private fun parseFactId(factId: String): Pair<Int, Int>? {
-        // "14 + 23 = ?" or "34 - 12 = ?"
-        val match = Regex("""(\d+) [+-] (\d+) = \?""").matchEntire(factId)
-        return match?.destructured?.let { (a, b) -> a.toInt() to b.toInt() }
+        val parts = factId.split(" ")
+        return if (parts.size >= 3) parts[0].toInt() to parts[2].toInt() else null
     }
 
     override fun getNextExercise(): Exercise? {
         if (workingSet.isEmpty()) return null
-
-        val factId = workingSet.removeAt(0)
-        workingSet.add(factId) // Move to the end of the queue
-
+        val factId = workingSet.removeAt(0).also { workingSet.add(it) }
         val (op1, op2) = parseFactId(factId) ?: return null
-
-        val equation = TwoDigitEquation(level.operation, op1, op2, factId)
-        return Exercise(equation)
+        return Exercise(TwoDigitEquation(level.operation, op1, op2, factId))
     }
 
     override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): Pair<FactMastery?, String> {
         val factId = (exercise.equation as TwoDigitEquation).getFactId()
         val (op1, op2) = parseFactId(factId) ?: return null to level.id
 
-        // TODO: Old style prefix - update
-        val prefix = if (level.operation == Operation.ADDITION) "ADD" else "SUB"
-        val o1 = op1 % 10
-        val o2 = op2 % 10
-        val t1 = op1 / 10
-        val t2 = op2 / 10
-
-        val onesFactId = "${prefix}_ONES_${o1}_${o2}"
-        val tensFactId = "${prefix}_TENS_${t1}_${t2}"
+        val (onesFactId, tensFactId) = getComponentFactIds(op1, op2)
 
         val onesMastery = recordInternal(onesFactId, exercise, wasCorrect)
         val tensMastery = recordInternal(tensFactId, exercise, wasCorrect)
-
-        // Also record the semantic fact mastery
-        // TODO: We need to calculate mastery of this level correctly.
-        // Currently we store mastery for each individual fact,
-        // ignoring that we treat tens and ones separately.
         val semanticMastery = recordInternal(factId, exercise, wasCorrect)
 
         userMastery[onesFactId] = onesMastery
         userMastery[tensFactId] = tensMastery
         userMastery[factId] = semanticMastery
 
-        // If the combined mastery is high enough, replace it in the working set.
         if ((onesMastery.strength + tensMastery.strength) / 2 >= 4) {
             workingSet.remove(factId)
-            updateWorkingSet() // Re-sort and fill
+            updateWorkingSet()
         }
 
-        // Return the SEMANTIC mastery to be saved in DB
         return semanticMastery to level.id
     }
 

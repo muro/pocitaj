@@ -42,12 +42,11 @@ data class Subtraction(private val a: Int, private val b: Int) : Equation {
     override fun getFactId(): String = "$a - $b = ?"
 }
 
-// TODO: why not just factId, can't it all be reconstructed?
 data class TwoDigitEquation(
-    private val operation: Operation,
-    private val op1: Int,
-    private val op2: Int,
-    private val factId: String
+    val operation: Operation,
+    val op1: Int,
+    val op2: Int,
+    val id: String
 ) : Equation {
     override fun question(): String =
         String.format(Locale.ENGLISH, "%d %s %d = ?", op1, operation.toSymbol(), op2)
@@ -59,8 +58,9 @@ data class TwoDigitEquation(
     }
 
     override fun getFact(): Triple<Operation, Int, Int> = Triple(operation, op1, op2)
-    override fun getFactId() = factId
+    override fun getFactId() = id
 }
+
 
 data class Multiplication(val a: Int, val b: Int) : Equation {
     override fun question(): String =

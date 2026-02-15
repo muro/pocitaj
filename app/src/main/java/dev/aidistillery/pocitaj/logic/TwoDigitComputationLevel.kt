@@ -2,7 +2,6 @@ package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.Operation
 
-// TODO: Look into this class and simplify.
 open class TwoDigitComputationLevel(
     override val id: String,
     override val operation: Operation,
@@ -19,6 +18,7 @@ open class TwoDigitComputationLevel(
     override fun generateExercise(): Exercise {
         var op1: Int
         var op2: Int
+        var factId: String
 
         do {
             if (operation == Operation.ADDITION) {
@@ -35,6 +35,7 @@ open class TwoDigitComputationLevel(
                     onesSum < 10
                 }
                 if (!conditionMet) continue
+                factId = "$op1 + $op2 = ?"
 
             } else { // SUBTRACTION
                 op1 = kotlin.random.Random.nextInt(11, 100)
@@ -52,19 +53,17 @@ open class TwoDigitComputationLevel(
                     ones1 >= ones2
                 }
                 if (!conditionMet) continue
+                factId = "$op1 - $op2 = ?"
             }
             // If we are here, we have valid operands
             break
         } while (true)
 
-        return if (operation == Operation.ADDITION) {
-            Exercise(Addition(op1, op2))
-        } else {
-            Exercise(Subtraction(op1, op2))
-        }
+        return Exercise(TwoDigitEquation(operation, op1, op2, factId))
     }
 
     override fun getAllPossibleFactIds(): List<String> {
+        // MINIMAL FIX: Return component IDs instead of combinatorial IDs.
         val onesPairs = if (operation == Operation.ADDITION) {
             (0..9).flatMap { o1 ->
                 (0..9).mapNotNull { o2 ->
@@ -76,17 +75,10 @@ open class TwoDigitComputationLevel(
             }
         } else { // SUBTRACTION
             if (withRegrouping) {
-                // Borrow: o1 < o2. Fact is HELD as 1{o1}, e.g. 14-7
-                // The stored fact uses "14" and "7".
-                // But for the final number, op1 has ones digit o1.
-                // Wait, logic in generateExercise: 
-                // if borrow, onesDigit = op1OnesOrTeens - 10.
-                // Actually, let's look at tens logic.
-
-                // Let's stick to generating valid (op1, op2) pairs that satisfy the condition.
+                // Borrow: o1 < o2
                 (0..8).flatMap { o1 ->
                     (o1 + 1..9).map { o2 ->
-                        o1 to o2 // o1 < o2, so requires borrow
+                        o1 to o2
                     }
                 }
             } else {
@@ -100,7 +92,6 @@ open class TwoDigitComputationLevel(
         }
 
         val tensPairs = if (operation == Operation.ADDITION) {
-            // Max tens sum is 8 if carrying (to avoid >100 result), 9 otherwise
             val maxTensSum = if (withRegrouping) 8 else 9
             (1..9).flatMap { t1 ->
                 (1..(maxTensSum - t1)).map { t2 ->
@@ -114,8 +105,6 @@ open class TwoDigitComputationLevel(
                 // Fact stores effective tens: SUB_TENS_{effT1}_{t2}
                 (1..8).flatMap { effT1 ->
                     (1..effT1).map { t2 ->
-                        // effT1 is what remains after borrow.
-                        // So original tens digit was effT1 + 1.
                         (effT1 + 1) to t2
                     }
                 }
@@ -129,16 +118,11 @@ open class TwoDigitComputationLevel(
             }
         }
 
-        return onesPairs.flatMap { (o1, o2) ->
-            tensPairs.map { (t1, t2) ->
-                val op1 = t1 * 10 + o1
-                val op2 = t2 * 10 + o2
-                if (operation == Operation.ADDITION) {
-                    "$op1 + $op2 = ?"
-                } else {
-                    "$op1 - $op2 = ?"
-                }
-            }
-        }
+        val prefix = if (operation == Operation.ADDITION) "ADD" else "SUB"
+
+        val ones = onesPairs.map { (o1, o2) -> "${prefix}_ONES_${o1}_${o2}" }
+        val tens = tensPairs.map { (t1, t2) -> "${prefix}_TENS_${t1}_${t2}" }
+
+        return (ones + tens).distinct()
     }
 }

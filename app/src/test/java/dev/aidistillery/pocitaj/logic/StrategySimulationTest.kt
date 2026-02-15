@@ -81,9 +81,17 @@ class StrategySimulationTest {
 
             // Verification Assertions
             // Perfect student: At least 1 exercise per fact.
+            // EXCEPTION: TwoDigitComputationLevel updates 2 facts per exercise (ones + tens),
+            // so the minimum exercises needed is factsCount / 2.
+            val minExpectedExercises = if (level is TwoDigitComputationLevel) {
+                (factsCountReported / 2.0).toInt()
+            } else {
+                factsCountReported
+            }
+
             assertTrue(
-                "Level ${level.id}: Perfect student should take at least $factsCountReported exercises",
-                perfect.exerciseCount >= factsCountReported
+                "Level ${level.id}: Perfect student should take at least $minExpectedExercises exercises (Facts: $factsCountReported, Actual: ${perfect.exerciseCount})",
+                perfect.exerciseCount >= minExpectedExercises
             )
 
             // Mistake Prone Logic:
@@ -198,27 +206,10 @@ class StrategySimulationTest {
     private fun getRequiredFactsForMastery(level: Level): Set<String> {
         val allFactIds = level.getAllPossibleFactIds()
 
-        return if (level is TwoDigitComputationLevel) {
-            // For TwoDigitComputationLevel, DrillStrategy manages mastery on the *underlying* single-digit facts (ones and tens),
-            // not on the composite problem ID itself.
-            allFactIds.flatMap { factId ->
-                val (op1, op2) = getOpsFromFactId(factId).let { it.second to it.third }
-                val prefix = if (level.operation == Operation.ADDITION) "ADD" else "SUB"
-
-                // Decompose
-                val o1 = op1 % 10
-                val o2 = op2 % 10
-                val t1 = op1 / 10
-                val t2 = op2 / 10
-
-                // TODO: this seems to use the old naming
-                val ones = "${prefix}_ONES_${o1}_${o2}"
-                val tens = "${prefix}_TENS_${t1}_${t2}"
-                listOf(ones, tens)
-            }.toSet()
-        } else {
-            allFactIds.toSet()
-        }
+        // For TwoDigitComputationLevel, getAllPossibleFactIds already returns the component facts (ONES/TENS).
+        // For other levels, it returns the semantic facts.
+        // In both cases, these are exactly the facts we need to track mastery for.
+        return allFactIds.toSet()
     }
     
     companion object {

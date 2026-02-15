@@ -65,6 +65,7 @@ class TwoDigitDrillStrategyTest {
         val exercise = strategy.getNextExercise()
 
         // ASSERT
+        // Verify it is TwoDigitEquation
         assertTrue(exercise?.equation is TwoDigitEquation)
         val twoDigitEquation = exercise!!.equation as TwoDigitEquation
         val (op, op1, op2) = twoDigitEquation.getFact()
@@ -88,8 +89,11 @@ class TwoDigitDrillStrategyTest {
         )
         val strategy =
             TwoDigitDrillStrategy(twoDigitAdditionLevel, userMastery, activeUserId = 1L)
+
+        // Use TwoDigitEquation explicitly because Strategy casts to it
         val exercise =
             Exercise(TwoDigitEquation(Operation.ADDITION, 12, 21, "12 + 21 = ?"))
+
         // Set a fast time to ensure a SpeedBadge (Gold/Silver) is earned, allowing promotion from Strength 2 -> 3
         exercise.solve(33, timeMillis = 500)
 
@@ -152,20 +156,6 @@ class TwoDigitDrillStrategyTest {
         assertTrue(exercise?.equation is TwoDigitEquation)
         val equation = exercise!!.equation as TwoDigitEquation
         val (op, op1, op2) = equation.getFact()
-
-        // logic reconstruction:
-        // op1OnesOrTeens (parts[2]) = 14
-        // op2Ones (parts[3]) = 9
-        // op1TensEffective (parts[6]) = 1
-        // op2Tens (parts[7]) = 1
-        //
-        // op2 = 1*10 + 9 = 19
-        //
-        // isAddition = false.
-        // op1OnesOrTeens >= 10 (14 >= 10) -> True
-        // onesDigit = 14 - 10 = 4
-        // originalTens = 1 + 1 = 2
-        // op1 = 2*10 + 4 = 24
 
         assertEquals(24, op1)
         assertEquals(19, op2)
