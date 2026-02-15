@@ -4,6 +4,8 @@ import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
 import kotlin.time.Clock
 
+private const val MASTERY_THRESHOLD = 5
+
 class TwoDigitDrillStrategy(
     private val level: Level,
     private val userMastery: MutableMap<String, FactMastery>,
@@ -35,7 +37,7 @@ class TwoDigitDrillStrategy(
     private fun updateWorkingSet() {
         // Helper to find weakest facts
         fun getWeakest(facts: List<String>, count: Int): List<String> = facts
-            .filter { getMastery(it).strength < 5 }
+            .filter { getMastery(it).strength < MASTERY_THRESHOLD }
             .ifEmpty { facts }
             .sortedBy { getMastery(it).strength }
             .take(count)
@@ -44,8 +46,8 @@ class TwoDigitDrillStrategy(
         val onesFacts = allFacts.filter { it.contains("_ONES_") }
         val tensFacts = allFacts.filter { it.contains("_TENS_") }
 
-        if (onesFacts.all { getMastery(it).strength >= 5 } &&
-            tensFacts.all { getMastery(it).strength >= 5 }) {
+        if (onesFacts.all { getMastery(it).strength >= MASTERY_THRESHOLD } &&
+            tensFacts.all { getMastery(it).strength >= MASTERY_THRESHOLD }) {
             workingSet.clear()
             return
         }
@@ -97,7 +99,7 @@ class TwoDigitDrillStrategy(
         userMastery[tensFactId] = tensMastery
         userMastery[factId] = semanticMastery
 
-        if ((onesMastery.strength + tensMastery.strength) / 2 >= 5) {
+        if ((onesMastery.strength + tensMastery.strength) / 2 >= MASTERY_THRESHOLD) {
             workingSet.remove(factId)
             updateWorkingSet()
         }

@@ -21,72 +21,35 @@ class ProgressIntegrationTest {
         // ARRANGE
         val activeUserId = 1L
         val level = Curriculum.TwoDigitAdditionNoCarry
-        // Start with empty mastery
         val userMastery = mutableMapOf<String, FactMastery>()
+        val strategy = TwoDigitDrillStrategy(level, userMastery, activeUserId = activeUserId)
 
-        // Real Strategy
-        val strategy = TwoDigitDrillStrategy(
-            level = level,
-            userMastery = userMastery,
-            activeUserId = activeUserId
-        )
-
-        // ACT
-        // Simulate a user solving 30 exercises correctly
-        // This exercises the full Component Decomposition logic in recordAttempt
+        // ACT: Simulate user solving 30 exercises
         repeat(30) {
-            val exercise = strategy.getNextExercise()
-            if (exercise != null) {
-                // Determine correct answer
-                // Note: TwoDigitEquation.getExpectedResult() is not available on Equation interface directly 
-                // without casting or using internal logic, but we can trust the equation object
-                // to answer its own question if we had a helper, or just use getExpectedResult defined in Equation interface
-                val answer = exercise.equation.getExpectedResult()
-
-                // Solve it (takes 2000ms, plenty for silver badge/progress)
-                exercise.solve(answer, 2000)
-
-                // Record it -> This updates userMastery map in place
-                strategy.recordAttempt(exercise, wasCorrect = true)
-            }
+            val exercise = strategy.getNextExercise() ?: return@repeat
+            exercise.solve(exercise.equation.getExpectedResult(), 2000)
+            strategy.recordAttempt(exercise, wasCorrect = true)
         }
 
-        // Now feed the resulting mastery into the ViewModel
-        val mockDao = mockk<FactMasteryDao>()
-        // Return the state of mastery AFTER the exercises
-        every { mockDao.getAllFactsForUser(activeUserId) } returns flowOf(userMastery.values.toList())
-
+        // Setup ViewModel AFTER exercises are solved so it captures the completed state
+        val mockDao = mockk<FactMasteryDao> {
+            every { getAllFactsForUser(activeUserId) } returns flowOf(userMastery.values.toList())
+        }
         val viewModel = ProgressReportViewModel(mockDao, activeUserId)
 
         // ASSERT
-        // Wait for the ViewModel to calculate progress
-        val progressMap = viewModel.levelProgressByOperation
-            .filter { it.isNotEmpty() }
-            .first()
+        val progressMap = viewModel.levelProgressByOperation.filter { it.isNotEmpty() }.first()
+        val levelProgress = progressMap[Operation.ADDITION]?.get(level.id)?.progress ?: 0f
 
-        val additionProgress = progressMap[Operation.ADDITION] ?: emptyMap()
-        val levelProgress = additionProgress[level.id]?.progress ?: 0f
+        // Strategy picks 2 weak Ones + 2 weak Tens -> generates 4 exercises.
+        // Each wave of 4 exercises masters those 4 components. Ratio is ~1.0.
+        val totalFacts = level.getAllPossibleFactIds().size
+        val expectedProgress = 30f / totalFacts
+        val tolerance = 0.1f
 
-        // println("Resulting Progress: $levelProgress")
-
-        // We expect valid progress. 
-        // 30 correct exercises.
-        // Strategy Logic:
-        // - It picks 2 weak Ones and 2 weak Tens.
-        // - It generates 2x2 = 4 exercises.
-        // - Solving these 4 exercises masters the 2 Ones and 2 Tens.
-        // - Ratio: 4 exercises -> 4 mastered components.
-        // - So we expect approx 1 mastered component per exercise.
-        val expectedMastered = 30f
-        val totalRequired = level.getAllPossibleFactIds().size // ~91
-        val expectedProgress = expectedMastered / totalRequired // ~0.33
-
-        // Allow some tolerance (e.g. +/- 10%) for overlaps or non-ideal repetition
-        val tolerance = 0.1f // +/- 10% progress
-        
         assertTrue(
-            "Progress should be close to $expectedProgress (30 items / $totalRequired), but was $levelProgress",
-            levelProgress >= (expectedProgress - tolerance) && levelProgress <= (expectedProgress + tolerance)
+            "Progress $levelProgress should be close to 30/$totalFacts",
+            levelProgress in (expectedProgress - tolerance)..(expectedProgress + tolerance)
         )
     }
 }
