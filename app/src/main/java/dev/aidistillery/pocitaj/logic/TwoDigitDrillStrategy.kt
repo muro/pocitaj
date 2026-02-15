@@ -35,7 +35,7 @@ class TwoDigitDrillStrategy(
     private fun updateWorkingSet() {
         // Helper to find weakest facts
         fun getWeakest(facts: List<String>, count: Int): List<String> = facts
-            .filter { getMastery(it).strength < 4 }
+            .filter { getMastery(it).strength < 5 }
             .ifEmpty { facts }
             .sortedBy { getMastery(it).strength }
             .take(count)
@@ -44,8 +44,8 @@ class TwoDigitDrillStrategy(
         val onesFacts = allFacts.filter { it.contains("_ONES_") }
         val tensFacts = allFacts.filter { it.contains("_TENS_") }
 
-        if (onesFacts.all { getMastery(it).strength >= 4 } &&
-            tensFacts.all { getMastery(it).strength >= 4 }) {
+        if (onesFacts.all { getMastery(it).strength >= 5 } &&
+            tensFacts.all { getMastery(it).strength >= 5 }) {
             workingSet.clear()
             return
         }
@@ -97,7 +97,7 @@ class TwoDigitDrillStrategy(
         userMastery[tensFactId] = tensMastery
         userMastery[factId] = semanticMastery
 
-        if ((onesMastery.strength + tensMastery.strength) / 2 >= 4) {
+        if ((onesMastery.strength + tensMastery.strength) / 2 >= 5) {
             workingSet.remove(factId)
             updateWorkingSet()
         }
