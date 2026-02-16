@@ -1,11 +1,11 @@
 package dev.aidistillery.pocitaj.data
 
 import dev.aidistillery.pocitaj.logic.Curriculum
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
@@ -101,42 +101,46 @@ class AdaptiveExerciseSourceTest {
     }
 
     @Test
-    fun `initialize with levelId filters curriculum to a single level`() = runBlocking {
-        // ARRANGE
-        val config = ExerciseConfig(
-            operation = Operation.ADDITION,
-            difficulty = 10,
-            count = 5,
-            levelId = "ADD_SUM_5"
-        )
+    fun `initialize with levelId filters curriculum to a single level`() {
+        runBlocking {
+            // ARRANGE
+            val config = ExerciseConfig(
+                operation = Operation.ADDITION,
+                difficulty = 10,
+                count = 5,
+                levelId = "ADD_SUM_5"
+            )
 
-        // ACT
-        exerciseSource.initialize(config)
-        val exercise = exerciseSource.getNextExercise()!!
-        val level = Curriculum.getLevelForExercise(exercise)
+            // ACT
+            exerciseSource.initialize(config)
+            val exercise = exerciseSource.getNextExercise()!!
+            val level = Curriculum.getLevelForExercise(exercise)
 
-        // ASSERT
-        assertEquals("ADD_SUM_5", level?.id)
+            // ASSERT
+            level?.id shouldBe "ADD_SUM_5"
+        }
     }
 
     @Test
-    fun `initialize without levelId filters curriculum by operation`() = runBlocking {
-        // ARRANGE
-        val config = ExerciseConfig(
-            operation = Operation.SUBTRACTION,
-            difficulty = 10,
-            count = 5
-        )
+    fun `initialize without levelId filters curriculum by operation`() {
+        runBlocking {
+            // ARRANGE
+            val config = ExerciseConfig(
+                operation = Operation.SUBTRACTION,
+                difficulty = 10,
+                count = 5
+            )
 
-        // ACT
-        exerciseSource.initialize(config)
+            // ACT
+            exerciseSource.initialize(config)
 
-        // Generate a few exercises to ensure they are all from the correct operation
-        repeat(5) {
-            val exercise = exerciseSource.getNextExercise()!!
-            val level = Curriculum.getLevelForExercise(exercise)
-            // ASSERT
-            assertEquals(Operation.SUBTRACTION, level?.operation)
+            // Generate a few exercises to ensure they are all from the correct operation
+            repeat(5) {
+                val exercise = exerciseSource.getNextExercise()!!
+                val level = Curriculum.getLevelForExercise(exercise)
+                // ASSERT
+                level?.operation shouldBe Operation.SUBTRACTION
+            }
         }
     }
 }

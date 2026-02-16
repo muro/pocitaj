@@ -5,14 +5,15 @@ import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.ui.exercise.ExerciseViewModel
 import dev.aidistillery.pocitaj.ui.exercise.UiState
 import dev.aidistillery.pocitaj.ui.progress.MainDispatcherRule
+import io.kotest.assertions.withClue
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -74,10 +75,9 @@ class AdaptiveExerciseSourceMasteryTest {
 
         // ACT: Get the first exercise and answer it correctly via the ViewModel
         val uiState = viewModel.uiState.value
-        assertTrue(
-            "UI state should be ExerciseScreen, but was $uiState",
-            uiState is UiState.ExerciseScreen
-        )
+        withClue("UI state should be ExerciseScreen, but was $uiState") {
+            uiState.shouldBeInstanceOf<UiState.ExerciseScreen>()
+        }
         val exercise = (uiState as UiState.ExerciseScreen).currentExercise
         val factId = exercise.getFactId()
         val correctAnswer = exercise.equation.getExpectedResult().toString()
@@ -90,15 +90,18 @@ class AdaptiveExerciseSourceMasteryTest {
         val allMastery = factMasteryDao.getAllFactsForUser(1).first()
         val factMasteryEntries = allMastery.filter { it.factId == factId }
 
-        assertTrue(
-            "Mastery info for $factId should have been saved",
-            factMasteryEntries.isNotEmpty()
-        )
-        assertEquals("Two entries should be created (global and per-level)", 2, factMasteryEntries.size)
+        withClue("Mastery info for $factId should have been saved") {
+            factMasteryEntries.isNotEmpty() shouldBe true
+        }
+        withClue("Two entries should be created (global and per-level)") {
+            factMasteryEntries.size shouldBe 2
+        }
 
         // Both global and per-level entries should have their strength increased to 4 (Consolidating) due to Gold speed "Fast Track"
         factMasteryEntries.forEach {
-            assertEquals("Strength should be updated to 4", 4, it.strength)
+            withClue("Strength should be updated to 4") {
+                it.strength shouldBe 4
+            }
         }
     }
 }
