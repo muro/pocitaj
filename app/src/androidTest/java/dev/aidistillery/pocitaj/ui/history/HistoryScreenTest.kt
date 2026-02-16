@@ -11,7 +11,7 @@ import dev.aidistillery.pocitaj.R
 import dev.aidistillery.pocitaj.TestApp
 import dev.aidistillery.pocitaj.data.ExerciseAttempt
 import dev.aidistillery.pocitaj.data.Operation
-import junit.framework.TestCase.assertTrue
+import io.kotest.matchers.booleans.shouldBeTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import java.util.Date
@@ -28,7 +28,7 @@ class HistoryScreenTest : BaseExerciseUiTest() {
 
         runBlocking {
             if (application.globals.userDao.getUser(1) == null) {
-                assertTrue(false)
+                false.shouldBeTrue()
                 Log.e("HistoryScreenTest", "User with ID 1 not found in the database.")
             }
         }
@@ -94,7 +94,7 @@ class HistoryScreenTest : BaseExerciseUiTest() {
             InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
         runBlocking {
             if (application.globals.userDao.getUser(1) == null) {
-                assertTrue(false)
+                false.shouldBeTrue()
                 Log.e("HistoryScreenTest", "User with ID 1 not found in the database.")
             }
         }

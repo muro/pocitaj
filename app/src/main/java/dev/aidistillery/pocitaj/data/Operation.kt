@@ -9,7 +9,7 @@ enum class Operation {
     MULTIPLICATION,
     DIVISION;
 
-    // TODO: possibly delete
+    // Keep for symmetry
     @Suppress("unused")
     companion object {
         fun fromString(type: String): Operation? {

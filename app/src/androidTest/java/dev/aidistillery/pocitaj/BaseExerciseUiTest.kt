@@ -19,7 +19,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.logic.Exercise
 import dev.aidistillery.pocitaj.ui.setup.StarRatingKey
-import junit.framework.TestCase
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -118,7 +118,7 @@ abstract class BaseExerciseUiTest {
         val levelId = "SUB_REVIEW_1"
         composeTestRule.onNodeWithTag("operation_card_-")
             .performScrollToNode(matcher = hasTestTag("level_tile_${levelId}")) // -100_progress"))
-        TestCase.assertEquals(getProgress(levelId), 100)
+        getProgress(levelId) shouldBe 100
 
         // Click on the first "Review" button found
         composeTestRule.onAllNodesWithText("🧶")[0].performVerifiedClick("Review button")
