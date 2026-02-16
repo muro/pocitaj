@@ -1,8 +1,9 @@
 package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.Operation
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
+import io.kotest.matchers.ints.shouldBeInRange
+import io.kotest.matchers.shouldBe
 import org.junit.Test
 
 class RangeLevelTest {
@@ -16,7 +17,7 @@ class RangeLevelTest {
         val rangeFacts = rangeLevel.getAllPossibleFactIds().sorted()
         val originalFacts = originalLevel.getAllPossibleFactIds().sorted()
 
-        assertEquals(originalFacts, rangeFacts)
+        rangeFacts shouldBe originalFacts
     }
 
     @Test
@@ -28,7 +29,7 @@ class RangeLevelTest {
         val rangeFacts = rangeLevel.getAllPossibleFactIds().sorted()
         val originalFacts = originalLevel.getAllPossibleFactIds().sorted()
 
-        assertEquals(originalFacts, rangeFacts)
+        rangeFacts shouldBe originalFacts
     }
 
     @Test
@@ -40,7 +41,7 @@ class RangeLevelTest {
         val rangeFacts = rangeLevel.getAllPossibleFactIds().sorted()
         val originalFacts = originalLevel.getAllPossibleFactIds().sorted()
 
-        assertEquals(originalFacts, rangeFacts)
+        rangeFacts shouldBe originalFacts
     }
 
     @Test
@@ -51,12 +52,10 @@ class RangeLevelTest {
             val equation = exercise.equation as Subtraction
             val (op, op1, op2) = equation.getFact()
 
-            // Check op1 range
-            assertTrue("op1 should be in range 5..10", op1 in 5..10)
-            // Check op2 range
-            assertTrue("op2 should be in range 0..op1", op2 in 0..op1)
-            // Result check
-            assertTrue("Result must be non-negative", (op1 - op2) >= 0)
+            op shouldBe Operation.SUBTRACTION
+            op1 shouldBeInRange 5..10
+            op2 shouldBeInRange 0..op1
+            (op1 - op2) shouldBeGreaterThanOrEqual 0
         }
     }
 
@@ -69,7 +68,7 @@ class RangeLevelTest {
         val rangeFacts = rangeLevel.getAllPossibleFactIds().sorted()
         val originalFacts = originalLevel.getAllPossibleFactIds().sorted()
 
-        assertEquals(originalFacts, rangeFacts)
+        rangeFacts shouldBe originalFacts
     }
 
     @Test
@@ -80,9 +79,9 @@ class RangeLevelTest {
             val equation = exercise.equation as Addition
             val (op, op1, op2) = equation.getFact()
 
+            op shouldBe Operation.ADDITION
             // Sum check
-            val sum = op1 + op2
-            assertTrue("Sum should be in range 5..10", sum in 5..10)
+            op1 + op2 shouldBeInRange 5..10
         }
     }
 }

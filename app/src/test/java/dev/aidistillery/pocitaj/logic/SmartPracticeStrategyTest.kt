@@ -2,8 +2,9 @@ package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import org.junit.Test
 
 class SmartPracticeStrategyTest {
@@ -24,7 +25,7 @@ class SmartPracticeStrategyTest {
             "ADD_1_2" to FactMastery("ADD_1_2", 1, "", 5, 0)
         )
         val strategy = SmartPracticeStrategy(listOf(level1), userMastery, 1L)
-        assertTrue(strategy.isLevelMastered(level1))
+        strategy.isLevelMastered(level1).shouldBeTrue()
     }
 
     @Test
@@ -34,7 +35,7 @@ class SmartPracticeStrategyTest {
             "ADD_1_2" to FactMastery("ADD_1_2", 1, "", 4, 0) // Not mastered
         )
         val strategy = SmartPracticeStrategy(listOf(level1), userMastery, 1L)
-        assertFalse(strategy.isLevelMastered(level1))
+        strategy.isLevelMastered(level1).shouldBeFalse()
     }
 
     @Test
@@ -44,13 +45,13 @@ class SmartPracticeStrategyTest {
             // ADD_1_2 is missing
         )
         val strategy = SmartPracticeStrategy(listOf(level1), userMastery, 1L)
-        assertFalse(strategy.isLevelMastered(level1))
+        strategy.isLevelMastered(level1).shouldBeFalse()
     }
 
     @Test
     fun `isLevelUnlocked returns true for a level with no prerequisites`() {
         val strategy = SmartPracticeStrategy(listOf(level1), mutableMapOf(), 1L)
-        assertTrue(strategy.isLevelUnlocked(level1))
+        strategy.isLevelUnlocked(level1).shouldBeTrue()
     }
 
     @Test
@@ -64,7 +65,7 @@ class SmartPracticeStrategyTest {
             "ADD_1_2" to FactMastery("ADD_1_2", 1, "", 5, 0)
         )
         val strategy = SmartPracticeStrategy(listOf(level1, level2), userMastery, 1L)
-        assertTrue(strategy.isLevelUnlocked(level2))
+        strategy.isLevelUnlocked(level2).shouldBeTrue()
     }
 
     @Test
@@ -78,14 +79,16 @@ class SmartPracticeStrategyTest {
             "ADD_1_2" to FactMastery("ADD_1_2", 1, "", 4, 0) // Not mastered
         )
         val strategy = SmartPracticeStrategy(listOf(level1, level2), userMastery, 1L)
-        assertFalse(strategy.isLevelUnlocked(level2))
+        strategy.isLevelUnlocked(level2).shouldBeFalse()
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun `creating strategy with an empty level throws exception`() {
         val emptyLevel = object : Level by level1 {
             override fun getAllPossibleFactIds() = emptyList<String>()
         }
-        SmartPracticeStrategy(listOf(emptyLevel), mutableMapOf(), 1L)
+        shouldThrow<IllegalArgumentException> {
+            SmartPracticeStrategy(listOf(emptyLevel), mutableMapOf(), 1L)
+        }
     }
 }

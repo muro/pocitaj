@@ -1,8 +1,11 @@
 package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.Operation
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import io.kotest.assertions.withClue
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.ints.shouldBeInRange
+import io.kotest.matchers.shouldBe
 import org.junit.Test
 
 class TableLevelTest {
@@ -13,14 +16,18 @@ class TableLevelTest {
             val exercise = level.generateExercise()
             val equation = exercise.equation as Multiplication
             val (op, op1, op2) = equation.getFact()
-            assertEquals("ID should match expected format", "MUL_TABLE_3", level.id)
-            assertEquals("Operation should be MULTIPLICATION", Operation.MULTIPLICATION, op)
+            level.id shouldBe "MUL_TABLE_3"
+            op shouldBe Operation.MULTIPLICATION
 
             // Check if one operand is 3
-            assertTrue("One operand should be 3", op1 == 3 || op2 == 3)
+            withClue("One operand must be 3 (op1=$op1, op2=$op2)") {
+                (op1 == 3 || op2 == 3).shouldBeTrue()
+            }
             // Check if other is in range 2..12
             val other = if (op1 == 3) op2 else op1
-            assertTrue("Other operand should be in range 2..12", other in 2..12)
+            withClue("The other operand must be between 2 and 12 (was $other)") {
+                other shouldBeInRange 2..12
+            }
         }
     }
 
@@ -31,16 +38,22 @@ class TableLevelTest {
             val exercise = level.generateExercise()
             val equation = exercise.equation as Division
             val (op, op1, op2) = equation.getFact()
-            assertEquals("ID should match expected format", "DIV_BY_4", level.id)
-            assertEquals("Operation should be DIVISION", Operation.DIVISION, op)
+            level.id shouldBe "DIV_BY_4"
+            op shouldBe Operation.DIVISION
 
             // Check divisor is 4
-            assertEquals("Divisor should be 4", 4, op2)
+            withClue("Divisor should be 4") {
+                op2 shouldBe 4
+            }
             // Check dividend is multiple of 4
-            assertTrue("Dividend should be multiple of 4", op1 % 4 == 0)
+            withClue("Dividend $op1 should be a multiple of 4") {
+                (op1 % 4 == 0).shouldBeTrue()
+            }
             // Check result range 2..10
             val result = op1 / op2
-            assertTrue("Result should be in range 2..10", result in 2..10)
+            withClue("Result should be between 2 and 10 (was $result)") {
+                result shouldBeInRange 2..10
+            }
         }
     }
 
@@ -52,9 +65,11 @@ class TableLevelTest {
         // 2..12 -> 11 pairs. Each pair generates 2 IDs (AxB and BxA)
         // However, for op2 = table (5), 5x5 is generated twice but stored once in the Set.
         // So 10 * 2 + 1 = 21 facts expected.
-        assertEquals(21, facts.size)
-        assertTrue(facts.contains("5 * 2 = ?"))
-        assertTrue(facts.contains("2 * 5 = ?"))
+        withClue("Should have 21 unique facts for multiplication table 5") {
+            facts.size shouldBe 21
+        }
+        facts shouldContain "5 * 2 = ?"
+        facts shouldContain "2 * 5 = ?"
     }
 
     @Test
@@ -64,8 +79,10 @@ class TableLevelTest {
 
         // 2..10 -> 9 items. Each item generates 1 fact (Dividend / Divisor)
         // Total 9 facts expected.
-        assertEquals(9, facts.size)
-        assertTrue(facts.contains("12 / 6 = ?")) // 12 / 6 = 2
-        assertTrue(facts.contains("60 / 6 = ?")) // 60 / 6 = 10
+        withClue("Should have 9 unique facts for division table 6") {
+            facts.size shouldBe 9
+        }
+        facts shouldContain "12 / 6 = ?"
+        facts shouldContain "60 / 6 = ?"
     }
 }

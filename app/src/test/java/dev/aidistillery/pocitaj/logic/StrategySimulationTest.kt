@@ -2,7 +2,8 @@ package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
-import org.junit.Assert.assertTrue
+import io.kotest.assertions.withClue
+import io.kotest.matchers.shouldBe
 import org.junit.Test
 import kotlin.random.Random
 import kotlin.time.Clock
@@ -87,10 +88,9 @@ class StrategySimulationTest {
                 factsCountReported
             }
 
-            assertTrue(
-                "Level ${level.id}: Perfect student should take at least $minExpectedExercises exercises (Facts: $factsCountReported, Actual: ${perfect.exerciseCount})",
-                perfect.exerciseCount >= minExpectedExercises
-            )
+            withClue("Level ${level.id}: Perfect student should take at least $minExpectedExercises exercises (Facts: $factsCountReported, Actual: ${perfect.exerciseCount})") {
+                (perfect.exerciseCount >= minExpectedExercises) shouldBe true
+            }
 
             // Mistake Prone Logic:
             // Mistakes = ceil(uniqueQueries * 0.2)
@@ -102,10 +102,9 @@ class StrategySimulationTest {
             val tolerance =
                 2 // Allow for random walk variance (sometimes Mistaken path is luckily shorter)
 
-            assertTrue(
-                "Level ${level.id}: Mistaken student should take at least ${expectedPenalty - tolerance} more exercises (Perfect: ${perfect.exerciseCount}, MST: ${mistaken.exerciseCount}, Queries: $uniqueQueriesReported, TheoreticalMistakes: $expectedMistakes)",
-                mistaken.exerciseCount >= expectedMin - tolerance
-            )
+            withClue("Level ${level.id}: Mistaken student should take at least ${expectedPenalty - tolerance} more exercises (Perfect: ${perfect.exerciseCount}, MST: ${mistaken.exerciseCount}, Queries: $uniqueQueriesReported, TheoreticalMistakes: $expectedMistakes)") {
+                (mistaken.exerciseCount >= expectedMin - tolerance) shouldBe true
+            }
 
             val rowFormat = "| %-25s | %-10d | %-10d | %-13s |"
             println(

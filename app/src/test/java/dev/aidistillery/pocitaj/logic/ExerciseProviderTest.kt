@@ -2,8 +2,10 @@ package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.Test
 import kotlin.random.Random
 
@@ -18,7 +20,7 @@ class ExerciseProviderTest {
         val exercise = provider.getNextExercise()
 
         val exerciseLevel = Curriculum.getLevelForExercise(exercise)
-        assertEquals("ADD_SUM_5", exerciseLevel?.id)
+        exerciseLevel?.id shouldBe "ADD_SUM_5"
     }
 
     @Test
@@ -35,7 +37,7 @@ class ExerciseProviderTest {
 
         // The working set should contain the weakest fact, plus new facts
         val exerciseId = exercise.getFactId()
-        assert(exerciseId == "ADDITION_1_2" || !userMastery.containsKey(exerciseId))
+        (exerciseId == "ADDITION_1_2" || !userMastery.containsKey(exerciseId)).shouldBeTrue()
     }
 
     @Test
@@ -57,7 +59,7 @@ class ExerciseProviderTest {
         val exercise = provider.getNextExercise()
 
         val exerciseId = exercise.getFactId()
-        assert(exerciseId == "ADDITION_1_2" || !userMastery.containsKey(exerciseId))
+        (exerciseId == "ADDITION_1_2" || !userMastery.containsKey(exerciseId)).shouldBeTrue()
     }
 
     @Test
@@ -72,7 +74,7 @@ class ExerciseProviderTest {
         val exercise = provider.getNextExercise()
 
         val exerciseLevel = Curriculum.getLevelForExercise(exercise)
-        assertEquals("ADD_SUM_10", exerciseLevel?.id)
+        exerciseLevel?.id shouldBe "ADD_SUM_10"
     }
 
     @Test
@@ -94,7 +96,7 @@ class ExerciseProviderTest {
         val exercise = provider.getNextExercise()
 
         val exerciseLevel = Curriculum.getLevelForExercise(exercise)
-        assertEquals("ADD_SUM_5", exerciseLevel?.id) // Should be from the mastered level
+        exerciseLevel?.id shouldBe "ADD_SUM_5" // Should be from the mastered level
     }
 
     @Test
@@ -108,7 +110,7 @@ class ExerciseProviderTest {
             workingSet.add(provider.getNextExercise().getFactId())
         }
 
-        assertEquals(5, workingSet.size)
+        workingSet.size shouldBe 5
     }
 
     @Test
@@ -126,11 +128,11 @@ class ExerciseProviderTest {
             workingSet.add(provider.getNextExercise().getFactId())
         }
 
-        assertEquals(5, workingSet.size)
+        workingSet.size shouldBe 5
         // Check that the working set contains only weak facts
         for (factId in workingSet) {
             val strength = userMastery[factId]?.strength ?: 0
-            assert(strength < 5)
+            (strength < 5) shouldBe true
         }
     }
 
@@ -143,8 +145,8 @@ class ExerciseProviderTest {
         val exercise = provider.getNextExercise()
 
         val exerciseLevel = Curriculum.getLevelForExercise(exercise)
-        assertEquals("DIV_BY_2", exerciseLevel?.id)
-        assertTrue(exercise.equation is Division)
+        exerciseLevel?.id shouldBe "DIV_BY_2"
+        exercise.equation.shouldBeInstanceOf<Division>()
     }
 
     @Test
@@ -165,9 +167,9 @@ class ExerciseProviderTest {
             workingSet.add(provider.getNextExercise().getFactId())
         }
 
-        assertEquals(5, workingSet.size)
+        workingSet.size shouldBe 5
         // Check that the mastered fact is not in the working set
-        assert(!workingSet.contains("ADDITION_1_4"))
+        workingSet.contains("ADDITION_1_4").shouldBeFalse()
     }
 
     @Test
@@ -185,7 +187,7 @@ class ExerciseProviderTest {
         val exercise = provider.getNextExercise()
 
         val exerciseLevel = Curriculum.getLevelForExercise(exercise)
-        assertEquals(curriculum[1].id, exerciseLevel?.id)
+        exerciseLevel?.id shouldBe curriculum[1].id
     }
 
     @Test
@@ -198,6 +200,6 @@ class ExerciseProviderTest {
 
         // The provider should not be able to select a level with prerequisites
         val exerciseLevel = Curriculum.getLevelForExercise(exercise)
-        assertEquals(curriculum[0].id, exerciseLevel?.id)
+        exerciseLevel?.id shouldBe curriculum[0].id
     }
 }

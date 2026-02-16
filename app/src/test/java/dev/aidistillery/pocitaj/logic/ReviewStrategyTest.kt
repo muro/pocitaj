@@ -2,8 +2,10 @@ package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.withClue
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.Test
 
 class ReviewStrategyTest {
@@ -47,7 +49,9 @@ class ReviewStrategyTest {
         val userMastery = mutableMapOf<String, FactMastery>()
         val strategy = setupStrategy(userMastery)
         val exercise = strategy.getNextExercise()
-        assertNotNull("Should return a non-null exercise even with no history", exercise)
+        withClue("Should return a non-null exercise even with no history") {
+            exercise.shouldNotBeNull()
+        }
     }
 
     @Test
@@ -66,11 +70,9 @@ class ReviewStrategyTest {
         val selections = (1..20).mapNotNull { strategy.getNextExercise()?.getFactId() }
         val overdueSelections = selections.count { it == overdueFactId }
 
-        assertEquals(
-            "The overdue fact should be selected in all 20 attempts",
-            20,
-            overdueSelections
-        )
+        withClue("The overdue fact should be selected in all 20 attempts") {
+            overdueSelections shouldBe 20
+        }
     }
 
     // --- recordAttempt Tests ---
@@ -83,11 +85,9 @@ class ReviewStrategyTest {
 
         strategy.recordAttempt(exercise, wasCorrect = false)
 
-        assertEquals(
-            "Strength should be reset to 1 on failure",
-            1,
-            userMastery["1 + 1 = ?"]!!.strength
-        )
+        withClue("Strength should be reset to 1 on failure") {
+            userMastery["1 + 1 = ?"]!!.strength shouldBe 1
+        }
     }
 
     @Test
@@ -101,11 +101,9 @@ class ReviewStrategyTest {
 
         strategy.recordAttempt(exercise, true)
 
-        assertEquals(
-            "Strength should be promoted to 5",
-            5,
-            userMastery["1 + 2 = ?"]!!.strength
-        )
+        withClue("Strength should be promoted to 5") {
+            userMastery["1 + 2 = ?"]!!.strength shouldBe 5
+        }
     }
 
     @Test
@@ -118,11 +116,9 @@ class ReviewStrategyTest {
 
         strategy.recordAttempt(exercise, true)
 
-        assertEquals(
-            "Strength should not exceed 5",
-            5,
-            userMastery["1 + 1 = ?"]!!.strength
-        )
+        withClue("Strength should not exceed 5") {
+            userMastery["1 + 1 = ?"]!!.strength shouldBe 5
+        }
     }
 
     @Test
@@ -135,7 +131,9 @@ class ReviewStrategyTest {
 
         strategy.recordAttempt(exercise, true)
 
-        assertEquals("Strength should remain at 5", 5, userMastery["1 + 1 = ?"]!!.strength)
+        withClue("Strength should remain at 5") {
+            userMastery["1 + 1 = ?"]!!.strength shouldBe 5
+        }
     }
 
     @Test
@@ -148,18 +146,18 @@ class ReviewStrategyTest {
 
         strategy.recordAttempt(exercise, true)
 
-        assertEquals(
-            "Strength should remain at 4",
-            4,
-            userMastery["1 + 1 = ?"]!!.strength
-        )
+        withClue("Strength should remain at 4") {
+            userMastery["1 + 1 = ?"]!!.strength shouldBe 4
+        }
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun `creating strategy with an empty level throws exception`() {
         val emptyLevel = object : Level by testLevel {
             override fun getAllPossibleFactIds() = emptyList<String>()
         }
-        setupStrategy(mutableMapOf(), level = emptyLevel)
+        shouldThrow<IllegalArgumentException> {
+            setupStrategy(mutableMapOf(), level = emptyLevel)
+        }
     }
 }
