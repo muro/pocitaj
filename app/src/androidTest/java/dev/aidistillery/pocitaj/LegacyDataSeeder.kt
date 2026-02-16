@@ -32,15 +32,6 @@ object LegacyDataSeeder {
         // problemText = "3 + 5 = ?", logicalOperation = ADDITION
         // problemText = "? + 7 = 10", logicalOperation = ADDITION
 
-        // Note: Operation enum mapping in Room usually defaults to String names if using converters, or Ordinals?
-        // Let's assume Converters are using names usually, but checking Converters class is best.
-        // Assuming defaults or common practice: matching the enum name.
-        // If I use the same inserts as DataCaptureTest used, I should rely on how Room was sending them.
-        // But here I am using raw SQL.
-
-        // Let's peek at Converters if I can, but usually it's String.
-        // "ADDITION"
-
         db.execSQL("INSERT INTO exercise_attempt (userId, timestamp, problemText, logicalOperation, correctAnswer, submittedAnswer, wasCorrect, durationMs) VALUES (1, $now, '3 + 5 = ?', 'ADDITION', 8, 8, 1, 1000)")
         db.execSQL("INSERT INTO exercise_attempt (userId, timestamp, problemText, logicalOperation, correctAnswer, submittedAnswer, wasCorrect, durationMs) VALUES (1, $now, '? + 7 = 10', 'ADDITION', 3, 3, 1, 1500)")
     }
