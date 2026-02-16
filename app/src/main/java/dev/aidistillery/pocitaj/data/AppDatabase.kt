@@ -81,7 +81,7 @@ abstract class AppDatabase : RoomDatabase() {
             }
 
             private fun convertToSemanticId(oldId: String): String? {
-                // ADDITION_3_5 -> 3 + 5 = ?
+                // 1. Standard Arithmetic: ADDITION_3_5 -> 3 + 5 = ?
                 val standardRegex = Regex("""([A-Z]+)_(\d+)_(\d+)""")
                 standardRegex.matchEntire(oldId)?.let { match ->
                     val (opName, a, b) = match.destructured
@@ -91,6 +91,18 @@ abstract class AppDatabase : RoomDatabase() {
                         "MULTIPLICATION" -> "$a * $b = ?"
                         "DIVISION" -> "$a / $b = ?"
                         else -> null
+                    }
+                }
+
+                // 2. Missing Addends: ADDITION_3_?_10 or ADDITION_?_7_10
+                val missingAddRegex = Regex("""ADDITION_(?:\?_(\d+)|(\d+)_\?)_(\d+)""")
+                missingAddRegex.matchEntire(oldId)?.let { match ->
+                    val groups = match.groupValues
+                    val sum = groups[3]
+                    return if (groups[1].isNotEmpty()) {
+                        "? + ${groups[1]} = $sum"
+                    } else {
+                        "${groups[2]} + ? = $sum"
                     }
                 }
 

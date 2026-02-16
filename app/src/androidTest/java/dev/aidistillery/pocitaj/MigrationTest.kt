@@ -55,13 +55,12 @@ class MigrationTest {
         assert(globalStrength == 2) { "Global strength mismatch. Expected 2, got $globalStrength" }
         cursorGlobal.close()
 
-        // Validate Missing Operand conversion
-        // Legacy: ADDITION_3_?_10 -> 3 + ? = 10
+        // Validate Missing Operand conversion: ADDITION_3_?_10 -> 3 + ? = 10
         val cursorMissing =
             db.query("SELECT * FROM fact_mastery WHERE factId = ?", arrayOf("3 + ? = 10"))
-        // Note: Seeder might not have this exact fact unless I updated it? 
-        // DataCaptureTest captured whatever was in DB.
-        // I should check LegacyDataSeeder content to be sure what to assert.
-        // For now, assertion on simple addition is good start.
+        assert(cursorMissing.moveToFirst()) { "Missing addend 3 + ? = 10 not found after migration" }
+        val missingStrength = cursorMissing.getInt(cursorMissing.getColumnIndex("strength"))
+        assert(missingStrength == 4) { "Strength mismatch for 3 + ? = 10. Expected 4, got $missingStrength" }
+        cursorMissing.close()
     }
 }

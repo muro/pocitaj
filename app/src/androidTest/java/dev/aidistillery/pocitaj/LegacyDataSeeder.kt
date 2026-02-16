@@ -17,7 +17,9 @@ object LegacyDataSeeder {
             Triple("MULTIPLICATION_3_4", "MUL_TABLE_3", 3),
             Triple("DIVISION_12_3", "DIV_BY_3", 4),
             // User requested check for "general" mastery (no level)
-            Triple("ADDITION_2_2", "", 2) // Duplicate fact, but global mastery tracking
+            Triple("ADDITION_2_2", "", 2), // Duplicate fact, but global mastery tracking
+            // Missing Addend
+            Triple("ADDITION_3_?_10", "ADD_MAKING_10S", 4)
         )
 
         val now = System.currentTimeMillis()

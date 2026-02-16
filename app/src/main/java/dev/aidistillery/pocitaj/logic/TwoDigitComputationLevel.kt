@@ -181,8 +181,8 @@ open class TwoDigitComputationLevel(
         if (op != operation) return false
 
         // Basic range check for two-digit numbers (10..99)
-        if (A < 10 || A > 99) return false
-        if (B < 10 || B > 99) return false
+        if (A !in 10..99) return false
+        if (B !in 10..99) return false
 
         if (operation == Operation.ADDITION) {
             // Level constraint: Sum < 100
