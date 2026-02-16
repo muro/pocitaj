@@ -2,7 +2,8 @@ package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
-import org.junit.Assert.assertEquals
+import io.kotest.matchers.floats.plusOrMinus
+import io.kotest.matchers.shouldBe
 import org.junit.Test
 
 class LevelTest {
@@ -14,8 +15,8 @@ class LevelTest {
 
         val affected = level.getAffectedFactIds(exercise)
 
-        assertEquals(1, affected.size)
-        assertEquals("2 + 3 = ?", affected[0])
+        affected.size shouldBe 1
+        affected[0] shouldBe "2 + 3 = ?"
     }
 
     @Test
@@ -28,7 +29,7 @@ class LevelTest {
             override fun generateExercise(): Exercise = throw IllegalStateException()
             override fun getAllPossibleFactIds(): List<String> = emptyList()
         }
-        assertEquals(0f, level.calculateProgress(emptyMap()), 0.001f)
+        level.calculateProgress(emptyMap()) shouldBe (0f plusOrMinus 0.001f)
     }
 
     @Test
@@ -50,6 +51,6 @@ class LevelTest {
         )
 
         // (0.1 + 0.5 + 1.0 + 0.0) / 4 = 1.6 / 4 = 0.4
-        assertEquals(0.4f, level.calculateProgress(masteryMap), 0.001f)
+        level.calculateProgress(masteryMap) shouldBe (0.4f plusOrMinus 0.001f)
     }
 }

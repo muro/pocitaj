@@ -174,6 +174,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.coroutines.test)
+    testImplementation(libs.kotest.assertions)
     testImplementation(libs.turbine)
     testImplementation(libs.compose.ui.test.junit4)
     testImplementation(libs.robolectric)
