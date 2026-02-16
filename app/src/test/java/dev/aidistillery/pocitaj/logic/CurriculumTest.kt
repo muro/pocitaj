@@ -1,9 +1,11 @@
 package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.Operation
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.Test
 
 class CurriculumTest {
@@ -13,7 +15,7 @@ class CurriculumTest {
         val levels = Curriculum.getAllLevels()
         // 10 Addition + 6 Subtraction + 11 multiplication (2-12) + 9 division (2-10) + 8 mixed review
         val expectedCount = 10 + 6 + 11 + 9 + 8
-        assertEquals(expectedCount, levels.size)
+        levels.size shouldBe expectedCount
     }
 
     @Test
@@ -22,8 +24,8 @@ class CurriculumTest {
         repeat(100) {
             val exercise = level.generateExercise()
             val (op, op1, op2) = exercise.equation.getFact()
-            assertEquals("Operation must be addition", Operation.ADDITION, op)
-            assertTrue("Sum must be > 10 for $op1 + $op2", op1 + op2 > 10)
+            op shouldBe Operation.ADDITION
+            (op1 + op2 > 10).shouldBeTrue()
         }
     }
 
@@ -33,11 +35,8 @@ class CurriculumTest {
         repeat(100) {
             val exercise = level.generateExercise()
             val (op, op1, op2) = exercise.equation.getFact()
-            assertEquals("Operation must be addition", Operation.ADDITION, op)
-            assertTrue(
-                "Sum of units must be < 10 for $op1 + $op2",
-                (op1 % 10) + (op2 % 10) < 10
-            )
+            op shouldBe Operation.ADDITION
+            ((op1 % 10) + (op2 % 10) < 10).shouldBeTrue()
         }
     }
 
@@ -47,12 +46,9 @@ class CurriculumTest {
         repeat(100) {
             val exercise = level.generateExercise()
             val (op, op1, op2) = exercise.equation.getFact()
-            assertEquals("Operation must be addition", Operation.ADDITION, op)
-            assertTrue(
-                "Sum of units must be >= 10 for $op1 + $op2",
-                (op1 % 10) + (op2 % 10) >= 10
-            )
-            assertTrue("Total sum must be < 100 for $op1 + $op2", op1 + op2 < 100)
+            op shouldBe Operation.ADDITION
+            ((op1 % 10) + (op2 % 10) >= 10).shouldBeTrue()
+            (op1 + op2 < 100).shouldBeTrue()
         }
     }
 
@@ -62,11 +58,8 @@ class CurriculumTest {
         repeat(100) {
             val exercise = level.generateExercise()
             val (op, op1, op2) = exercise.equation.getFact()
-            assertEquals("Operation must be subtraction", Operation.SUBTRACTION, op)
-            assertTrue(
-                "op1 unit must be >= op2 unit for $op1 - $op2",
-                (op1 % 10) >= (op2 % 10)
-            )
+            op shouldBe Operation.SUBTRACTION
+            ((op1 % 10) >= (op2 % 10)).shouldBeTrue()
         }
     }
 
@@ -76,11 +69,8 @@ class CurriculumTest {
         repeat(100) {
             val exercise = level.generateExercise()
             val (op, op1, op2) = exercise.equation.getFact()
-            assertEquals("Operation must be subtraction", Operation.SUBTRACTION, op)
-            assertTrue(
-                "op1 unit must be < op2 unit for $op1 - $op2",
-                (op1 % 10) < (op2 % 10)
-            )
+            op shouldBe Operation.SUBTRACTION
+            ((op1 % 10) < (op2 % 10)).shouldBeTrue()
         }
     }
 
@@ -94,19 +84,17 @@ class CurriculumTest {
             val exercise = level.generateExercise()
             val equation = exercise.equation
             val (op, op1, op2) = equation.getFact()
-            
-            assertEquals("Operation must be addition", Operation.ADDITION, op)
-            assertEquals("Sum must be 10 for $op1 + $op2", 10, op1 + op2)
 
-            assertTrue("Equation must be MissingAddend", equation is MissingAddend)
-            val missingAddend = equation as MissingAddend
+            op shouldBe Operation.ADDITION
+            (op1 + op2) shouldBe 10
 
-            if (missingAddend.a == null) missingOp1Count++
-            if (missingAddend.b == null) missingOp2Count++
+            equation.shouldBeInstanceOf<MissingAddend>()
+            if (equation.a == null) missingOp1Count++
+            if (equation.b == null) missingOp2Count++
         }
 
-        assertTrue("Should generate some missing first operands", missingOp1Count > 0)
-        assertTrue("Should generate some missing second operands", missingOp2Count > 0)
+        (missingOp1Count > 0).shouldBeTrue()
+        (missingOp2Count > 0).shouldBeTrue()
     }
 
     @Test
@@ -115,8 +103,8 @@ class CurriculumTest {
         val factIds = level.getAllPossibleFactIds()
 
         // Should contain both "3 + ? = 10" and "? + 3 = 10"
-        assertTrue(factIds.contains("3 + ? = 10"))
-        assertTrue(factIds.contains("? + 3 = 10"))
+        factIds shouldContain "3 + ? = 10"
+        factIds shouldContain "? + 3 = 10"
     }
 
     @Test
@@ -125,8 +113,8 @@ class CurriculumTest {
         repeat(100) {
             val exercise = level.generateExercise()
             val (op, op1, op2) = exercise.equation.getFact()
-            assertEquals("Operation must be addition", Operation.ADDITION, op)
-            assertEquals("Operands must be equal for $op1 + $op2", op1, op2)
+            op shouldBe Operation.ADDITION
+            op1 shouldBe op2
         }
     }
 
@@ -138,10 +126,7 @@ class CurriculumTest {
         repeat(100) {
             val exercise = level.generateExercise()
             val equation = exercise.equation as Multiplication
-            assertTrue(
-                "One of the operands must be $table",
-                equation.a == table || equation.b == table
-            )
+            (equation.a == table || equation.b == table).shouldBeTrue()
         }
     }
 
@@ -153,12 +138,12 @@ class CurriculumTest {
         val factIds = level.getAllPossibleFactIds()
 
         // The set logic handles duplicates, so we check for specific examples.
-        assertEquals(21, factIds.size) // 11 pairs, 7x7 is not duplicated
-        assertTrue(factIds.contains("7 * 2 = ?"))
-        assertTrue(factIds.contains("2 * 7 = ?"))
-        assertTrue(factIds.contains("7 * 12 = ?"))
-        assertTrue(factIds.contains("12 * 7 = ?"))
-        assertTrue(factIds.contains("7 * 7 = ?"))
+        factIds.size shouldBe 21 // 11 pairs, 7x7 is not duplicated
+        factIds shouldContain "7 * 2 = ?"
+        factIds shouldContain "2 * 7 = ?"
+        factIds shouldContain "7 * 12 = ?"
+        factIds shouldContain "12 * 7 = ?"
+        factIds shouldContain "7 * 7 = ?"
     }
 
     @Test
@@ -169,8 +154,8 @@ class CurriculumTest {
         repeat(100) {
             val exercise = level.generateExercise()
             val equation = exercise.equation as Division
-            assertEquals("The divisor must be $divisor", divisor, equation.b)
-            assertTrue("The dividend must be divisible by the divisor", equation.a % divisor == 0)
+            equation.b shouldBe divisor
+            (equation.a % divisor == 0).shouldBeTrue()
         }
     }
 
@@ -181,10 +166,10 @@ class CurriculumTest {
             Curriculum.getLevelsFor(Operation.DIVISION).find { it.id == "DIV_BY_$divisor" }!!
         val factIds = level.getAllPossibleFactIds()
 
-        assertEquals(9, factIds.size) // 2..10 for the result
-        assertTrue(factIds.contains("12 / 6 = ?"))
-        assertTrue(factIds.contains("30 / 6 = ?"))
-        assertTrue(factIds.contains("60 / 6 = ?"))
+        factIds.size shouldBe 9 // 2..10 for the result
+        factIds shouldContain "12 / 6 = ?"
+        factIds shouldContain "30 / 6 = ?"
+        factIds shouldContain "60 / 6 = ?"
     }
 
     @Test
@@ -198,24 +183,20 @@ class CurriculumTest {
 
         // 1. Check prerequisites
         val expectedPrerequisites = setOf(level1.id, level2.id)
-        assertEquals(expectedPrerequisites, mixedLevel.prerequisites)
+        mixedLevel.prerequisites shouldBe expectedPrerequisites
 
         // 2. Check combined fact IDs
         val expectedFactIds = level1.getAllPossibleFactIds() + level2.getAllPossibleFactIds()
-        assertEquals(expectedFactIds.toSet(), mixedLevel.getAllPossibleFactIds().toSet())
+        mixedLevel.getAllPossibleFactIds().toSet() shouldBe expectedFactIds.toSet()
 
         // 3. Check exercise generation to ensure both levels are represented
         val generatedLevelIds = mutableSetOf<String>()
         repeat(200) { // Generate enough exercises to reasonably expect a mix
             val exercise = mixedLevel.generateExercise()
             val level = Curriculum.getLevelForExercise(exercise)
-            assertNotNull("Generated exercise must belong to a level", level)
-            generatedLevelIds.add(level!!.id)
+            level.shouldNotBeNull()
+            generatedLevelIds.add(level.id)
         }
-        assertEquals(
-            "Generated exercises should come from both source levels",
-            expectedPrerequisites,
-            generatedLevelIds
-        )
+        generatedLevelIds shouldBe expectedPrerequisites
     }
 }

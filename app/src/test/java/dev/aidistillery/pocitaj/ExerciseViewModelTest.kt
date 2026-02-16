@@ -9,6 +9,9 @@ import dev.aidistillery.pocitaj.ui.exercise.AnswerResult
 import dev.aidistillery.pocitaj.ui.exercise.ExerciseViewModel
 import dev.aidistillery.pocitaj.ui.exercise.ResultStatus
 import dev.aidistillery.pocitaj.ui.exercise.UiState
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -19,8 +22,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -57,7 +58,7 @@ class ExerciseViewModelTest {
         viewModel.checkAnswer("4", 1000)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        assertEquals(AnswerResult.Correct, viewModel.answerResult.value)
+        viewModel.answerResult.value shouldBe AnswerResult.Correct
     }
 
     @Test
@@ -71,7 +72,7 @@ class ExerciseViewModelTest {
         viewModel.checkAnswer("5", 1000)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        assertEquals(AnswerResult.Incorrect, viewModel.answerResult.value)
+        viewModel.answerResult.value shouldBe AnswerResult.Incorrect
     }
 
     @Test
@@ -101,19 +102,19 @@ class ExerciseViewModelTest {
 
             // THEN: The UI state should be SummaryScreen
             val uiState = viewModel.uiState.value
-            assertTrue(uiState is UiState.SummaryScreen)
+            uiState.shouldBeInstanceOf<UiState.SummaryScreen>()
 
             // AND: The results should be correct
-            val summaryScreen = uiState as UiState.SummaryScreen
-            assertEquals(2, summaryScreen.results.size)
+            val summaryScreen = uiState
+            summaryScreen.results.size shouldBe 2
 
-            assertEquals("2 + 2 = 4", summaryScreen.results[0].equation)
-            assertEquals(ResultStatus.CORRECT, summaryScreen.results[0].status)
-            assertEquals(1000, summaryScreen.results[0].elapsedMs)
+            summaryScreen.results[0].equation shouldBe "2 + 2 = 4"
+            summaryScreen.results[0].status shouldBe ResultStatus.CORRECT
+            summaryScreen.results[0].elapsedMs shouldBe 1000
 
-            assertEquals("3 + 3 ≠ 5", summaryScreen.results[1].equation)
-            assertEquals(ResultStatus.INCORRECT, summaryScreen.results[1].status)
-            assertEquals(1500, summaryScreen.results[1].elapsedMs)
+            summaryScreen.results[1].equation shouldBe "3 + 3 ≠ 5"
+            summaryScreen.results[1].status shouldBe ResultStatus.INCORRECT
+            summaryScreen.results[1].elapsedMs shouldBe 1500
         }
 
     @Test
@@ -141,20 +142,21 @@ class ExerciseViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         val initialState = viewModel.uiState.value
-        assertTrue(initialState is UiState.ExerciseScreen && initialState.currentExercise == exercise1)
+        initialState.shouldBeInstanceOf<UiState.ExerciseScreen>()
+        initialState.currentExercise shouldBe exercise1
 
         // WHEN: An unrecognized answer is submitted and the animation finishes
         viewModel.checkAnswer("?", 1000) // Invalid answer
         testDispatcher.scheduler.advanceUntilIdle()
-        assertEquals(AnswerResult.Unrecognized, viewModel.answerResult.value)
+        viewModel.answerResult.value shouldBe AnswerResult.Unrecognized
 
         viewModel.onFeedbackAnimationFinished()
         testDispatcher.scheduler.advanceUntilIdle()
 
         // THEN: The view model should NOT have advanced to the next exercise
         val finalState = viewModel.uiState.value
-        assertTrue(finalState is UiState.ExerciseScreen)
-        assertTrue(finalState is UiState.ExerciseScreen && finalState.currentExercise == exercise1)
+        finalState.shouldBeInstanceOf<UiState.ExerciseScreen>()
+        finalState.currentExercise shouldBe exercise1
     }
 
     @Test
@@ -163,14 +165,14 @@ class ExerciseViewModelTest {
         viewModel.startExercises(ExerciseConfig(Operation.ADDITION, 10, 1))
         viewModel.checkAnswer("1", 1000)
         testDispatcher.scheduler.advanceUntilIdle()
-        assertTrue(viewModel.resultsList().isNotEmpty())
+        viewModel.resultsList().isNotEmpty().shouldBeTrue()
 
         // WHEN: startExercises is called again
         viewModel.startExercises(ExerciseConfig(Operation.ADDITION, 10, 1))
         testDispatcher.scheduler.advanceUntilIdle()
 
         // THEN: The history should be empty
-        assertTrue(viewModel.resultsList().isEmpty())
+        viewModel.resultsList().isEmpty().shouldBeTrue()
     }
 
     @Test
@@ -193,14 +195,14 @@ class ExerciseViewModelTest {
 
         // THEN: The results list should contain two distinct entries
         val results = viewModel.resultsList()
-        assertEquals(2, results.size)
+        results.size shouldBe 2
 
         // Verify the first attempt (unrecognized)
-        assertEquals("7 + 7 = ?", results[0].equation)
-        assertEquals(ResultStatus.NOT_RECOGNIZED, results[0].status)
+        results[0].equation shouldBe "7 + 7 = ?"
+        results[0].status shouldBe ResultStatus.NOT_RECOGNIZED
 
         // Verify the second attempt (correct)
-        assertEquals("7 + 7 = 14", results[1].equation)
-        assertEquals(ResultStatus.CORRECT, results[1].status)
+        results[1].equation shouldBe "7 + 7 = 14"
+        results[1].status shouldBe ResultStatus.CORRECT
     }
 }
