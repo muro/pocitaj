@@ -48,6 +48,29 @@ class AdaptiveExerciseSource(
         return exerciseProvider?.getNextExercise()
     }
 
+    override suspend fun recordAttempt(exercise: Exercise, submittedAnswer: Int, durationMs: Long) {
+        val wasCorrect = exercise.equation.getExpectedResult() == submittedAnswer
+        val (newMastery, level) = exerciseProvider?.recordAttempt(exercise, wasCorrect) ?: return
+
+        withContext(ioDispatcher) {
+            val attempt = ExerciseAttempt(
+                userId = activeUserManager.activeUser.id,
+                timestamp = System.currentTimeMillis(),
+                problemText = exercise.equation.question(),
+                logicalOperation = exercise.equation.getFact().first,
+                correctAnswer = exercise.equation.getExpectedResult(),
+                submittedAnswer = submittedAnswer,
+                wasCorrect = wasCorrect,
+                durationMs = durationMs
+            )
+            exerciseAttemptDao.insert(attempt)
+
+            newMastery?.let {
+                factMasteryDao.upsert(it, level)
+            }
+        }
+    }
+
     /**
      * A debug-only function to get the current working set from the DrillStrategy using reflection.
      * This is not intended for production use.
@@ -76,29 +99,6 @@ class AdaptiveExerciseSource(
         } catch (e: Exception) {
             e.printStackTrace()
             emptyList()
-        }
-    }
-
-    override suspend fun recordAttempt(exercise: Exercise, submittedAnswer: Int, durationMs: Long) {
-        val wasCorrect = exercise.equation.getExpectedResult() == submittedAnswer
-        val (newMastery, level) = exerciseProvider?.recordAttempt(exercise, wasCorrect) ?: return
-
-        withContext(ioDispatcher) {
-            val attempt = ExerciseAttempt(
-                userId = activeUserManager.activeUser.id,
-                timestamp = System.currentTimeMillis(),
-                problemText = exercise.equation.question(),
-                logicalOperation = exercise.equation.getFact().first,
-                correctAnswer = exercise.equation.getExpectedResult(),
-                submittedAnswer = submittedAnswer,
-                wasCorrect = wasCorrect,
-                durationMs = durationMs
-            )
-            exerciseAttemptDao.insert(attempt)
-
-            newMastery?.let {
-                factMasteryDao.upsert(it, level)
-            }
         }
     }
 }
