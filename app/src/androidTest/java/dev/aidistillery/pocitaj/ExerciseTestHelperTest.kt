@@ -5,9 +5,9 @@ import dev.aidistillery.pocitaj.logic.Addition
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.Exercise
 import dev.aidistillery.pocitaj.ui.exercise.ResultStatus
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,7 +37,7 @@ class ExerciseTestHelperTest : BaseExerciseUiTest() {
         composeTestRule.awaitIdle()
 
         // Check the first problem
-        assertEquals("1 + 2 = ?", exerciseTestHelper.getExerciseProblem())
+        exerciseTestHelper.getExerciseProblem() shouldBe "1 + 2 = ?"
 
         // Submit a correct answer
         exerciseTestHelper.submitAnswer("3")
@@ -47,7 +47,7 @@ class ExerciseTestHelperTest : BaseExerciseUiTest() {
 
 
         // Check the second problem
-        assertEquals("3 + 4 = ?", exerciseTestHelper.getExerciseProblem())
+        exerciseTestHelper.getExerciseProblem() shouldBe "3 + 4 = ?"
 
         // Submit an incorrect answer
         exerciseTestHelper.submitAnswer("8")
@@ -59,7 +59,7 @@ class ExerciseTestHelperTest : BaseExerciseUiTest() {
 
 
         // Check the third problem
-        assertEquals("5 + 0 = ?", exerciseTestHelper.getExerciseProblem())
+        exerciseTestHelper.getExerciseProblem() shouldBe "5 + 0 = ?"
 
         // Submit a correct answer
         exerciseTestHelper.submitAnswer("5")
@@ -68,13 +68,13 @@ class ExerciseTestHelperTest : BaseExerciseUiTest() {
         composeTestRule.awaitIdle()
 
         // No more exercises
-        assertNull(exerciseTestHelper.getExerciseProblem())
+        exerciseTestHelper.getExerciseProblem().shouldBeNull()
 
         // Check the results
         val results = exerciseTestHelper.getResults()
-        assertEquals(3, results.size)
-        assertEquals(ResultStatus.CORRECT, results[0].status)
-        assertEquals(ResultStatus.INCORRECT, results[1].status)
-        assertEquals(ResultStatus.CORRECT, results[2].status)
+        results.size shouldBe 3
+        results[0].status shouldBe ResultStatus.CORRECT
+        results[1].status shouldBe ResultStatus.INCORRECT
+        results[2].status shouldBe ResultStatus.CORRECT
     }
 }

@@ -22,9 +22,8 @@ import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.logic.Addition
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.Exercise
-import junit.framework.TestCase
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class UserProfileScreenTest : BaseExerciseUiTest() {
@@ -137,7 +136,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         val levelId = Curriculum.SubtractionFrom5.id
         composeTestRule.onNodeWithTag("level_tile_${levelId}").assertIsDisplayed()
-        TestCase.assertEquals(getProgress(levelId), 0)
+        getProgress(levelId) shouldBe 0
 
         // 3. Switch to Alice
         composeTestRule.onNodeWithContentDescription("User Profile")
@@ -151,7 +150,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         composeTestRule.onNodeWithTag("user_profile_Alice").assertIsDisplayed()
         composeTestRule.onNodeWithTag("level_tile_${levelId}")
             .assertIsDisplayed()
-        TestCase.assertEquals(getProgress(levelId), 100)
+        getProgress(levelId) shouldBe 100
 
         // 5. Start an Exercise as Alice
         setExercises(listOf(Exercise(Addition(1, 4))))
@@ -168,8 +167,8 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
             attemptsForAlice = globals.exerciseAttemptDao.getAttemptCountForUser(2)
             attemptsForDefaultUser = globals.exerciseAttemptDao.getAttemptCountForUser(1)
         }
-        assertEquals(1, attemptsForAlice)
-        assertEquals(0, attemptsForDefaultUser)
+        attemptsForAlice shouldBe 1
+        attemptsForDefaultUser shouldBe 0
 
         composeTestRule.onNodeWithTag("Back").performClick()
         composeTestRule.mainClock.advanceTimeBy(RESULT_ANIMATION_PROGRESS_TIME)
@@ -198,7 +197,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 7. Verify Bob's State
         openOperationCard("-")
         composeTestRule.onNodeWithTag("level_tile_${levelId}").assertIsDisplayed()
-        TestCase.assertEquals(getProgress(levelId), 0)
+        getProgress(levelId) shouldBe 0
     }
 
     @Test
@@ -215,7 +214,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle()
 
         // 3. Verify that "Alice" is the active user
-        assertEquals("Alice", globals.activeUserManager.activeUser.name)
+        globals.activeUserManager.activeUser.name shouldBe "Alice"
     }
 
     @Test

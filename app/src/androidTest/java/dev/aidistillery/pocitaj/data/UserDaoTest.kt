@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,10 +34,12 @@ class UserDaoTest {
 
     @Test
     @Throws(Exception::class)
-    fun insertAndGetUser() = runBlocking {
-        val user = User(name = "test_user")
-        userDao.insert(user)
-        val retrievedUser = userDao.getUserByName("test_user")
-        assertEquals(user.name, retrievedUser?.name)
+    fun insertAndGetUser() {
+        runBlocking {
+            val user = User(name = "test_user")
+            userDao.insert(user)
+            val retrievedUser = userDao.getUserByName("test_user")
+            retrievedUser?.name shouldBe user.name
+        }
     }
 }

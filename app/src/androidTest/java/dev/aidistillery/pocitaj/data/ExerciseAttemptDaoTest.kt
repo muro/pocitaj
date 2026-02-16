@@ -3,11 +3,11 @@ package dev.aidistillery.pocitaj.data
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,7 +51,7 @@ class ExerciseAttemptDaoTest {
         exerciseAttemptDao.insert(attempt)
 
         val attempts = exerciseAttemptDao.getAttemptsForUser(1).first()
-        assertEquals(1, attempts.size)
-        assertEquals(attempt, attempts[0])
+        attempts.size shouldBe 1
+        attempts[0] shouldBe attempt
     }
 }

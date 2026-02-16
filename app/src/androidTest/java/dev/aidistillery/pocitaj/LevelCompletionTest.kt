@@ -5,8 +5,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.Level
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertTrue
+import io.kotest.assertions.withClue
+import io.kotest.matchers.ints.shouldBeGreaterThan
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import kotlin.math.ceil
@@ -18,13 +19,15 @@ class LevelCompletionTest : AdaptiveExerciseUiTest() {
         val level = Curriculum.TableLevel(dev.aidistillery.pocitaj.data.Operation.MULTIPLICATION, 3)
         val levelId = level.id
         composeTestRule.onNodeWithTag("level_tile_${levelId}").assertIsDisplayed()
-        assertEquals(0, getProgress(levelId))
+        getProgress(levelId) shouldBe 0
 
         answerAllQuestionsCorrectly("×", levelId)
 
         openOperationCard("×")
         val progress = getProgress(levelId)
-        assertTrue("Progress should be greater than 0, but was $progress", progress > 0)
+        withClue("Progress should be greater than 0, but was $progress") {
+            progress shouldBeGreaterThan 0
+        }
         composeTestRule.onNodeWithTag("level_tile_${levelId}").assertIsDisplayed()
     }
 
@@ -46,7 +49,9 @@ class LevelCompletionTest : AdaptiveExerciseUiTest() {
         // setMasteryProgress distributes this as 12 facts at Strength 5 (12.0 weight)
         // and 1 fact at Strength 2 (0.1 weight). Total weight 12.1.
         // 12.1 / 21 = 0.576... -> 57%
-        assertEquals("Pre-condition failed: Initial progress should be 57%", 57, initialProgress)
+        withClue("Pre-condition failed: Initial progress should be 57%") {
+            initialProgress shouldBe 57
+        }
 
         // ACT 2: Play one full session, answering all questions correctly
         answerAllQuestionsCorrectly("×", levelId)
@@ -55,7 +60,9 @@ class LevelCompletionTest : AdaptiveExerciseUiTest() {
         openOperationCard("×") // Re-open the card to refresh the UI with final progress
         composeTestRule.onNodeWithTag("level_tile_${levelId}").assertIsDisplayed()
         val finalProgress = getProgress(levelId)
-        assertTrue("Post-condition failed: Final progress should be > 60%", finalProgress > 60)
+        withClue("Post-condition failed: Final progress should be > 60%") {
+            finalProgress shouldBeGreaterThan 60
+        }
 
         // TODO: Once the "New Star" celebration animation/UI is implemented,
         // add an assertion here to verify its visibility. For example:
