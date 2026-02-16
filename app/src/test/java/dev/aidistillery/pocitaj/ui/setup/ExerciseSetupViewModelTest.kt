@@ -6,6 +6,10 @@ import dev.aidistillery.pocitaj.data.FakeActiveUserManager
 import dev.aidistillery.pocitaj.data.FakeFactMasteryDao
 import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.logic.Curriculum
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.floats.plusOrMinus
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -13,9 +17,6 @@ import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -62,12 +63,12 @@ class ExerciseSetupViewModelTest {
             val initialAddLevels =
                 initialState.find { it.operation == Operation.ADDITION }!!.levelStatuses
             val sum5Level = initialAddLevels.find { it.level.id == "ADD_SUM_5" }!!
-            assertEquals(0f, sum5Level.progress)
-            assertTrue(sum5Level.isUnlocked)
+            sum5Level.progress shouldBe 0f
+            sum5Level.isUnlocked.shouldBeTrue()
 
             val sum10Level = initialAddLevels.find { it.level.id == "ADD_SUM_10" }!!
             // SUM_10 is locked initially (prereqs not met)
-            assertFalse(sum10Level.isUnlocked)
+            sum10Level.isUnlocked.shouldBeFalse()
 
             // 2. Simulate partial progress
             val allFacts = Curriculum.SumsUpTo5.getAllPossibleFactIds()
@@ -85,11 +86,7 @@ class ExerciseSetupViewModelTest {
             // SumsUpTo5 has 21 facts. masteredFacts takes 10 of them.
             // (10 * 0.1 + 11 * 0.0) / 21 = 1.0 / 21 = 0.0476...
             val expectedProgress = 1.0f / 21f
-            assertEquals(
-                expectedProgress,
-                partialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.progress,
-                0.001f
-            )
+            partialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.progress shouldBe (expectedProgress plusOrMinus 0.001f)
 
 
             // 3. Simulate mastering the first level completely
@@ -102,12 +99,9 @@ class ExerciseSetupViewModelTest {
             val updatedState = awaitItem()
             val updatedAddLevels =
                 updatedState.find { it.operation == Operation.ADDITION }!!.levelStatuses
-            assertEquals(
-                1f,
-                updatedAddLevels.find { it.level.id == "ADD_SUM_5" }!!.progress,
-                0.001f
-            )
-            assertTrue(updatedAddLevels.find { it.level.id == "ADD_SUM_10" }!!.isUnlocked)
+
+            updatedAddLevels.find { it.level.id == "ADD_SUM_5" }!!.progress shouldBe (1f plusOrMinus 0.001f)
+            updatedAddLevels.find { it.level.id == "ADD_SUM_10" }!!.isUnlocked.shouldBeTrue()
         }
     }
 }

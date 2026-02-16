@@ -2,7 +2,7 @@ package dev.aidistillery.pocitaj.ui.history
 
 import dev.aidistillery.pocitaj.data.ExerciseAttempt
 import dev.aidistillery.pocitaj.data.Operation
-import org.junit.Assert.assertEquals
+import io.kotest.matchers.shouldBe
 import org.junit.Test
 
 class HistoryViewModelTest {
@@ -21,7 +21,7 @@ class HistoryViewModelTest {
         )
         val expected = "5 + 5 = 10"
         val actual = attempt.toHistoryString()
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
@@ -38,7 +38,7 @@ class HistoryViewModelTest {
         )
         val expected = "2 + 5 = 7"
         val actual = attempt.toHistoryString()
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 
     @Test
@@ -55,6 +55,6 @@ class HistoryViewModelTest {
         )
         val expected = "10 - 3 = 6"
         val actual = attempt.toHistoryString()
-        assertEquals(expected, actual)
+        actual shouldBe expected
     }
 }

@@ -6,6 +6,11 @@ import dev.aidistillery.pocitaj.data.FakeFactMasteryDao
 import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.Curriculum.SumsUpTo5
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.floats.plusOrMinus
+import io.kotest.matchers.maps.shouldContainKey
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -13,9 +18,6 @@ import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestWatcher
@@ -55,40 +57,40 @@ class ProgressReportViewModelTest {
         viewModel.factProgressByOperation.test {
             // Initial state check
             val initialFactProgress = awaitItem()
-            assertEquals(4, initialFactProgress.size)
-            assertTrue(initialFactProgress.values.all { it.isEmpty() })
+            initialFactProgress.size shouldBe 4
+            initialFactProgress.values.all { it.isEmpty() }.shouldBeTrue()
 
             // State after emitting facts
             fakeDao.emit(facts)
 
             val updatedFactProgress = awaitItem()
-            assertEquals(4, updatedFactProgress.size)
+            updatedFactProgress.size shouldBe 4
 
             val additionFacts = updatedFactProgress[Operation.MULTIPLICATION]
-            assertNotNull(additionFacts)
-            assertEquals(121, additionFacts!!.size)
+            additionFacts.shouldNotBeNull()
+            additionFacts.size shouldBe 121
             val masteredFact = additionFacts.find { it.factId == "2 * 3 = ?" }
-            assertNotNull(masteredFact)
-            assertEquals(3, masteredFact!!.mastery!!.strength)
+            masteredFact.shouldNotBeNull()
+            masteredFact.mastery!!.strength shouldBe 3
         }
 
         // ACT & ASSERT for levelProgressByOperation
         viewModel.levelProgressByOperation.test {
             // Initial state check
             val initialLevelProgress = awaitItem()
-            assertEquals(0, initialLevelProgress.size)
+            initialLevelProgress.size shouldBe 0
 
             // State after emitting facts
             fakeDao.emit(facts)
 
             val updatedLevelProgress = awaitItem()
-            assertEquals(4, updatedLevelProgress.size)
+            updatedLevelProgress.size shouldBe 4
 
             val additionLevels = updatedLevelProgress[Operation.ADDITION]
-            assertNotNull(additionLevels)
-            val sumsUpTo5Progress = additionLevels!![SumsUpTo5.id]
-            assertNotNull(sumsUpTo5Progress)
-            assertTrue(sumsUpTo5Progress!!.progress > 0)
+            additionLevels.shouldNotBeNull()
+            val sumsUpTo5Progress = additionLevels[SumsUpTo5.id]
+            sumsUpTo5Progress.shouldNotBeNull()
+            (sumsUpTo5Progress.progress > 0).shouldBeTrue()
         }
     }
 
@@ -109,25 +111,27 @@ class ProgressReportViewModelTest {
         viewModel.levelProgressByOperation.test {
             // Initial state check
             val initialLevelProgress = awaitItem()
-            assertEquals(0, initialLevelProgress.size)
+            initialLevelProgress.size shouldBe 0
 
             // State after emitting facts
             fakeDao.emit(facts)
 
             val updatedLevelProgress = awaitItem()
-            assertEquals(4, updatedLevelProgress.size)
+            updatedLevelProgress.size shouldBe 4
 
             val additionLevels = updatedLevelProgress[Operation.ADDITION]!!
-            assertNotNull(additionLevels)
+            additionLevels.shouldNotBeNull()
 
-            assertTrue(additionLevels.containsKey("ADD_SUM_5"))
+            additionLevels.shouldContainKey("ADD_SUM_5")
             val s5 = additionLevels["ADD_SUM_5"]!!
-            assertTrue(3 / 25 <= s5.progress)
-            assertTrue(additionLevels.containsKey("ADD_SUM_10"))
+            (s5.progress >= 3f / 25f).shouldBeTrue()
+
+            additionLevels.shouldContainKey("ADD_SUM_10")
             val s10 = additionLevels["ADD_SUM_10"]!!
-            assertTrue(0.03 <= s10.progress)
-            assertTrue(additionLevels.containsKey("ADD_TWO_DIGIT_CARRY"))
-            assertEquals(0.0f, additionLevels["ADD_TWO_DIGIT_CARRY"]!!.progress)
+            (s10.progress >= 0.03f).shouldBeTrue()
+
+            additionLevels.shouldContainKey("ADD_TWO_DIGIT_CARRY")
+            additionLevels["ADD_TWO_DIGIT_CARRY"]!!.progress shouldBe 0.0f
         }
     }
 
@@ -156,9 +160,9 @@ class ProgressReportViewModelTest {
             val subtractionProgress =
                 progress[Operation.SUBTRACTION]!![Curriculum.SubtractionFrom5.id]!!
 
-            assertEquals(1.0f, additionProgress.progress)
-            assertTrue(additionProgress.isMastered)
-            assertEquals(0.5f, subtractionProgress.progress, 0.05f)
+            additionProgress.progress shouldBe 1.0f
+            additionProgress.isMastered.shouldBeTrue()
+            subtractionProgress.progress shouldBe (0.5f plusOrMinus 0.05f)
         }
     }
 }
