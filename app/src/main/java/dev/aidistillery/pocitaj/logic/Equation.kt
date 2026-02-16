@@ -41,11 +41,16 @@ interface Equation {
                 }
             }
 
-            // 2. Missing Addend (5 + ? = 12)
-            val missingAddRegex = Regex("""(\d+) \+ \? = (\d+)""")
+            // 2. Missing Addend (? + 5 = 12 or 5 + ? = 12)
+            // TODO: use OR for ?|\d+ , then we use null when it's "?"
+            val missingAddRegex = Regex("""(?:\? \+ (\d+) = (\d+))|(\d+) \+ \? = (\d+)""")
             missingAddRegex.matchEntire(factId)?.let { match ->
-                val (a, sum) = match.destructured
-                return MissingAddend(a.toInt(), sum.toInt())
+                val groups = match.groupValues
+                return if (groups[1].isNotEmpty()) {
+                    MissingAddend(null, groups[1].toInt(), groups[2].toInt())
+                } else {
+                    MissingAddend(groups[3].toInt(), null, groups[4].toInt())
+                }
             }
 
             // 3. Missing Subtrahend (10 - ? = 4)
@@ -91,14 +96,35 @@ data class Multiplication(val a: Int, val b: Int) : Equation {
     override fun getFactId(): String = "$a * $b = ?"
 }
 
-data class MissingAddend(private val a: Int, private val result: Int) : Equation {
-    private val b: Int = result - a // The missing operand
+data class MissingAddend(val a: Int?, val b: Int?, val sum: Int) : Equation {
+    init {
+        require((a == null) != (b == null)) { "Exactly one operand must be null" }
+    }
 
-    override fun question(): String = String.format(Locale.ENGLISH, "%d + ? = %d", a, result)
-    override fun getExpectedResult(): Int = b
+    private val missingOperand: Int = if (a == null) sum - b!! else sum - a
 
-    override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.ADDITION, a, b)
-    override fun getFactId(): String = "$a + ? = $result"
+    override fun question(): String = if (a == null) {
+        String.format(Locale.ENGLISH, "? + %d = %d", b, sum)
+    } else {
+        String.format(Locale.ENGLISH, "%d + ? = %d", a, sum)
+    }
+
+    override fun getExpectedResult(): Int = missingOperand
+
+    // TODO: This might be a bit misleading - it is as if we returned 3+4=7 for normal addition
+    override fun getFact(): Triple<Operation, Int, Int> {
+        return if (a == null) {
+            Triple(Operation.ADDITION, missingOperand, b!!)
+        } else {
+            Triple(Operation.ADDITION, a, missingOperand)
+        }
+    }
+
+    override fun getFactId(): String = if (a == null) {
+        "? + $b = $sum"
+    } else {
+        "$a + ? = $sum"
+    }
 }
 
 data class MissingSubtrahend(private val a: Int, private val result: Int) : Equation {

@@ -131,20 +131,20 @@ class ExerciseBookTest {
 
     @Test
     fun `equationString returns correct format for unsolved MissingAddend`() {
-        val exercise = Exercise(MissingAddend(7, 15))
+        val exercise = Exercise(MissingAddend(7, null, 15))
         assertEquals("7 + ? = 15", exercise.equationString())
     }
 
     @Test
     fun `equationString returns correct format for solved correct MissingAddend`() {
-        val exercise = Exercise(MissingAddend(7, 15))
+        val exercise = Exercise(MissingAddend(7, null, 15))
         exercise.solve(8)
         assertEquals("7 + 8 = 15", exercise.equationString())
     }
 
     @Test
     fun `equationString returns correct format for solved incorrect MissingAddend`() {
-        val exercise = Exercise(MissingAddend(7, 15))
+        val exercise = Exercise(MissingAddend(7, null, 15))
         exercise.solve(9)
         // For incorrect, it should show the original equation with the incorrect submitted answer
         assertEquals("7 + 9 ≠ 15", exercise.equationString())

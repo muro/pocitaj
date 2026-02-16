@@ -203,15 +203,23 @@ object Curriculum {
         override val strategy = ExerciseStrategy.DRILL
 
         override fun generateExercise(): Exercise {
-            // Making 10s: 3 + ? = 10
+            // Making 10s: 3 + ? = 10 OR ? + 3 = 10
             val a = Random.nextInt(1, 10)
-            return Exercise(MissingAddend(a, 10))
+            val equation = if (Random.nextBoolean()) {
+                MissingAddend(a, null, 10)
+            } else {
+                MissingAddend(null, a, 10)
+            }
+            return Exercise(equation)
         }
 
         override fun getAllPossibleFactIds(): List<String> {
-            // IDs: 1 + ? = 10, etc.
-            return (1..9).map { a ->
-                "$a + ? = 10"
+            // IDs: 1 + ? = 10, ? + 1 = 10, etc.
+            return (1..9).flatMap { a ->
+                listOf(
+                    "$a + ? = 10",
+                    "? + $a = 10"
+                )
             }
         }
     }

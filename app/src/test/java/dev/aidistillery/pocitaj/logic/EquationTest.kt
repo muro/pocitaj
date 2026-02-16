@@ -83,15 +83,28 @@ class EquationTest {
 
     // --- Missing Addend ---
     @Test
-    fun `MissingAddend formats question and factId correctly`() {
-        val eq = MissingAddend(5, 12) // 5 + ? = 12
+    fun `MissingAddend Op1 formats question and factId correctly`() {
+        val eq = MissingAddend(null, 5, 12) // ? + 5 = 12
+        assertEquals("? + 5 = 12", eq.question())
+        assertEquals("? + 5 = 12", eq.getFactId())
+    }
+
+    @Test
+    fun `MissingAddend Op1 formats solved state correctly`() {
+        val eq = MissingAddend(null, 5, 12)
+        assertEquals("7 + 5 = 12", eq.getQuestionAsSolved(7))
+    }
+
+    @Test
+    fun `MissingAddend Op2 formats question and factId correctly`() {
+        val eq = MissingAddend(5, null, 12) // 5 + ? = 12
         assertEquals("5 + ? = 12", eq.question())
         assertEquals("5 + ? = 12", eq.getFactId())
     }
 
     @Test
-    fun `MissingAddend formats solved state correctly`() {
-        val eq = MissingAddend(5, 12)
+    fun `MissingAddend Op2 formats solved state correctly`() {
+        val eq = MissingAddend(5, null, 12)
         assertEquals("5 + 7 = 12", eq.getQuestionAsSolved(7))
     }
 
@@ -148,9 +161,17 @@ class EquationTest {
 
     @Test
     fun `parse MissingAddend correctly`() {
-        val eq = Equation.parse("5 + ? = 12")
-        assertTrue(eq is MissingAddend)
-        assertEquals(7, eq?.getExpectedResult())
+        val eq2 = Equation.parse("5 + ? = 12")
+        assertTrue(eq2 is MissingAddend)
+        assertEquals(7, eq2?.getExpectedResult())
+        assertEquals(5, (eq2 as MissingAddend).a)
+        assertEquals(null, eq2.b)
+
+        val eq1 = Equation.parse("? + 5 = 12")
+        assertTrue(eq1 is MissingAddend)
+        assertEquals(7, eq1?.getExpectedResult())
+        assertEquals(null, (eq1 as MissingAddend).a)
+        assertEquals(5, eq1.b)
     }
 
     @Test

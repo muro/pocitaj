@@ -85,14 +85,38 @@ class CurriculumTest {
     }
 
     @Test
-    fun `Making10s generates sums of 10`() {
+    fun `Making10s generates sums of 10 with missing operands`() {
         val level = Curriculum.Making10s
-        repeat(20) { // Only a few pairs exist, 20 is plenty
+        var missingOp1Count = 0
+        var missingOp2Count = 0
+
+        repeat(100) {
             val exercise = level.generateExercise()
-            val (op, op1, op2) = exercise.equation.getFact()
+            val equation = exercise.equation
+            val (op, op1, op2) = equation.getFact()
+            
             assertEquals("Operation must be addition", Operation.ADDITION, op)
             assertEquals("Sum must be 10 for $op1 + $op2", 10, op1 + op2)
+
+            assertTrue("Equation must be MissingAddend", equation is MissingAddend)
+            val missingAddend = equation as MissingAddend
+
+            if (missingAddend.a == null) missingOp1Count++
+            if (missingAddend.b == null) missingOp2Count++
         }
+
+        assertTrue("Should generate some missing first operands", missingOp1Count > 0)
+        assertTrue("Should generate some missing second operands", missingOp2Count > 0)
+    }
+
+    @Test
+    fun `Making10s generates correct fact IDs`() {
+        val level = Curriculum.Making10s
+        val factIds = level.getAllPossibleFactIds()
+
+        // Should contain both "3 + ? = 10" and "? + 3 = 10"
+        assertTrue(factIds.contains("3 + ? = 10"))
+        assertTrue(factIds.contains("? + 3 = 10"))
     }
 
     @Test
