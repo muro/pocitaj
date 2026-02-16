@@ -14,6 +14,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -60,11 +61,13 @@ class ExerciseSetupViewModelTest {
             val initialState = awaitItem()
             val initialAddLevels =
                 initialState.find { it.operation == Operation.ADDITION }!!.levelStatuses
-            assertEquals(0f, initialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.progress)
-            assertTrue(initialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.isUnlocked)
-            // TODO: Re-enable and fix these assertions. With the removal of the prerequisite
-            // system, these tests need to be rewritten to assert that all levels are unlocked.
-            // assertFalse(initialAddLevels.find { it.level.id == "ADD_SUM_10" }!!.isUnlocked)
+            val sum5Level = initialAddLevels.find { it.level.id == "ADD_SUM_5" }!!
+            assertEquals(0f, sum5Level.progress)
+            assertTrue(sum5Level.isUnlocked)
+
+            val sum10Level = initialAddLevels.find { it.level.id == "ADD_SUM_10" }!!
+            // SUM_10 is locked initially (prereqs not met)
+            assertFalse(sum10Level.isUnlocked)
 
             // 2. Simulate partial progress
             val allFacts = Curriculum.SumsUpTo5.getAllPossibleFactIds()

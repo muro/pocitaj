@@ -70,6 +70,7 @@ import dev.aidistillery.pocitaj.ui.components.PocitajScreen
 import dev.aidistillery.pocitaj.ui.components.StarRatingDisplay
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import dev.aidistillery.pocitaj.ui.theme.getGradientForOperation
+import dev.aidistillery.pocitaj.ui.theme.glow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -381,11 +382,22 @@ fun LevelTile(
                 set(StarRatingKey, (100 * levelStatus.progress).toInt())
             }
             .testTag("${levelStatus.level.id}-${(levelStatus.progress * 100).toInt()}_progress")
-            .clickable(enabled = levelStatus.isUnlocked, onClick = onClick),
+            .then(
+                // Glow if unlocked (prereqs met) but not yet mastered (fully progress)
+                if (levelStatus.isUnlocked) {
+                    Modifier.glow(
+                        color = Color.White.copy(alpha = 0.4f),
+                        radius = 20.dp,
+                        spread = 2.dp,
+                        borderRadius = 12.dp
+                    )
+                } else Modifier
+            )
+            .clickable(enabled = true, onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = if (levelStatus.isUnlocked) 0.8f else 0.3f),
-            contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (levelStatus.isUnlocked) 1f else 0.5f)
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = if (levelStatus.isUnlocked) 0.9f else 0.85f),
+            contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (levelStatus.isUnlocked) 1f else 0.95f)
         )
     ) {
         Column(
