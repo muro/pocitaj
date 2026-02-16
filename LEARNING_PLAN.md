@@ -75,11 +75,11 @@
 
 *This phase adds smaller features that improve the overall learning experience and make the app more delightful to use.*
 
-### ### Step 3.1 (New): Implement Graceful Error Handling for Review Questions
+### ### Step 3.1 (New): Implement Graceful Error Handling for Review Questions [DONE]
 *   **Action:** Refine the `ExerciseProvider` logic.
 *   **Details:** If a user makes a mistake on a review question from a *past* level, the system will log the mistake for future review but will **not** force the user to leave their currently selected level.
 
-### ### Step 3.2 (New): Implement Proactive Confidence Boosters
+### ### Step 3.2 (New): Implement Proactive Confidence Boosters [DONE]
 *   **Action:** Further refine the `ExerciseProvider` logic.
 *   **Details:** Implement the intra-level 80/20 split. When practicing a level, occasionally show an easy, already-mastered question from that same level to build confidence.
 
@@ -152,7 +152,7 @@
 
 ### Phase 2: The Learning & UI Logic
 
-**Step 4: Define the `Curriculum` [POSTPONED]**
+**Step 4: Define the `Curriculum` [DONE]**
 *   **Purpose:** Codify the mastery levels.
 *   **Action:** Create a `Curriculum` object/enum that defines the levels as we've outlined.
 *   **Note:** The first level for each of the four operations has been implemented. This will be revisited after the learning simulator is built to allow for better testing and validation of the full curriculum.
