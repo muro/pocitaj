@@ -1,19 +1,11 @@
 package dev.aidistillery.pocitaj.logic
 
-import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TwoDigitComputationLevelTest {
-    private fun createMastery(
-        factId: String,
-        strength: Int,
-        lastTested: Long = 0L
-    ): Pair<String, FactMastery> {
-        return factId to FactMastery(factId, 1, "test_level", strength, lastTested)
-    }
 
     @Test
     fun `level creates correct equation type`() {
