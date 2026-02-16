@@ -60,17 +60,8 @@ class ExerciseSetupViewModel(
 
                     allLevels.groupBy { it.operation }.map { (op, levels) ->
                         val levelStates = levels.map { level ->
-                            val factsInLevel = level.getAllPossibleFactIds()
-                            val progress = if (factsInLevel.isEmpty()) {
-                                0f
-                            } else {
-                                val totalStrength = factsInLevel.sumOf { factId ->
-                                    masteryMap[factId]?.strength ?: 0
-                                }
-                                val maxPossibleStrength = factsInLevel.size * MASTERY_STRENGTH
-                                totalStrength.toFloat() / maxPossibleStrength
-                            }
                             val isUnlocked = level.prerequisites.all { it in masteredLevelIds }
+                            val progress = level.calculateProgress(masteryMap)
                             LevelStatus(level, isUnlocked, progress)
                         }
                         OperationLevels(op, levelStates)

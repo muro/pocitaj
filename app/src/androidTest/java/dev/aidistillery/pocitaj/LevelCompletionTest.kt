@@ -41,7 +41,12 @@ class LevelCompletionTest : AdaptiveExerciseUiTest() {
         openOperationCard("×")
         composeTestRule.onNodeWithTag("level_tile_${levelId}").assertIsDisplayed()
         val initialProgress = getProgress(levelId)
-        assertEquals("Pre-condition failed: Initial progress should be 59%", 59, initialProgress)
+        // With weighted system, 0.59 target yields 57% initial progress.
+        // Math: 21 facts total. Target 0.59 * (21*5) points = 62 points.
+        // setMasteryProgress distributes this as 12 facts at Strength 5 (12.0 weight)
+        // and 1 fact at Strength 2 (0.1 weight). Total weight 12.1.
+        // 12.1 / 21 = 0.576... -> 57%
+        assertEquals("Pre-condition failed: Initial progress should be 57%", 57, initialProgress)
 
         // ACT 2: Play one full session, answering all questions correctly
         answerAllQuestionsCorrectly("×", levelId)

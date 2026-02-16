@@ -70,15 +70,7 @@ class ProgressReportViewModel(
                 Curriculum.getAllLevels().groupBy { it.operation }
                     .mapValues { (_, levels) ->
                         levels.associate { level ->
-                            val levelFacts = level.getAllPossibleFactIds()
-                            val masteredCount = levelFacts.count { factId ->
-                                (masteryMap[factId]?.strength ?: 0) >= 5
-                            }
-                            val progress = if (levelFacts.isNotEmpty()) {
-                                masteredCount.toFloat() / levelFacts.size
-                            } else {
-                                0f
-                            }
+                            val progress = level.calculateProgress(masteryMap)
                             level.id to LevelProgress(progress, progress >= 1.0f)
                         }
                     }

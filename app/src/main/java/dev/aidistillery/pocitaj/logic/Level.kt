@@ -1,5 +1,6 @@
 package dev.aidistillery.pocitaj.logic
 
+import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
 
 /**
@@ -33,6 +34,27 @@ interface Level {
      */
     fun recognizes(equation: Equation): Boolean =
         getAllPossibleFactIds().contains(equation.getFactId())
+
+    /**
+     * Calculates the progress for this level based on user mastery.
+     * Uses a non-linear weight model: Strength 4 = 50%, Strength 5 = 100%.
+     */
+    fun calculateProgress(masteryMap: Map<String, FactMastery>): Float {
+        val factIds = getAllPossibleFactIds()
+        if (factIds.isEmpty()) return 0f
+
+        val totalWeight = factIds.sumOf { factId ->
+            val strength = masteryMap[factId]?.strength ?: 0
+            when (strength) {
+                0 -> 0.0
+                in 1..3 -> 0.1
+                4 -> 0.5
+                5 -> 1.0
+                else -> 1.0
+            }
+        }
+        return (totalWeight / factIds.size).toFloat()
+    }
 }
 
 class MixedReviewLevel(

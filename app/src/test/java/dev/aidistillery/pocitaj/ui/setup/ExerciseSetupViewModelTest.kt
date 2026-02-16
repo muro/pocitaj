@@ -71,12 +71,17 @@ class ExerciseSetupViewModelTest {
             val masteredFacts = allFacts.take(allFacts.size / 2).map {
                 FactMastery(it, 1, "", 2, 0) // Master half the facts to strength 2
             }
+            // State after emitting facts
             fakeDao.emit(masteredFacts)
 
             val partialState = awaitItem()
             val partialAddLevels =
                 partialState.find { it.operation == Operation.ADDITION }!!.levelStatuses
-            val expectedProgress = (allFacts.size / 2 * 2).toFloat() / (allFacts.size * 5)
+
+            // New math: strength 2 has weight 0.1. 
+            // SumsUpTo5 has 21 facts. masteredFacts takes 10 of them.
+            // (10 * 0.1 + 11 * 0.0) / 21 = 1.0 / 21 = 0.0476...
+            val expectedProgress = 1.0f / 21f
             assertEquals(
                 expectedProgress,
                 partialAddLevels.find { it.level.id == "ADD_SUM_5" }!!.progress,
