@@ -14,8 +14,7 @@ interface Level {
     fun generateExercise(): Exercise
     fun getAllPossibleFactIds(): List<String>
 
-    fun createExercise(equation: Equation): Exercise = Exercise(equation)
-    fun createExercise(factId: String): Exercise = createExercise(Equation.parse(factId)!!)
+    fun createExercise(factId: String): Exercise = Exercise(Equation.parse(factId)!!)
 
     /**
      * Determines which fact IDs are impacted by solving the given exercise.

@@ -61,7 +61,7 @@ open class TwoDigitComputationLevel(
 
         val equation =
             if (operation == Operation.ADDITION) Addition(op1, op2) else Subtraction(op1, op2)
-        return createExercise(equation)
+        return Exercise(equation)
     }
 
     override fun getAllPossibleFactIds(): List<String> {
@@ -140,7 +140,7 @@ open class TwoDigitComputationLevel(
                 if (op == Operation.SUBTRACTION && op1 < op2) continue
                 break
             } while (true)
-            createExercise(
+            Exercise(
                 if (op == Operation.ADDITION) Addition(op1, op2) else Subtraction(
                     op1,
                     op2
@@ -165,7 +165,7 @@ open class TwoDigitComputationLevel(
                 if (op == Operation.SUBTRACTION && (op1 < op2 || op1 < 10 || op2 < 10)) continue
                 break
             } while (true)
-            createExercise(
+            Exercise(
                 if (op == Operation.ADDITION) Addition(op1, op2) else Subtraction(
                     op1,
                     op2

@@ -8,7 +8,7 @@ class LevelTest {
     @Test
     fun `default getAffectedFactIds returns single fact`() {
         val level = Curriculum.SumsUpTo5
-        val exercise = level.createExercise(Addition(2, 3))
+        val exercise = Exercise(Addition(2, 3))
 
         val affected = level.getAffectedFactIds(exercise)
 

@@ -14,7 +14,7 @@ class ReviewStrategyTest {
         override val operation = Operation.ADDITION
         override val prerequisites = emptySet<String>()
         override val strategy = ExerciseStrategy.REVIEW // Important: Set strategy to REVIEW
-        override fun generateExercise() = createExercise(Addition(1, 1))
+        override fun generateExercise() = Exercise(Addition(1, 1))
         override fun getAllPossibleFactIds() = (1..10).map { "1 + $it = ?" }
     }
 

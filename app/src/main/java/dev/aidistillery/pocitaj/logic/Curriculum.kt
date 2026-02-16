@@ -26,9 +26,9 @@ object Curriculum {
             val part = Random.nextInt(0, whole + 1)
 
             return if (operation == Operation.ADDITION) {
-                createExercise(Addition(part, whole - part))
+                Exercise(Addition(part, whole - part))
             } else {
-                createExercise(Subtraction(whole, part))
+                Exercise(Subtraction(whole, part))
             }
         }
 
@@ -70,12 +70,12 @@ object Curriculum {
                     op1 = op2
                     op2 = temp
                 }
-                createExercise(Multiplication(op1, op2))
+                Exercise(Multiplication(op1, op2))
             } else {
                 // Division
                 val result = Random.nextInt(2, 11)
                 val op1 = number * result
-                createExercise(Division(op1, number))
+                Exercise(Division(op1, number))
             }
         }
 
@@ -126,9 +126,9 @@ object Curriculum {
             // We want the sum to cross 10
             val op2 = Random.nextInt(10 - op1 + 1, 10)
             return if (Random.nextBoolean()) {
-                createExercise(Addition(op1, op2))
+                Exercise(Addition(op1, op2))
             } else {
-                createExercise(Addition(op2, op1))
+                Exercise(Addition(op2, op1))
             }
         }
 
@@ -161,7 +161,7 @@ object Curriculum {
 
         override fun generateExercise(): Exercise {
             val op1 = Random.nextInt(1, 11)
-            return createExercise(Addition(op1, op1))
+            return Exercise(Addition(op1, op1))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
@@ -179,9 +179,9 @@ object Curriculum {
             val op1 = Random.nextInt(1, 10) // e.g. 4
             val op2 = op1 + 1 // e.g. 5
             return if (Random.nextBoolean()) {
-                createExercise(Addition(op1, op2))
+                Exercise(Addition(op1, op2))
             } else {
-                createExercise(Addition(op2, op1))
+                Exercise(Addition(op2, op1))
             }
         }
 
@@ -205,7 +205,7 @@ object Curriculum {
         override fun generateExercise(): Exercise {
             // Making 10s: 3 + ? = 10
             val a = Random.nextInt(1, 10)
-            return createExercise(MissingAddend(a, 10))
+            return Exercise(MissingAddend(a, 10))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
@@ -225,7 +225,7 @@ object Curriculum {
         override fun generateExercise(): Exercise {
             val op1 = Random.nextInt(1, 10) * 10
             val op2 = Random.nextInt(1, 10) * 10
-            return createExercise(Addition(op1, op2))
+            return Exercise(Addition(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {
@@ -280,7 +280,7 @@ object Curriculum {
         override fun generateExercise(): Exercise {
             val op1 = Random.nextInt(2, 10) * 10
             val op2 = Random.nextInt(1, op1 / 10) * 10
-            return createExercise(Subtraction(op1, op2))
+            return Exercise(Subtraction(op1, op2))
         }
 
         override fun getAllPossibleFactIds(): List<String> {

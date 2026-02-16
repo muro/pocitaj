@@ -13,7 +13,7 @@ class SmartPracticeStrategyTest {
         override val operation = Operation.ADDITION
         override val prerequisites = emptySet<String>()
         override val strategy = ExerciseStrategy.DRILL
-        override fun generateExercise() = createExercise(Addition(1, 1))
+        override fun generateExercise() = Exercise(Addition(1, 1))
         override fun getAllPossibleFactIds() = listOf("ADD_1_1", "ADD_1_2")
     }
 

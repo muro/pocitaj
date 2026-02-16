@@ -23,7 +23,7 @@ class TwoDigitComputationLevelTest {
     @Test
     fun `getAffectedFactIds handles multi-fact updates in TwoDigitComputationLevel`() {
         val level = TwoDigitComputationLevel("ADD_CARRY", Operation.ADDITION, true)
-        val exercise = level.createExercise(Addition(19, 19))
+        val exercise = Exercise(Addition(19, 19))
 
         val affectedIds = level.getAffectedFactIds(exercise)
 
