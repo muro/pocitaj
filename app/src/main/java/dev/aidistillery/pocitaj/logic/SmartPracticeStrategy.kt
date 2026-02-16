@@ -89,25 +89,79 @@ class SmartPracticeStrategy(
         }
 
         val factId = findWeakestFactIn(levelToPractice)
-        return exerciseFromFactId(factId)
+        return levelToPractice.createExercise(factId)
     }
 
     override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): Pair<FactMastery?, String> {
-        val factId = exercise.getFactId()
-        val mastery =
-            userMastery[factId] ?: FactMastery(factId, activeUserId, "", lastTestedTimestamp = 0)
-        val now = clock.now().toEpochMilliseconds()
+        val level = curriculum.find { it.recognizes(exercise.equation) } ?: findCurrentLevel()
+
+        val affectedIds = level.getAffectedFactIds(exercise)
+        val primaryFactId = exercise.getFactId()
+        var primaryResult: FactMastery? = null
         val duration = exercise.timeTakenMillis?.toLong() ?: 0L
 
-        val newMastery = SpacedRepetitionSystem.updateMastery(
-            currentMastery = mastery,
-            wasCorrect = wasCorrect,
-            durationMs = duration,
-            speedBadge = exercise.speedBadge,
-            clock = clock
+        affectedIds.forEach { factId ->
+            val mastery = userMastery[factId] ?: FactMastery(factId, activeUserId, level.id, 3, 0L)
+
+            val updated = calculateMasteryUpdate(
+                mastery,
+                wasCorrect,
+                duration,
+                exercise.speedBadge,
+                clock
+            )
+
+            userMastery[factId] = updated
+            if (factId == primaryFactId) {
+                primaryResult = updated
+            }
+        }
+
+        return primaryResult to level.id
+    }
+
+    private fun calculateMasteryUpdate(
+        currentMastery: FactMastery,
+        wasCorrect: Boolean,
+        durationMs: Long,
+        speedBadge: SpeedBadge,
+        clock: Clock
+    ): FactMastery {
+        val now = clock.now().toEpochMilliseconds()
+
+        // 1. Update Average Duration
+        val newAvgDuration = if (currentMastery.avgDurationMs > 0) {
+            (currentMastery.avgDurationMs * 0.8 + durationMs * 0.2).toLong()
+        } else {
+            durationMs
+        }
+
+        val currentStrength = currentMastery.strength
+        val newStrength = if (wasCorrect) {
+            when {
+                // GOLD badge "Fast Track": Jump to Consolidating (Target - 1) if below it.
+                // If already at Consolidating or higher, promote to Target.
+                speedBadge == SpeedBadge.GOLD -> {
+                    if (currentStrength < MASTERY_STRENGTH - 1) MASTERY_STRENGTH - 1
+                    else MASTERY_STRENGTH
+                }
+
+                // Normal incremental promotion logic
+                currentStrength <= 1 -> currentStrength + 1
+                currentStrength == 2 -> if (speedBadge >= SpeedBadge.BRONZE) 3 else 2
+                currentStrength == 3 -> if (speedBadge >= SpeedBadge.SILVER) 4 else 3
+                currentStrength == 4 -> if (speedBadge >= SpeedBadge.GOLD) 5 else 4
+                else -> currentStrength
+            }
+        } else {
+            1 // Reset to 1 on failure
+        }
+
+        return currentMastery.copy(
+            strength = newStrength.coerceAtMost(MASTERY_STRENGTH),
+            lastTestedTimestamp = now,
+            avgDurationMs = newAvgDuration
         )
-        userMastery[factId] = newMastery
-        return newMastery to (findCurrentLevel().id)
     }
 
     private fun findWeakestFactIn(level: Level): String {

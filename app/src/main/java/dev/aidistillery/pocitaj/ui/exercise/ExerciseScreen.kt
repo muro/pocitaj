@@ -344,7 +344,7 @@ fun ExerciseScreen(
 @Composable
 fun PreviewExerciseScreen() {
     val equation: Equation = Subtraction(14, 2)
-    val exercise = Exercise(equation, equation.getExpectedResult())
+    val exercise = Exercise(equation, equation.getExpectedResult(), solved = true)
     val mockInkModelManager = object : InkModelManager {
         override fun setModel(languageTag: String): String = "Model set"
         override fun deleteActiveModel(): com.google.android.gms.tasks.Task<String?> =
@@ -385,7 +385,7 @@ fun PreviewExerciseScreen() {
 @Composable
 fun PreviewExerciseScreenDebug() {
     val equation: Equation = Subtraction(14, 2)
-    val exercise = Exercise(equation, equation.getExpectedResult())
+    val exercise = Exercise(equation, equation.getExpectedResult(), solved = true)
     val mockInkModelManager = object : InkModelManager {
         override fun setModel(languageTag: String): String = "Model set"
         override fun deleteActiveModel(): com.google.android.gms.tasks.Task<String?> =

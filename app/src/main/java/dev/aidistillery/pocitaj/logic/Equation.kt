@@ -1,7 +1,6 @@
 package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.Operation
-import dev.aidistillery.pocitaj.data.toSymbol
 import java.util.Locale
 
 interface Equation {
@@ -24,6 +23,41 @@ interface Equation {
 
     // Unique identifier for mastery tracking
     fun getFactId(): String
+
+    companion object {
+        fun parse(factId: String): Equation? {
+            // 1. Standard Arithmetic (5 + 3 = ?, 10 - 4 = ?, 7 * 6 = ?, 20 / 5 = ?)
+            val standardRegex = Regex("""(\d+) ([+\-*/]) (\d+) = \?""")
+            standardRegex.matchEntire(factId)?.let { match ->
+                val (aStr, opSymbol, bStr) = match.destructured
+                val a = aStr.toInt()
+                val b = bStr.toInt()
+                return when (opSymbol) {
+                    "+" -> Addition(a, b)
+                    "-" -> Subtraction(a, b)
+                    "*" -> Multiplication(a, b)
+                    "/" -> Division(a, b)
+                    else -> null
+                }
+            }
+
+            // 2. Missing Addend (5 + ? = 12)
+            val missingAddRegex = Regex("""(\d+) \+ \? = (\d+)""")
+            missingAddRegex.matchEntire(factId)?.let { match ->
+                val (a, sum) = match.destructured
+                return MissingAddend(a.toInt(), sum.toInt())
+            }
+
+            // 3. Missing Subtrahend (10 - ? = 4)
+            val missingSubRegex = Regex("""(\d+) - \? = (\d+)""")
+            missingSubRegex.matchEntire(factId)?.let { match ->
+                val (a, diff) = match.destructured
+                return MissingSubtrahend(a.toInt(), diff.toInt())
+            }
+
+            return null
+        }
+    }
 }
 
 data class Addition(private val a: Int, private val b: Int) : Equation {
@@ -42,24 +76,7 @@ data class Subtraction(private val a: Int, private val b: Int) : Equation {
     override fun getFactId(): String = "$a - $b = ?"
 }
 
-data class TwoDigitEquation(
-    val operation: Operation,
-    val op1: Int,
-    val op2: Int,
-    val id: String
-) : Equation {
-    override fun question(): String =
-        String.format(Locale.ENGLISH, "%d %s %d = ?", op1, operation.toSymbol(), op2)
 
-    override fun getExpectedResult(): Int = when (operation) {
-        Operation.ADDITION -> op1 + op2
-        Operation.SUBTRACTION -> op1 - op2
-        else -> throw IllegalArgumentException("Unsupported operation for TwoDigitEquation")
-    }
-
-    override fun getFact(): Triple<Operation, Int, Int> = Triple(operation, op1, op2)
-    override fun getFactId() = id
-}
 
 
 data class Multiplication(val a: Int, val b: Int) : Equation {
@@ -100,4 +117,13 @@ data class Division(val a: Int, val b: Int) : Equation {
 
     override fun getFact(): Triple<Operation, Int, Int> = Triple(Operation.DIVISION, a, b)
     override fun getFactId(): String = "$a / $b = ?"
+}
+
+fun Operation.createEquation(op1: Int, op2: Int): Equation {
+    return when (this) {
+        Operation.ADDITION -> Addition(op1, op2)
+        Operation.SUBTRACTION -> Subtraction(op1, op2)
+        Operation.MULTIPLICATION -> Multiplication(op1, op2)
+        Operation.DIVISION -> Division(op1, op2)
+    }
 }

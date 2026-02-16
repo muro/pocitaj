@@ -13,6 +13,27 @@ interface Level {
     val strategy: ExerciseStrategy
     fun generateExercise(): Exercise
     fun getAllPossibleFactIds(): List<String>
+
+    fun createExercise(equation: Equation): Exercise = Exercise(equation)
+    fun createExercise(factId: String): Exercise = createExercise(Equation.parse(factId)!!)
+
+    /**
+     * Determines which fact IDs are impacted by solving the given exercise.
+     *
+     * This allows a single exercise to update mastery for multiple underlying skills.
+     * For example, `19 + 19` (Composite Fact) might update mastery for `9 + 9` (Ones) and `10 + 10` (Tens).
+     * This is a pedagogical decision owned by the Level, not the Exercise.
+     *
+     * Default implementation returns only the primary fact ID from the equation.
+     */
+    fun getAffectedFactIds(exercise: Exercise): List<String> = listOf(exercise.getFactId())
+
+    /**
+     * Returns true if this level is capable of generating the given equation.
+     * Used to identify the level responsible for a specific exercise during mixed practice.
+     */
+    fun recognizes(equation: Equation): Boolean =
+        getAllPossibleFactIds().contains(equation.getFactId())
 }
 
 class MixedReviewLevel(
@@ -31,4 +52,9 @@ class MixedReviewLevel(
     override fun getAllPossibleFactIds(): List<String> {
         return levelsToReview.flatMap { it.getAllPossibleFactIds() }
     }
+
+    override fun recognizes(equation: Equation): Boolean {
+        return levelsToReview.any { it.recognizes(equation) }
+    }
+
 }

@@ -66,7 +66,7 @@ class DrillStrategy(
     }
 
     private fun getMastery(factId: String): FactMastery {
-        return userMastery[factId] ?: FactMastery(factId, activeUserId, "", 3, 0)
+        return userMastery[factId] ?: FactMastery(factId, activeUserId, level.id, 3, 0)
     }
 
     private fun updateWorkingSet() {
@@ -108,29 +108,89 @@ class DrillStrategy(
 
         val factId = workingSet.removeAt(selectedIndex)
         workingSet.add(factId)
-        return exerciseFromFactId(factId)
+        return level.createExercise(factId)
     }
 
     override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): Pair<FactMastery?, String> {
-        val factId = exercise.getFactId()
-        val mastery = getMastery(factId)
-        val now = clock.now().toEpochMilliseconds()
+        val affectedIds = level.getAffectedFactIds(exercise)
+        val primaryFactId = exercise.getFactId()
+        var primaryResult: FactMastery? = null
+
         val duration = exercise.timeTakenMillis?.toLong() ?: 0L
 
-        val newMastery = SpacedRepetitionSystem.updateMastery(
-            currentMastery = mastery,
-            wasCorrect = wasCorrect,
-            durationMs = duration,
-            speedBadge = exercise.speedBadge,
-            clock = clock
-        )
-        userMastery[factId] = newMastery
+        affectedIds.forEach { factId ->
+            val mastery = getMastery(factId)
 
-        if (newMastery.strength >= REPLACEABLE_MASTERY) {
-            workingSet.remove(factId)
-            addNextWeakestFact()
+            val updated = calculateMasteryUpdate(
+                mastery,
+                wasCorrect,
+                duration,
+                exercise.speedBadge,
+                clock
+            )
+
+            userMastery[factId] = updated
+            if (factId == primaryFactId) {
+                primaryResult = updated
+            }
         }
-        return newMastery to level.id
+
+        // Cleanup working set: remove any facts that are now mastered
+        val masteredInWorkingSet =
+            workingSet.filter { getMastery(it).strength >= REPLACEABLE_MASTERY }
+        if (masteredInWorkingSet.isNotEmpty()) {
+            workingSet.removeAll(masteredInWorkingSet)
+            repeat(masteredInWorkingSet.size) { addNextWeakestFact() }
+        }
+
+        return primaryResult to level.id
+    }
+
+    private fun calculateMasteryUpdate(
+        currentMastery: FactMastery,
+        wasCorrect: Boolean,
+        durationMs: Long,
+        speedBadge: SpeedBadge,
+        clock: Clock
+    ): FactMastery {
+        val now = clock.now().toEpochMilliseconds()
+
+        // 1. Update Average Duration (Weighted Moving Average)
+        val newAvgDuration = if (currentMastery.avgDurationMs > 0) {
+            (currentMastery.avgDurationMs * 0.8 + durationMs * 0.2).toLong()
+        } else {
+            durationMs
+        }
+
+        // 2. Update Strength
+        val currentStrength = currentMastery.strength
+        val newStrength = if (wasCorrect) {
+            when {
+                // GOLD badge "Fast Track" (Aggressive Drill):
+                // Jump to Consolidating (Strength 4) if below it.
+                // If already at Consolidating or higher, promote to Mastered (5).
+                speedBadge == SpeedBadge.GOLD -> {
+                    if (currentStrength < L3_MASTERY - 1) L3_MASTERY - 1
+                    else L3_MASTERY
+                }
+
+                // Normal incremental promotion logic
+                currentStrength <= 1 -> currentStrength + 1
+                currentStrength == 2 -> if (speedBadge >= SpeedBadge.BRONZE) 3 else 2
+                currentStrength == 3 -> if (speedBadge >= SpeedBadge.SILVER) 4 else 3
+                currentStrength == 4 -> if (speedBadge >= SpeedBadge.GOLD) 5 else 4
+                else -> currentStrength
+            }
+        } else {
+            1 // Reset to 1 on failure
+        }
+
+        // Ensure we don't exceed L3_MASTERY (5)
+        return currentMastery.copy(
+            strength = newStrength.coerceAtMost(L3_MASTERY),
+            lastTestedTimestamp = now,
+            avgDurationMs = newAvgDuration
+        )
     }
 
     private fun addNextWeakestFact() {

@@ -76,8 +76,6 @@ import kotlin.time.Clock
 class ReviewStrategy(
     private val level: Level,
     private val userMastery: MutableMap<String, FactMastery>,
-    private val reviewStrength: Int,
-    private val targetStrength: Int,
     private val activeUserId: Long,
     private val clock: Clock = Clock.System
 ) : ExerciseProvider {
@@ -132,7 +130,7 @@ class ReviewStrategy(
                 // If there are no unseen facts left, just review the least recently tested fact.
                 val leastRecentFactId =
                     seenFactIds.minByOrNull { userMastery[it]!!.lastTestedTimestamp }
-                return leastRecentFactId?.let { exerciseFromFactId(it) }
+                return leastRecentFactId?.let { level.createExercise(it) }
             } else {
                 return null // Nothing to do.
             }
@@ -144,47 +142,87 @@ class ReviewStrategy(
 
         for ((factId, urgency) in candidates) {
             if (randomPoint < urgency) {
-                return exerciseFromFactId(factId)
+                return level.createExercise(factId)
             }
             randomPoint -= urgency
         }
 
         // Fallback in case of rounding errors.
-        return candidates.keys.firstOrNull()?.let { exerciseFromFactId(it) }
+        return candidates.keys.firstOrNull()?.let { level.createExercise(it) }
     }
 
     override fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): Pair<FactMastery?, String> {
-        val factId = exercise.getFactId()
-        val mastery =
-            userMastery[factId] ?: FactMastery(factId, activeUserId, "", lastTestedTimestamp = 0)
-        val now = clock.now().toEpochMilliseconds()
+        val affectedIds = level.getAffectedFactIds(exercise)
+        val primaryFactId = exercise.getFactId()
+        var primaryResult: FactMastery? = null
         val duration = exercise.timeTakenMillis?.toLong() ?: 0L
 
-        val newAvgDuration = if (mastery.avgDurationMs > 0) {
-            (mastery.avgDurationMs * 0.8 + duration * 0.2).toLong()
-        } else {
-            duration
+        affectedIds.forEach { factId ->
+            val mastery = getMastery(factId)
+
+            val updated = calculateMasteryUpdate(
+                mastery,
+                wasCorrect,
+                duration,
+                exercise.speedBadge,
+                clock
+            )
+
+            userMastery[factId] = updated
+            if (factId == primaryFactId) {
+                primaryResult = updated
+            }
         }
 
-        val newStrength = if (wasCorrect) {
-            when (exercise.speedBadge) {
-                SpeedBadge.GOLD -> targetStrength
-                SpeedBadge.SILVER, SpeedBadge.BRONZE -> (mastery.strength - 1).coerceAtLeast(
-                    reviewStrength
-                )
+        return primaryResult to level.id
+    }
 
-                else -> mastery.strength
+    private fun getMastery(factId: String): FactMastery {
+        return userMastery[factId] ?: FactMastery(factId, activeUserId, level.id, 3, 0L)
+    }
+
+    private fun calculateMasteryUpdate(
+        currentMastery: FactMastery,
+        wasCorrect: Boolean,
+        durationMs: Long,
+        speedBadge: SpeedBadge,
+        clock: Clock
+    ): FactMastery {
+        val now = clock.now().toEpochMilliseconds()
+
+        // 1. Update Average Duration (Weighted Moving Average)
+        val newAvgDuration = if (currentMastery.avgDurationMs > 0) {
+            (currentMastery.avgDurationMs * 0.8 + durationMs * 0.2).toLong()
+        } else {
+            durationMs
+        }
+
+        val targetStrength = 5 // L3_MASTERY
+
+        // 2. Update Strength
+        val currentStrength = currentMastery.strength
+        val newStrength = if (wasCorrect) {
+            when {
+                // GOLD badge (Conservative Review):
+                // Only promote by 1 step, even if very fast.
+                // We trust the SRS schedule; if it's review time, verify one step at a time.
+                speedBadge == SpeedBadge.GOLD -> currentStrength + 1
+
+                // Normal incremental promotion logic
+                currentStrength <= 1 -> currentStrength + 1
+                currentStrength == 2 -> if (speedBadge >= SpeedBadge.BRONZE) 3 else 2
+                currentStrength == 3 -> if (speedBadge >= SpeedBadge.SILVER) 4 else 3
+                currentStrength == 4 -> if (speedBadge >= SpeedBadge.GOLD) 5 else 4
+                else -> currentStrength
             }
         } else {
             1 // Reset to 1 on failure
         }
 
-        val newMastery = mastery.copy(
-            strength = newStrength,
+        return currentMastery.copy(
+            strength = newStrength.coerceAtMost(targetStrength),
             lastTestedTimestamp = now,
             avgDurationMs = newAvgDuration
         )
-        userMastery[factId] = newMastery
-        return newMastery to level.id
     }
 }

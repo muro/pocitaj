@@ -16,7 +16,7 @@ class DrillStrategyTest {
         override val operation = Operation.ADDITION
         override val prerequisites = emptySet<String>()
         override val strategy = ExerciseStrategy.DRILL
-        override fun generateExercise() = Exercise(Addition(1, 1))
+        override fun generateExercise() = createExercise(Addition(1, 1))
         override fun getAllPossibleFactIds() = (1..10).map { "1 + $it = ?" }
     }
 
@@ -175,7 +175,7 @@ class DrillStrategyTest {
         val userMastery = mutableMapOf("1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 4, 100L))
         val strategy = setupStrategy(userMastery, setSize = 1)
         assertEquals(listOf("1 + 1 = ?"), strategy.workingSet)
-        val exercise = exerciseFromFactId("1 + 1 = ?")
+        val exercise = testLevel.createExercise("1 + 1 = ?")
 
         strategy.recordAttempt(exercise, false)
 
@@ -188,7 +188,7 @@ class DrillStrategyTest {
         val userMastery = mutableMapOf<String, FactMastery>()
         val testUserId = 7L
         val strategy = setupStrategy(userMastery, userId = testUserId)
-        val exercise = exerciseFromFactId("1 + 1 = ?")
+        val exercise = testLevel.createExercise("1 + 1 = ?")
 
         // ACT
         val (newMastery, _) = strategy.recordAttempt(exercise, wasCorrect = true)
@@ -206,7 +206,7 @@ class DrillStrategyTest {
     fun `strength 2 to 3 does not happen if speed is too slow`() {
         val userMastery = mutableMapOf("1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 2, 100L))
         val strategy = setupStrategy(userMastery)
-        val exercise = exerciseFromFactId("1 + 1 = ?")
+        val exercise = testLevel.createExercise("1 + 1 = ?")
         exercise.speedBadge = SpeedBadge.NONE // Too slow
 
         strategy.recordAttempt(exercise, true)
@@ -222,7 +222,7 @@ class DrillStrategyTest {
     fun `strength 2 to 3 requires bronze badge`() {
         val userMastery = mutableMapOf("1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 2, 100L))
         val strategy = setupStrategy(userMastery)
-        val exercise = exerciseFromFactId("1 + 1 = ?")
+        val exercise = testLevel.createExercise("1 + 1 = ?")
         exercise.speedBadge = SpeedBadge.BRONZE
 
         strategy.recordAttempt(exercise, true)
@@ -285,7 +285,7 @@ class DrillStrategyTest {
         assertEquals(4, initialWorkingSet.size)
 
         // ACT: Master the L2 fact
-        strategy.recordAttempt(exerciseFromFactId("1 + 1 = ?"), true)
+        strategy.recordAttempt(testLevel.createExercise("1 + 1 = ?"), true)
 
         // ASSERT
         val finalWorkingSet = strategy.workingSet

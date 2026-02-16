@@ -90,10 +90,13 @@ class AdaptiveExerciseSourceMasteryTest {
         val allMastery = factMasteryDao.getAllFactsForUser(1).first()
         val factMasteryEntries = allMastery.filter { it.factId == factId }
 
-        assertTrue("Mastery info should have been saved for the fact", factMasteryEntries.isNotEmpty())
+        assertTrue(
+            "Mastery info for $factId should have been saved",
+            factMasteryEntries.isNotEmpty()
+        )
         assertEquals("Two entries should be created (global and per-level)", 2, factMasteryEntries.size)
-        
-        // Both global and per-level entries should have their strength increased to 4 - the state after answering 1st time correctly
+
+        // Both global and per-level entries should have their strength increased to 4 (Consolidating) due to Gold speed "Fast Track"
         factMasteryEntries.forEach {
             assertEquals("Strength should be updated to 4", 4, it.strength)
         }

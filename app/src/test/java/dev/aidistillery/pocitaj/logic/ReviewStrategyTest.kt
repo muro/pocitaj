@@ -14,7 +14,7 @@ class ReviewStrategyTest {
         override val operation = Operation.ADDITION
         override val prerequisites = emptySet<String>()
         override val strategy = ExerciseStrategy.REVIEW // Important: Set strategy to REVIEW
-        override fun generateExercise() = Exercise(Addition(1, 1))
+        override fun generateExercise() = createExercise(Addition(1, 1))
         override fun getAllPossibleFactIds() = (1..10).map { "1 + $it = ?" }
     }
 
@@ -31,15 +31,11 @@ class ReviewStrategyTest {
     private fun setupStrategy(
         masteryMap: MutableMap<String, FactMastery>,
         level: Level = testLevel,
-        reviewStrength: Int = 5,
-        targetStrength: Int = 6,
         userId: Long = 1L
     ): ReviewStrategy {
         return ReviewStrategy(
             level,
             masteryMap,
-            reviewStrength = reviewStrength,
-            targetStrength = targetStrength,
             activeUserId = userId
         )
     }
@@ -81,9 +77,9 @@ class ReviewStrategyTest {
 
     @Test
     fun `incorrect answer resets strength to 1`() {
-        val userMastery = mutableMapOf("1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 7, 100L))
+        val userMastery = mutableMapOf("1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 4, 100L))
         val strategy = setupStrategy(userMastery)
-        val exercise = exerciseFromFactId("1 + 1 = ?")
+        val exercise = testLevel.createExercise("1 + 1 = ?")
 
         strategy.recordAttempt(exercise, wasCorrect = false)
 
@@ -95,62 +91,66 @@ class ReviewStrategyTest {
     }
 
     @Test
-    fun `correct answer with Gold speed promotes to targetStrength`() {
+    fun `correct answer with Gold speed promotes to targetStrength (5)`() {
+        // Start at 4 (Consolidating). Gold should push to 5 (Mastered).
         val userMastery =
-            mutableMapOf("1 + 2 = ?" to FactMastery("1 + 2 = ?", 1, "", 6, 100L))
-        val strategy = setupStrategy(userMastery, reviewStrength = 6, targetStrength = 7)
-        val exercise = exerciseFromFactId("1 + 2 = ?")
+            mutableMapOf("1 + 2 = ?" to FactMastery("1 + 2 = ?", 1, "", 4, 100L))
+        val strategy = setupStrategy(userMastery)
+        val exercise = testLevel.createExercise("1 + 2 = ?")
         exercise.speedBadge = SpeedBadge.GOLD
 
         strategy.recordAttempt(exercise, true)
 
         assertEquals(
-            "Strength should be promoted to targetStrength",
-            7,
+            "Strength should be promoted to 5",
+            5,
             userMastery["1 + 2 = ?"]!!.strength
         )
     }
 
     @Test
-    fun `correct answer with Gold speed does not promote beyond targetStrength`() {
-        val userMastery = mutableMapOf("1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 7, 100L))
-        val strategy = setupStrategy(userMastery, reviewStrength = 6, targetStrength = 7)
-        val exercise = exerciseFromFactId("1 + 1 = ?")
+    fun `correct answer with Gold speed does not promote beyond targetStrength (5)`() {
+        // Start at 5. Gold should keep it at 5.
+        val userMastery = mutableMapOf("1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 5, 100L))
+        val strategy = setupStrategy(userMastery)
+        val exercise = testLevel.createExercise("1 + 1 = ?")
         exercise.speedBadge = SpeedBadge.GOLD
 
         strategy.recordAttempt(exercise, true)
 
         assertEquals(
-            "Strength should not exceed targetStrength",
-            7,
+            "Strength should not exceed 5",
+            5,
             userMastery["1 + 1 = ?"]!!.strength
         )
     }
 
     @Test
-    fun `correct answer with Silver speed demotes strength by 1`() {
-        val userMastery = mutableMapOf("1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 7, 100L))
-        val strategy = setupStrategy(userMastery, reviewStrength = 6, targetStrength = 7)
-        val exercise = exerciseFromFactId("1 + 1 = ?")
+    fun `correct answer with Silver speed at max strength remains at max`() {
+        // Start at 5. Silver should maintain 5 (no demotion).
+        val userMastery = mutableMapOf("1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 5, 100L))
+        val strategy = setupStrategy(userMastery)
+        val exercise = testLevel.createExercise("1 + 1 = ?")
         exercise.speedBadge = SpeedBadge.SILVER
 
         strategy.recordAttempt(exercise, true)
 
-        assertEquals("Strength should be demoted by 1", 6, userMastery["1 + 1 = ?"]!!.strength)
+        assertEquals("Strength should remain at 5", 5, userMastery["1 + 1 = ?"]!!.strength)
     }
 
     @Test
-    fun `correct answer with Bronze speed does not demote below reviewStrength`() {
-        val userMastery = mutableMapOf("1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 6, 100L))
-        val strategy = setupStrategy(userMastery, reviewStrength = 6, targetStrength = 7)
-        val exercise = exerciseFromFactId("1 + 1 = ?")
+    fun `correct answer with Bronze speed at consolidating strength remains at consolidating`() {
+        // Start at 4. Bronze should maintain 4.
+        val userMastery = mutableMapOf("1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "", 4, 100L))
+        val strategy = setupStrategy(userMastery)
+        val exercise = testLevel.createExercise("1 + 1 = ?")
         exercise.speedBadge = SpeedBadge.BRONZE
 
         strategy.recordAttempt(exercise, true)
 
         assertEquals(
-            "Strength should not go below reviewStrength",
-            6,
+            "Strength should remain at 4",
+            4,
             userMastery["1 + 1 = ?"]!!.strength
         )
     }
@@ -161,23 +161,5 @@ class ReviewStrategyTest {
             override fun getAllPossibleFactIds() = emptyList<String>()
         }
         setupStrategy(mutableMapOf(), level = emptyLevel)
-    }
-}
-
-// Helper function copied from DrillStrategyTest
-private fun exerciseFromFactId(factId: String): Exercise {
-    // 1 + 1 = ?
-    val regex = Regex("""(\d+) ([+\-*/]) (\d+) = \?""")
-    val match = regex.matchEntire(factId) ?: throw IllegalArgumentException("Invalid ID: $factId")
-    val (op1Str, opStr, op2Str) = match.destructured
-    val first = op1Str.toInt()
-    val second = op2Str.toInt()
-
-    return when (opStr) {
-        "+" -> Exercise(Addition(first, second))
-        "-" -> Exercise(Subtraction(first, second))
-        "*" -> Exercise(Multiplication(first, second))
-        "/" -> Exercise(Division(first, second))
-        else -> throw IllegalArgumentException("Unknown op: $opStr")
     }
 }

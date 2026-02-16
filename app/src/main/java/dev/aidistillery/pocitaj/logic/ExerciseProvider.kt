@@ -1,7 +1,8 @@
 package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
-import dev.aidistillery.pocitaj.data.Operation
+import kotlin.random.Random
+import kotlin.time.Clock
 
 /**
  * Defines the teaching strategy for a given level. This allows the app to use different
@@ -22,79 +23,22 @@ interface ExerciseProvider {
     fun recordAttempt(exercise: Exercise, wasCorrect: Boolean): Pair<FactMastery?, String>
 }
 
-/**
- * A helper function to create an Exercise object from a fact ID string. This is used by all
- * strategies to convert the abstract fact ID into a concrete exercise.
- */
-internal fun exerciseFromFactId(factId: String): Exercise {
-    // 1. Try Semantic ID Parsing
-    val standardRegex = Regex("""(\d+) ([+\-*/]) (\d+) = \?""")
-    standardRegex.matchEntire(factId)?.let { match ->
-        val (aStr, opSymbol, bStr) = match.destructured
-        val a = aStr.toInt()
-        val b = bStr.toInt()
-        val equation = when (opSymbol) {
-            "+" -> Addition(a, b)
-            "-" -> Subtraction(a, b)
-            "*" -> Multiplication(a, b)
-            "/" -> Division(a, b)
-            else -> throw IllegalArgumentException("Unknown operation symbol: $opSymbol")
-        }
-        return Exercise(equation)
-    }
-
-    val missingAddRegex = Regex("""(\d+) \+ \? = (\d+)""")
-    missingAddRegex.matchEntire(factId)?.let { match ->
-        val (a, sum) = match.destructured
-        return Exercise(MissingAddend(a.toInt(), sum.toInt()))
-    }
-
-    val missingSubRegex = Regex("""(\d+) - \? = (\d+)""")
-    missingSubRegex.matchEntire(factId)?.let { match ->
-        val (a, diff) = match.destructured
-        return Exercise(MissingSubtrahend(a.toInt(), diff.toInt()))
-    }
-
-    // 2. Fallback to Legacy Parsing (ADDITION_1_2)
-    return try {
-        val parts = factId.split("_")
-        val operation = Operation.valueOf(parts[0])
-        val op1 = parts[1].toInt()
-        val op2 = parts[2].toInt()
-
-        val equation = when (operation) {
-            Operation.ADDITION -> Addition(op1, op2)
-            Operation.SUBTRACTION -> Subtraction(op1, op2)
-            Operation.MULTIPLICATION -> Multiplication(op1, op2)
-            Operation.DIVISION -> Division(op1, op2)
-        }
-        Exercise(equation)
-    } catch (e: Exception) {
-        throw IllegalArgumentException("Invalid Fact ID format: $factId", e)
-    }
-}
-
 fun Level.createStrategy(
     userMastery: MutableMap<String, FactMastery>,
     activeUserId: Long,
-    clock: kotlin.time.Clock = kotlin.time.Clock.System
+    clock: Clock = Clock.System,
+    random: Random = Random.Default
 ): ExerciseProvider {
     return when {
-        this is TwoDigitComputationLevel -> TwoDigitDrillStrategy(
-            this, userMastery, activeUserId = activeUserId, clock = clock
-        )
-
         this.strategy == ExerciseStrategy.REVIEW -> ReviewStrategy(
             this,
             userMastery,
-            reviewStrength = 5,
-            targetStrength = 6,
             activeUserId = activeUserId,
             clock = clock
         )
 
         else -> DrillStrategy(
-            this, userMastery, activeUserId = activeUserId, clock = clock
+            this, userMastery, activeUserId = activeUserId, clock = clock, random = random
         )
     }
 }
