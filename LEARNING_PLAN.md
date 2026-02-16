@@ -83,9 +83,11 @@
 *   **Action:** Further refine the `ExerciseProvider` logic.
 *   **Details:** Implement the intra-level 80/20 split. When practicing a level, occasionally show an easy, already-mastered question from that same level to build confidence.
 
-### ### Step 3.3 (New): Implement Reactive Repetition (Smart Repetition)
+### ### Step 3.3 (New): Implement Reactive Repetition (Smart Repetition) [DONE]
 *   **Action:** Add stateful logic to the exercise session.
-*   **Details:** When a user gets a problem wrong (e.g., fails $7 \times 8$), add related problems (e.g., $8 \times 7$, $56 \div 7$) to a temporary queue to be shown within the current session.
+* **Details:** `DrillStrategy` inherently handles this via the Working Set. Failed facts are reset
+  to strength 0 and returned to the working set, ensuring they are repeated shortly (verified by
+  test).
 
 ### ### Step 3.4 (Previously 3.2): Add Problem Variety
 *   **Action:** Introduce different ways of asking questions.
