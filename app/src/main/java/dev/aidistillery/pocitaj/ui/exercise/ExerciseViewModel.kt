@@ -105,10 +105,7 @@ class ExerciseViewModel(
         if (currentExercise != null) {
             _uiState.value = UiState.ExerciseScreen(currentExercise!!)
         } else {
-            // All exercises completed, calculate results and transition
-            val results = resultsList()
-            _uiState.value = UiState.SummaryScreen(results)
-            _navigationEvents.emit(NavigationEvent.NavigateToSummary)
+            handleSessionComplete()
         }
     }
 
@@ -117,22 +114,47 @@ class ExerciseViewModel(
         viewModelScope.launch {
             currentExercise?.let { exercise ->
                 val intAnswer = answer.toIntOrNull()
-                val isCorrect = intAnswer?.let { exercise.solve(it, elapsedMs) } ?: false
 
-                exerciseHistory.add(exercise.copy())
                 if (intAnswer != null) {
-                    exerciseSource.recordAttempt(exercise, intAnswer, elapsedMs.toLong())
+                    exercise.solve(intAnswer, elapsedMs)
                 }
 
-                // Set the UI state based on the result
-                _answerResult.value = when {
-                    intAnswer == null -> AnswerResult.Unrecognized
-                    isCorrect -> AnswerResult.Correct
-                    else -> AnswerResult.Incorrect
+                exerciseHistory.add(exercise.copy())
+
+                if (intAnswer == null) {
+                    onUnrecognizedAnswer(exercise, answer, elapsedMs)
+                } else {
+                    if (exercise.correct()) {
+                        onCorrectAnswer(exercise, intAnswer, elapsedMs)
+                    } else {
+                        onIncorrectAnswer(exercise, intAnswer, elapsedMs)
+                    }
                 }
                 updateWorkingSetForDebug()
             }
         }
+    }
+
+    @Suppress("unused")
+    private fun onUnrecognizedAnswer(exercise: Exercise, answer: String, elapsedMs: Int) {
+        _answerResult.value = AnswerResult.Unrecognized
+    }
+
+    private suspend fun onCorrectAnswer(exercise: Exercise, answer: Int, elapsedMs: Int) {
+        exerciseSource.recordAttempt(exercise, answer, elapsedMs.toLong())
+        _answerResult.value = AnswerResult.Correct
+    }
+
+    private suspend fun onIncorrectAnswer(exercise: Exercise, answer: Int, elapsedMs: Int) {
+        exerciseSource.recordAttempt(exercise, answer, elapsedMs.toLong())
+        _answerResult.value = AnswerResult.Incorrect
+    }
+
+    private suspend fun handleSessionComplete() {
+        // All exercises completed, calculate results and transition
+        val results = resultsList()
+        _uiState.value = UiState.SummaryScreen(results)
+        _navigationEvents.emit(NavigationEvent.NavigateToSummary)
     }
 
     private fun updateWorkingSetForDebug() {
