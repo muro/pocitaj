@@ -75,34 +75,32 @@
 
 *This phase adds smaller features that improve the overall learning experience and make the app more delightful to use.*
 
-### ### Step 3.1 (New): Implement Graceful Error Handling for Review Questions [DONE]
+### ### Step 3.1: Implement Graceful Error Handling for Review Questions [DONE]
 *   **Action:** Refine the `ExerciseProvider` logic.
 *   **Details:** If a user makes a mistake on a review question from a *past* level, the system will log the mistake for future review but will **not** force the user to leave their currently selected level.
 
-### ### Step 3.2 (New): Implement Proactive Confidence Boosters [DONE]
+### ### Step 3.2: Implement Proactive Confidence Boosters [DONE]
 *   **Action:** Further refine the `ExerciseProvider` logic.
 *   **Details:** Implement the intra-level 80/20 split. When practicing a level, occasionally show an easy, already-mastered question from that same level to build confidence.
 
-### ### Step 3.3 (New): Implement Reactive Repetition (Smart Repetition) [DONE]
+### ### Step 3.3: Implement Reactive Repetition (Smart Repetition) [DONE]
 *   **Action:** Add stateful logic to the exercise session.
 * **Details:** `DrillStrategy` inherently handles this via the Working Set. Failed facts are reset
   to strength 0 and returned to the working set, ensuring they are repeated shortly (verified by
   test).
 
-### ### Step 3.4 (Previously 3.2): Add Problem Variety
+### ### Step 3.4: Add Problem Variety
 *   **Action:** Introduce different ways of asking questions.
 *   **Details:**
-    * Instead of just `$a + b = ?` format, add:
-        * Fill-in-the-blank problems: `$a + ? = c`
-        * Simple word problems: "You have 5 apples and get 3 more. How many apples in total?"
+    * Instead of just `$a + b = ?` format, add fill-in-the-blank problems: `$a + ? = c`
 
-### ### Step 3.5 (Previously 3.3): Add Audio-Visual Feedback
+### ### Step 3.5: Add Audio-Visual Feedback [DONE]
 *   **Action:** Make the app more responsive and fun.
 *   **Details:**
     * Add simple, satisfying sound effects for correct and incorrect answers.
     * Create a special animation or "celebration" screen for when a user masters a level for the first time or achieves a new high score.
 
-### ### Step 3.6 (New): Add "New Star" Celebration
+### ### Step 3.6: Add "New Star" Celebration
 *   **Action:** Add a celebration animation to the Results Screen when a user earns a new star.
 *   **Details:**
     * The `ExerciseViewModel` will be updated to track the star rating before and after a session.

@@ -134,6 +134,15 @@ fun ResultsScreen(
                 modifier = Modifier.fillMaxSize()
             )
         }
+
+        if (results.isNotEmpty() && results.all { it.status == ResultStatus.CORRECT }) {
+            dev.aidistillery.pocitaj.ui.components.ConfettiAnimation(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag("confetti_animation"),
+                particleCount = 150
+            )
+        }
     }
 }
 
