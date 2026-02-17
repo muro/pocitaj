@@ -345,26 +345,7 @@ fun ExerciseScreen(
 fun PreviewExerciseScreen() {
     val equation: Equation = Subtraction(14, 2)
     val exercise = Exercise(equation, equation.getExpectedResult(), solved = true)
-    val mockInkModelManager = object : InkModelManager {
-        override fun setModel(languageTag: String): String = "Model set"
-        override fun deleteActiveModel(): com.google.android.gms.tasks.Task<String?> =
-            Tasks.forResult(null)
-
-        override fun download(): com.google.android.gms.tasks.Task<String?> = Tasks.forResult(null)
-        override suspend fun recognizeInk(ink: Ink, hint: String): String = "12"
-    }
-    val mockExerciseSource = object : ExerciseSource {
-        override suspend fun initialize(config: ExerciseConfig) {}
-        override fun getNextExercise(): Exercise? = null
-        override suspend fun recordAttempt(
-            exercise: Exercise,
-            submittedAnswer: Int,
-            durationMs: Long
-        ) {
-        }
-    }
-    val viewModel = ExerciseViewModel(mockInkModelManager, mockExerciseSource)
-    viewModel.startExercises(ExerciseConfig(Operation.SUBTRACTION, 12, 10))
+    val viewModel = rememberMockExerciseViewModel()
 
     AppTheme {
         ExerciseScreen(exercise, viewModel, false) { _: String, _: Int -> }
@@ -386,28 +367,45 @@ fun PreviewExerciseScreen() {
 fun PreviewExerciseScreenDebug() {
     val equation: Equation = Subtraction(14, 2)
     val exercise = Exercise(equation, equation.getExpectedResult(), solved = true)
-    val mockInkModelManager = object : InkModelManager {
-        override fun setModel(languageTag: String): String = "Model set"
-        override fun deleteActiveModel(): com.google.android.gms.tasks.Task<String?> =
-            Tasks.forResult(null)
-
-        override fun download(): com.google.android.gms.tasks.Task<String?> = Tasks.forResult(null)
-        override suspend fun recognizeInk(ink: Ink, hint: String): String = "12"
-    }
-    val mockExerciseSource = object : ExerciseSource {
-        override suspend fun initialize(config: ExerciseConfig) {}
-        override fun getNextExercise(): Exercise? = null
-        override suspend fun recordAttempt(
-            exercise: Exercise,
-            submittedAnswer: Int,
-            durationMs: Long
-        ) {
-        }
-    }
-    val viewModel = ExerciseViewModel(mockInkModelManager, mockExerciseSource)
-    viewModel.startExercises(ExerciseConfig(Operation.SUBTRACTION, 12, 10))
+    val viewModel = rememberMockExerciseViewModel()
 
     AppTheme {
         ExerciseScreen(exercise, viewModel, true) { _: String, _: Int -> }
+    }
+}
+
+@Composable
+private fun rememberMockExerciseViewModel(): ExerciseViewModel {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    return remember {
+        val inkModelManager = object : InkModelManager {
+            override fun setModel(languageTag: String): String = "Model set"
+            override fun deleteActiveModel(): com.google.android.gms.tasks.Task<String?> =
+                Tasks.forResult(null)
+
+            override fun download(): com.google.android.gms.tasks.Task<String?> =
+                Tasks.forResult(null)
+
+            override suspend fun recognizeInk(ink: Ink, hint: String): String = "12"
+        }
+        val exerciseSource = object : ExerciseSource {
+            override suspend fun initialize(config: ExerciseConfig) {}
+            override fun getNextExercise(): Exercise? = null
+            override suspend fun recordAttempt(
+                exercise: Exercise,
+                submittedAnswer: Int,
+                durationMs: Long
+            ) {
+            }
+        }
+        val soundManager = object : dev.aidistillery.pocitaj.ui.SoundManager(context) {
+            override fun playCorrect() {}
+            override fun playWrong() {}
+            override fun playUnrecognized() {}
+            override fun playLevelComplete() {}
+        }
+        ExerciseViewModel(inkModelManager, exerciseSource, soundManager).apply {
+            startExercises(ExerciseConfig(Operation.SUBTRACTION, 12, 10))
+        }
     }
 }

@@ -12,6 +12,7 @@ import dev.aidistillery.pocitaj.data.AdaptiveExerciseSource
 import dev.aidistillery.pocitaj.data.ExerciseConfig
 import dev.aidistillery.pocitaj.data.ExerciseSource
 import dev.aidistillery.pocitaj.logic.Exercise
+import dev.aidistillery.pocitaj.ui.SoundManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -43,7 +44,9 @@ sealed class NavigationEvent {
 }
 
 class ExerciseViewModel(
-    private val inkModelManager: InkModelManager, private val exerciseSource: ExerciseSource
+    private val inkModelManager: InkModelManager,
+    private val exerciseSource: ExerciseSource,
+    private val soundManager: SoundManager
 ) : ViewModel() {
     private var currentExercise: Exercise? = null
     private var exercisesRemaining: Int = 0
@@ -137,20 +140,24 @@ class ExerciseViewModel(
 
     @Suppress("unused")
     private fun onUnrecognizedAnswer(exercise: Exercise, answer: String, elapsedMs: Int) {
+        soundManager.playUnrecognized()
         _answerResult.value = AnswerResult.Unrecognized
     }
 
     private suspend fun onCorrectAnswer(exercise: Exercise, answer: Int, elapsedMs: Int) {
+        soundManager.playCorrect()
         exerciseSource.recordAttempt(exercise, answer, elapsedMs.toLong())
         _answerResult.value = AnswerResult.Correct
     }
 
     private suspend fun onIncorrectAnswer(exercise: Exercise, answer: Int, elapsedMs: Int) {
+        soundManager.playWrong()
         exerciseSource.recordAttempt(exercise, answer, elapsedMs.toLong())
         _answerResult.value = AnswerResult.Incorrect
     }
 
     private suspend fun handleSessionComplete() {
+        soundManager.playLevelComplete()
         // All exercises completed, calculate results and transition
         val results = resultsList()
         _uiState.value = UiState.SummaryScreen(results)
@@ -234,7 +241,9 @@ object ExerciseViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
         val globals = App.app.globals
         return ExerciseViewModel(
-            inkModelManager = globals.inkModelManager, exerciseSource = globals.exerciseSource
+            inkModelManager = globals.inkModelManager,
+            exerciseSource = globals.exerciseSource,
+            soundManager = globals.soundManager
         ) as T
     }
 }

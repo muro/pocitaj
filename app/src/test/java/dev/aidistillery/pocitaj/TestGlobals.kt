@@ -12,6 +12,7 @@ import dev.aidistillery.pocitaj.data.FactMasteryDao
 import dev.aidistillery.pocitaj.data.FakeActiveUserManager
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.data.UserDao
+import dev.aidistillery.pocitaj.ui.SoundManager
 
 object FakeInkModelManager : InkModelManager {
     private var recognitionResult = "123"
@@ -46,6 +47,9 @@ class TestGlobals(private val context: Context) : Globals {
     }
     override val inkModelManager: InkModelManager by lazy {
         FakeInkModelManager
+    }
+    override val soundManager: SoundManager by lazy {
+        SoundManager(context)
     }
     override val activeUser: User
         get() = activeUserManager.activeUser

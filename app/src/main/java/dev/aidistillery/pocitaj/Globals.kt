@@ -11,6 +11,7 @@ import dev.aidistillery.pocitaj.data.ExerciseSource
 import dev.aidistillery.pocitaj.data.FactMasteryDao
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.data.UserDao
+import dev.aidistillery.pocitaj.ui.SoundManager
 
 interface Globals {
     val userDao: UserDao
@@ -19,6 +20,7 @@ interface Globals {
     val activeUserManager: ActiveUserManager
     val exerciseSource: ExerciseSource
     val inkModelManager: InkModelManager
+    val soundManager: SoundManager
     val activeUser: User
 }
 
@@ -43,6 +45,9 @@ class ProductionGlobals(private val context: Context) : Globals {
     }
     override val inkModelManager: InkModelManager by lazy {
         ModelManager()
+    }
+    override val soundManager: SoundManager by lazy {
+        SoundManager(context)
     }
     override val activeUser: User
         get() = activeUserManager.activeUser

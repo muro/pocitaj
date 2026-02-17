@@ -5,6 +5,7 @@ import dev.aidistillery.pocitaj.data.ExerciseSource
 import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.logic.Addition
 import dev.aidistillery.pocitaj.logic.Exercise
+import dev.aidistillery.pocitaj.ui.SoundManager
 import dev.aidistillery.pocitaj.ui.exercise.AnswerResult
 import dev.aidistillery.pocitaj.ui.exercise.ExerciseViewModel
 import dev.aidistillery.pocitaj.ui.exercise.ResultStatus
@@ -31,6 +32,7 @@ class ExerciseViewModelTest {
     private lateinit var viewModel: ExerciseViewModel
     private lateinit var inkModelManager: InkModelManager
     private lateinit var exerciseSource: ExerciseSource
+    private lateinit var soundManager: SoundManager
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -39,7 +41,8 @@ class ExerciseViewModelTest {
         Dispatchers.setMain(testDispatcher)
         inkModelManager = mockk(relaxed = true)
         exerciseSource = mockk(relaxed = true)
-        viewModel = ExerciseViewModel(inkModelManager, exerciseSource)
+        soundManager = mockk(relaxed = true)
+        viewModel = ExerciseViewModel(inkModelManager, exerciseSource, soundManager)
     }
 
     @After
@@ -59,6 +62,7 @@ class ExerciseViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.answerResult.value shouldBe AnswerResult.Correct
+        coVerify { soundManager.playCorrect() }
     }
 
     @Test
@@ -73,6 +77,7 @@ class ExerciseViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.answerResult.value shouldBe AnswerResult.Incorrect
+        coVerify { soundManager.playWrong() }
     }
 
     @Test
@@ -115,6 +120,9 @@ class ExerciseViewModelTest {
             summaryScreen.results[1].equation shouldBe "3 + 3 ≠ 5"
             summaryScreen.results[1].status shouldBe ResultStatus.INCORRECT
             summaryScreen.results[1].elapsedMs shouldBe 1500
+
+            // AND: Level complete sound should be played
+            coVerify { soundManager.playLevelComplete() }
         }
 
     @Test
@@ -149,6 +157,9 @@ class ExerciseViewModelTest {
         viewModel.checkAnswer("?", 1000) // Invalid answer
         testDispatcher.scheduler.advanceUntilIdle()
         viewModel.answerResult.value shouldBe AnswerResult.Unrecognized
+
+        // VERIFY: Unrecognized sound is played
+        coVerify { soundManager.playUnrecognized() }
 
         viewModel.onFeedbackAnimationFinished()
         testDispatcher.scheduler.advanceUntilIdle()

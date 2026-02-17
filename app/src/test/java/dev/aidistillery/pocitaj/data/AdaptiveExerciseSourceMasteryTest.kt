@@ -57,7 +57,7 @@ class AdaptiveExerciseSourceMasteryTest {
 
         activeUserManager = FakeActiveUserManager(User(id = 1, name = "Test User"))
         exerciseSource = AdaptiveExerciseSource(factMasteryDao, exerciseAttemptDao, activeUserManager, testDispatcher)
-        viewModel = ExerciseViewModel(mockk(relaxed = true), exerciseSource)
+        viewModel = ExerciseViewModel(mockk(relaxed = true), exerciseSource, mockk(relaxed = true))
     }
 
     @After
