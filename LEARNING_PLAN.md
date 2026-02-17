@@ -211,3 +211,57 @@
 *   **Purpose:** To connect all the new screens.
 *   **Action:** Add buttons and update the navigation graph to link the setup screen to the progress report and history views.
 *   **Testing:** Update **UI tests** to confirm that clicking the navigation buttons takes the user to the correct screens.
+
+---
+
+## Phase 4: Mastery & Retention (Reviews & Smart Practice) [NEW]
+
+*This phase focuses on ensuring long-term retention and giving students a strong sense of validation
+and purpose.*
+
+### ### Step 4.1: Revamp Review Strategy ("Verification Tests")
+
+* **Goal:** Transform "Review Levels" from simple drills into high-stakes, rewarding milestones that
+  verify cumulative mastery.
+* **Action:** Clarify the purpose and contents of Review Levels.
+* **Details:**
+    * **Transparency:** Clearly indicate *which* specific skills or levels are being tested in a
+      Review Level (e.g., "Review of levels 1-3").
+    * **"Boss Battle" Feel:** Distinguish Review Levels visually (e.g., gold border, shield icon) to
+      signal importance.
+    * **Verification:** Treat these as "exams" or "checkpoints." Passing a Review Level should feel
+      like a major accomplishment, confirming that the student hasn't just memorized the latest
+      topic but has retained previous ones.
+    * **Celebration:** Add a distinct "Mastery Confirmed" animation or reward upon passing,
+      reinforcing the feeling of accomplishment.
+
+### ### Step 4.2: Refine Smart Practice ("Daily Test" / Purposeful Practice)
+
+* **Goal:** Provide a clear pedagogical reason for "Smart Practice" to exist and declutter the UI.
+* **Action:** Rebrand and reposition Smart Practice to be a purposeful, routine activity rather than
+  a confused alternative to normal levels.
+* **Details:**
+    * **Rebrand:** Consider renaming to "Daily Test," "Warmup," or "Brain Gym" to imply a regular,
+      maintenance activity.
+    * **Justification:** Explain *why* this exists (Spaced Repetition: "Keep your skills sharp!").
+      It's for retention, not for learning new material.
+    * **Declutter:** Instead of a permanent button on every operation card, consider:
+        * Showing it only when relevant (e.g., once a day, or after 2-3 levels are mastered).
+        * Moving it to a "Daily Goals" section at the top of the screen.
+        * Making it a "recommended next step" bubble if the user has been away for a while.
+
+### ### Step 4.3: Progress Calendar & Daily Streak
+
+* **Goal:** Visualize consistency to build a daily habit.
+* **Action:** Add a calendar view and a prominent streak counter.
+* **Details:**
+    * **Streak Counter:** Display a "🔥 Streak" count on the Home Screen header for immediate
+      motivation.
+    * **Calendar View:** A simple monthly view in the Progress screen highlighting days with
+      activity.
+    * **Differentiation:** Distinguish between "did some practice" (small dot) vs "met daily goal" (
+      star/check).
+    * **Forgiveness:** Allow a "freeze" or grace period if missed to prevent demotivation.
+
+
+
