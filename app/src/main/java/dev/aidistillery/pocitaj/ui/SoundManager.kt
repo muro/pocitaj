@@ -25,7 +25,7 @@ open class SoundManager(context: Context) {
             .build()
 
         correctSoundId = soundPool.load(context, R.raw.correct, 1)
-        wrongSoundId = soundPool.load(context, R.raw.wrong, 1)
+        wrongSoundId = soundPool.load(context, R.raw.sad, 1)
         unrecognizedSoundId = soundPool.load(context, R.raw.unrecognized, 1)
         levelCompleteSoundId = soundPool.load(context, R.raw.level_complete, 1)
     }
