@@ -62,12 +62,12 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
         runBlocking {
             // Master all of SumsUpTo5
             Curriculum.SumsUpTo5.getAllPossibleFactIds().forEach { factId ->
-                factMasteryDao.upsert(FactMastery(factId, 1, "", 5, 0))
+                factMasteryDao.upsert(FactMastery(factId, 1, Curriculum.SumsUpTo5.id, 5, 0))
             }
             // Master half of SubtractionFrom5
             val subtractionFacts = Curriculum.SubtractionFrom5.getAllPossibleFactIds()
             subtractionFacts.take(subtractionFacts.size / 2).forEach { factId ->
-                factMasteryDao.upsert(FactMastery(factId, 1, "", 5, 0))
+                factMasteryDao.upsert(FactMastery(factId, 1, Curriculum.SubtractionFrom5.id, 5, 0))
             }
         }
 

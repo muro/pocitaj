@@ -1,6 +1,8 @@
 package dev.aidistillery.pocitaj.data
 
 import dev.aidistillery.pocitaj.logic.Curriculum
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,19 +20,6 @@ class AdaptiveExerciseSourceTest {
     private lateinit var activeUserManager: FakeActiveUserManager
 
     // --- Test Doubles ---
-
-    class FakeFactMasteryDao : FactMasteryDao {
-        private val facts = mutableMapOf<String, FactMastery>()
-        private val flow = MutableStateFlow<List<FactMastery>>(emptyList())
-        override fun getAllFactsForUser(userId: Long) = flow.asStateFlow()
-        override suspend fun getFactMastery(userId: Long, factId: String, level: String) = facts[factId]
-        override suspend fun getFactMastery(userId: Long, factId: String) = facts[factId]
-        override suspend fun upsert(factMastery: FactMastery) {
-            facts[factMastery.factId] = factMastery
-            flow.value = facts.values.toList()
-        }
-    }
-
     class FakeExerciseAttemptDao : ExerciseAttemptDao {
         private val attempts = mutableListOf<ExerciseAttempt>()
         override suspend fun insert(attempt: ExerciseAttempt) {
@@ -45,7 +34,6 @@ class AdaptiveExerciseSourceTest {
         }
     }
 
-    @Suppress("RedundantNullableReturnType")
     class FakeUserDao : UserDao {
         private val users = mutableMapOf<Long, User>()
         private var nextId = 1L
@@ -143,4 +131,45 @@ class AdaptiveExerciseSourceTest {
             }
         }
     }
+
+    @Test
+    fun `recordAttempt saves mastery for the active level and globally`() {
+        runBlocking {
+            // ARRANGE
+            val levelId = "ADD_SUM_5"
+            val config = ExerciseConfig(
+                operation = Operation.ADDITION,
+                difficulty = 10,
+                count = 5,
+                levelId = levelId
+            )
+            exerciseSource.initialize(config)
+            val exercise = exerciseSource.getNextExercise()!! // e.g., 1+1
+
+            // ACT
+            exerciseSource.recordAttempt(exercise, exercise.equation.getExpectedResult(), 1000L)
+
+            // ASSERT
+            val factId = exercise.equation.question()
+
+            // 1. Verify it was saved for the correct level
+            val savedMastery = factMasteryDao.getFactMastery(7, factId, levelId)
+            savedMastery.shouldNotBeNull()
+            savedMastery.level shouldBe levelId
+
+            // 2. Verify it was saved globally (level = "")
+            val savedGlobalMastery = factMasteryDao.getFactMastery(7, factId, "")
+            savedGlobalMastery.shouldNotBeNull()
+            savedGlobalMastery.level shouldBe ""
+
+            // 3. Verify it was NOT saved for other levels containing the same fact (e.g., Doubles)
+            val doublesId = Curriculum.Doubles.id
+            if (factId == "2 + 2 = ?") {
+                val savedMasteryDoubles = factMasteryDao.getFactMastery(7, factId, doublesId)
+                savedMasteryDoubles.shouldBeNull()
+            }
+        }
+    }
 }
+
+

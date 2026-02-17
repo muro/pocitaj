@@ -44,10 +44,15 @@ class ProgressReportViewModel(
     val factProgressByOperation: StateFlow<Map<Operation, List<FactProgress>>> =
         factMasteryDao.getAllFactsForUser(activeUserId)
             .map { masteryList ->
-                val masteryMap = masteryList.associateBy { it.factId }
+                val bestMasteryMap =
+                    masteryList.groupBy { it.factId }
+                        .mapValues { (_, masteries) ->
+                            masteries.maxByOrNull { it.strength }
+                        }
+
                 allFactsByOperation.mapValues { (operation, factIds) ->
                     factIds.map { factId ->
-                        val mastery = masteryMap[factId]
+                        val mastery = bestMasteryMap[factId]
                         val parts = factId.split('_')
                         val op1 = parts.getOrNull(1)?.toIntOrNull() ?: 0
                         val op2 = parts.getOrNull(2)?.toIntOrNull() ?: 0
@@ -66,11 +71,13 @@ class ProgressReportViewModel(
     val levelProgressByOperation: StateFlow<Map<Operation, Map<String, LevelProgress>>> =
         factMasteryDao.getAllFactsForUser(activeUserId)
             .map { masteryList ->
-                val masteryMap = masteryList.associateBy { it.factId }
+                val masteryByLevel = masteryList.groupBy { it.level }
                 Curriculum.getAllLevels().groupBy { it.operation }
                     .mapValues { (_, levels) ->
                         levels.associate { level ->
-                            val progress = level.calculateProgress(masteryMap)
+                            val levelMasteryList = masteryByLevel[level.id] ?: emptyList()
+                            val levelMasteryMap = levelMasteryList.associateBy { it.factId }
+                            val progress = level.calculateProgress(levelMasteryMap)
                             level.id to LevelProgress(progress, progress >= 1.0f)
                         }
                     }

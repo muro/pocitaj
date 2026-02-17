@@ -5,7 +5,6 @@ import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.FakeFactMasteryDao
 import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.logic.Curriculum
-import dev.aidistillery.pocitaj.logic.Curriculum.SumsUpTo5
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.floats.plusOrMinus
 import io.kotest.matchers.maps.shouldContainKey
@@ -49,8 +48,14 @@ class ProgressReportViewModelTest {
         val fakeDao = FakeFactMasteryDao()
         val viewModel = ProgressReportViewModel(fakeDao, 1)
         val facts = listOf(
-            FactMastery("1 + 1 = ?", 1, "", 5, 5), // Mastered
-            FactMastery("2 * 3 = ?", 1, "", 3, 4) // Learning
+            FactMastery("1 + 1 = ?", 1, Curriculum.SumsUpTo5.id, 5, 5), // Mastered
+            FactMastery(
+                "2 * 3 = ?",
+                1,
+                Curriculum.TableLevel(Operation.MULTIPLICATION, 3).id,
+                3,
+                4
+            ) // Learning
         )
 
         // ACT & ASSERT for factProgressByOperation
@@ -88,7 +93,7 @@ class ProgressReportViewModelTest {
 
             val additionLevels = updatedLevelProgress[Operation.ADDITION]
             additionLevels.shouldNotBeNull()
-            val sumsUpTo5Progress = additionLevels[SumsUpTo5.id]
+            val sumsUpTo5Progress = additionLevels[Curriculum.SumsUpTo5.id]
             sumsUpTo5Progress.shouldNotBeNull()
             (sumsUpTo5Progress.progress > 0).shouldBeTrue()
         }
@@ -100,11 +105,23 @@ class ProgressReportViewModelTest {
         val fakeDao = FakeFactMasteryDao()
         val viewModel = ProgressReportViewModel(fakeDao, 1)
         val facts = listOf(
-            FactMastery("1 + 1 = ?", 1, "", 5, 5), // Mastered
-            FactMastery("1 + 3 = ?", 1, "", 5, 5), // Mastered
-            FactMastery("3 + 1 = ?", 1, "", 5, 5), // Mastered
-            FactMastery("3 + 3 = ?", 1, "", 5, 5), // Mastered (Sum 6 -> SumsUpTo10)
-            FactMastery("4 + 4 = ?", 1, "", 5, 5), // Mastered (Sum 8 -> SumsUpTo10)
+            FactMastery("1 + 1 = ?", 1, Curriculum.SumsUpTo5.id, 5, 5), // Mastered
+            FactMastery("1 + 3 = ?", 1, Curriculum.SumsUpTo5.id, 5, 5), // Mastered
+            FactMastery("3 + 1 = ?", 1, Curriculum.SumsUpTo5.id, 5, 5), // Mastered
+            FactMastery(
+                "3 + 3 = ?",
+                1,
+                Curriculum.SumsUpTo10.id,
+                5,
+                5
+            ), // Mastered (Sum 6 -> SumsUpTo10)
+            FactMastery(
+                "4 + 4 = ?",
+                1,
+                Curriculum.SumsUpTo10.id,
+                5,
+                5
+            ), // Mastered (Sum 8 -> SumsUpTo10)
         )
 
         // ACT & ASSERT for levelProgressByOperation
@@ -140,12 +157,12 @@ class ProgressReportViewModelTest {
         // ARRANGE
         val fakeDao = FakeFactMasteryDao()
         val viewModel = ProgressReportViewModel(fakeDao, 1)
-        val masteredAdditionFacts = SumsUpTo5.getAllPossibleFactIds().map {
-            FactMastery(it, 1, "", 5, 0)
+        val masteredAdditionFacts = Curriculum.SumsUpTo5.getAllPossibleFactIds().map {
+            FactMastery(it, 1, Curriculum.SumsUpTo5.id, 5, 0)
         }
         val subtractionFacts = Curriculum.SubtractionFrom5.getAllPossibleFactIds()
         val masteredSubtractionFacts = subtractionFacts.take(subtractionFacts.size / 2).map {
-            FactMastery(it, 1, "", 5, 0)
+            FactMastery(it, 1, Curriculum.SubtractionFrom5.id, 5, 0)
         }
         val facts = masteredAdditionFacts + masteredSubtractionFacts
 
@@ -156,13 +173,44 @@ class ProgressReportViewModelTest {
             fakeDao.emit(facts)
 
             val progress = awaitItem()
-            val additionProgress = progress[Operation.ADDITION]!![SumsUpTo5.id]!!
+            val additionProgress = progress[Operation.ADDITION]!![Curriculum.SumsUpTo5.id]!!
             val subtractionProgress =
                 progress[Operation.SUBTRACTION]!![Curriculum.SubtractionFrom5.id]!!
 
             additionProgress.progress shouldBe 1.0f
             additionProgress.isMastered.shouldBeTrue()
             subtractionProgress.progress shouldBe (0.5f plusOrMinus 0.05f)
+        }
+    }
+
+    @Test
+    fun `level progress is isolated between levels`() = runTest {
+        val fakeDao = FakeFactMasteryDao()
+        val viewModel = ProgressReportViewModel(fakeDao, 1)
+        val doublesId = Curriculum.Doubles.id
+        val sumsUpTo5Id = Curriculum.SumsUpTo5.id
+
+        // Master 2+2 in Doubles only
+        val facts = listOf(
+            FactMastery("2 + 2 = ?", 1, doublesId, 5, 0)
+        )
+
+        viewModel.levelProgressByOperation.test {
+            skipItems(1) // Initial
+            fakeDao.emit(facts)
+
+            val progress = awaitItem()
+            val additionProgress = progress[Operation.ADDITION]!!
+
+            // Doubles should have progress (2+2 is in Doubles)
+            val doublesProgress = additionProgress[doublesId]
+            doublesProgress.shouldNotBeNull()
+            (doublesProgress.progress > 0f).shouldBeTrue()
+
+            // SumsUpTo5 should NOT have progress (2+2 is also in SumsUpTo5, but mastery was for Doubles)
+            val sumsProgress = additionProgress[sumsUpTo5Id]
+            sumsProgress.shouldNotBeNull()
+            sumsProgress.progress shouldBe 0f
         }
     }
 }
