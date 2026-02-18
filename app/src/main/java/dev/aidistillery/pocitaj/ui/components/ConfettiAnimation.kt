@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -46,15 +47,16 @@ fun ConfettiAnimation(
         particles.forEach { it.randomize(density.density) }
     }
 
-    Canvas(modifier = modifier.fillMaxSize()) {
-        val currentProgress = progress.value
+    if (progress.value < 1f) {
+        Canvas(modifier = modifier
+            .fillMaxSize()
+            .testTag("confetti_animation")) {
+            val currentProgress = progress.value
 
-        // If animation is done, don't draw anything
-        if (currentProgress >= 1f) return@Canvas
-
-        particles.forEach { particle ->
-            particle.update(currentProgress)
-            drawConfetti(particle)
+            particles.forEach { particle ->
+                particle.update(currentProgress)
+                drawConfetti(particle)
+            }
         }
     }
 }
