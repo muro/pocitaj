@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import kotlin.math.PI
 import kotlin.math.cos
@@ -27,35 +28,28 @@ fun ConfettiAnimation(
     durationMillis: Int = 3000,
     particleCount: Int = 100
 ) {
-    val particles = remember(particleCount) {
-        List(particleCount) { ConfettiParticle() }
+    val isPreview = LocalInspectionMode.current
+    val density = LocalDensity.current.density
+    val particles = remember(particleCount, density) {
+        List(particleCount) { ConfettiParticle().apply { randomize(density) } }
     }
 
     // Animation progress from 0f to 1f
-    val progress = remember { Animatable(0f) }
-
-    LaunchedEffect(Unit) {
-        progress.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis, easing = LinearEasing)
-        )
+    val progress = remember { Animatable(if (isPreview) 0.5f else 0f) }
+    if (!isPreview) {
+        LaunchedEffect(Unit) {
+            progress.animateTo(1f, tween(durationMillis, easing = LinearEasing))
+        }
     }
-
-    // Randomize initial positions once
-    val density = LocalDensity.current
-    LaunchedEffect(Unit) {
-        particles.forEach { it.randomize(density.density) }
-    }
-
     if (progress.value < 1f) {
-        Canvas(modifier = modifier
-            .fillMaxSize()
-            .testTag("confetti_animation")) {
-            val currentProgress = progress.value
-
-            particles.forEach { particle ->
-                particle.update(currentProgress)
-                drawConfetti(particle)
+        Canvas(
+            modifier = modifier
+                .fillMaxSize()
+                .testTag("confetti_animation")
+        ) {
+            particles.forEach {
+                it.update()
+                drawConfetti(it)
             }
         }
     }
@@ -101,7 +95,7 @@ private class ConfettiParticle(
         size = (Random.nextFloat() * 10f + 10f) * density
     }
 
-    fun update(progress: Float) {
+    fun update() {
         // Simple physics simulation based on progress is harder because progress is 0->1 linear.
         // Instead, we simulate "ticks" implicitly by how far we move per frame relative to screen height.
         // However, for a simple fire-and-forget animation, we can just project position based on time.
