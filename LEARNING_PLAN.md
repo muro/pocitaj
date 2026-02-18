@@ -89,7 +89,7 @@
   to strength 0 and returned to the working set, ensuring they are repeated shortly (verified by
   test).
 
-### ### Step 3.4: Add Problem Variety
+### ### Step 3.4: Add Problem Variety [DONE]
 *   **Action:** Introduce different ways of asking questions.
 *   **Details:**
     * Instead of just `$a + b = ?` format, add fill-in-the-blank problems: `$a + ? = c`
@@ -100,7 +100,7 @@
     * Add simple, satisfying sound effects for correct and incorrect answers.
     * Create a special animation or "celebration" screen for when a user masters a level for the first time or achieves a new high score.
 
-### ### Step 3.6: Add "New Star" Celebration
+### ### Step 3.6: Add "New Star" Celebration [DONE]
 *   **Action:** Add a celebration animation to the Results Screen when a user earns a new star.
 *   **Details:**
     * The `ExerciseViewModel` will be updated to track the star rating before and after a session.

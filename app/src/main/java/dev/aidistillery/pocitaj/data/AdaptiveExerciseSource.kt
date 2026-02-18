@@ -20,13 +20,23 @@ class AdaptiveExerciseSource(
 ) : ExerciseSource {
 
     private var exerciseProvider: ExerciseProvider? = null
+    override var currentLevelId: String? = null
+        private set
+
+    private var initialStars: Int? = null
 
     override suspend fun initialize(config: ExerciseConfig) {
+        currentLevelId = config.levelId
         val userMastery =
             factMasteryDao.getAllFactsForUser(activeUserManager.activeUser.id).first()
                 .associateBy { it.factId }
         val level =
             config.levelId?.let { Curriculum.getAllLevels().find { level -> level.id == it } }
+        initialStars = level?.let {
+            val levelMasteryMap =
+                userMastery.filterKeys { factId -> factId in it.getAllPossibleFactIds() }
+            it.calculateStars(levelMasteryMap)
+        }
 
         exerciseProvider = if (level != null) {
             level.createStrategy(
@@ -69,6 +79,34 @@ class AdaptiveExerciseSource(
                 factMasteryDao.upsert(it, level)
             }
         }
+    }
+
+    override suspend fun getSessionResult(history: List<Exercise>): SessionResult {
+        val finalStars = currentLevelId?.let { levelId ->
+            val level = Curriculum.getAllLevels().find { it.id == levelId } ?: return@let 0
+            val masteries =
+                factMasteryDao.getAllFactsForUser(activeUserManager.activeUser.id).first()
+                    .associateBy { it.factId }
+            val levelMasteryMap = masteries.filterKeys { it in level.getAllPossibleFactIds() }
+            level.calculateStars(levelMasteryMap)
+        } ?: 0
+
+        val results = history.map { exercise ->
+            dev.aidistillery.pocitaj.ui.exercise.ResultDescription(
+                exercise.equationString(),
+                dev.aidistillery.pocitaj.ui.exercise.ResultStatus.fromBooleanPair(
+                    exercise.solved,
+                    exercise.correct()
+                ),
+                exercise.timeTakenMillis ?: 0,
+                exercise.speedBadge
+            )
+        }
+
+        return SessionResult(
+            results,
+            StarProgress(initialStars ?: 0, finalStars)
+        )
     }
 
     /**

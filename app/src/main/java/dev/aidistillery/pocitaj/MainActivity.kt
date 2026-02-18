@@ -191,7 +191,7 @@ fun AppNavigation(restartApp: () -> Unit) {
             val summaryState = uiState as? UiState.SummaryScreen
             if (summaryState != null) {
                 ResultsScreen(
-                    results = summaryState.results,
+                    sessionResult = summaryState.sessionResult,
                     onDone = { exerciseViewModel.onSummaryDone() },
                     onDoAgain = { exerciseViewModel.restartExercises() },
                     onProgressClicked = { navController.navigate(Destinations.PROGRESS_ROUTE) }

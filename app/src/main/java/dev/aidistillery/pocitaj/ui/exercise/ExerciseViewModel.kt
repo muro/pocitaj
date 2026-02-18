@@ -11,6 +11,7 @@ import dev.aidistillery.pocitaj.InkModelManager
 import dev.aidistillery.pocitaj.data.AdaptiveExerciseSource
 import dev.aidistillery.pocitaj.data.ExerciseConfig
 import dev.aidistillery.pocitaj.data.ExerciseSource
+import dev.aidistillery.pocitaj.data.SessionResult
 import dev.aidistillery.pocitaj.logic.Exercise
 import dev.aidistillery.pocitaj.ui.SoundManager
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,7 +26,7 @@ import kotlinx.coroutines.launch
 sealed class UiState {
     data object ExerciseSetup : UiState()
     data class ExerciseScreen(val currentExercise: Exercise) : UiState()
-    data class SummaryScreen(val results: List<ResultDescription>) : UiState()
+    data class SummaryScreen(val sessionResult: SessionResult) : UiState()
 }
 
 sealed class AnswerResult {
@@ -69,7 +70,7 @@ class ExerciseViewModel(
     private val _workingSet = MutableStateFlow<List<String>>(emptyList())
     val workingSet: StateFlow<List<String>> = _workingSet.asStateFlow()
 
-    fun startExercises(exerciseConfig: ExerciseConfig) { // You'll define ExerciseConfig
+    fun startExercises(exerciseConfig: ExerciseConfig) {
         viewModelScope.launch {
             currentExerciseConfig = exerciseConfig
             currentLevelId = exerciseConfig.levelId
@@ -158,9 +159,8 @@ class ExerciseViewModel(
 
     private suspend fun handleSessionComplete() {
         soundManager.playLevelComplete()
-        // All exercises completed, calculate results and transition
-        val results = resultsList()
-        _uiState.value = UiState.SummaryScreen(results)
+        val sessionResult = exerciseSource.getSessionResult(exerciseHistory)
+        _uiState.value = UiState.SummaryScreen(sessionResult)
         _navigationEvents.emit(NavigationEvent.NavigateToSummary)
     }
 
@@ -200,16 +200,6 @@ class ExerciseViewModel(
                 }
             }
             _recognizedText.value = null // Reset recognition state
-        }
-    }
-
-    fun resultsList(): List<ResultDescription> {
-        return exerciseHistory.map { exercise ->
-            ResultDescription(
-                exercise.equationString(), ResultStatus.fromBooleanPair(
-                    exercise.solved, exercise.correct()
-                ), exercise.timeTakenMillis ?: 0, exercise.speedBadge
-            )
         }
     }
 

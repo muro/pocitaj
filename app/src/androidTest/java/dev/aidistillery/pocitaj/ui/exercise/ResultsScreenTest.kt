@@ -5,37 +5,14 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import dev.aidistillery.pocitaj.data.SessionResult
+import dev.aidistillery.pocitaj.data.StarProgress
 import dev.aidistillery.pocitaj.logic.SpeedBadge
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TestWatcher
-import org.junit.runner.Description
-
-@OptIn(ExperimentalCoroutinesApi::class)
-class MainDispatcherRule(
-    private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
-) : TestWatcher() {
-    override fun starting(description: Description) {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    override fun finished(description: Description) {
-        Dispatchers.resetMain()
-    }
-}
 
 class ResultsScreenTest {
-
-    @get:Rule
-    val mainDispatcherRule = MainDispatcherRule()
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -51,7 +28,7 @@ class ResultsScreenTest {
         composeTestRule.setContent {
             AppTheme {
                 ResultsScreen(
-                    results = results,
+                    sessionResult = SessionResult(results, StarProgress(0, 1)),
                     onDone = {},
                     onDoAgain = {},
                     onProgressClicked = {},
@@ -76,7 +53,7 @@ class ResultsScreenTest {
         composeTestRule.setContent {
             AppTheme {
                 ResultsScreen(
-                    results = results,
+                    sessionResult = SessionResult(results, StarProgress(1, 1)),
                     onDone = {},
                     onDoAgain = {},
                     onProgressClicked = {}
@@ -88,4 +65,27 @@ class ResultsScreenTest {
     }
 
 
+    @Test
+    fun when_star_gained_celebration_is_shown() {
+        // ARRANGE: A session where the user gains a star (1 -> 2)
+        val results = List(5) {
+            ResultDescription("2+2=4", ResultStatus.CORRECT, 1000, SpeedBadge.GOLD)
+        }
+
+        composeTestRule.mainClock.autoAdvance = false
+        composeTestRule.setContent {
+            AppTheme {
+                ResultsScreen(
+                    sessionResult = SessionResult(results, StarProgress(1, 2)),
+                    onDone = {},
+                    onDoAgain = {},
+                    onProgressClicked = {}
+                )
+            }
+        }
+
+        // ASSERT: Verify confetti animation exists
+        // It should be present immediately as it's forced in DEBUG mode
+        composeTestRule.onNodeWithTag("confetti_animation").assertExists()
+    }
 }

@@ -19,6 +19,7 @@ data class ExerciseConfig(
 )
 
 interface ExerciseSource {
+    val currentLevelId: String?
     suspend fun initialize(config: ExerciseConfig)
     fun getNextExercise(): Exercise?
     suspend fun recordAttempt(
@@ -26,4 +27,5 @@ interface ExerciseSource {
         submittedAnswer: Int,
         durationMs: Long
     )
+    suspend fun getSessionResult(history: List<Exercise>): SessionResult
 }

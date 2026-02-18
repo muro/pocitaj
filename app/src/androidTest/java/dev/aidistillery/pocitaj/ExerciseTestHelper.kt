@@ -8,6 +8,7 @@ import dev.aidistillery.pocitaj.logic.Exercise
 import dev.aidistillery.pocitaj.logic.Level
 import dev.aidistillery.pocitaj.ui.exercise.ExerciseViewModel
 import dev.aidistillery.pocitaj.ui.exercise.ExerciseViewModelFactory
+import dev.aidistillery.pocitaj.ui.exercise.ResultDescription
 import dev.aidistillery.pocitaj.ui.exercise.UiState
 
 class ExerciseTestHelper(viewModelStoreOwner: ViewModelStoreOwner) {
@@ -52,7 +53,10 @@ class ExerciseTestHelper(viewModelStoreOwner: ViewModelStoreOwner) {
         viewModel.onFeedbackAnimationFinished()
     }
 
-    fun getResults(): List<dev.aidistillery.pocitaj.ui.exercise.ResultDescription> {
-        return viewModel.resultsList()
+    fun getResults(): List<ResultDescription> {
+        return when (val uiState = viewModel.uiState.value) {
+            is UiState.SummaryScreen -> uiState.sessionResult.results
+            else -> emptyList()
+        }
     }
 }

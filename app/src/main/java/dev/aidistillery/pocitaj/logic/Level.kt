@@ -55,6 +55,12 @@ interface Level {
         }
         return (totalWeight / factIds.size).toFloat()
     }
+
+    // TODO: consider finding a better home for this function
+    fun calculateStars(masteryMap: Map<String, FactMastery>): Int {
+        val progress = calculateProgress(masteryMap)
+        return (progress * 3).toInt()
+    }
 }
 
 class MixedReviewLevel(

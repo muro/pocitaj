@@ -57,9 +57,12 @@ import dev.aidistillery.pocitaj.InkModelManager
 import dev.aidistillery.pocitaj.data.ExerciseConfig
 import dev.aidistillery.pocitaj.data.ExerciseSource
 import dev.aidistillery.pocitaj.data.Operation
+import dev.aidistillery.pocitaj.data.SessionResult
+import dev.aidistillery.pocitaj.data.StarProgress
 import dev.aidistillery.pocitaj.logic.Equation
 import dev.aidistillery.pocitaj.logic.Exercise
 import dev.aidistillery.pocitaj.logic.Subtraction
+import dev.aidistillery.pocitaj.ui.SoundManager
 import dev.aidistillery.pocitaj.ui.components.AutoSizeText
 import dev.aidistillery.pocitaj.ui.components.PocitajScreen
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
@@ -389,6 +392,7 @@ private fun rememberMockExerciseViewModel(): ExerciseViewModel {
             override suspend fun recognizeInk(ink: Ink, hint: String): String = "12"
         }
         val exerciseSource = object : ExerciseSource {
+            override val currentLevelId: String? = null
             override suspend fun initialize(config: ExerciseConfig) {}
             override fun getNextExercise(): Exercise? = null
             override suspend fun recordAttempt(
@@ -397,14 +401,23 @@ private fun rememberMockExerciseViewModel(): ExerciseViewModel {
                 durationMs: Long
             ) {
             }
+
+            override suspend fun getSessionResult(history: List<Exercise>): SessionResult {
+                return SessionResult(emptyList(), StarProgress(0, 0))
+            }
         }
-        val soundManager = object : dev.aidistillery.pocitaj.ui.SoundManager(context) {
+        val soundManager = object : SoundManager(context) {
             override fun playCorrect() {}
             override fun playWrong() {}
             override fun playUnrecognized() {}
             override fun playLevelComplete() {}
         }
-        ExerciseViewModel(inkModelManager, exerciseSource, soundManager).apply {
+
+        ExerciseViewModel(
+            inkModelManager,
+            exerciseSource = exerciseSource,
+            soundManager = soundManager
+        ).apply {
             startExercises(ExerciseConfig(Operation.SUBTRACTION, 12, 10))
         }
     }

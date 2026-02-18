@@ -41,6 +41,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -54,8 +55,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.aidistillery.pocitaj.R
+import dev.aidistillery.pocitaj.data.SessionResult
+import dev.aidistillery.pocitaj.data.StarProgress
 import dev.aidistillery.pocitaj.logic.SpeedBadge
+import dev.aidistillery.pocitaj.ui.components.ConfettiAnimation
 import dev.aidistillery.pocitaj.ui.components.PocitajScreen
+import dev.aidistillery.pocitaj.ui.components.StarRatingDisplay
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import dev.aidistillery.pocitaj.ui.theme.customColors
 import kotlinx.coroutines.delay
@@ -84,11 +89,33 @@ data class ResultDescription(
 
 @Composable
 fun ResultsScreen(
-    results: List<ResultDescription>,
+    sessionResult: SessionResult,
     onDone: () -> Unit,
     onDoAgain: () -> Unit,
     onProgressClicked: () -> Unit
 ) {
+    val initialStars = sessionResult.starProgress.initialStars
+    val finalStars = sessionResult.starProgress.finalStars
+    val results = sessionResult.results
+    val newStarEarned = finalStars > initialStars
+
+    // Animate stars from initial to final
+    var animatedStars by remember { mutableStateOf(initialStars.toFloat()) }
+    LaunchedEffect(finalStars) {
+        if (newStarEarned) {
+            delay(500) // Small delay before starting star animation
+            val duration = 1000L
+            val steps = 20
+            val increment = (finalStars - initialStars).toFloat() / steps
+            for (i in 1..steps) {
+                delay(duration / steps)
+                animatedStars = initialStars + increment * i
+            }
+        } else {
+            animatedStars = finalStars.toFloat()
+        }
+    }
+
     PocitajScreen {
         Column(
             modifier = Modifier
@@ -107,11 +134,18 @@ fun ResultsScreen(
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.results_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.results_title),
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    StarRatingDisplay(
+                        progress = animatedStars / 3f,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(onClick = onDoAgain) {
                     Icon(
@@ -135,12 +169,14 @@ fun ResultsScreen(
             )
         }
 
-        if (results.isNotEmpty() && results.all { it.status == ResultStatus.CORRECT }) {
-            dev.aidistillery.pocitaj.ui.components.ConfettiAnimation(
+        if (newStarEarned || (results.isNotEmpty() && results.all { it.status == ResultStatus.CORRECT })) {
+            ConfettiAnimation(
                 modifier = Modifier
                     .fillMaxSize()
                     .testTag("confetti_animation"),
-                particleCount = 150
+                particleCount = if (newStarEarned) 300 else 150,
+                shape = if (newStarEarned) dev.aidistillery.pocitaj.ui.components.ConfettiShape.STAR else dev.aidistillery.pocitaj.ui.components.ConfettiShape.RECTANGLE,
+                palette = if (newStarEarned) dev.aidistillery.pocitaj.ui.components.ConfettiPalette.GOLD_SILVER else dev.aidistillery.pocitaj.ui.components.ConfettiPalette.DEFAULT
             )
         }
     }
@@ -426,7 +462,13 @@ fun PreviewResultsScreen() {
             )
         )
     }
+
     AppTheme {
-        ResultsScreen(results, onDone = {}, onDoAgain = {}, onProgressClicked = {})
+        ResultsScreen(
+            SessionResult(results, StarProgress(1, 2)),
+            onDone = {},
+            onDoAgain = {},
+            onProgressClicked = {}
+        )
     }
 }

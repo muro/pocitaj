@@ -5,7 +5,11 @@ import dev.aidistillery.pocitaj.data.ExerciseAttempt
 import dev.aidistillery.pocitaj.data.ExerciseAttemptDao
 import dev.aidistillery.pocitaj.data.ExerciseConfig
 import dev.aidistillery.pocitaj.data.ExerciseSource
+import dev.aidistillery.pocitaj.data.SessionResult
+import dev.aidistillery.pocitaj.data.StarProgress
 import dev.aidistillery.pocitaj.logic.Exercise
+import dev.aidistillery.pocitaj.ui.exercise.ResultDescription
+import dev.aidistillery.pocitaj.ui.exercise.ResultStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -18,9 +22,11 @@ class ExerciseBook(
 
     private val exercises = mutableListOf<Exercise>()
     private var currentIndex = -1
+    override var currentLevelId: String? = null
+        private set
 
     override suspend fun initialize(config: ExerciseConfig) {
-        // No-op for the test implementation
+        currentLevelId = config.levelId
     }
 
     override fun getNextExercise(): Exercise? {
@@ -47,6 +53,20 @@ class ExerciseBook(
             )
             exerciseAttemptDao.insert(attempt)
         }
+    }
+
+    override suspend fun getSessionResult(history: List<Exercise>): SessionResult {
+        return SessionResult(
+            history.map {
+                ResultDescription(
+                    it.equationString(),
+                    ResultStatus.fromBooleanPair(it.solved, it.correct()),
+                    it.timeTakenMillis ?: 0,
+                    it.speedBadge
+                )
+            },
+            StarProgress(0, 0)
+        )
     }
 
     /**
