@@ -59,7 +59,7 @@ abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 val cursor = db.query("SELECT factId, userId, level FROM fact_mastery")
-                try {
+                cursor.use { cursor ->
                     while (cursor.moveToNext()) {
                         val oldId = cursor.getString(0)
                         val userId = cursor.getLong(1)
@@ -75,8 +75,6 @@ abstract class AppDatabase : RoomDatabase() {
                             )
                         }
                     }
-                } finally {
-                    cursor.close()
                 }
             }
 
