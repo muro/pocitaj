@@ -177,24 +177,24 @@ open class TwoDigitComputationLevel(
     }
 
     override fun recognizes(equation: Equation): Boolean {
-        val (op, A, B) = equation.getFact()
+        val (op, a, b) = equation.getFact()
         if (op != operation) return false
 
         // Basic range check for two-digit numbers (10..99)
-        if (A !in 10..99) return false
-        if (B !in 10..99) return false
+        if (a !in 10..99) return false
+        if (b !in 10..99) return false
 
         if (operation == Operation.ADDITION) {
             // Level constraint: Sum < 100
-            if (A + B >= 100) return false
+            if (a + b >= 100) return false
         } else {
             // Subtraction: Result positive implies A >= B
-            if (A < B) return false
+            if (a < b) return false
         }
 
         // Check regrouping condition
-        val startOnes = A % 10
-        val operandOnes = B % 10
+        val startOnes = a % 10
+        val operandOnes = b % 10
 
         return if (operation == Operation.ADDITION) {
             val sumOnes = startOnes + operandOnes
