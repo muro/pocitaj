@@ -2,9 +2,7 @@ package dev.aidistillery.pocitaj.ui.history
 
 import android.content.res.Configuration
 import android.icu.text.SimpleDateFormat
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,60 +36,162 @@ import dev.aidistillery.pocitaj.R
 import dev.aidistillery.pocitaj.data.ExerciseAttempt
 import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
+import java.time.LocalDate
 import java.util.Date
 import java.util.Locale
 
 @Composable
 fun HistoryScreen(
-    history: Map<String, List<ExerciseAttempt>>
+    uiState: HistoryUiState = HistoryUiState(),
+    onDateSelected: (LocalDate) -> Unit = {}
 ) {
-    if (history.isEmpty()) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(
-                    painter = painterResource(id = R.drawable.sleepy),
-                    contentDescription = null,
-                    modifier = Modifier.size(128.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    stringResource(id = R.string.no_history_yet),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+    Column(modifier = Modifier.fillMaxSize()) {
+        ActivityHeatmap(
+            dailyActivity = uiState.dailyActivity,
+            selectedDate = uiState.selectedDate,
+            onDateSelected = onDateSelected
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (uiState.filteredHistory.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Image(
+                        painter = painterResource(id = R.drawable.sleepy),
+                        contentDescription = null,
+                        modifier = Modifier.size(128.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        stringResource(id = R.string.no_history_for_date),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
+        } else {
+            HistoryList(uiState = uiState, modifier = Modifier.weight(1f))
         }
-    } else {
-        HistoryList(history = history)
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun HistoryList(history: Map<String, List<ExerciseAttempt>>) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
+fun ActivityHeatmap(
+    dailyActivity: Map<LocalDate, Int>,
+    selectedDate: LocalDate,
+    onDateSelected: (LocalDate) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val today = LocalDate.now()
+    // Start from the Monday 4 weeks before the current week
+    val firstDayOfWeek = today.with(java.time.DayOfWeek.MONDAY).minusWeeks(4)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
             .padding(16.dp)
+            .testTag("activity_heatmap")
     ) {
-        history.forEach { (date, attempts) ->
-            stickyHeader {
-                Text(
-                    text = date,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(vertical = 8.dp)
-                )
+        Text(
+            text = stringResource(id = R.string.activity_center),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Column {
+            for (week in 0..4) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    for (day in 0..6) {
+                        val date = firstDayOfWeek.plusDays((week * 7 + day).toLong())
+                        val count = dailyActivity[date] ?: 0
+                        val tier = when {
+                            count >= 50 -> 3
+                            count >= 30 -> 2
+                            count >= 10 -> 1
+                            else -> 0
+                        }
+                        val isFuture = date.isAfter(today)
+
+                        if (!isFuture) {
+                            HeatmapDay(
+                                date = date,
+                                tier = tier,
+                                isSelected = date == selectedDate,
+                                onClick = { onDateSelected(date) }
+                            )
+                        } else {
+                            // Placeholder for future days
+                            Box(modifier = Modifier.size(32.dp))
+                        }
+                    }
+                }
+                if (week < 4) Spacer(modifier = Modifier.height(4.dp))
             }
-            items(attempts) { attempt ->
-                HistoryItem(attempt = attempt)
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+        }
+    }
+}
+
+@Composable
+fun HeatmapDay(
+    date: LocalDate,
+    tier: Int,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val backgroundColor = when (tier) {
+        3 -> Color(0xFFFFD700) // Gold
+        2 -> Color(0xFFC0C0C0) // Silver
+        1 -> Color(0xFFCD7F32) // Bronze
+        else -> MaterialTheme.colorScheme.surfaceVariant
+    }
+
+    val borderColor = if (isSelected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        Color.Transparent
+    }
+
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .size(32.dp)
+            .testTag("heatmap_day_$date"),
+        shape = MaterialTheme.shapes.extraSmall,
+        color = backgroundColor,
+        border = androidx.compose.foundation.BorderStroke(2.dp, borderColor)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = date.dayOfMonth.toString(),
+                style = MaterialTheme.typography.labelSmall,
+                color = if (tier > 0) Color.Black else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+fun HistoryList(
+    uiState: HistoryUiState,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        items(uiState.filteredHistory) { attempt ->
+            HistoryItem(attempt = attempt)
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -151,44 +251,36 @@ fun HistoryItem(attempt: ExerciseAttempt) {
 @Composable
 fun HistoryScreenPreview() {
     AppTheme {
-        val history = mapOf(
-            "Jul 13, 2025" to listOf(
-                ExerciseAttempt(
-                    problemText = "2 + 2",
-                    submittedAnswer = 4,
-                    wasCorrect = true,
-                    correctAnswer = 4,
-                    durationMs = 1000,
-                    timestamp = System.currentTimeMillis(),
-                    userId = 1,
-                    logicalOperation = Operation.ADDITION
-                ),
-                ExerciseAttempt(
-                    problemText = "3 + 3",
-                    submittedAnswer = 5,
-                    wasCorrect = false,
-                    correctAnswer = 6,
-                    durationMs = 2100,
-                    timestamp = System.currentTimeMillis() - 1000 * 60 * 5,
-                    userId = 1,
-                    logicalOperation = Operation.ADDITION
-                ),
+        val attempts = listOf(
+            ExerciseAttempt(
+                id = 1,
+                userId = 1,
+                timestamp = System.currentTimeMillis(),
+                problemText = "2 + 3 = ?",
+                logicalOperation = Operation.ADDITION,
+                correctAnswer = 5,
+                submittedAnswer = 5,
+                wasCorrect = true,
+                durationMs = 2000
             ),
-            "Jul 12, 2025" to listOf(
-                ExerciseAttempt(
-                    problemText = "4 + 4",
-                    submittedAnswer = 8,
-                    wasCorrect = true,
-                    correctAnswer = 8,
-                    durationMs = 1500,
-                    timestamp = System.currentTimeMillis() - 1000 * 60 * 60 * 24,
-                    userId = 1,
-                    logicalOperation = Operation.ADDITION
-                )
+            ExerciseAttempt(
+                id = 2,
+                userId = 1,
+                timestamp = System.currentTimeMillis() - 10000,
+                problemText = "10 * 2 = ?",
+                logicalOperation = Operation.MULTIPLICATION,
+                correctAnswer = 20,
+                submittedAnswer = 20,
+                wasCorrect = true,
+                durationMs = 1500
             )
         )
         Surface {
-            HistoryScreen(history = history)
+            HistoryScreen(
+                uiState = HistoryUiState(
+                    filteredHistory = attempts
+                )
+            )
         }
     }
 }
@@ -206,6 +298,6 @@ fun HistoryScreenPreview() {
 @Composable
 fun HistoryScreenEmptyPreview() {
     AppTheme {
-        HistoryScreen(history = emptyMap())
+        HistoryScreen()
     }
 }

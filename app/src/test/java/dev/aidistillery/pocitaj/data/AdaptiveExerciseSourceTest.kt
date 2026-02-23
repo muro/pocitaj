@@ -26,8 +26,22 @@ class AdaptiveExerciseSourceTest {
             attempts.add(attempt)
         }
 
-        override fun getAttemptsForUser(userId: Long) =
-            MutableStateFlow(attempts.toList()).asStateFlow()
+        override fun getAttemptsForDate(userId: Long, dateString: String) =
+            MutableStateFlow(attempts.filter {
+                it.userId == userId &&
+                        java.time.Instant.ofEpochMilli(it.timestamp)
+                            .atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+                            .toString() == dateString
+            }).asStateFlow()
+
+        override fun getDailyActivityCounts(userId: Long) =
+            MutableStateFlow(attempts.filter { it.userId == userId }
+                .groupBy {
+                    java.time.Instant.ofEpochMilli(it.timestamp)
+                        .atZone(java.time.ZoneId.systemDefault()).toLocalDate().toString()
+                }
+                .map { DailyActivityCount(it.key, it.value.size) }
+            ).asStateFlow()
 
         override suspend fun getAttemptCountForUser(userId: Long): Int {
             return attempts.size

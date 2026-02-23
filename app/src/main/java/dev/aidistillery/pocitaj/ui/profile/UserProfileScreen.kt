@@ -55,6 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.aidistillery.pocitaj.R
+import dev.aidistillery.pocitaj.data.DailyActivityCount
 import dev.aidistillery.pocitaj.data.ExerciseAttempt
 import dev.aidistillery.pocitaj.data.ExerciseAttemptDao
 import dev.aidistillery.pocitaj.data.User
@@ -66,6 +67,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.runBlocking
+import java.time.Instant
+import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -404,14 +407,29 @@ class FakeUserDao : UserDao {
     override fun getAllUsers(): StateFlow<List<User>> = getAllUsersFlow()
 }
 
+// TODO: there are multiple FakeExerciseAttemptDao classes now - unify them.
 class FakeExerciseAttemptDao : ExerciseAttemptDao {
     private val attempts = mutableListOf<ExerciseAttempt>()
     override suspend fun insert(attempt: ExerciseAttempt) {
         attempts.add(attempt)
     }
 
-    override fun getAttemptsForUser(userId: Long): Flow<List<ExerciseAttempt>> {
-        return MutableStateFlow(attempts.filter { it.userId == userId }).asStateFlow()
+    override fun getAttemptsForDate(userId: Long, dateString: String): Flow<List<ExerciseAttempt>> {
+        return MutableStateFlow(attempts.filter {
+            it.userId == userId &&
+                    Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDate()
+                        .toString() == dateString
+        }).asStateFlow()
+    }
+
+    override fun getDailyActivityCounts(userId: Long): Flow<List<DailyActivityCount>> {
+        val counts = attempts.filter { it.userId == userId }
+            .groupBy {
+                Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDate()
+                    .toString()
+            }
+            .map { DailyActivityCount(it.key, it.value.size) }
+        return MutableStateFlow(counts).asStateFlow()
     }
 
     override suspend fun getAttemptCountForUser(userId: Long): Int {

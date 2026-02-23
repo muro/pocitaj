@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -100,7 +101,7 @@ fun ResultsScreen(
     val newStarEarned = finalStars > initialStars
 
     // Animate stars from initial to final
-    var animatedStars by remember { mutableStateOf(initialStars.toFloat()) }
+    var animatedStars by remember { mutableFloatStateOf(initialStars.toFloat()) }
     LaunchedEffect(finalStars) {
         if (newStarEarned) {
             delay(500) // Small delay before starting star animation

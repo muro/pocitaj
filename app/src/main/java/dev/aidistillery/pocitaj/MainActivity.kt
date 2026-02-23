@@ -48,6 +48,7 @@ import dev.aidistillery.pocitaj.ui.setup.StartupScreen
 import dev.aidistillery.pocitaj.ui.setup.StartupViewModel
 import dev.aidistillery.pocitaj.ui.setup.StartupViewModelFactory
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
+import java.time.LocalDate
 
 
 class MainActivity : ComponentActivity() {
@@ -201,17 +202,21 @@ fun AppNavigation(restartApp: () -> Unit) {
         composable(route = Destinations.PROGRESS_ROUTE) {
             val factProgressByOperation by progressReportViewModel.factProgressByOperation.collectAsState()
             val levelProgressByOperation by progressReportViewModel.levelProgressByOperation.collectAsState()
-            val history by historyViewModel.historyByDate.collectAsState()
+            val historyUiState by historyViewModel.uiState.collectAsState()
             ProgressContainerScreen(
                 factProgressByOperation = factProgressByOperation,
                 levelProgressByOperation = levelProgressByOperation,
-                history = history,
+                historyUiState = historyUiState,
+                onDateSelected = { date: LocalDate -> historyViewModel.selectDate(date) },
                 onBack = { navController.navigateUp() }
             )
         }
         composable(route = Destinations.HISTORY_ROUTE) {
-            val history by historyViewModel.historyByDate.collectAsState()
-            HistoryScreen(history = history)
+            val historyUiState by historyViewModel.uiState.collectAsState()
+            HistoryScreen(
+                uiState = historyUiState,
+                onDateSelected = { date: LocalDate -> historyViewModel.selectDate(date) }
+            )
         }
         composable(route = Destinations.CREDITS_ROUTE) {
             CreditsScreen {
