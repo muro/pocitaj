@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.aidistillery.pocitaj.R
+import dev.aidistillery.pocitaj.ui.theme.AnimationDurations
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 
 @Composable
@@ -46,7 +47,10 @@ fun HabitBuilderHeader(
                 initialValue = 1f,
                 targetValue = 1.25f, // Slightly larger pulse for the fire
                 animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 600, easing = FastOutSlowInEasing),
+                    animation = tween(
+                        durationMillis = AnimationDurations.PulseMs,
+                        easing = FastOutSlowInEasing
+                    ),
                     repeatMode = RepeatMode.Reverse
                 ),
                 label = "fireScale"

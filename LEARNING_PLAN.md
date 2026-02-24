@@ -255,5 +255,6 @@ and purpose.*
 * **Details:**
     * **Streak Counter:** Display a "🔥 Streak" count on the History Screen header for immediate motivation.
     * **Daily Tracking:** Replaced the calendar view with the "Today's Catch Tracker", which visualizes milestones (10, 30, 50 exercises) using interactive, animated star/fish rewards.
+        * **[TODO]** Need fish svg files for the history page ("Today's Catch Tracker").
     * **Differentiation:** The dashboard intelligently analyzes the day's attempts and creates "Smart Highlight" cards (e.g., "Speedy Paws", "Laser Focus") rather than just showing dots on a calendar.
     * **Forgiveness:** Grace period logic is handled elegantly (if the user hasn't played yet today, the streak remains intact until tomorrow).

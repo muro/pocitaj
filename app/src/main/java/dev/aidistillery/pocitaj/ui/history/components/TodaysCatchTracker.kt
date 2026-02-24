@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.aidistillery.pocitaj.R
+import dev.aidistillery.pocitaj.ui.theme.AnimationDurations
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 
 @Composable
@@ -121,7 +122,10 @@ private fun MilestoneReward(
                 initialValue = 1f,
                 targetValue = 1.1f,
                 animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+                    animation = tween(
+                        durationMillis = AnimationDurations.PulseMs,
+                        easing = FastOutSlowInEasing
+                    ),
                     repeatMode = RepeatMode.Reverse
                 ),
                 label = "pulseScale"

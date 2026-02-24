@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
+import dev.aidistillery.pocitaj.ui.theme.AnimationDurations
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -34,7 +35,7 @@ enum class ConfettiPalette {
 @Composable
 fun ConfettiAnimation(
     modifier: Modifier = Modifier,
-    durationMillis: Int = 3000,
+    durationMillis: Int = AnimationDurations.ConfettiMs,
     particleCount: Int = 100,
     shape: ConfettiShape = ConfettiShape.RECTANGLE,
     palette: ConfettiPalette = ConfettiPalette.DEFAULT
