@@ -20,48 +20,33 @@ class HistoryViewModelTest {
         val dao = mockk<ExerciseAttemptDao>()
         val user = User(id = 1, name = "Test")
         val today = LocalDate.now()
-        val yesterday = today.minusDays(1)
 
         val dailyCounts = listOf(
             dev.aidistillery.pocitaj.data.DailyActivityCount(today.toString(), 2)
         )
         val todayAttempt = createAttempt(123456789L)
-        val yesterdayAttempt = createAttempt(987654321L)
 
         every { dao.getDailyActivityCounts(1) } returns flowOf(dailyCounts)
         every { dao.getAttemptsForDate(1, today.toString()) } returns flowOf(listOf(todayAttempt))
-        every { dao.getAttemptsForDate(1, yesterday.toString()) } returns flowOf(
-            listOf(
-                yesterdayAttempt
-            )
-        )
 
         val viewModel = HistoryViewModel(dao, user)
 
         viewModel.uiState.test {
-            // Wait for initial state with data
-            var state = awaitItem()
-            while (state.dailyActivity.isEmpty() || state.filteredHistory.isEmpty()) {
-                state = awaitItem()
-            }
-            state.selectedDate shouldBe today
-            state.dailyActivity[today] shouldBe 2
-            state.filteredHistory shouldBe listOf(todayAttempt)
+            // Initial state is emitted immediately
+            awaitItem()
 
-            // Selection change
-            viewModel.selectDate(yesterday)
+            // Wait for the combined flow to emit the actual data
+            val state = awaitItem()
 
-            // Wait for state with yesterday's data
-            state = awaitItem()
-            while (state.selectedDate != yesterday || state.filteredHistory != listOf(
-                    yesterdayAttempt
-                )
-            ) {
-                state = awaitItem()
-            }
+            // 2 total attempts today (mocked by dailyCounts)
+            state.todaysCount shouldBe 2
 
-            state.selectedDate shouldBe yesterday
-            state.filteredHistory shouldBe listOf(yesterdayAttempt)
+            // Streak should be 1 (because activity map only has today)
+            state.currentStreak shouldBe 1
+
+            // Highlight should be Perfect Precision (100% correct, but count is low, but the threshold is 0 for testing sometimes, wait, count < 10 for SpeedyPaws, but PerfectPrecision needs exactly 100% of WHATEVER batch size if we follow the strict analyzer, wait no, analyzer needs 10 for PP too. Let's just check it's empty or has PP based on actual analyzer logic for 1 attempt)
+            // Actually, for 1 attempt, no highlights should be generated because all thresholds are >= 10.
+            state.todaysHighlights.isEmpty() shouldBe true
         }
     }
 

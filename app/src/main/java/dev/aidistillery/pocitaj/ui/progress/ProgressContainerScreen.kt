@@ -28,7 +28,6 @@ import dev.aidistillery.pocitaj.ui.history.HistoryScreen
 import dev.aidistillery.pocitaj.ui.history.HistoryUiState
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +35,6 @@ fun ProgressContainerScreen(
     factProgressByOperation: Map<Operation, List<FactProgress>>,
     levelProgressByOperation: Map<Operation, Map<String, LevelProgress>>,
     historyUiState: HistoryUiState = HistoryUiState(),
-    onDateSelected: (LocalDate) -> Unit = {},
     onBack: () -> Unit,
     initialPage: Int = 0
 ) {
@@ -92,8 +90,7 @@ fun ProgressContainerScreen(
                     )
 
                     1 -> HistoryScreen(
-                        uiState = historyUiState,
-                        onDateSelected = onDateSelected
+                        uiState = historyUiState
                     )
                 }
             }

@@ -1,22 +1,12 @@
 package dev.aidistillery.pocitaj.ui.history
 
-import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTouchInput
-import dev.aidistillery.pocitaj.data.ExerciseAttempt
-import dev.aidistillery.pocitaj.data.Operation
+import dev.aidistillery.pocitaj.logic.SmartHighlight
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
-import io.kotest.matchers.shouldBe
 import org.junit.Rule
 import org.junit.Test
-import java.time.LocalDate
 
 class ActivityScreenTest {
 
@@ -24,105 +14,23 @@ class ActivityScreenTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun activityScreen_showsHeatmapAndHistory() {
-        val today = LocalDate.now()
-        val attempts = listOf(
-            ExerciseAttempt(
-                userId = 1,
-                timestamp = System.currentTimeMillis(),
-                problemText = "2 + 2 = ?",
-                logicalOperation = Operation.ADDITION,
-                correctAnswer = 4,
-                submittedAnswer = 4,
-                wasCorrect = true,
-                durationMs = 1000
-            )
-        )
-
-        val dailyActivity = mapOf(today to 1)
-
+    fun activityScreen_showsDataLayerPlaceholders_inPhase1() {
         composeTestRule.setContent {
             AppTheme {
                 HistoryScreen(
                     uiState = HistoryUiState(
-                        dailyActivity = dailyActivity,
-                        selectedDate = today,
-                        filteredHistory = attempts
-                    ),
-                    onDateSelected = {}
+                        currentStreak = 7,
+                        todaysCount = 42,
+                        todaysHighlights = listOf(SmartHighlight.SpeedyPaws(3))
+                    )
                 )
             }
         }
 
-        // Verify heatmap is displayed
-        composeTestRule.onNodeWithTag("activity_heatmap").assertIsDisplayed()
-
-        // Verify history item for the selected day is shown
-        composeTestRule.onNodeWithText("2 + 2 = 4").assertIsDisplayed()
-    }
-
-    @Test
-    fun tappingDay_updatesSelection() {
-        val today = LocalDate.now()
-        val yesterday = today.minusDays(1)
-        var selectedDateResult: LocalDate? = null
-
-        composeTestRule.setContent {
-            AppTheme {
-                ActivityHeatmap(
-                    dailyActivity = mapOf(today to 5, yesterday to 15),
-                    selectedDate = today,
-                    onDateSelected = { selectedDateResult = it }
-                )
-            }
-        }
-
-        // Verify it exists and is clickable
-        composeTestRule.onNodeWithTag("activity_heatmap_header").performClick()
-        composeTestRule.waitForIdle()
-        
-        composeTestRule.onNodeWithTag("heatmap_day_$yesterday")
-            .assertExists()
-            .assertHasClickAction()
-            .performClick()
-
-        composeTestRule.waitForIdle()
-
-        if (selectedDateResult == null) {
-            // If still null, try one more time with explicit touch input
-            composeTestRule.onNodeWithTag("heatmap_day_$yesterday")
-                .performTouchInput { click() }
-            composeTestRule.waitForIdle()
-        }
-
-        selectedDateResult shouldBe yesterday
-    }
-
-    @Test
-    fun tappingHeader_togglesHeatmapVisibility() {
-        val today = LocalDate.now()
-
-        composeTestRule.setContent {
-            AppTheme {
-                ActivityHeatmap(
-                    dailyActivity = mapOf(today to 5),
-                    selectedDate = today,
-                    onDateSelected = { }
-                )
-            }
-        }
-
-        // 1. Hidden by default (Today's date should not be visible)
-        composeTestRule.onAllNodesWithTag("heatmap_day_$today").assertCountEquals(0)
-
-        // 2. Expand on click
-        composeTestRule.onNodeWithTag("activity_heatmap_header").performClick()
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("heatmap_day_$today").assertIsDisplayed()
-
-        // 3. Collapse on second click
-        composeTestRule.onNodeWithTag("activity_heatmap_header").performClick()
-        composeTestRule.waitForIdle()
-        composeTestRule.onAllNodesWithTag("heatmap_day_$today").assertCountEquals(0)
+        // Verify placeholders are displayed
+        composeTestRule.onNodeWithText("Phase 1: Activity Center Data Layer").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Current Streak: 7").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Today's Count: 42").assertIsDisplayed()
+        composeTestRule.onNodeWithText("⚡ Speedy Paws").assertIsDisplayed()
     }
 }

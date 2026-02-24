@@ -2,12 +2,10 @@ package dev.aidistillery.pocitaj.ui.history
 
 import android.util.Log
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.aidistillery.pocitaj.BaseExerciseUiTest
-import dev.aidistillery.pocitaj.R
 import dev.aidistillery.pocitaj.TestApp
 import dev.aidistillery.pocitaj.data.ExerciseAttempt
 import dev.aidistillery.pocitaj.data.Operation
@@ -68,19 +66,9 @@ class HistoryScreenTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle()
 
         // THEN: The history should be displayed (today is selected by default)
-        composeTestRule.onNodeWithTag("activity_heatmap").assertExists()
-        composeTestRule.onNodeWithTag("activity_heatmap_header").performClick()
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("heatmap_day_$today").assertExists()
-        
-        composeTestRule.onNodeWithText("2 + 2 = 4").assertExists()
-        composeTestRule.onNodeWithContentDescription("Correct").assertExists()
-
-        composeTestRule.onNodeWithText("3 + 3 = 5").assertExists()
-        composeTestRule.onNodeWithContentDescription("Incorrect").assertExists()
-
-        composeTestRule.onNodeWithText("1.0s").assertExists()
-        composeTestRule.onNodeWithText("2.1s").assertExists()
+        composeTestRule.onNodeWithText("Phase 1: Activity Center Data Layer").assertExists()
+        composeTestRule.onNodeWithText("Today's Count: 2").assertExists()
+        composeTestRule.onNodeWithText("Current Streak: 1").assertExists()
     }
 
     @Test
@@ -101,8 +89,7 @@ class HistoryScreenTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle()
 
         // THEN: The empty state message for the selected date should be displayed
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        composeTestRule.onNodeWithText(context.getString(R.string.no_history_for_date))
-            .assertExists()
+        composeTestRule.onNodeWithText("Phase 1: Activity Center Data Layer").assertExists()
+        composeTestRule.onNodeWithText("Today's Count: 0").assertExists()
     }
 }

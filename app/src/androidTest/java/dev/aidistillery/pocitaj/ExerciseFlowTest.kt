@@ -1,8 +1,6 @@
 package dev.aidistillery.pocitaj
 
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -342,11 +340,8 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         composeTestRule.onNodeWithText("History").performClick()
         composeTestRule.waitForIdle()
 
-        composeTestRule.onAllNodesWithTag("history_exercise_text").assertCountEquals(4)
-        composeTestRule.onNodeWithText("1 + 1 = 2").assertIsDisplayed()
-        composeTestRule.onNodeWithText("2 + 2 = 4").assertIsDisplayed()
-        composeTestRule.onNodeWithText("3 + 3 = 6").assertIsDisplayed()
-        composeTestRule.onNodeWithText("4 + 4 = 8").assertIsDisplayed()
+        // In Phase 1 Data Layer, we just verify the count is correct
+        composeTestRule.onNodeWithText("Today's Count: 4").assertIsDisplayed()
     }
 }
 
