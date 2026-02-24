@@ -69,7 +69,9 @@ fun SmartHighlightCard(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         shape = RoundedCornerShape(20.dp),
-        color = backgroundColor.copy(alpha = 0.6f)
+        shadowElevation = 4.dp,
+        tonalElevation = 2.dp,
+        color = backgroundColor
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
