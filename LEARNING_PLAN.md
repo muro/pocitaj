@@ -248,18 +248,12 @@ and purpose.*
         * Moving it to a "Daily Goals" section at the top of the screen.
         * Making it a "recommended next step" bubble if the user has been away for a while.
 
-### ### Step 4.3: Progress Calendar & Daily Streak
+### ### Step 4.3: Progress Calendar & Daily Streak [DONE]
 
 * **Goal:** Visualize consistency to build a daily habit.
-* **Action:** Add a calendar view and a prominent streak counter.
+* **Action:** Add a prominent streak counter and daily activity tracker. (Note: The traditional calendar approach was replaced with a highly motivating, kid-friendly "Activity Center" dashboard).
 * **Details:**
-    * **Streak Counter:** Display a "🔥 Streak" count on the Home Screen header for immediate
-      motivation.
-    * **Calendar View:** A simple monthly view in the Progress screen highlighting days with
-      activity.
-    * **Differentiation:** Distinguish between "did some practice" (small dot) vs "met daily goal" (
-      star/check).
-    * **Forgiveness:** Allow a "freeze" or grace period if missed to prevent demotivation.
-
-
-
+    * **Streak Counter:** Display a "🔥 Streak" count on the History Screen header for immediate motivation.
+    * **Daily Tracking:** Replaced the calendar view with the "Today's Catch Tracker", which visualizes milestones (10, 30, 50 exercises) using interactive, animated star/fish rewards.
+    * **Differentiation:** The dashboard intelligently analyzes the day's attempts and creates "Smart Highlight" cards (e.g., "Speedy Paws", "Laser Focus") rather than just showing dots on a calendar.
+    * **Forgiveness:** Grace period logic is handled elegantly (if the user hasn't played yet today, the streak remains intact until tomorrow).
