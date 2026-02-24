@@ -11,7 +11,7 @@ plugins {
 
 val (appVersionCode, appVersionName) = Versioning.getVersionInfo()
 
-val keystorePropsFile = rootProject.file("app/keystore.properties")
+val keystorePropsFile: File = rootProject.file("app/keystore.properties")
 val keystoreProps = Properties()
 // Use a try-catch block to avoid build failures if the file is missing (e.g., on a CI server)
 try {
@@ -121,6 +121,7 @@ android {
         }
     }
     kotlin {
+        jvmToolchain(21)
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
             optIn.add("kotlin.time.ExperimentalTime")
