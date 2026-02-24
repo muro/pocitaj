@@ -67,4 +67,16 @@
     <string name="highlight_unstoppable_message">Incredible! You completed %1$d exercises today!</string>
     <string name="highlight_perfect_precision_title">Perfect Precision</string>
     <string name="highlight_perfect_precision_message">100%% accurate! Not a single mistake!</string>
+
+    <!-- Activity Center -->
+    <string name="habit_streak_active">🔥 %1$d Day Streak!</string>
+    <string name="habit_streak_empty">Ready to start your streak?</string>
+    <string name="rewards_three_earned">3 Rewards earned! Unstoppable!</string>
+    <string name="rewards_two_earned">2 Rewards earned! Let\'s get the last one!</string>
+    <string name="rewards_one_earned">1 Reward earned! Keep going!</string>
+    <string name="rewards_lets_earn">Let\'s earn some rewards today!</string>
+    <string name="rewards_zero_earned">0 Rewards earned. Let\'s start the adventure!</string>
+    <string name="reward_content_description">Reward for %1$d exercises</string>
+    <string name="achieved_content_description">Achieved</string>
+    <string name="exercises_completed_today">%1$d exercises completed today</string>
 </resources>

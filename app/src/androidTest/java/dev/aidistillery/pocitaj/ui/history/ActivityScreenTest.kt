@@ -27,10 +27,9 @@ class ActivityScreenTest {
             }
         }
 
-        // Verify placeholders are displayed
-        composeTestRule.onNodeWithText("Phase 1: Activity Center Data Layer").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Current Streak: 7").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Today's Count: 42").assertIsDisplayed()
-        composeTestRule.onNodeWithText("⚡ Speedy Paws").assertIsDisplayed()
+        // Verify Phase 2 components are displayed
+        composeTestRule.onNodeWithText("🔥 7 Day Streak!").assertIsDisplayed()
+        composeTestRule.onNodeWithText("42 exercises completed today").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Speedy Paws").assertIsDisplayed()
     }
 }

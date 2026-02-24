@@ -340,8 +340,8 @@ class ExerciseFlowTest : BaseExerciseUiTest() {
         composeTestRule.onNodeWithText("History").performClick()
         composeTestRule.waitForIdle()
 
-        // In Phase 1 Data Layer, we just verify the count is correct
-        composeTestRule.onNodeWithText("Today's Count: 4").assertIsDisplayed()
+        // In Phase 2 UI, we verify the TodaysCatchTracker displays the updated count
+        composeTestRule.onNodeWithText("4 exercises completed today").assertIsDisplayed()
     }
 }
 

@@ -12,7 +12,6 @@ import dev.aidistillery.pocitaj.data.Operation
 import io.kotest.matchers.booleans.shouldBeTrue
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
-import java.time.LocalDate
 
 class HistoryScreenTest : BaseExerciseUiTest() {
 
@@ -30,7 +29,6 @@ class HistoryScreenTest : BaseExerciseUiTest() {
             }
         }
         val now = System.currentTimeMillis()
-        val today = LocalDate.now()
         
         runBlocking {
             exerciseAttemptDao.insert(
@@ -66,9 +64,8 @@ class HistoryScreenTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle()
 
         // THEN: The history should be displayed (today is selected by default)
-        composeTestRule.onNodeWithText("Phase 1: Activity Center Data Layer").assertExists()
-        composeTestRule.onNodeWithText("Today's Count: 2").assertExists()
-        composeTestRule.onNodeWithText("Current Streak: 1").assertExists()
+        composeTestRule.onNodeWithText("🔥 1 Day Streak!").assertExists()
+        composeTestRule.onNodeWithText("2 exercises completed today").assertExists()
     }
 
     @Test
@@ -89,7 +86,8 @@ class HistoryScreenTest : BaseExerciseUiTest() {
         composeTestRule.waitForIdle()
 
         // THEN: The empty state message for the selected date should be displayed
-        composeTestRule.onNodeWithText("Phase 1: Activity Center Data Layer").assertExists()
-        composeTestRule.onNodeWithText("Today's Count: 0").assertExists()
+        composeTestRule.onNodeWithText("Ready to start your streak?").assertExists()
+        composeTestRule.onNodeWithText("0 Rewards earned. Let's start the adventure!")
+            .assertExists()
     }
 }
