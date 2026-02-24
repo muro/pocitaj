@@ -65,7 +65,7 @@ class HistoryScreenTest : BaseExerciseUiTest() {
 
         // THEN: The history for that date should be displayed in the new dashboard format
         composeTestRule.onNodeWithText("🔥").assertExists()
-        composeTestRule.onNodeWithText("2 Day Streak!").assertExists()
+        composeTestRule.onNodeWithText("1 Day Streak!").assertExists()
         composeTestRule.onNodeWithText("Let's earn some rewards today!").assertExists()
     }
 

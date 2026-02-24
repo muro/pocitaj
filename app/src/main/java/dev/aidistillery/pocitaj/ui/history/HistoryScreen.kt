@@ -1,6 +1,10 @@
 package dev.aidistillery.pocitaj.ui.history
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -9,6 +13,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,6 +30,13 @@ import dev.aidistillery.pocitaj.ui.theme.AppTheme
 
 @Composable
 fun HistoryScreen(uiState: HistoryUiState = HistoryUiState()) {
+    // State logic to trigger entry animations on first composition
+    var visible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        visible = true
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -28,17 +44,41 @@ fun HistoryScreen(uiState: HistoryUiState = HistoryUiState()) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
-            HabitBuilderHeader(currentStreak = uiState.currentStreak)
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn(animationSpec = tween(500, delayMillis = 100)) + slideInVertically(
+                    animationSpec = tween(500, delayMillis = 100),
+                    initialOffsetY = { -it / 2 }
+                )
+            ) {
+                HabitBuilderHeader(currentStreak = uiState.currentStreak)
+            }
             Spacer(modifier = Modifier.height(8.dp))
         }
 
         item {
-            TodaysCatchTracker(todaysCount = uiState.todaysCount)
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn(animationSpec = tween(500, delayMillis = 250)) + slideInVertically(
+                    animationSpec = tween(500, delayMillis = 250),
+                    initialOffsetY = { it / 2 }
+                )
+            ) {
+                TodaysCatchTracker(todaysCount = uiState.todaysCount)
+            }
             Spacer(modifier = Modifier.height(16.dp))
         }
 
         items(uiState.todaysHighlights) { highlight ->
-            SmartHighlightCard(highlight = highlight)
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn(animationSpec = tween(500, delayMillis = 400)) + slideInVertically(
+                    animationSpec = tween(500, delayMillis = 400),
+                    initialOffsetY = { it / 2 }
+                )
+            ) {
+                SmartHighlightCard(highlight = highlight)
+            }
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
