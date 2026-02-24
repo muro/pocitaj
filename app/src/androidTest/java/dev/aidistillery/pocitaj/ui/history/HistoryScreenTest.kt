@@ -63,9 +63,10 @@ class HistoryScreenTest : BaseExerciseUiTest() {
         composeTestRule.onNodeWithText("History").performClick()
         composeTestRule.waitForIdle()
 
-        // THEN: The history should be displayed (today is selected by default)
-        composeTestRule.onNodeWithText("🔥 1 Day Streak!").assertExists()
-        composeTestRule.onNodeWithText("2 exercises completed today").assertExists()
+        // THEN: The history for that date should be displayed in the new dashboard format
+        composeTestRule.onNodeWithText("🔥").assertExists()
+        composeTestRule.onNodeWithText("2 Day Streak!").assertExists()
+        composeTestRule.onNodeWithText("Let's earn some rewards today!").assertExists()
     }
 
     @Test

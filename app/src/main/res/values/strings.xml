@@ -69,7 +69,7 @@
     <string name="highlight_perfect_precision_message">100%% accurate! Not a single mistake!</string>
 
     <!-- Activity Center -->
-    <string name="habit_streak_active">🔥 %1$d Day Streak!</string>
+    <string name="habit_streak_active">%1$d Day Streak!</string>
     <string name="habit_streak_empty">Ready to start your streak?</string>
     <string name="rewards_three_earned">3 Rewards earned! Unstoppable!</string>
     <string name="rewards_two_earned">2 Rewards earned! Let\'s get the last one!</string>

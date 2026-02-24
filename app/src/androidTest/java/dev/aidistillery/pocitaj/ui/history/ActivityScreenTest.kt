@@ -27,9 +27,10 @@ class ActivityScreenTest {
             }
         }
 
-        // Verify Phase 2 components are displayed
-        composeTestRule.onNodeWithText("🔥 7 Day Streak!").assertIsDisplayed()
-        composeTestRule.onNodeWithText("42 exercises completed today").assertIsDisplayed()
+        composeTestRule.onNodeWithText("🔥").assertIsDisplayed()
+        composeTestRule.onNodeWithText("7 Day Streak!").assertIsDisplayed()
+        composeTestRule.onNodeWithText("2 Rewards earned! Let's get the last one!")
+            .assertIsDisplayed()
         composeTestRule.onNodeWithText("Speedy Paws").assertIsDisplayed()
     }
 }
