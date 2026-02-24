@@ -54,5 +54,7 @@
     <string name="incorrect_answer_image">Incorrect Answer Image</string>
     <string name="unrecognized_answer_image">Unrecognized Answer Image</string>
     <string name="teacher_image">Teacher Image</string>
-    <string name="activity_center">Activity Center</string>
+    <string name="activity_center">Calendar</string>
+    <string name="collapse_calendar">Collapse Calendar</string>
+    <string name="expand_calendar">Expand Calendar</string>
 </resources>

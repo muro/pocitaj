@@ -2,7 +2,9 @@ package dev.aidistillery.pocitaj.ui.history
 
 import android.content.res.Configuration
 import android.icu.text.SimpleDateFormat
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,11 +21,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -87,6 +95,7 @@ fun ActivityHeatmap(
     onDateSelected: (LocalDate) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
     val today = LocalDate.now()
     // Start from the Monday 4 weeks before the current week
     val firstDayOfWeek = today.with(java.time.DayOfWeek.MONDAY).minusWeeks(4)
@@ -97,14 +106,29 @@ fun ActivityHeatmap(
             .padding(16.dp)
             .testTag("activity_heatmap")
     ) {
-        Text(
-            text = stringResource(id = R.string.activity_center),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { isExpanded = !isExpanded }
+                .testTag("activity_heatmap_header")
+                .padding(bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(id = R.string.activity_center),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                contentDescription = stringResource(if (isExpanded) R.string.collapse_calendar else R.string.expand_calendar),
+                tint = MaterialTheme.colorScheme.onSurface
+            )
+        }
 
-        Column {
+        AnimatedVisibility(visible = isExpanded) {
+            Column {
             for (week in 0..4) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -136,6 +160,7 @@ fun ActivityHeatmap(
                 }
                 if (week < 4) Spacer(modifier = Modifier.height(4.dp))
             }
+        }
         }
     }
 }

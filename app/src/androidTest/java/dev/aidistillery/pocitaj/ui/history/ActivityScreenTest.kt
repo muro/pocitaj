@@ -1,9 +1,11 @@
 package dev.aidistillery.pocitaj.ui.history
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -76,6 +78,9 @@ class ActivityScreenTest {
         }
 
         // Verify it exists and is clickable
+        composeTestRule.onNodeWithTag("activity_heatmap_header").performClick()
+        composeTestRule.waitForIdle()
+        
         composeTestRule.onNodeWithTag("heatmap_day_$yesterday")
             .assertExists()
             .assertHasClickAction()
@@ -91,5 +96,33 @@ class ActivityScreenTest {
         }
 
         selectedDateResult shouldBe yesterday
+    }
+
+    @Test
+    fun tappingHeader_togglesHeatmapVisibility() {
+        val today = LocalDate.now()
+
+        composeTestRule.setContent {
+            AppTheme {
+                ActivityHeatmap(
+                    dailyActivity = mapOf(today to 5),
+                    selectedDate = today,
+                    onDateSelected = { }
+                )
+            }
+        }
+
+        // 1. Hidden by default (Today's date should not be visible)
+        composeTestRule.onAllNodesWithTag("heatmap_day_$today").assertCountEquals(0)
+
+        // 2. Expand on click
+        composeTestRule.onNodeWithTag("activity_heatmap_header").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("heatmap_day_$today").assertIsDisplayed()
+
+        // 3. Collapse on second click
+        composeTestRule.onNodeWithTag("activity_heatmap_header").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onAllNodesWithTag("heatmap_day_$today").assertCountEquals(0)
     }
 }

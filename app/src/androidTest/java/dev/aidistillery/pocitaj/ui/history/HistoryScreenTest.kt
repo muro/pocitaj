@@ -69,6 +69,8 @@ class HistoryScreenTest : BaseExerciseUiTest() {
 
         // THEN: The history should be displayed (today is selected by default)
         composeTestRule.onNodeWithTag("activity_heatmap").assertExists()
+        composeTestRule.onNodeWithTag("activity_heatmap_header").performClick()
+        composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("heatmap_day_$today").assertExists()
         
         composeTestRule.onNodeWithText("2 + 2 = 4").assertExists()
