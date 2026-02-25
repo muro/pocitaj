@@ -43,6 +43,17 @@ import androidx.compose.ui.unit.dp
 import dev.aidistillery.pocitaj.R
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import dev.aidistillery.pocitaj.ui.theme.motion
+import java.time.LocalDate
+
+private val SUSHI_ICONS = listOf(
+    R.drawable.sushi_02_nigiri_amaebi,
+    R.drawable.sushi_02_nigiri_tamago,
+    R.drawable.sushi_02_nigiri_unagi,
+    R.drawable.sushi_03_gunkanmaki_ikura,
+    R.drawable.sushi_03_nigiri_ebi,
+    R.drawable.sushi_03_nigiri_sake,
+    R.drawable.sushi_03_nigiri_tai
+)
 
 @Composable
 fun TodaysCatchTracker(
@@ -50,22 +61,11 @@ fun TodaysCatchTracker(
     modifier: Modifier = Modifier
 ) {
     val thresholds = listOf(10, 30, 50)
-    
-    val sushiIcons = remember {
-        listOf(
-            R.drawable.sushi_02_nigiri_amaebi,
-            R.drawable.sushi_02_nigiri_tamago,
-            R.drawable.sushi_02_nigiri_unagi,
-            R.drawable.sushi_03_gunkanmaki_ikura,
-            R.drawable.sushi_03_nigiri_ebi,
-            R.drawable.sushi_03_nigiri_sake,
-            R.drawable.sushi_03_nigiri_tai
-        )
-    }
 
-    // Pick a random icon for each threshold, but keep them stable during recomposition
+    // Pick a random icon for each threshold, but keep them stable for the entire day
     val selectedIcons = remember {
-        thresholds.map { sushiIcons.random() }
+        val seed = LocalDate.now().toEpochDay()
+        getStableSushiIcons(seed, thresholds.size)
     }
 
     // Determine title text based on progress
@@ -230,4 +230,9 @@ fun TodaysCatchTrackerOnePreview() {
 @Composable
 fun TodaysCatchTrackerAllPreview() {
     AppTheme { Surface { TodaysCatchTracker(todaysCount = 55) } }
+}
+
+internal fun getStableSushiIcons(seed: Long, count: Int): List<Int> {
+    val random = kotlin.random.Random(seed)
+    return SUSHI_ICONS.shuffled(random).take(count)
 }
