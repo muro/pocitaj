@@ -1,6 +1,10 @@
 package dev.aidistillery.pocitaj.ui.progress
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,7 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.LinearProgressIndicator
@@ -25,11 +29,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,6 +56,7 @@ import dev.aidistillery.pocitaj.logic.getLevelDisplayName
 import dev.aidistillery.pocitaj.logic.getSpeedBadge
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import dev.aidistillery.pocitaj.ui.theme.customColors
+import dev.aidistillery.pocitaj.ui.theme.motion
 
 @Composable
 fun ProgressReportScreen(
@@ -71,6 +82,16 @@ fun ProgressReportScreen(
             }
         }
     } else {
+        val isPreview = LocalInspectionMode.current
+        var listVisible by remember { mutableStateOf(isPreview) }
+        val listEnterDuration = MaterialTheme.motion.listEnter
+
+        if (!isPreview) {
+            LaunchedEffect(Unit) {
+                listVisible = true
+            }
+        }
+
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(modifier = Modifier.height(32.dp))
             LazyColumn(
@@ -80,19 +101,37 @@ fun ProgressReportScreen(
                     .testTag("progress_report_list"),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(Operation.entries.toList()) { operation ->
-                    Card(modifier = Modifier.testTag("operation_card_${operation.name}")) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = getOperationTitle(operation),
-                                style = MaterialTheme.typography.headlineMedium,
-                                modifier = Modifier.padding(bottom = 8.dp)
+                itemsIndexed(Operation.entries.toList()) { index, operation ->
+                    AnimatedVisibility(
+                        visible = listVisible,
+                        enter = fadeIn(
+                            animationSpec = tween(
+                                durationMillis = listEnterDuration,
+                                delayMillis = index * 100
                             )
-                            OperationProgress(
-                                operation = operation,
-                                factProgress = factProgressByOperation[operation] ?: emptyList(),
-                                levelProgress = levelProgressByOperation[operation] ?: emptyMap()
+                        ) + slideInVertically(
+                            initialOffsetY = { it / 2 },
+                            animationSpec = tween(
+                                durationMillis = listEnterDuration,
+                                delayMillis = index * 100
                             )
+                        )
+                    ) {
+                        Card(modifier = Modifier.testTag("operation_card_${operation.name}")) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = getOperationTitle(operation),
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                                OperationProgress(
+                                    operation = operation,
+                                    factProgress = factProgressByOperation[operation]
+                                        ?: emptyList(),
+                                    levelProgress = levelProgressByOperation[operation]
+                                        ?: emptyMap()
+                                )
+                            }
                         }
                     }
                 }

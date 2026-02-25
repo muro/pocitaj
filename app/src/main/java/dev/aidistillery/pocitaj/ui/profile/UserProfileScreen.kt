@@ -2,9 +2,16 @@ package dev.aidistillery.pocitaj.ui.profile
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +27,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -45,8 +52,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -62,6 +71,7 @@ import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.data.UserAppearance
 import dev.aidistillery.pocitaj.data.UserDao
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
+import dev.aidistillery.pocitaj.ui.theme.motion
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -83,6 +93,20 @@ fun UserProfileScreen(
     var showAddUserDialog by remember { mutableStateOf(initialShowAddUserDialog) }
     var editingUser by remember { mutableStateOf<User?>(null) }
     var userToDelete by remember { mutableStateOf<User?>(null) }
+
+    val isPreview = LocalInspectionMode.current
+    var listVisible by remember { mutableStateOf(isPreview) }
+    val listEnterDuration = MaterialTheme.motion.listEnter
+
+    if (!isPreview) {
+        LaunchedEffect(users) {
+            if (users.size > 1 && !listVisible) {
+                // Wait for the list to be populated from the DB so all items animate staggered
+                kotlinx.coroutines.delay(50)
+                listVisible = true
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -106,53 +130,30 @@ fun UserProfileScreen(
                 .padding(16.dp)
         ) {
             LazyColumn(modifier = Modifier.testTag("user_profile_list")) {
-                items(users.filter { it.id != 1L }) { user ->
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp, bottom = 8.dp)
-                            .clickable { onUserSelected(user.id) },
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        val iconRes = UserAppearance.icons[user.iconId]
-                        if (iconRes != null) {
-                            Icon(
-                                painter = painterResource(id = iconRes),
-                                contentDescription = "${user.iconId} Icon",
-                                tint = Color(user.color),
-                                modifier = Modifier
-                                    .size(30.dp)
-                                    .semantics(mergeDescendants = false) {}
-                                    .testTag("UserIcon_${user.name}_${user.iconId}")
+                val filteredUsers = users.filter { it.id != 1L }
+                itemsIndexed(filteredUsers) { index, user ->
+                    AnimatedVisibility(
+                        visible = listVisible,
+                        enter = fadeIn(
+                            animationSpec = tween(
+                                durationMillis = listEnterDuration,
+                                delayMillis = index * 100
                             )
-                        }
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(
-                            user.name,
-                            modifier = Modifier.weight(1f),
-                            color = MaterialTheme.colorScheme.primary
+                        ) + slideInVertically(
+                            initialOffsetY = { it / 2 },
+                            animationSpec = tween(
+                                durationMillis = listEnterDuration,
+                                delayMillis = index * 100
+                            )
                         )
-                        IconButton(
-                            onClick = { editingUser = user },
-                            enabled = user.id != 1L
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit ${user.name}",
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-                        }
-                        IconButton(
-                            onClick = { userToDelete = user },
-                            enabled = user.id != 1L && user.id != activeUser.id
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.delete, user.name),
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-                        }
+                    ) {
+                        UserItem(
+                            user = user,
+                            activeUserId = activeUser.id,
+                            onUserSelected = onUserSelected,
+                            onEdit = { editingUser = it },
+                            onDelete = { userToDelete = it }
+                        )
                     }
                 }
             }
@@ -192,6 +193,72 @@ fun UserProfileScreen(
                     getAttemptCount = { viewModel.getAttemptCountForUser(user) }
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun UserItem(
+    user: User,
+    activeUserId: Long,
+    onUserSelected: (Long) -> Unit,
+    onEdit: (User) -> Unit,
+    onDelete: (User) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(if (isPressed) 0.95f else 1f, label = "scale")
+
+    Row(
+        modifier
+            .fillMaxWidth()
+            .scale(scale)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = androidx.compose.foundation.LocalIndication.current
+            ) { onUserSelected(user.id) }
+            .padding(top = 8.dp, bottom = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val iconRes = UserAppearance.icons[user.iconId]
+        if (iconRes != null) {
+            Icon(
+                painter = painterResource(id = iconRes),
+                contentDescription = "${user.iconId} Icon",
+                tint = Color(user.color),
+                modifier = Modifier
+                    .size(30.dp)
+                    .semantics(mergeDescendants = false) {}
+                    .testTag("UserIcon_${user.name}_${user.iconId}")
+            )
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            user.name,
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.primary
+        )
+        IconButton(
+            onClick = { onEdit(user) },
+            enabled = user.id != 1L
+        ) {
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = "Edit ${user.name}",
+                tint = MaterialTheme.colorScheme.secondary
+            )
+        }
+        IconButton(
+            onClick = { onDelete(user) },
+            enabled = user.id != 1L && user.id != activeUserId
+        ) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = stringResource(R.string.delete, user.name),
+                tint = MaterialTheme.colorScheme.secondary
+            )
         }
     }
 }
