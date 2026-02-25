@@ -23,9 +23,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import dev.aidistillery.pocitaj.R
 import dev.aidistillery.pocitaj.ui.components.PocitajScreen
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
+import dev.aidistillery.pocitaj.ui.theme.motion
 
 @Composable
 fun StartupScreen(error: String?, onRetry: () -> Unit) {
@@ -47,16 +50,21 @@ fun StartupScreen(error: String?, onRetry: () -> Unit) {
             verticalArrangement = Arrangement.Center
         ) {
             if (error == null) {
-                val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-                val scale by infiniteTransition.animateFloat(
-                    initialValue = 1f,
-                    targetValue = 1.1f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(1000),
-                        repeatMode = RepeatMode.Reverse
-                    ),
-                    label = "pulse"
-                )
+                val isPreview = LocalInspectionMode.current
+                val scale by if (isPreview) {
+                    remember { androidx.compose.runtime.mutableFloatStateOf(1.05f) }
+                } else {
+                    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+                    infiniteTransition.animateFloat(
+                        initialValue = 1f,
+                        targetValue = 1.1f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(MaterialTheme.motion.pulse),
+                            repeatMode = RepeatMode.Reverse
+                        ),
+                        label = "pulse"
+                    )
+                }
                 Image(
                     painter = painterResource(id = R.drawable.smiling),
                     contentDescription = null,

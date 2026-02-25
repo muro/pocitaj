@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.aidistillery.pocitaj.logic.SmartHighlight
@@ -27,14 +29,20 @@ import dev.aidistillery.pocitaj.ui.history.components.HabitBuilderHeader
 import dev.aidistillery.pocitaj.ui.history.components.SmartHighlightCard
 import dev.aidistillery.pocitaj.ui.history.components.TodaysCatchTracker
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
+import dev.aidistillery.pocitaj.ui.theme.motion
 
 @Composable
 fun HistoryScreen(uiState: HistoryUiState = HistoryUiState()) {
-    // State logic to trigger entry animations on first composition
-    var visible by remember { mutableStateOf(false) }
+    val isPreview = LocalInspectionMode.current
+    val listEnterDuration = MaterialTheme.motion.listEnter
 
-    LaunchedEffect(Unit) {
-        visible = true
+    // State logic to trigger entry animations on first composition
+    var visible by remember { mutableStateOf(isPreview) }
+
+    if (!isPreview) {
+        LaunchedEffect(Unit) {
+            visible = true
+        }
     }
 
     LazyColumn(
@@ -46,8 +54,13 @@ fun HistoryScreen(uiState: HistoryUiState = HistoryUiState()) {
         item {
             AnimatedVisibility(
                 visible = visible,
-                enter = fadeIn(animationSpec = tween(500, delayMillis = 100)) + slideInVertically(
-                    animationSpec = tween(500, delayMillis = 100),
+                enter = fadeIn(
+                    animationSpec = tween(
+                        listEnterDuration,
+                        delayMillis = 100
+                    )
+                ) + slideInVertically(
+                    animationSpec = tween(listEnterDuration, delayMillis = 100),
                     initialOffsetY = { -it / 2 }
                 )
             ) {
@@ -59,8 +72,13 @@ fun HistoryScreen(uiState: HistoryUiState = HistoryUiState()) {
         item {
             AnimatedVisibility(
                 visible = visible,
-                enter = fadeIn(animationSpec = tween(500, delayMillis = 250)) + slideInVertically(
-                    animationSpec = tween(500, delayMillis = 250),
+                enter = fadeIn(
+                    animationSpec = tween(
+                        listEnterDuration,
+                        delayMillis = 250
+                    )
+                ) + slideInVertically(
+                    animationSpec = tween(listEnterDuration, delayMillis = 250),
                     initialOffsetY = { it / 2 }
                 )
             ) {
@@ -72,8 +90,13 @@ fun HistoryScreen(uiState: HistoryUiState = HistoryUiState()) {
         items(uiState.todaysHighlights) { highlight ->
             AnimatedVisibility(
                 visible = visible,
-                enter = fadeIn(animationSpec = tween(500, delayMillis = 400)) + slideInVertically(
-                    animationSpec = tween(500, delayMillis = 400),
+                enter = fadeIn(
+                    animationSpec = tween(
+                        listEnterDuration,
+                        delayMillis = 400
+                    )
+                ) + slideInVertically(
+                    animationSpec = tween(listEnterDuration, delayMillis = 400),
                     initialOffsetY = { it / 2 }
                 )
             ) {
