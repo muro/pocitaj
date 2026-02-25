@@ -21,18 +21,20 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +50,23 @@ fun TodaysCatchTracker(
     modifier: Modifier = Modifier
 ) {
     val thresholds = listOf(10, 30, 50)
+    
+    val sushiIcons = remember {
+        listOf(
+            R.drawable.sushi_02_nigiri_amaebi,
+            R.drawable.sushi_02_nigiri_tamago,
+            R.drawable.sushi_02_nigiri_unagi,
+            R.drawable.sushi_03_gunkanmaki_ikura,
+            R.drawable.sushi_03_nigiri_ebi,
+            R.drawable.sushi_03_nigiri_sake,
+            R.drawable.sushi_03_nigiri_tai
+        )
+    }
+
+    // Pick a random icon for each threshold, but keep them stable during recomposition
+    val selectedIcons = remember {
+        thresholds.map { sushiIcons.random() }
+    }
 
     // Determine title text based on progress
     val titleText = when {
@@ -85,11 +104,12 @@ fun TodaysCatchTracker(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                thresholds.forEach { threshold ->
+                thresholds.forEachIndexed { index, threshold ->
                     val isAchieved = todaysCount >= threshold
                     MilestoneReward(
                         threshold = threshold,
-                        isAchieved = isAchieved
+                        isAchieved = isAchieved,
+                        iconResId = selectedIcons[index]
                     )
                 }
             }
@@ -110,6 +130,7 @@ fun TodaysCatchTracker(
 private fun MilestoneReward(
     threshold: Int,
     isAchieved: Boolean,
+    iconResId: Int,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -155,11 +176,10 @@ private fun MilestoneReward(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = if (isAchieved) Icons.Filled.Star else Icons.Filled.Star, // Placeholder for Fish
+                painter = painterResource(id = iconResId),
                 contentDescription = stringResource(R.string.reward_content_description, threshold),
-                modifier = Modifier.size(32.dp),
-                tint = if (isAchieved) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                modifier = Modifier.size(40.dp),
+                tint = if (isAchieved) Color.Unspecified else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
             )
 
             if (isAchieved) {
