@@ -263,7 +263,6 @@ fun UserItem(
     }
 }
 
-@Suppress("AssignedValueIsNeverRead")
 @Composable
 fun AddUserDialog(
     onDismiss: () -> Unit,
