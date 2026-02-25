@@ -62,9 +62,9 @@ import dev.aidistillery.pocitaj.logic.SpeedBadge
 import dev.aidistillery.pocitaj.ui.components.ConfettiAnimation
 import dev.aidistillery.pocitaj.ui.components.PocitajScreen
 import dev.aidistillery.pocitaj.ui.components.StarRatingDisplay
-import dev.aidistillery.pocitaj.ui.theme.AnimationDurations
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import dev.aidistillery.pocitaj.ui.theme.customColors
+import dev.aidistillery.pocitaj.ui.theme.motion
 import kotlinx.coroutines.delay
 import java.util.Locale
 
@@ -210,14 +210,14 @@ fun ResultsList(results: List<ResultDescription>, modifier: Modifier = Modifier)
                     visible = visible.value,
                     enter = fadeIn(
                         animationSpec = tween(
-                            durationMillis = AnimationDurations.ListEnterMs,
+                            durationMillis = MaterialTheme.motion.listEnter,
                             delayMillis = index * 100
                         )
                     ) +
                             slideInVertically(
                                 initialOffsetY = { it / 2 },
                                 animationSpec = tween(
-                                    durationMillis = AnimationDurations.ListEnterMs,
+                                    durationMillis = MaterialTheme.motion.listEnter,
                                     delayMillis = index * 100
                                 )
                             )

@@ -5,6 +5,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,7 +19,7 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
-import dev.aidistillery.pocitaj.ui.theme.AnimationDurations
+import dev.aidistillery.pocitaj.ui.theme.motion
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -35,12 +36,12 @@ enum class ConfettiPalette {
 @Composable
 fun ConfettiAnimation(
     modifier: Modifier = Modifier,
-    durationMillis: Int = AnimationDurations.ConfettiMs,
     particleCount: Int = 100,
     shape: ConfettiShape = ConfettiShape.RECTANGLE,
     palette: ConfettiPalette = ConfettiPalette.DEFAULT
 ) {
     val isPreview = LocalInspectionMode.current
+    val durationMillis = MaterialTheme.motion.confetti
     val density = LocalDensity.current.density
     val particles = remember(particleCount, density, shape, palette) {
         List(particleCount) {
@@ -188,7 +189,7 @@ private fun DrawScope.drawStar(color: Color, size: Float) {
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@androidx.compose.ui.tooling.preview.Preview(name = "Confetti - Regular")
 @Composable
 fun PreviewConfetti() {
     dev.aidistillery.pocitaj.ui.theme.AppTheme {

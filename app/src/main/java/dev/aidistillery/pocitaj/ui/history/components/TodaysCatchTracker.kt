@@ -32,14 +32,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.aidistillery.pocitaj.R
-import dev.aidistillery.pocitaj.ui.theme.AnimationDurations
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
+import dev.aidistillery.pocitaj.ui.theme.motion
 
 @Composable
 fun TodaysCatchTracker(
@@ -115,22 +116,26 @@ private fun MilestoneReward(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        // Create an infinite pulsing animation for achieved milestones
+        val isPreview = LocalInspectionMode.current
         val scale = if (isAchieved) {
-            val infiniteTransition = rememberInfiniteTransition(label = "starPulse")
-            val scaleAnim by infiniteTransition.animateFloat(
-                initialValue = 1f,
-                targetValue = 1.1f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(
-                        durationMillis = AnimationDurations.PulseMs,
-                        easing = FastOutSlowInEasing
+            if (isPreview) {
+                1.05f // Middle of 1.0f to 1.1f
+            } else {
+                val infiniteTransition = rememberInfiniteTransition(label = "starPulse")
+                val scaleAnim by infiniteTransition.animateFloat(
+                    initialValue = 1f,
+                    targetValue = 1.1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(
+                            durationMillis = MaterialTheme.motion.pulse,
+                            easing = FastOutSlowInEasing
+                        ),
+                        repeatMode = RepeatMode.Reverse
                     ),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "pulseScale"
-            )
-            scaleAnim
+                    label = "pulseScale"
+                )
+                scaleAnim
+            }
         } else {
             1f
         }

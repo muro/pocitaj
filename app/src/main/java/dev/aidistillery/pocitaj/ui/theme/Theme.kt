@@ -96,7 +96,16 @@ data class Motion(
     val short: Int = 150,
     val medium: Int = 300,
     val long: Int = 500,
-    val debug: Int = 1000
+    val debug: Int = 1000,
+
+    /** Duration for repeating pulse animations (e.g., highlighting streaks and rewards). */
+    val pulse: Int = 800,
+
+    /** Duration for the confetti celebration effect on success/milestone. */
+    val confetti: Int = 3000,
+
+    /** Duration for the enter animation of items in a list. */
+    val listEnter: Int = 500
 )
 
 private val defaultMotion = Motion()
