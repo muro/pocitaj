@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,7 +24,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -53,7 +51,6 @@ import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.data.toSymbol
 import dev.aidistillery.pocitaj.logic.Curriculum
 import dev.aidistillery.pocitaj.logic.SpeedBadge
-import dev.aidistillery.pocitaj.logic.getLevelDisplayName
 import dev.aidistillery.pocitaj.logic.getSpeedBadge
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import dev.aidistillery.pocitaj.ui.theme.customColors
@@ -192,68 +189,14 @@ fun LevelProgressList(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         levelProgress.forEach { (levelId, progress) ->
-            Column {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    CircularProgressIndicator(
-                        progress = { progress.progress },
-                        modifier = Modifier
-                            .size(32.dp)
-                            .testTag("progress_${levelId}_${"%.1f".format(progress.progress)}")
-                    )
-                    Text(
-                        text = stringResource(id = getLevelDisplayName(levelId)),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-
-                if (progress.progress > 0f && progress.progress < 1f) {
-                    val level = Curriculum.getAllLevels().find { it.id == levelId }
-                    if (level != null) {
-                        val levelFacts = level.getAllPossibleFactIds()
-                        val weakFacts = factProgress
-                            .filter { it.factId in levelFacts && (it.mastery?.strength ?: 0) < 5 }
-                            .sortedByDescending { it.mastery != null }
-                            .take(6)
-
-                        if (weakFacts.isNotEmpty()) {
-                            FlowRow(
-                                modifier = Modifier.padding(top = 8.dp, start = 48.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                weakFacts.forEach { weakFact ->
-                                    Surface(
-                                        shape = RoundedCornerShape(8.dp),
-                                        color = MaterialTheme.colorScheme.errorContainer,
-                                        modifier = Modifier.testTag("weak_fact_${weakFact.factId}")
-                                    ) {
-                                        Text(
-                                            text = formatFactIdForDisplay(weakFact.factId),
-                                            modifier = Modifier.padding(
-                                                horizontal = 8.dp,
-                                                vertical = 4.dp
-                                            ),
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.onErrorContainer
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            LevelProgressItem(
+                levelId = levelId,
+                progress = progress,
+                factProgress = factProgress
+            )
         }
     }
 }
-
-private fun formatFactIdForDisplay(factId: String): String {
-    return factId.replace(" = ?", "")
-}
-
 
 private fun mapFactsToCoords(facts: List<FactProgress>): List<Triple<Int, Int, FactProgress>> {
     val legacyRegex = Regex("""^[A-Z]+_(\d+)_(\d+)$""")

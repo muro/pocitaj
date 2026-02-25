@@ -100,7 +100,7 @@ fun UserProfileScreen(
 
     if (!isPreview) {
         LaunchedEffect(users) {
-            if (users.size > 1 && !listVisible) {
+            if (users.isNotEmpty() && !listVisible) {
                 // Wait for the list to be populated from the DB so all items animate staggered
                 kotlinx.coroutines.delay(50)
                 listVisible = true

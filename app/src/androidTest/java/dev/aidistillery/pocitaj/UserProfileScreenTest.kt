@@ -39,6 +39,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 2. Navigate to the profile screen
         composeTestRule.onNodeWithContentDescription("User Profile")
             .performVerifiedClick("User Profile icon")
+        waitForProfileAnimations()
 
         // 3. Verify that the users are displayed
         composeTestRule.onNodeWithText("Alice").assertIsDisplayed()
@@ -50,6 +51,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 1. Click the profile icon
         composeTestRule.onNodeWithContentDescription("User Profile")
             .performVerifiedClick("User Profile icon")
+        waitForProfileAnimations()
 
         // 2. Verify that the UserProfileScreen is displayed
         composeTestRule.onNodeWithText("User Profile").assertIsDisplayed()
@@ -60,6 +62,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 1. Navigate to the profile screen
         composeTestRule.onNodeWithContentDescription("User Profile")
             .performVerifiedClick("User Profile icon")
+        waitForProfileAnimations()
 
         // 2. Click the "Add User" button
         composeTestRule.onNodeWithText("Add User")
@@ -74,6 +77,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 1. Navigate to the profile screen
         composeTestRule.onNodeWithContentDescription("User Profile")
             .performVerifiedClick("User Profile icon")
+        waitForProfileAnimations()
 
         // 2. Click the "Add User" button
         composeTestRule.onNodeWithText("Add User")
@@ -101,6 +105,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 2. Navigate to the profile screen
         composeTestRule.onNodeWithContentDescription("User Profile")
             .performVerifiedClick("User Profile icon")
+        waitForProfileAnimations()
         // Verify that "Alice" is displayed
         composeTestRule.onNodeWithText("Alice").assertIsDisplayed()
 
@@ -141,7 +146,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 3. Switch to Alice
         composeTestRule.onNodeWithContentDescription("User Profile")
             .performVerifiedClick("User Profile icon")
-        composeTestRule.waitForIdle()
+        waitForProfileAnimations()
         composeTestRule.onNodeWithText("Alice").performClick()
         composeTestRule.waitForIdle()
 
@@ -177,6 +182,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 6. Switch to Bob
         composeTestRule.onNodeWithContentDescription("User Profile")
             .performVerifiedClick("User Profile icon")
+        waitForProfileAnimations()
         composeTestRule.onNodeWithText("Bob").performClick()
         composeTestRule.waitForIdle()
 
@@ -210,6 +216,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 2. Navigate to the profile screen and select "Alice"
         composeTestRule.onNodeWithContentDescription("User Profile")
             .performVerifiedClick("User Profile icon")
+        waitForProfileAnimations()
         composeTestRule.onNodeWithText("Alice").performClick()
         composeTestRule.waitForIdle()
 
@@ -227,6 +234,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
         // 2. Navigate to the profile screen
         composeTestRule.onNodeWithContentDescription("User Profile")
             .performVerifiedClick("User Profile icon")
+        waitForProfileAnimations()
         composeTestRule.waitForIdle()
 
         // 3. Verify the user's icon is displayed
@@ -254,6 +262,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 2. Navigate to the profile screen and click "Edit"
         composeTestRule.onNodeWithContentDescription("User Profile").performClick()
+        waitForProfileAnimations()
         composeTestRule.onNodeWithContentDescription("Edit Caleb", useUnmergedTree = true)
             .performClick()
 
@@ -286,6 +295,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 2. Navigate to profile and delete the user
         composeTestRule.onNodeWithContentDescription("User Profile").performClick()
+        waitForProfileAnimations()
         composeTestRule.onNodeWithContentDescription("Delete Frank", useUnmergedTree = true)
             .performClick()
 
@@ -321,6 +331,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 2. Navigate to profile and try to delete the user
         composeTestRule.onNodeWithContentDescription("User Profile").performClick()
+        waitForProfileAnimations()
         composeTestRule.onNodeWithContentDescription("Delete Grace", useUnmergedTree = true)
             .performClick()
 
@@ -360,7 +371,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 3. Navigate to the profile screen
         composeTestRule.onNodeWithContentDescription("User Profile").performClick()
-        composeTestRule.waitForIdle()
+        waitForProfileAnimations()
 
         // 4. Verify that the delete button for Alice is disabled
         composeTestRule.onNodeWithContentDescription("Delete Alice").assertIsNotEnabled()
@@ -380,7 +391,7 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 2. Navigate to the profile screen
         composeTestRule.onNodeWithContentDescription("User Profile").performClick()
-        composeTestRule.waitForIdle()
+        waitForProfileAnimations()
 
         // 3. Click the back button
         composeTestRule.onNodeWithContentDescription("Back").performClick()
@@ -391,5 +402,12 @@ class UserProfileScreenTest : BaseExerciseUiTest() {
 
         // 5. Verify that the active user is still Alice
         composeTestRule.onNodeWithTag("user_profile_Alice").assertIsDisplayed()
+    }
+
+    private fun waitForProfileAnimations() {
+        composeTestRule.waitForIdle()
+        // Wait for the LaunchedEffect delay(50) and staggered animations
+        composeTestRule.mainClock.advanceTimeBy(1000)
+        composeTestRule.waitForIdle()
     }
 }

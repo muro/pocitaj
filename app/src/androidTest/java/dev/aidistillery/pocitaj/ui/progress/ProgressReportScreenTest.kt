@@ -104,9 +104,20 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
         composeTestRule.onNodeWithContentDescription("My Progress").performClick()
         composeTestRule.waitForIdle()
 
-        // THEN: The weak fact should be displayed as a chip
+        // Scroll to the level and expand it
+        val levelId = Curriculum.SumsUpTo5.id
         composeTestRule.onNodeWithTag("progress_report_list")
-            .performScrollToNode(hasTestTag("weak_fact_1 + 2 = ?"))
-        composeTestRule.onNodeWithTag("weak_fact_1 + 2 = ?").assertIsDisplayed()
+            .performScrollToNode(hasTestTag("level_row_$levelId"))
+
+        composeTestRule.onNodeWithTag("level_row_$levelId").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.mainClock.advanceTimeBy(1000)
+        composeTestRule.waitForIdle()
+
+        // THEN: The weak fact should be displayed as a chip
+        // Note: we don't performScrollToNode here because it might be flaky with newly appeared items,
+        // and it should be visible after expansion if we just scrolled to the header.
+        composeTestRule.onNodeWithTag("weak_fact_1 + 2 = ?", useUnmergedTree = true)
+            .assertIsDisplayed()
     }
 }
