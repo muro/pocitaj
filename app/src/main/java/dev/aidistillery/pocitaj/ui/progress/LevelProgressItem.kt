@@ -87,11 +87,15 @@ fun LevelProgressItem(
                     val levelFacts = level.getAllPossibleFactIds()
 
                     val allWeakFacts = factProgress
-                        .filter { it.factId in levelFacts && (it.mastery?.strength ?: 0) < 5 }
-                        .groupBy { Pair(it.mastery != null, it.mastery?.strength ?: 0) }
-                        .toSortedMap(compareByDescending<Pair<Boolean, Int>> { it.first }.thenBy { it.second })
-                        .values
-                        .flatMap { it.shuffled() }
+                        .filter {
+                            it.factId in levelFacts &&
+                                    it.mastery != null &&
+                                    it.mastery.strength < 5
+                        }
+                        .sortedWith(
+                            compareBy<FactProgress> { it.mastery?.strength ?: 0 }
+                                .thenBy { it.factId }
+                        )
 
                     val showOverflow = allWeakFacts.size > 6
                     val renderFacts =
