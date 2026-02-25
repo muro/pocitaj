@@ -69,7 +69,7 @@ fun ConfettiAnimation(
         ) {
             // Read progress.value inside the drawing block to trigger redrawing
             // without recomposing the whole ConfettiAnimation composable.
-            @Suppress("UNUSED_VARIABLE")
+            @Suppress("unused")
             val p = progress.value
             particles.forEach {
                 it.update()
