@@ -13,10 +13,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,7 +25,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -158,7 +159,7 @@ fun OperationProgress(
 ) {
     when (operation) {
         Operation.ADDITION, Operation.SUBTRACTION -> {
-            LevelProgressList(levelProgress = levelProgress)
+            LevelProgressList(levelProgress = levelProgress, factProgress = factProgress)
         }
 
         Operation.MULTIPLICATION -> {
@@ -183,25 +184,74 @@ fun OperationProgress(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun LevelProgressList(levelProgress: Map<String, LevelProgress>) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+fun LevelProgressList(
+    levelProgress: Map<String, LevelProgress>,
+    factProgress: List<FactProgress>
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         levelProgress.forEach { (levelId, progress) ->
             Column {
-                Text(
-                    text = stringResource(id = getLevelDisplayName(levelId)),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                LinearProgressIndicator(
-                    progress = { progress.progress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("progress_${levelId}_${"%.1f".format(progress.progress)}")
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator(
+                        progress = { progress.progress },
+                        modifier = Modifier
+                            .size(32.dp)
+                            .testTag("progress_${levelId}_${"%.1f".format(progress.progress)}")
+                    )
+                    Text(
+                        text = stringResource(id = getLevelDisplayName(levelId)),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                if (progress.progress > 0f && progress.progress < 1f) {
+                    val level = Curriculum.getAllLevels().find { it.id == levelId }
+                    if (level != null) {
+                        val levelFacts = level.getAllPossibleFactIds()
+                        val weakFacts = factProgress
+                            .filter { it.factId in levelFacts && (it.mastery?.strength ?: 0) < 5 }
+                            .sortedByDescending { it.mastery != null }
+                            .take(6)
+
+                        if (weakFacts.isNotEmpty()) {
+                            FlowRow(
+                                modifier = Modifier.padding(top = 8.dp, start = 48.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                weakFacts.forEach { weakFact ->
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = MaterialTheme.colorScheme.errorContainer,
+                                        modifier = Modifier.testTag("weak_fact_${weakFact.factId}")
+                                    ) {
+                                        Text(
+                                            text = formatFactIdForDisplay(weakFact.factId),
+                                            modifier = Modifier.padding(
+                                                horizontal = 8.dp,
+                                                vertical = 4.dp
+                                            ),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onErrorContainer
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+private fun formatFactIdForDisplay(factId: String): String {
+    return factId.replace(" = ?", "")
 }
 
 
@@ -484,20 +534,38 @@ fun ProgressReportScreenPreview() {
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_NO,
     showBackground = true,
-    name = "Light Mode"
-)
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true,
-    name = "Dark Mode"
+    name = "Adding & Subtracting Progress Mode"
 )
 @Composable
-fun EmptyProgressReportScreenPreview() {
+fun AdditionProgressReportPreview() {
     AppTheme {
-        ProgressReportScreen(
-            factProgressByOperation = emptyMap(),
-            levelProgressByOperation = emptyMap()
+        val fakeMasteredFacts = mapOf(
+            "1 + 1 = ?" to FactMastery("1 + 1 = ?", 1, "ADD_SUM_5", 5, 0, 1000),
+            "2 + 2 = ?" to FactMastery("2 + 2 = ?", 1, "ADD_SUM_5", 5, 0, 1000),
+            "8 + 8 = ?" to FactMastery("8 + 8 = ?", 1, "ADD_SUM_20", 2, 0, 5000),
+            "9 + 7 = ?" to FactMastery("9 + 7 = ?", 1, "ADD_SUM_20", 1, 0, 6000),
+            "15 - 5 = ?" to FactMastery("15 - 5 = ?", 1, "SUB_FROM_20", 3, 0, 3000),
+            "12 - 4 = ?" to FactMastery("12 - 4 = ?", 1, "SUB_FROM_20", 1, 0, 6000)
         )
+
+        val factProgress = fakeMasteredFacts.map { (id, mastery) ->
+            FactProgress(id, mastery, SpeedBadge.NONE)
+        }
+
+        val levelProgress = mapOf(
+            "ADD_SUM_5" to LevelProgress(1.0f, true),
+            "ADD_SUM_10" to LevelProgress(0.0f, false),
+            "ADD_SUM_20" to LevelProgress(0.5f, false),
+            "SUB_FROM_20" to LevelProgress(0.3f, false)
+        )
+
+        Surface(modifier = Modifier.padding(16.dp)) {
+            OperationProgress(
+                operation = Operation.ADDITION,
+                factProgress = factProgress,
+                levelProgress = levelProgress
+            )
+        }
     }
 }
 

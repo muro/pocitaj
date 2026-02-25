@@ -85,4 +85,28 @@ class ProgressReportScreenTest : BaseExerciseUiTest() {
         composeTestRule.onRoot().printToLog("progress_report_list")
         composeTestRule.onNodeWithTag("progress_SUB_FROM_5_0.5").assertIsDisplayed()
     }
+
+    @Test
+    fun progressReportScreen_showsWeakFactsForActiveLevels() {
+        // GIVEN: A user with an active level containing weak facts
+        val application =
+            InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as TestApp
+        val factMasteryDao = application.globals.factMasteryDao
+        runBlocking {
+            // Master one fact to make level active (progress > 0)
+            factMasteryDao.upsert(FactMastery("1 + 1 = ?", 1, Curriculum.SumsUpTo5.id, 5, 0))
+            // Make another fact weak
+            factMasteryDao.upsert(FactMastery("1 + 2 = ?", 1, Curriculum.SumsUpTo5.id, 1, 0))
+        }
+
+        // WHEN: Navigate to progress report screen
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithContentDescription("My Progress").performClick()
+        composeTestRule.waitForIdle()
+
+        // THEN: The weak fact should be displayed as a chip
+        composeTestRule.onNodeWithTag("progress_report_list")
+            .performScrollToNode(hasTestTag("weak_fact_1 + 2 = ?"))
+        composeTestRule.onNodeWithTag("weak_fact_1 + 2 = ?").assertIsDisplayed()
+    }
 }
