@@ -2,32 +2,23 @@ package dev.aidistillery.pocitaj.ui.history
 
 import app.cash.turbine.test
 import dev.aidistillery.pocitaj.data.ExerciseAttempt
-import dev.aidistillery.pocitaj.data.ExerciseAttemptDao
+import dev.aidistillery.pocitaj.data.FakeExerciseAttemptDao
 import dev.aidistillery.pocitaj.data.Operation
 import dev.aidistillery.pocitaj.data.User
 import io.kotest.matchers.shouldBe
-import io.mockk.every
-import io.mockk.mockk
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import java.time.LocalDate
 
 class HistoryViewModelTest {
 
     @Test
     fun `uiState combines activity, selection, and filtered list correctly`() = runTest {
-        val dao = mockk<ExerciseAttemptDao>()
+        val dao = FakeExerciseAttemptDao()
         val user = User(id = 1, name = "Test")
-        val today = LocalDate.now()
-
-        val dailyCounts = listOf(
-            dev.aidistillery.pocitaj.data.DailyActivityCount(today.toString(), 2)
-        )
-        val todayAttempt = createAttempt(123456789L)
-
-        every { dao.getDailyActivityCounts(1) } returns flowOf(dailyCounts)
-        every { dao.getAttemptsForDate(1, today.toString()) } returns flowOf(listOf(todayAttempt))
+        val todayAttempt1 = createAttempt(System.currentTimeMillis())
+        val todayAttempt2 = createAttempt(System.currentTimeMillis() - 1000)
+        dao.insert(todayAttempt1)
+        dao.insert(todayAttempt2)
 
         val viewModel = HistoryViewModel(dao, user)
 

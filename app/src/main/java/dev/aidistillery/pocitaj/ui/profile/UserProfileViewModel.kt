@@ -1,5 +1,6 @@
 package dev.aidistillery.pocitaj.ui.profile
 
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -8,9 +9,11 @@ import dev.aidistillery.pocitaj.App
 import dev.aidistillery.pocitaj.data.ActiveUserManager
 import dev.aidistillery.pocitaj.data.ExerciseAttemptDao
 import dev.aidistillery.pocitaj.data.User
+import dev.aidistillery.pocitaj.data.UserAppearance
 import dev.aidistillery.pocitaj.data.UserDao
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -30,7 +33,32 @@ open class UserProfileViewModel(
 
     fun addUser(name: String) {
         viewModelScope.launch {
-            userDao.insert(User(name = name))
+            val currentUsers = userDao.getAllUsersFlow().first()
+            val usedIcons = currentUsers.map { it.iconId }.toSet()
+            val usedColors = currentUsers.map { it.color }.toSet()
+
+            val availableIcons = UserAppearance.icons.keys.filter { it !in usedIcons }
+            val nextIcon = if (availableIcons.isNotEmpty()) {
+                availableIcons.random()
+            } else {
+                UserAppearance.icons.keys.random()
+            }
+
+            val allColors = UserAppearance.colors.map { it.toArgb() }
+            val availableColors = allColors.filter { it !in usedColors }
+            val nextColor = if (availableColors.isNotEmpty()) {
+                availableColors.random()
+            } else {
+                allColors.random()
+            }
+
+            userDao.insert(
+                User(
+                    name = name,
+                    iconId = nextIcon,
+                    color = nextColor
+                )
+            )
         }
     }
 

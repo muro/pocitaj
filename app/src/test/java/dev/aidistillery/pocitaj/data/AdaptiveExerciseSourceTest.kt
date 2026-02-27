@@ -4,9 +4,6 @@ import dev.aidistillery.pocitaj.logic.Curriculum
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
@@ -18,67 +15,6 @@ class AdaptiveExerciseSourceTest {
     private lateinit var userDao: FakeUserDao
     private lateinit var exerciseSource: AdaptiveExerciseSource
     private lateinit var activeUserManager: FakeActiveUserManager
-
-    // --- Test Doubles ---
-    class FakeExerciseAttemptDao : ExerciseAttemptDao {
-        private val attempts = mutableListOf<ExerciseAttempt>()
-        override suspend fun insert(attempt: ExerciseAttempt) {
-            attempts.add(attempt)
-        }
-
-        override fun getAttemptsForDate(userId: Long, dateString: String) =
-            MutableStateFlow(attempts.filter {
-                it.userId == userId &&
-                        java.time.Instant.ofEpochMilli(it.timestamp)
-                            .atZone(java.time.ZoneId.systemDefault()).toLocalDate()
-                            .toString() == dateString
-            }).asStateFlow()
-
-        override fun getDailyActivityCounts(userId: Long) =
-            MutableStateFlow(attempts.filter { it.userId == userId }
-                .groupBy {
-                    java.time.Instant.ofEpochMilli(it.timestamp)
-                        .atZone(java.time.ZoneId.systemDefault()).toLocalDate().toString()
-                }
-                .map { DailyActivityCount(it.key, it.value.size) }
-            ).asStateFlow()
-
-        override suspend fun getAttemptCountForUser(userId: Long): Int {
-            return attempts.size
-        }
-    }
-
-    class FakeUserDao : UserDao {
-        private val users = mutableMapOf<Long, User>()
-        private var nextId = 1L
-        override suspend fun insert(user: User): Long {
-            val idToInsert = user.id.takeIf { it != 0L } ?: nextId++
-            users[idToInsert] = user.copy(id = idToInsert)
-            return idToInsert
-        }
-
-        override suspend fun update(user: User) {
-            users[user.id] = user.copy()
-        }
-
-        override fun getAllUsersFlow(): Flow<List<User>> {
-            TODO("Not yet implemented")
-        }
-
-        override suspend fun getUser(id: Long): User? = users[id]
-        override suspend fun delete(user: User) {
-            users.remove(user.id)
-        }
-
-        override suspend fun getUserByName(name: String): User? =
-            users.values.find { it.name == name }
-
-        override suspend fun getUserFlow(id: Long): User? {
-            TODO("Not yet implemented")
-        }
-
-        override fun getAllUsers() = MutableStateFlow(users.values.toList()).asStateFlow()
-    }
 
     @Before
     fun setup() {

@@ -49,7 +49,8 @@ This document captures the remaining tasks and vision for the Pocitaj app. It se
     - **Risk**: Low. Involves moving/refactoring UI components.
 
 ## 📱 User Experience & Platform
-- **Enhanced Profile Editing**
+
+- **Enhanced Profile Editing** [DONE (partially)]
     - **Details**: Add more diverse and polished icons. Implement "Automatic Color Assignment" that picks an unused color from the palette for new users.
     - **Difficulty**: 3/10 (Low)
     - **Dependencies**: `UserProfileScreen.kt`, `UserAppearance.kt`.
@@ -64,3 +65,10 @@ This document captures the remaining tasks and vision for the Pocitaj app. It se
     - **Difficulty**: 2/10 (Low)
     - **Dependencies**: `Level.kt`, `Curriculum.kt`, image assets.
     - **Risk**: Low.
+
+## ✅ Completed (Recent)
+
+- **Automatic Profile Assignment**: Unique, randomized color and icon assignment for new users is
+  implemented and verified.
+- **Test Infrastructure Consolidation**: Core DAO fakes unified and moved to `debug` source set to
+  prevent production leakage.

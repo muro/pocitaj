@@ -64,21 +64,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.aidistillery.pocitaj.R
-import dev.aidistillery.pocitaj.data.DailyActivityCount
-import dev.aidistillery.pocitaj.data.ExerciseAttempt
 import dev.aidistillery.pocitaj.data.ExerciseAttemptDao
+import dev.aidistillery.pocitaj.data.FakeExerciseAttemptDao
+import dev.aidistillery.pocitaj.data.FakeUserDao
 import dev.aidistillery.pocitaj.data.User
 import dev.aidistillery.pocitaj.data.UserAppearance
-import dev.aidistillery.pocitaj.data.UserDao
 import dev.aidistillery.pocitaj.ui.theme.AppTheme
 import dev.aidistillery.pocitaj.ui.theme.motion
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.runBlocking
-import java.time.Instant
-import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -445,63 +439,7 @@ fun EditUserAppearanceDialog(
     )
 }
 
-class FakeUserDao : UserDao {
-    private val users = mutableMapOf<Long, User>()
-    private var nextId = 1L
-    override suspend fun insert(user: User): Long {
-        val idToInsert = user.id.takeIf { it != 0L } ?: nextId++
-        users[idToInsert] = user.copy(id = idToInsert)
-        return idToInsert
-    }
-
-    override suspend fun update(user: User) {
-        users[user.id] = user.copy()
-    }
-
-    override fun getAllUsersFlow() = MutableStateFlow(users.values.toList()).asStateFlow()
-
-    override suspend fun getUser(id: Long): User? = users[id]
-    override suspend fun delete(user: User) {
-        users.remove(user.id)
-    }
-
-    override suspend fun getUserByName(name: String): User? =
-        users.values.find { it.name == name }
-
-    override suspend fun getUserFlow(id: Long): User? = users[id]
-
-    override fun getAllUsers(): StateFlow<List<User>> = getAllUsersFlow()
-}
-
 // TODO: there are multiple FakeExerciseAttemptDao classes now - unify them.
-class FakeExerciseAttemptDao : ExerciseAttemptDao {
-    private val attempts = mutableListOf<ExerciseAttempt>()
-    override suspend fun insert(attempt: ExerciseAttempt) {
-        attempts.add(attempt)
-    }
-
-    override fun getAttemptsForDate(userId: Long, dateString: String): Flow<List<ExerciseAttempt>> {
-        return MutableStateFlow(attempts.filter {
-            it.userId == userId &&
-                    Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDate()
-                        .toString() == dateString
-        }).asStateFlow()
-    }
-
-    override fun getDailyActivityCounts(userId: Long): Flow<List<DailyActivityCount>> {
-        val counts = attempts.filter { it.userId == userId }
-            .groupBy {
-                Instant.ofEpochMilli(it.timestamp).atZone(ZoneId.systemDefault()).toLocalDate()
-                    .toString()
-            }
-            .map { DailyActivityCount(it.key, it.value.size) }
-        return MutableStateFlow(counts).asStateFlow()
-    }
-
-    override suspend fun getAttemptCountForUser(userId: Long): Int {
-        return attempts.count { it.userId == userId }
-    }
-}
 
 
 class FakeUserProfileViewModel(
