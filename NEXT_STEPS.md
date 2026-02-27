@@ -18,6 +18,13 @@ This document captures the remaining tasks and vision for the Pocitaj app. It se
     - **Difficulty**: 3/10 (Low, but depending on external data)
     - **Dependencies**: `ResultsScreen.kt`, `ConfettiAnimation.kt`, animation assets.
     - **Risk**: Low.
+- **Immersive Exercise UX**
+  - **Details**: Make the exercise screen much more animated and friendly. The drawing card should
+    animate from the missing part of the equation to its large input state, making it clear what is
+    being filled. Use more vibrant, inviting colors for the input area.
+  - **Difficulty**: 7/10 (Medium-High)
+  - **Dependencies**: `ExerciseScreen.kt`, `EquationDisplay.kt`, Shared Element-like transitions.
+  - **Risk**: Medium. Requires complex coordinated animations.
 
 ## 🏆 Gamification & Engagement
 - **Achievement System**
