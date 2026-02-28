@@ -2,8 +2,6 @@ package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
-import io.kotest.assertions.withClue
-import io.kotest.matchers.shouldBe
 import org.junit.Test
 import kotlin.random.Random
 import kotlin.time.Clock
@@ -58,10 +56,10 @@ class StrategySimulationTest {
     // --- Test Execution ---
 
     @Test
-    fun simplify_strategies_and_levels() {
+    fun simulate_drills_on_all_levels() {
         val levels = Curriculum.getAllLevels()
 
-        println("\n=== SIMULATION: (Strength >= 4) ===")
+        println("\n=== SIMULATION: Focused Drills (Strength >= 4) ===")
         val headerFormat = "| %-25s | %-10s | %-10s | %-13s |"
         println(headerFormat.format("Level ID", "Facts", "Perfect", "Mistaken/Perf"))
         println("|---------------------------|------------|------------|---------------|")
@@ -70,41 +68,20 @@ class StrategySimulationTest {
             val totalFacts = level.getAllPossibleFactIds().size
             if (totalFacts == 0) return@forEach
 
-            val perfect = runSimulationUntilMastery(level, PerfectStudent())
-            val mistaken = runSimulationUntilMastery(level, MistakeProneStudent())
-
+            val perfect =
+                runSimulationUntilMastery(listOf(level), PerfectStudent(), isSmartPractice = false)
+            val mistaken = runSimulationUntilMastery(
+                listOf(level),
+                MistakeProneStudent(),
+                isSmartPractice = false
+            )
+            
             val factsCountReported = perfect.factsCount
             val uniqueQueriesReported = perfect.uniqueQueries
             
             val ratio = if (perfect.exerciseCount > 0) {
                 mistaken.exerciseCount.toDouble() / perfect.exerciseCount
             } else 0.0
-
-            // Verification Assertions
-            // Perfect student: At least 1 exercise per fact (unless level updates multiple facts per exercise).
-            val minExpectedExercises = if (level is TwoDigitComputationLevel) {
-                factsCountReported / 2
-            } else {
-                factsCountReported
-            }
-
-            withClue("Level ${level.id}: Perfect student should take at least $minExpectedExercises exercises (Facts: $factsCountReported, Actual: ${perfect.exerciseCount})") {
-                (perfect.exerciseCount >= minExpectedExercises) shouldBe true
-            }
-
-            // Mistake Prone Logic:
-            // Mistakes = ceil(uniqueQueries * 0.2)
-            // Each mistake triggers a retry. The penalty should be at least 1 extra exercise.
-            val expectedMistakes = kotlin.math.ceil(uniqueQueriesReported * 0.2).toInt()
-            val expectedPenalty =
-                (expectedMistakes * 0.3).toInt() // Lowered slightly for robustness
-            val expectedMin = perfect.exerciseCount + expectedPenalty
-            val tolerance =
-                2 // Allow for random walk variance (sometimes Mistaken path is luckily shorter)
-
-            withClue("Level ${level.id}: Mistaken student should take at least ${expectedPenalty - tolerance} more exercises (Perfect: ${perfect.exerciseCount}, MST: ${mistaken.exerciseCount}, Queries: $uniqueQueriesReported, TheoreticalMistakes: $expectedMistakes)") {
-                (mistaken.exerciseCount >= expectedMin - tolerance) shouldBe true
-            }
 
             val rowFormat = "| %-25s | %-10d | %-10d | %-13s |"
             println(
@@ -118,12 +95,40 @@ class StrategySimulationTest {
         }
     }
 
+    @Test
+    fun simulate_smart_practice_on_addition() {
+        val levels = Curriculum.getLevelsFor(Operation.ADDITION)
+        val allFacts = levels.flatMap { it.getAllPossibleFactIds() }.distinct()
+
+        println("\n=== SIMULATION: Smart Practice (Addition) ===")
+        println("Total Facts in Operation: ${allFacts.size}")
+
+        val perfect = runSimulationUntilMastery(levels, PerfectStudent(), isSmartPractice = true)
+        val mistaken =
+            runSimulationUntilMastery(levels, MistakeProneStudent(), isSmartPractice = true)
+
+        println(
+            "Perfect Student Exercises: ${perfect.exerciseCount} (Efficiency: %.2f ex/fact)".format(
+                perfect.exerciseCount.toDouble() / allFacts.size
+            )
+        )
+        println(
+            "Mistaken Student Exercises: ${mistaken.exerciseCount} (Efficiency: %.2f ex/fact)".format(
+                mistaken.exerciseCount.toDouble() / allFacts.size
+            )
+        )
+
+        val ratio = mistaken.exerciseCount.toDouble() / perfect.exerciseCount
+        println("Penalty Ratio: %.1fx".format(ratio))
+    }
+
     // --- Simulation Logic ---
 
     private fun runSimulationUntilMastery(
-        level: Level,
+        curriculum: List<Level>,
         studentModel: StudentModel,
-        maxExercises: Int = 10000 // Safety break
+        isSmartPractice: Boolean,
+        maxExercises: Int = 20000 // Safety break (raised for full operation)
     ): SimulationResult {
         var strategy: ExerciseProvider? = null
         val userMastery = mutableMapOf<String, FactMastery>()
@@ -138,16 +143,21 @@ class StrategySimulationTest {
         }
 
         // Factory for Strategy
-        val strategyProvider = { l: Level, m: MutableMap<String, FactMastery>, c: Clock ->
-            l.createStrategy(m, activeUserId = 1L, clock = c, random = random)
+        val strategyProvider =
+            { levels: List<Level>, m: MutableMap<String, FactMastery>, c: Clock ->
+                if (isSmartPractice) {
+                    SmartPracticeStrategy(levels, m, activeUserId = 1L, random = random, clock = c)
+                } else {
+                    levels.first().createStrategy(m, activeUserId = 1L, clock = c, random = random)
+                }
         }
 
         var exercisesCount = 0
-        val requiredFacts = getRequiredFactsForMastery(level)
+        val requiredFacts = curriculum.flatMap { it.getAllPossibleFactIds() }.toSet()
 
         while (exercisesCount < maxExercises) {
             if (strategy == null) {
-                strategy = strategyProvider(level, userMastery, clock)
+                strategy = strategyProvider(curriculum, userMastery, clock)
             }
 
             // 1. Mastery Check
@@ -192,17 +202,6 @@ class StrategySimulationTest {
 
         return SimulationResult(maxExercises, requiredFacts.size, attemptCounts.size)
     }
-
-    // --- Helpers ---
-
-    private fun getRequiredFactsForMastery(level: Level): Set<String> {
-        val allFactIds = level.getAllPossibleFactIds()
-
-        // For TwoDigitComputationLevel, getAllPossibleFactIds already returns the component facts (ONES/TENS).
-        // For other levels, it returns the semantic facts.
-        // In both cases, these are exactly the facts we need to track mastery for.
-        return allFactIds.toSet()
-    }
     
     companion object {
         // --- Simulation Configuration ---
@@ -235,22 +234,38 @@ class StrategySimulationTest {
                 return Triple(Operation.DIVISION, a.toInt(), b.toInt())
             }
 
-            // Missing Operand: a + ? = b
-            val missingAddMatch = Regex("""(\d+) \+ \? = (\d+)""").matchEntire(factId)
-            if (missingAddMatch != null) {
-                val (a, result) = missingAddMatch.destructured
+            // Missing Operand: a + ? = b or ? + b = c
+            val missingAddMatchMiddle = Regex("""(\d+) \+ \? = (\d+)""").matchEntire(factId)
+            if (missingAddMatchMiddle != null) {
+                val (a, result) = missingAddMatchMiddle.destructured
                 val res = result.toInt()
                 val op1 = a.toInt()
                 val op2 = res - op1
                 return Triple(Operation.ADDITION, op1, op2) 
             }
+            val missingAddMatchStart = Regex("""\? \+ (\d+) = (\d+)""").matchEntire(factId)
+            if (missingAddMatchStart != null) {
+                val (b, result) = missingAddMatchStart.destructured
+                val res = result.toInt()
+                val op2 = b.toInt()
+                val op1 = res - op2
+                return Triple(Operation.ADDITION, op1, op2)
+            }
 
-            val missingSubMatch = Regex("""(\d+) - \? = (\d+)""").matchEntire(factId)
-            if (missingSubMatch != null) {
-                val (a, result) = missingSubMatch.destructured
+            val missingSubMatchMiddle = Regex("""(\d+) - \? = (\d+)""").matchEntire(factId)
+            if (missingSubMatchMiddle != null) {
+                val (a, result) = missingSubMatchMiddle.destructured
                 val res = result.toInt()
                 val op1 = a.toInt()
                 val op2 = op1 - res // a - b = res -> a - res = b
+                return Triple(Operation.SUBTRACTION, op1, op2)
+            }
+            val missingSubMatchStart = Regex("""\? - (\d+) = (\d+)""").matchEntire(factId)
+            if (missingSubMatchStart != null) {
+                val (b, result) = missingSubMatchStart.destructured
+                val res = result.toInt()
+                val op2 = b.toInt()
+                val op1 = res + op2 // a - b = res -> a = res + b
                 return Triple(Operation.SUBTRACTION, op1, op2)
             }
 

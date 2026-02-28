@@ -120,7 +120,7 @@ class SmartPracticeStrategy(
         return primaryResult to level.id
     }
 
-    private fun calculateMasteryUpdate(
+    internal fun calculateMasteryUpdate(
         currentMastery: FactMastery,
         wasCorrect: Boolean,
         durationMs: Long,
