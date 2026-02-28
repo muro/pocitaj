@@ -167,7 +167,7 @@ class SmartPracticeStrategy(
     private fun findWeakestFactIn(level: Level): String {
         val allFactsInLevel = level.getAllPossibleFactIds()
         val unmasteredFacts =
-            allFactsInLevel.filter { (userMastery[it]?.strength ?: 0) < MASTERY_STRENGTH }
+            allFactsInLevel.filter { (userMastery[it]?.strength ?: 0) < MASTERY_STRENGTH - 1 }
 
         val workingSet = if (unmasteredFacts.size < WORKING_SET_SIZE) {
             val newFactsNeeded = WORKING_SET_SIZE - unmasteredFacts.size
@@ -221,7 +221,7 @@ class SmartPracticeStrategy(
         if (allFactsInLevel.isEmpty()) return true
 
         return allFactsInLevel.all { factId ->
-            (userMastery[factId]?.strength ?: 0) >= MASTERY_STRENGTH
+            (userMastery[factId]?.strength ?: 0) >= MASTERY_STRENGTH - 1
         }
     }
 
