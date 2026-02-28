@@ -2,8 +2,11 @@ package dev.aidistillery.pocitaj.logic
 
 import dev.aidistillery.pocitaj.data.FactMastery
 import dev.aidistillery.pocitaj.data.Operation
+import io.kotest.matchers.doubles.shouldBeLessThan
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
+import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import org.junit.Test
 import kotlin.random.Random
 import kotlin.time.Clock
@@ -18,7 +21,20 @@ import kotlin.time.Instant
  */
 class StrategySimulationTest {
 
-    data class SimulationResult(val exerciseCount: Int, val factsCount: Int, val uniqueQueries: Int)
+    data class DistributionAudit(
+        val stdDev: Double,
+        val maxSequentialReps: Int,
+        val gapAverage: Double,
+        val minAttempts: Int,
+        val maxAttempts: Int
+    )
+
+    data class SimulationResult(
+        val exerciseCount: Int,
+        val factsCount: Int,
+        val uniqueQueries: Int,
+        val distribution: DistributionAudit? = null
+    )
 
     // --- Student Persona Modeling ---
 
@@ -97,6 +113,23 @@ class StrategySimulationTest {
      */
     class MidWayStudent : StudentModel {
         override fun getSuccessProbability(factId: String) = 0.95
+        override fun getAttemptDuration(factId: String) = 1500L
+    }
+
+    /**
+     * Persona 6: Kryptonite Student
+     * Perfect on everything EXCEPT one specific fact which they fail 3 times.
+     */
+    class KryptoniteStudent(private val targetFactId: String) : StudentModel {
+        private var failureCount = 0
+        override fun getSuccessProbability(factId: String): Double {
+            if (factId == targetFactId && failureCount < 3) {
+                failureCount++
+                return 0.0
+            }
+            return 1.0
+        }
+
         override fun getAttemptDuration(factId: String) = 1500L
     }
 
@@ -199,6 +232,44 @@ class StrategySimulationTest {
     }
 
     @Test
+    fun simulate_variety_and_enforcement() {
+        // Use a small level to easily see the distribution (Addition sums up to 5)
+        val level = Curriculum.getLevelsFor(Operation.ADDITION).first { it.id == "ADD_SUM_5" }
+        val allFacts = level.getAllPossibleFactIds()
+        
+        println("\n=== VARIETY & ENFORCEMENT AUDIT: Small Level (${level.id}) ===")
+        
+        // 1. Variety Check (Perfect Student)
+        val perfect = runSimulationUntilMastery(listOf(level), PerfectStudent(), isSmartPractice = false)
+        println("Perfect Student Stats:")
+        println("  Max Sequential Reps: ${perfect.distribution?.maxSequentialReps}")
+        println("  StdDev of Attempts: %.2f".format(perfect.distribution?.stdDev))
+        
+        // Assertions for "Feel"
+        perfect.distribution!!.maxSequentialReps shouldBe 1 // With working set > 1, no repeats should happen
+        // StdDev 0.46 means most facts had X attempts, some X+1. This is good variety for biased-random.
+        perfect.distribution.stdDev shouldBeLessThan 1.0 
+        (perfect.distribution.maxAttempts - perfect.distribution.minAttempts) shouldBeLessThanOrEqual 2
+        
+        // 2. Enforcement Check (Kryptonite Student)
+        val kryptoniteId = allFacts.first()
+        println("\nTesting enforcement on: $kryptoniteId")
+        val kryptoniteResult = runSimulationUntilMastery(
+            listOf(level), 
+            KryptoniteStudent(kryptoniteId), 
+            isSmartPractice = false
+        )
+        
+        println("Kryptonite Student Stats:")
+        println("  Total Exercises: ${kryptoniteResult.exerciseCount}")
+        
+        withClue("Enforcement check: Kryptonite student should take between 3 and 10 extra exercises") {
+            kryptoniteResult.exerciseCount shouldBeGreaterThanOrEqual (perfect.exerciseCount + 3)
+            kryptoniteResult.exerciseCount shouldBeLessThanOrEqual (perfect.exerciseCount + 10)
+        }
+    }
+
+    @Test
     fun simulate_adaptability_pure_beginner() {
         val levels = Curriculum.getLevelsFor(Operation.ADDITION)
         
@@ -254,8 +325,9 @@ class StrategySimulationTest {
         val userMastery = initialMastery.toMutableMap()
         val attemptCounts = mutableMapOf<String, Int>()
         
-        // Fixed Seed Random for Reproducibility
-        val random = Random(12345)
+        // Fixed seeds for Reproducibility
+        val strategyRandom = Random(12345)
+        val studentRandom = Random(54321)
 
         // Dummy clock
         val clock = object : Clock {
@@ -266,14 +338,15 @@ class StrategySimulationTest {
         val strategyProvider =
             { levels: List<Level>, m: MutableMap<String, FactMastery>, c: Clock ->
                 if (isSmartPractice) {
-                    SmartPracticeStrategy(levels, m, activeUserId = 1L, random = random, clock = c)
+                    SmartPracticeStrategy(levels, m, activeUserId = 1L, random = strategyRandom, clock = c)
                 } else {
-                    levels.first().createStrategy(m, activeUserId = 1L, clock = c, random = random)
+                    levels.first().createStrategy(m, activeUserId = 1L, clock = c, random = strategyRandom)
                 }
         }
 
         var exercisesCount = 0
         val requiredFacts = curriculum.flatMap { it.getAllPossibleFactIds() }.toSet()
+        val encounterSequence = mutableListOf<String>()
 
         while (exercisesCount < maxExercises) {
             if (strategy == null) {
@@ -284,18 +357,10 @@ class StrategySimulationTest {
             val allMastered = requiredFacts.all { factId ->
                 (userMastery[factId]?.strength ?: 0) >= MASTERY_STRENGTH
             }
-            if (allMastered) return SimulationResult(
-                exercisesCount,
-                requiredFacts.size,
-                attemptCounts.size
-            )
+            if (allMastered) break
 
             // 2. Get Next Exercise
-            val exercise = strategy.getNextExercise() ?: return SimulationResult(
-                exercisesCount,
-                requiredFacts.size,
-                attemptCounts.size
-            )
+            val exercise = strategy.getNextExercise() ?: break
 
             exercisesCount++
             val factId = exercise.getFactId()
@@ -303,11 +368,7 @@ class StrategySimulationTest {
 
             // 3. Simulate Student Attempt
             val probability = studentModel.getSuccessProbability(factId)
-            // Use local random for student simulation too, or passed random? 
-            // Student models are currently deterministic in this test (Perfect=1.0, Mistaken=Modulo).
-            // But if we had stochastic students, we should pass `random` to them too.
-            // For now, these are deterministic.
-            val wasCorrect = Random.nextDouble() < probability
+            val wasCorrect = studentRandom.nextDouble() < probability
             val duration = studentModel.getAttemptDuration(factId)
 
             exercise.timeTakenMillis = duration.toInt()
@@ -318,13 +379,64 @@ class StrategySimulationTest {
 
             // 4. Record Result
             strategy.recordAttempt(exercise, wasCorrect)
+            encounterSequence.add(factId)
         }
 
-        return SimulationResult(maxExercises, requiredFacts.size, attemptCounts.size)
+        // --- Post Simulation Metrics ---
+        val distributionAudit = calculateDistributionAudit(attemptCounts, encounterSequence)
+
+        return SimulationResult(
+            exercisesCount,
+            requiredFacts.size,
+            attemptCounts.size,
+            distributionAudit
+        )
+    }
+
+    private fun calculateDistributionAudit(
+        attemptCounts: Map<String, Int>,
+        encounterSequence: List<String>
+    ): DistributionAudit {
+        val counts = attemptCounts.values.map { it.toDouble() }
+        val avg = if (counts.isNotEmpty()) counts.average() else 0.0
+        val variance = if (counts.size > 1) {
+            counts.sumOf { (it - avg) * (it - avg) } / (counts.size - 1)
+        } else 0.0
+        val stdDev = Math.sqrt(variance)
+
+        var maxSequential = 0
+        var currentSequential = 0
+        var lastFact = ""
+        encounterSequence.forEach { f ->
+            if (f == lastFact) {
+                currentSequential++
+            } else {
+                currentSequential = 1
+                lastFact = f
+            }
+            maxSequential = Math.max(maxSequential, currentSequential)
+        }
+
+        val totalGap = encounterSequence.withIndex().groupBy { it.value }
+            .mapValues { (_, indices) ->
+                indices.map { it.index }.zipWithNext { a, b -> b - a }
+            }
+            .values.flatten()
+        val gapAvg = if (totalGap.isNotEmpty()) totalGap.average() else 0.0
+
+        return DistributionAudit(
+            stdDev, 
+            maxSequential, 
+            gapAvg,
+            attemptCounts.values.minOrNull() ?: 0,
+            attemptCounts.values.maxOrNull() ?: 0
+        )
     }
     
     companion object {
         // --- Simulation Configuration ---
+        // Strategy uses REPLACEABLE_MASTERY = 4 to swap facts out of working set.
+        // We align simulation to match this transition.
         private const val MASTERY_STRENGTH = 4
         private const val PERFECT_SPEED_MS = 500L
 
