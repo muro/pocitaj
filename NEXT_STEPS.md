@@ -45,7 +45,7 @@ This document captures the remaining tasks and vision for the Pocitaj app. It se
 
 ## 📚 Curriculum & Logic
 - **Operand Expansion**
-    - **Details**: Add missing pedagogical levels. E.g., Subtraction with borrowing, Multiplication tables 11 & 12 (if missing), Division with remainders basics.
+  - **Details**: Add missing pedagogical levels. E.g., Subtraction with borrowing.
     - **Difficulty**: 2/10 (Low)
     - **Dependencies**: `Curriculum.kt`, `Level.kt`.
     - **Risk**: Low. Pure logic additions.
