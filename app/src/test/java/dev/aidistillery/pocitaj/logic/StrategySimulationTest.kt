@@ -7,6 +7,7 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.ints.shouldBeLessThanOrEqual
+import io.kotest.matchers.ints.shouldBeLessThan as shouldBeLessThanInt
 import org.junit.Test
 import kotlin.random.Random
 import kotlin.time.Clock
@@ -133,6 +134,21 @@ class StrategySimulationTest {
         override fun getAttemptDuration(factId: String) = 1500L
     }
 
+    /**
+     * Persona 7: Adaptive Beginner
+     * Starts slow but gets faster by 100ms every 5 attempts.
+     */
+    class AdaptiveBeginner : StudentModel {
+        private val attempts = mutableMapOf<String, Int>()
+        override fun getSuccessProbability(factId: String) = 0.95
+        override fun getAttemptDuration(factId: String): Long {
+            val count = attempts[factId] ?: 0
+            attempts[factId] = count + 1
+            val speedGain = (count / 5) * 200L
+            return (2400L - speedGain).coerceAtLeast(800L)
+        }
+    }
+
     // --- Test Execution ---
 
     @Test
@@ -229,6 +245,13 @@ class StrategySimulationTest {
 
         val ratio = mistaken.exerciseCount.toDouble() / perfect.exerciseCount
         println("Penalty Ratio: %.1fx".format(ratio))
+
+        withClue("Expert Efficiency Guard: Perfect student should be highly efficient in multi-level practice (~2 sightings per fact)") {
+            (perfect.exerciseCount.toDouble() / allFacts.size) shouldBeLessThan 2.5
+        }
+        withClue("Recovery Efficiency Guard: Mistake prone student should not be excessively penalized (~3-4 sightings per fact)") {
+            (mistaken.exerciseCount.toDouble() / allFacts.size) shouldBeLessThan 4.0
+        }
     }
 
     @Test
@@ -272,28 +295,26 @@ class StrategySimulationTest {
     @Test
     fun simulate_adaptability_pure_beginner() {
         val levels = Curriculum.getLevelsFor(Operation.ADDITION)
+        val allFacts = levels.flatMap { it.getAllPossibleFactIds() }.distinct()
         
-        println("\n=== ADAPTABILITY REPORT: Pure Beginner (Cold Start) ===")
-        // Using 2400ms to allow them to barely pass Bronze thresholds (2500ms)
-        // and progress, otherwise they get stuck at Strength 2.
-        val beginner = object : StudentModel by PureBeginnerStudent() {
-            override fun getAttemptDuration(factId: String) = 2400L 
-        }
+        println("\n=== ADAPTABILITY REPORT: Adaptive Beginner (Learning Curve) ===")
+        val beginner = AdaptiveBeginner()
 
         val result = runSimulationUntilMastery(
             levels,
             beginner,
             isSmartPractice = true,
-            maxExercises = 1000 // Limit for readability
+            maxExercises = 15000 // Slow students need more time to hit Gold thresholds
         )
         
         println("Exercises Run: ${result.exerciseCount}")
         println("Unique Facts Encountered: ${result.uniqueQueries}")
         
-        if (result.exerciseCount >= 1000) {
-            println("Status: STRUGGLING (Did not complete operation within 1000 exercises)")
-        } else {
-            println("Status: COMPLETED")
+        withClue("Adaptability Guard: Adaptive Beginner should eventually complete the operation as they get faster") {
+            result.exerciseCount shouldBeLessThanInt 15000
+        }
+        withClue("Foundation Guard: Progress should be measured and steady") {
+            result.uniqueQueries shouldBe (allFacts.size)
         }
     }
 
