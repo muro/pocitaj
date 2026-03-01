@@ -37,7 +37,7 @@ class SmartPracticeStrategyTest {
     fun `isLevelMastered returns false when a fact is not at mastery strength`() {
         val userMastery = mutableMapOf(
             "ADD_1_1" to FactMastery("ADD_1_1", 1, "", 5, 0),
-            "ADD_1_2" to FactMastery("ADD_1_2", 1, "", 4, 0) // Not mastered
+            "ADD_1_2" to FactMastery("ADD_1_2", 1, "", 3, 0) // Not mastered (threshold is 4)
         )
         val strategy = SmartPracticeStrategy(listOf(level1), userMastery, 1L)
         strategy.isLevelMastered(level1).shouldBeFalse()
@@ -81,7 +81,7 @@ class SmartPracticeStrategyTest {
         }
         val userMastery = mutableMapOf(
             "ADD_1_1" to FactMastery("ADD_1_1", 1, "", 5, 0),
-            "ADD_1_2" to FactMastery("ADD_1_2", 1, "", 4, 0) // Not mastered
+            "ADD_1_2" to FactMastery("ADD_1_2", 1, "", 3, 0) // Not mastered (threshold is 4)
         )
         val strategy = SmartPracticeStrategy(listOf(level1, level2), userMastery, 1L)
         strategy.isLevelUnlocked(level2).shouldBeFalse()

@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.ints.shouldBeLessThan as shouldBeLessThanInt
+import io.kotest.matchers.booleans.shouldBeTrue
 import org.junit.Test
 import kotlin.random.Random
 import kotlin.time.Clock
@@ -331,6 +332,73 @@ class StrategySimulationTest {
         }
         
         verifyAdaptabilityPersona("Mid-Way Student", MidWayStudent(), maxExpected = 10000, initialHistory = history)
+    }
+
+    @Test
+    fun simulate_smart_practice_steady_state() {
+        // 1. Setup: Master initial levels 0-7 of Addition
+        val additionLevels = Curriculum.getLevelsFor(Operation.ADDITION)
+        val initialMasterLevels = additionLevels.take(8)
+        
+        val userMastery = initialMasterLevels.flatMap { it.getAllPossibleFactIds() }.associateWith {
+            FactMastery(it, 1L, "LEVEL_ID", 5, 0L, avgDurationMs = 1000L)
+        }.toMutableMap()
+        
+        val strategy = SmartPracticeStrategy(additionLevels, userMastery, activeUserId = 1L, random = Random(42))
+        
+        // 2. Run simulation and track distribution dynamically
+        var frontierHits = 0
+        var reviewHits = 0
+        val totalExercises = 100
+        
+        // We'll also track multi-fact updates
+        var maxAffectedFactsSeen = 0
+
+        repeat(totalExercises) {
+            // Determine the FIRST unmastered level as the current frontier
+            val frontierLevel = additionLevels.firstOrNull { level ->
+                level.getAllPossibleFactIds().any { (userMastery[it]?.strength ?: 0) < 4 }
+            } ?: additionLevels.last()
+            
+            val exercise = strategy.getNextExercise()
+            val factId = exercise.getFactId()
+            
+            val isFrontierHit = frontierLevel.getAllPossibleFactIds().contains(factId)
+            if (isFrontierHit) frontierHits++ else reviewHits++
+            
+            // For multi-fact verification: get affected IDs manually for the exercise
+            val level = additionLevels.find { it.id == "ADD_TWO_DIGIT_NO_CARRY" }
+            if (level != null && level.recognizes(exercise.equation)) {
+                maxAffectedFactsSeen = maxOf(maxAffectedFactsSeen, level.getAffectedFactIds(exercise).size)
+            }
+
+            strategy.recordAttempt(exercise.apply { 
+                timeTakenMillis = 500
+                speedBadge = SpeedBadge.GOLD 
+            }, wasCorrect = true)
+        }
+        
+        println("Steady State Distribution ($totalExercises ex):")
+        println("Frontier Hits: $frontierHits (${(frontierHits * 100 / totalExercises)}%)")
+        println("Review Hits: $reviewHits (${(reviewHits * 100 / totalExercises)}%)")
+        println("Max Affected Facts in one answer (2-digit): $maxAffectedFactsSeen")
+        
+        withClue("Steady State: Should mostly focus on Frontier (Expected ~80%, Actual: $frontierHits)") {
+            val ratio = frontierHits.toDouble() / totalExercises
+            (ratio >= 0.6 && ratio <= 0.98).shouldBeTrue()
+        }
+        
+        withClue("Steady State: Should occasionally review Mastered (Expected ~20%, Actual: $reviewHits)") {
+            val ratio = reviewHits.toDouble() / totalExercises
+            (ratio >= 0.02 && ratio <= 0.4).shouldBeTrue()
+        }
+
+        withClue("Multi-Fact Updates: A 2-digit exercise should update composite and component facts (Affected count should be >= 2)") {
+            // 2-digit addition updates: Full + components. 
+            // e.g. 12+13 -> 12+13, 2+3, 10+10 (3 facts)
+            // e.g. 10+20 -> 10+20, 0+0 (2 facts as 10+20 is both composite and tens)
+            (maxAffectedFactsSeen >= 2).shouldBeTrue()
+        }
     }
 
     private fun verifyAdaptabilityPersona(
