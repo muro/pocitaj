@@ -58,12 +58,18 @@ class SmartPracticeStrategy(
     private val userMastery: MutableMap<String, FactMastery>,
     private val activeUserId: Long,
     private val random: Random = Random.Default,
-    private val clock: Clock = Clock.System
+    private val clock: Clock = Clock.System,
+    private val learningExerciseProbability: Float = LEARNING_EXERCISE_PROBABILITY,
+    private val workingSetSize: Int = WORKING_SET_SIZE
 ) : ExerciseProvider {
+
+    var lastDecisionReason: String = ""
+        private set
+
     companion object {
-        private const val MASTERY_STRENGTH = 5
-        private const val LEARNING_EXERCISE_PROBABILITY = 0.8f
-        private const val WORKING_SET_SIZE = 5
+        const val MASTERY_STRENGTH = 5
+        const val LEARNING_EXERCISE_PROBABILITY = 0.8f
+        const val WORKING_SET_SIZE = 5
     }
 
     init {
@@ -77,15 +83,16 @@ class SmartPracticeStrategy(
         val currentLevel = findCurrentLevel()
         val masteredLevels = getMasteredLevels(currentLevel)
 
-        // This is the core of the smart practice logic. It ensures that the user spends most of their
-        // time on new material, but also periodically reviews older concepts to prevent forgetting.
-        val isLearningExercise =
-            masteredLevels.isEmpty() || random.nextFloat() < LEARNING_EXERCISE_PROBABILITY
+        // Logic Outcome (Ladder of Abstraction: Concrete Base)
+        val isLearningExercise = masteredLevels.isEmpty() || random.nextFloat() < learningExerciseProbability
 
         val levelToPractice = if (isLearningExercise) {
+            lastDecisionReason = "Learning (Frontier: ${currentLevel.id})"
             currentLevel
         } else {
-            masteredLevels.random(random)
+            val reviewLevel = masteredLevels.random(random)
+            lastDecisionReason = "Review (${reviewLevel.id})"
+            reviewLevel
         }
 
         val factId = findWeakestFactIn(levelToPractice)
@@ -169,8 +176,8 @@ class SmartPracticeStrategy(
         val unmasteredFacts =
             allFactsInLevel.filter { (userMastery[it]?.strength ?: 0) < MASTERY_STRENGTH - 1 }
 
-        val workingSet = if (unmasteredFacts.size < WORKING_SET_SIZE) {
-            val newFactsNeeded = WORKING_SET_SIZE - unmasteredFacts.size
+        val workingSet = if (unmasteredFacts.size < workingSetSize) {
+            val newFactsNeeded = workingSetSize - unmasteredFacts.size
             val unseenFacts = allFactsInLevel.filter { !userMastery.containsKey(it) }
             unmasteredFacts + unseenFacts.shuffled(random).take(newFactsNeeded)
         } else {
@@ -181,7 +188,7 @@ class SmartPracticeStrategy(
                     { getFirstOperand(it) },
                     { getSecondOperand(it) }
                 )
-            ).take(WORKING_SET_SIZE)
+            ).take(workingSetSize)
         }
 
         return if (workingSet.isNotEmpty()) {

@@ -35,8 +35,79 @@ class StrategySimulationTest {
         val exerciseCount: Int,
         val factsCount: Int,
         val uniqueQueries: Int,
-        val distribution: DistributionAudit? = null
+        val distribution: DistributionAudit? = null,
+        val masteryTrend: List<Int> = emptyList() // % of facts mastered over time
     )
+
+    @Test
+    fun simulate_ladder_of_abstraction() {
+        val levels = Curriculum.getLevelsFor(Operation.ADDITION)
+        val student = PureBeginnerStudent()
+
+        println("\n=== LADDER OF ABSTRACTION (Learning Behavior Audit) ===")
+        
+        // Level 1 & 2: Base Logic (Decision Tracing)
+        println(">> LEVEL 1: Decision Trace (Sampling first 20 & periodically)")
+        val result = runSimulationUntilMastery(
+            levels, 
+            student, 
+            isSmartPractice = true, 
+            verbose = true, 
+            maxExercises = 1000 // Limit for audit clarity
+        )
+
+        // Level 3: Aggregate Trends (Mastery Curve)
+        println("\n>> LEVEL 3: Mastery Growth Curve (% Mastered every 50 exercises)")
+        val curve = result.masteryTrend.joinToString(" -> ") { "$it%" }
+        println(curve)
+
+        withClue("Mastery Curve: Should show upward trend") {
+            result.masteryTrend.first() shouldBeLessThanInt result.masteryTrend.last()
+        }
+    }
+
+    @Test
+    fun verify_working_set_impact_on_variety() {
+        val levels = Curriculum.getLevelsFor(Operation.ADDITION)
+        val level = levels.first { it.id == "ADD_SUM_5" } // Small level for high density
+        val student = PerfectStudent()
+        
+        println("\n=== VARIETY AUDIT: Working Set Impact ===")
+        
+        listOf(1, 3, 5, 8).forEach { size ->
+            val strategyRandom = Random(42)
+            val strategy = SmartPracticeStrategy(levels, mutableMapOf(), 1L, random = strategyRandom, workingSetSize = size)
+            
+            val sequence = mutableListOf<String>()
+            repeat(50) {
+                val exercise = strategy.getNextExercise() ?: return@repeat
+                sequence.add(exercise.getFactId())
+                strategy.recordAttempt(exercise, true)
+            }
+            
+            val maxReps = calculateMaxSequential(sequence)
+            val uniqueIn50 = sequence.distinct().size
+            println("Size %d | Max Reps: %d | Unique in 50: %d".format(size, maxReps, uniqueIn50))
+            
+            if (size > 1) {
+                // With pure random selection from a small set, 3 in a row is statistically possible.
+                // We just want to ensure it's not "stuck" (e.g. 5+ reps)
+                maxReps shouldBeLessThanInt 5
+            }
+        }
+    }
+
+    private fun calculateMaxSequential(sequence: List<String>): Int {
+        if (sequence.isEmpty()) return 0
+        var max = 0
+        var current = 0
+        var last = ""
+        sequence.forEach { 
+            if (it == last) current++ else { current = 1; last = it }
+            max = maxOf(max, current)
+        }
+        return max
+    }
 
     // --- Student Persona Modeling ---
 
@@ -571,7 +642,8 @@ class StrategySimulationTest {
         studentModel: StudentModel,
         isSmartPractice: Boolean,
         initialMastery: Map<String, FactMastery> = emptyMap(),
-        maxExercises: Int = 20000 // Safety break (raised for full operation)
+        maxExercises: Int = 20000,
+        verbose: Boolean = false
     ): SimulationResult {
         var strategy: ExerciseProvider? = null
         val userMastery = initialMastery.toMutableMap()
@@ -599,6 +671,7 @@ class StrategySimulationTest {
         var exercisesCount = 0
         val requiredFacts = curriculum.flatMap { it.getAllPossibleFactIds() }.toSet()
         val encounterSequence = mutableListOf<String>()
+        val masteryTrend = mutableListOf<Int>()
 
         while (exercisesCount < maxExercises) {
             if (strategy == null) {
@@ -614,7 +687,12 @@ class StrategySimulationTest {
             if (allConsolidating) break
 
             // 2. Get Next Exercise
-            val exercise = strategy.getNextExercise() ?: break
+            val exercise = strategy!!.getNextExercise() ?: break
+            val reason = (strategy as? SmartPracticeStrategy)?.lastDecisionReason ?: "Standard"
+
+            if (verbose && (exercisesCount < 20 || exercisesCount % 50 == 0)) {
+                println("  Ex #%-4d: %-20s | Reason: %s".format(exercisesCount + 1, exercise.getFactId(), reason))
+            }
 
             exercisesCount++
             val factId = exercise.getFactId()
@@ -632,8 +710,14 @@ class StrategySimulationTest {
             exercise.speedBadge = getSpeedBadge(op, op1, op2, duration)
 
             // 4. Record Result
-            strategy.recordAttempt(exercise, wasCorrect)
+            strategy!!.recordAttempt(exercise, wasCorrect)
             encounterSequence.add(factId)
+
+            // 5. Mastery Snapshot (Aggregate Level)
+            if (exercisesCount % 50 == 0 || allConsolidating) {
+                val masteredCount = requiredFacts.count { (userMastery[it]?.strength ?: 0) >= MASTERY_STRENGTH - 1 }
+                masteryTrend.add((masteredCount * 100) / requiredFacts.size.coerceAtLeast(1))
+            }
         }
 
         // --- Post Simulation Metrics ---
@@ -643,7 +727,8 @@ class StrategySimulationTest {
             exercisesCount,
             requiredFacts.size,
             attemptCounts.size,
-            distributionAudit
+            distributionAudit,
+            masteryTrend
         )
     }
 
