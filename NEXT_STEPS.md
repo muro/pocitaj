@@ -54,6 +54,11 @@ This document captures the remaining tasks and vision for the Pocitaj app. It se
     - **Difficulty**: 4/10 (Medium)
     - **Dependencies**: `ProgressReportScreen.kt`, `ExerciseSetupScreen.kt`.
     - **Risk**: Low. Involves moving/refactoring UI components.
+- **Tighten Simulation Velocity Guards**
+    - **Details**: Our current simulations use very generous `maxExpected` limits (e.g., 20,000 exercises). Based on gathered data (Pure Beginner completes Addition in ~580 exercises, Adaptive in ~1800), we should tighten these guards to catch regressions that bloat the learning experience.
+    - **Difficulty**: 2/10 (Low)
+    - **Dependencies**: `StrategySimulationTest.kt`.
+    - **Risk**: Low.
 
 ## 📱 User Experience & Platform
 
