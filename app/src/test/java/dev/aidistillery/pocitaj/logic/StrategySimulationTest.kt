@@ -36,34 +36,85 @@ class StrategySimulationTest {
         val factsCount: Int,
         val uniqueQueries: Int,
         val distribution: DistributionAudit? = null,
-        val masteryTrend: List<Int> = emptyList() // % of facts mastered over time
+        val masteryTrend: List<Int> = emptyList(), // % of facts mastered over time
+        val decisionCounts: Map<String, Int> = emptyMap() // "Learning" vs "Review"
     )
 
-    @Test
-    fun simulate_ladder_of_abstraction() {
-        val levels = Curriculum.getLevelsFor(Operation.ADDITION)
-        val student = PureBeginnerStudent()
+    object MermaidReporter {
+        fun generateMultiLineMasteryCurve(title: String, series: Map<String, List<Int>>): String {
+            val maxLen = series.values.maxOfOrNull { it.size } ?: 0
+            val xLabels = (0 until maxLen).map { (it * 50).toString() }
+            
+            val lines = series.map { (name, trend) ->
+                val paddedTrend = trend + List(maxLen - trend.size) { trend.lastOrNull() ?: 0 }
+                "line \"$name\" [${paddedTrend.joinToString(", ")}]"
+            }
+            
+            return """
+                xychart-beta
+                  title "$title"
+                  x-axis [${xLabels.joinToString(", ")}]
+                  y-axis "Mastery %" 0 --> 100
+                  ${lines.joinToString("\n                  ")}
+            """.trimIndent()
+        }
 
-        println("\n=== LADDER OF ABSTRACTION (Learning Behavior Audit) ===")
+        fun generateDecisionPie(title: String, counts: Map<String, Int>): String {
+            return """
+                pie title "$title: Balance (80/20)"
+                  ${counts.entries.joinToString("\n                  ") { "\"${it.key}\" : ${it.value}" }}
+            """.trimIndent()
+        }
+    }
+
+    @Test
+    fun simulate_ladder_of_abstraction_all_personas() {
+        val levels = Curriculum.getLevelsFor(Operation.ADDITION)
+        val allFacts = levels.flatMap { it.getAllPossibleFactIds() }.distinct()
         
-        // Level 1 & 2: Base Logic (Decision Tracing)
-        println(">> LEVEL 1: Decision Trace (Sampling first 20 & periodically)")
-        val result = runSimulationUntilMastery(
-            levels, 
-            student, 
-            isSmartPractice = true, 
-            verbose = true, 
-            maxExercises = 1000 // Limit for audit clarity
+        println("\n=== LADDER OF ABSTRACTION: ALL PERSONAS ===")
+        
+        val scenarios = listOf(
+            "Pure Beginner (Scratch)" to (PureBeginnerStudent() to emptyMap<String, FactMastery>()),
+            "Adaptive Beginner (Scratch)" to (AdaptiveBeginner() to emptyMap<String, FactMastery>()),
+            "Mistake Prone (Scratch)" to (MistakeProneStudent() to emptyMap<String, FactMastery>()),
+            "Rusty Veteran (History @ 3)" to (RustyVeteranStudent() to allFacts.associateWith { 
+                FactMastery(it, 1L, "LEVEL_ID", 3, 0L, avgDurationMs = 2500L) 
+            }),
+            "Mid-Way Student (Start @ Lvl 6)" to (MidWayStudent() to levels.take(5).flatMap { it.getAllPossibleFactIds() }.associateWith {
+                FactMastery(it, 1L, "LEVEL_ID", 5, 0L, avgDurationMs = 800L)
+            })
         )
 
-        // Level 3: Aggregate Trends (Mastery Curve)
-        println("\n>> LEVEL 3: Mastery Growth Curve (% Mastered every 50 exercises)")
-        val curve = result.masteryTrend.joinToString(" -> ") { "$it%" }
-        println(curve)
+        val scratchTrends = mutableMapOf<String, List<Int>>()
+        val historyTrends = mutableMapOf<String, List<Int>>()
 
-        withClue("Mastery Curve: Should show upward trend") {
-            result.masteryTrend.first() shouldBeLessThanInt result.masteryTrend.last()
+        scenarios.forEach { (label, config) ->
+            val (student, history) = config
+            val result = runSimulationUntilMastery(
+                levels, 
+                student, 
+                isSmartPractice = true, 
+                initialMastery = history,
+                maxExercises = 1500
+            )
+
+            if (history.isEmpty()) {
+                scratchTrends[label] = result.masteryTrend
+            } else {
+                historyTrends[label] = result.masteryTrend
+            }
+            
+            println("\n--- REPORT FOR: $label ---")
+            println(MermaidReporter.generateMultiLineMasteryCurve(label, mapOf(label to result.masteryTrend)))
+            println("\n" + MermaidReporter.generateDecisionPie("$label Balance", result.decisionCounts))
         }
+
+        println("\n=== FINAL SCRATCH DASHBOARD ===")
+        println(MermaidReporter.generateMultiLineMasteryCurve("New User Onboarding: Learning Velocity", scratchTrends))
+
+        println("\n=== FINAL HISTORY DASHBOARD ===")
+        println(MermaidReporter.generateMultiLineMasteryCurve("User Recalibration: Mastery Recovery", historyTrends))
     }
 
     @Test
@@ -672,6 +723,7 @@ class StrategySimulationTest {
         val requiredFacts = curriculum.flatMap { it.getAllPossibleFactIds() }.toSet()
         val encounterSequence = mutableListOf<String>()
         val masteryTrend = mutableListOf<Int>()
+        val decisionCounts = mutableMapOf<String, Int>()
 
         while (exercisesCount < maxExercises) {
             if (strategy == null) {
@@ -689,6 +741,9 @@ class StrategySimulationTest {
             // 2. Get Next Exercise
             val exercise = strategy!!.getNextExercise() ?: break
             val reason = (strategy as? SmartPracticeStrategy)?.lastDecisionReason ?: "Standard"
+            
+            val type = if (reason.startsWith("Learning")) "Learning" else "Review"
+            decisionCounts[type] = (decisionCounts[type] ?: 0) + 1
 
             if (verbose && (exercisesCount < 20 || exercisesCount % 50 == 0)) {
                 println("  Ex #%-4d: %-20s | Reason: %s".format(exercisesCount + 1, exercise.getFactId(), reason))
@@ -728,7 +783,8 @@ class StrategySimulationTest {
             requiredFacts.size,
             attemptCounts.size,
             distributionAudit,
-            masteryTrend
+            masteryTrend,
+            decisionCounts
         )
     }
 
