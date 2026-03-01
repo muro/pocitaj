@@ -41,12 +41,22 @@ class StrategySimulationTest {
     )
 
     object MermaidReporter {
-        fun generateMultiLineMasteryCurve(title: String, series: Map<String, List<Int>>): String {
+        fun generateMultiLineMasteryCurve(
+            title: String, 
+            series: Map<String, List<Int>>,
+            labelInterval: Int = 1
+        ): String {
             val maxLen = series.values.maxOfOrNull { it.size } ?: 0
-            val xLabels = (0 until maxLen).map { (it * 50).toString() }
+            
+            // Mermaid's xychart-beta doesn't allow empty labels in the list.
+            // We must provide a list of labels that matches the data points OR
+            // let Mermaid handle the scale. For xychart-beta, we'll provide 
+            // fewer points on the X axis to match the labels.
+            val xLabels = (0 until maxLen step labelInterval).map { "\"${it * 50}\"" }
             
             val lines = series.map { (name, trend) ->
-                val paddedTrend = trend + List(maxLen - trend.size) { trend.lastOrNull() ?: 0 }
+                val sampledTrend = trend.filterIndexed { index, _ -> index % labelInterval == 0 }
+                val paddedTrend = sampledTrend + List(xLabels.size - sampledTrend.size) { sampledTrend.lastOrNull() ?: 0 }
                 "line \"$name\" [${paddedTrend.joinToString(", ")}]"
             }
             
@@ -83,7 +93,8 @@ class StrategySimulationTest {
             }),
             "Mid-Way Student (Start @ Lvl 6)" to (MidWayStudent() to levels.take(5).flatMap { it.getAllPossibleFactIds() }.associateWith {
                 FactMastery(it, 1L, "LEVEL_ID", 5, 0L, avgDurationMs = 800L)
-            })
+            }),
+            "Kryptonite Student (Stubborn Fact)" to (KryptoniteStudent("1 + 1 = ?") to emptyMap())
         )
 
         val scratchTrends = mutableMapOf<String, List<Int>>()
@@ -111,10 +122,10 @@ class StrategySimulationTest {
         }
 
         println("\n=== FINAL SCRATCH DASHBOARD ===")
-        println(MermaidReporter.generateMultiLineMasteryCurve("New User Onboarding: Learning Velocity", scratchTrends))
+        println(MermaidReporter.generateMultiLineMasteryCurve("New User Onboarding: Learning Velocity", scratchTrends, labelInterval = 5))
 
         println("\n=== FINAL HISTORY DASHBOARD ===")
-        println(MermaidReporter.generateMultiLineMasteryCurve("User Recalibration: Mastery Recovery", historyTrends))
+        println(MermaidReporter.generateMultiLineMasteryCurve("User Recalibration: Mastery Recovery", historyTrends, labelInterval = 1))
     }
 
     @Test
