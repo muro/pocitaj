@@ -365,6 +365,109 @@ class StrategySimulationTest {
     }
 
     @Test
+    fun simulate_smart_practice_unified_matrix() {
+        val levels = Curriculum.getLevelsFor(Operation.ADDITION)
+        
+        println("\n=== UNIFIED SIMULATION MATRIX (Addition) ===")
+        val headerFormat = "| %-16s | %-16s | %-10s | %-11s | %-18s |"
+        println(headerFormat.format("Persona", "Initial State", "Ex to Master", "Efficiency", "Phase 1 Focus"))
+        println("|------------------|------------------|------------|-------------|--------------------|")
+
+        val scenarios = listOf(
+            Triple("Grand Master", "Scratch", GrandMasterStudent() to emptyMap<String, FactMastery>()),
+            Triple("Pure Beginner", "Scratch", PureBeginnerStudent() to emptyMap<String, FactMastery>()),
+            Triple("Rusty Veteran", "All @ Strength 3", RustyVeteranStudent() to levels.flatMap { it.getAllPossibleFactIds() }.associateWith { 
+                FactMastery(it, 1L, "LEVEL_ID", 3, 0L, avgDurationMs = 2500L) 
+            }),
+            Triple("Mid-Way", "Mastered 1-5", MidWayStudent() to levels.take(6).flatMap { it.getAllPossibleFactIds() }.associateWith {
+                FactMastery(it, 1L, "LEVEL_ID", 5, 0L, avgDurationMs = 800L)
+            }),
+            Triple("Adv Intro", "Mastered 1-3", AdvancedStrugglingStudent() to levels.take(4).flatMap { it.getAllPossibleFactIds() }.associateWith {
+                FactMastery(it, 1L, "LEVEL_ID", 5, 0L, avgDurationMs = 600L)
+            })
+        )
+
+        scenarios.forEach { (name, state, logic) ->
+            val (student, history) = logic
+            
+            // Phase 1: Calibration (First 20 exercises)
+            val trace = runTrace(levels, student, isSmartPractice = true, initialMastery = history, count = 20)
+            val levelCounts = trace.encounterSequence.map { factId ->
+                levels.find { it.recognizes(Equation.parse(factId)!!) }?.id ?: "Unknown"
+            }.groupingBy { it }.eachCount()
+            
+            val topLevel = levelCounts.maxByOrNull { it.value }?.key?.take(15) ?: "N/A"
+            val phase1Summary = "$topLevel (${levelCounts[topLevel]}/20)"
+
+            // Full simulation
+            val result = runSimulationUntilMastery(levels, student, isSmartPractice = true, initialMastery = history)
+            
+            val efficiency = "%.2fx".format(result.exerciseCount.toDouble() / result.factsCount.coerceAtLeast(1))
+            
+            println(headerFormat.format(name, state, result.exerciseCount, efficiency, phase1Summary))
+            result.exerciseCount shouldBeLessThanInt 20000 // Safety guard
+        }
+    }
+
+    @Test
+    fun verify_frontier_calibration_speed() {
+        val levels = Curriculum.getLevelsFor(Operation.ADDITION)
+        val masterLevels = levels.take(5)
+        val coldLevel = levels[5]
+        
+        // Setup history: 1-5 Mastered
+        val history = masterLevels.flatMap { it.getAllPossibleFactIds() }.associateWith {
+            FactMastery(it, 1L, "LEVEL_ID", 5, 0L, avgDurationMs = 700L)
+        }
+        
+        println("\n=== FRONTIER CALIBRATION AUDIT ===")
+        println("Target Frontier: ${coldLevel.id}")
+        
+        // Run a short burst of 20 exercises
+        val result = runTrace(levels, PerfectStudent(), isSmartPractice = true, initialMastery = history, count = 20)
+        
+        val coldLevelFactIds = coldLevel.getAllPossibleFactIds().toSet()
+        val coldHits = result.encounterSequence.count { it in coldLevelFactIds }
+        val percentage = (coldHits.toDouble() / 20) * 100
+        
+        println("Calibration Hits (First 20): $coldHits / 20 (${percentage.toInt()}%)")
+        
+        withClue("Calibration Audit: Should identify and focus on Level 6 (cold) immediately (~80% probability)") {
+            // 80% of 20 is 16. Allow slight variance but expect high focus.
+            coldHits shouldBeGreaterThanOrEqual 15 
+        }
+    }
+
+    private fun runTrace(
+        curriculum: List<Level>,
+        studentModel: StudentModel,
+        isSmartPractice: Boolean,
+        initialMastery: Map<String, FactMastery> = emptyMap(),
+        count: Int
+    ): TraceResult {
+        val userMastery = initialMastery.toMutableMap()
+        val strategyRandom = Random(12345)
+        val studentRandom = Random(54321)
+        val clock = object : Clock { override fun now() = Instant.fromEpochMilliseconds(0L) }
+        
+        val strategy = if (isSmartPractice) {
+            SmartPracticeStrategy(curriculum, userMastery, activeUserId = 1L, random = strategyRandom, clock = clock)
+        } else {
+            curriculum.first().createStrategy(userMastery, activeUserId = 1L, clock = clock, random = strategyRandom)
+        }
+        
+        val sequence = mutableListOf<String>()
+        repeat(count) {
+            val exercise = strategy.getNextExercise() ?: return@repeat
+            sequence.add(exercise.getFactId())
+            strategy.recordAttempt(exercise, studentRandom.nextDouble() < studentModel.getSuccessProbability(exercise.getFactId()))
+        }
+        return TraceResult(sequence)
+    }
+
+    data class TraceResult(val encounterSequence: List<String>)
+
+    @Test
     fun simulate_smart_practice_steady_state() {
         // 1. Setup: Master initial levels 0-7 of Addition
         val additionLevels = Curriculum.getLevelsFor(Operation.ADDITION)
