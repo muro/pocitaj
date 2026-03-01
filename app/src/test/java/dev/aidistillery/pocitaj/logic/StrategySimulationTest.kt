@@ -306,8 +306,38 @@ class StrategySimulationTest {
 
     @Test
     fun simulate_adaptability_pure_beginner() {
-        // We use the AdaptiveBeginner here as it's more realistic for a "beginner" who learns
         verifyAdaptabilityPersona("Adaptive Beginner", AdaptiveBeginner(), maxExpected = 20000)
+    }
+
+    @Test
+    fun simulate_smart_practice_zero_state_comparison() {
+        val levels = Curriculum.getLevelsFor(Operation.ADDITION)
+        val allFacts = levels.flatMap { it.getAllPossibleFactIds() }.distinct()
+        
+        println("\n=== ZERO STATE COMPARISON (Full Addition) ===")
+        println("Operation: ADDITION, Total Facts: ${allFacts.size}")
+        
+        val personas = listOf(
+            "Perfect" to PerfectStudent(),
+            "Mistake Prone" to MistakeProneStudent(),
+            "Adv Struggling" to AdvancedStrugglingStudent(),
+            "Pure Beginner" to PureBeginnerStudent(),
+            "Grand Master" to GrandMasterStudent(),
+            "Adaptive Beginner" to AdaptiveBeginner()
+        )
+        
+        val headerFormat = "| %-20s | %-12s | %-12s |"
+        println(headerFormat.format("Persona", "Exercises", "Efficiency"))
+        println("|----------------------|--------------|--------------|")
+        
+        personas.forEach { (name, student) ->
+            val result = runSimulationUntilMastery(levels, student, isSmartPractice = true)
+            val efficiency = result.exerciseCount.toDouble() / allFacts.size
+            println(headerFormat.format(name, result.exerciseCount, "%.2fx".format(efficiency)))
+            
+            // Baseline safety: No persona should take more than 20k to master Addition (approx 400 facts)
+            result.exerciseCount shouldBeLessThanInt 20000
+        }
     }
 
     @Test
